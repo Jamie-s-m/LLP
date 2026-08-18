@@ -80,49 +80,51 @@ export const useAuthStore = create<AuthState>((set) => {
     error: null,
 
     login: async (email: string, password: string) => {
-      set({ isLoading: true, error: null })
-      try {
-        const response = await api.post('/auth/login', { email, password })
-        const userPayload = response.data.data?.user || response.data.user
-        const tokenPayload = response.data.data?.token || response.data.token
+  set({ isLoading: true, error: null })
+  try {
+    // MUST use relative route '/auth/login', NOT full URL
+    const response = await api.post('/auth/login', { email, password })
+    const userPayload = response.data.data?.user || response.data.user
+    const tokenPayload = response.data.data?.token || response.data.token
 
-        localStorage.setItem('token', tokenPayload)
-        localStorage.setItem('user', JSON.stringify(userPayload))
-        api.defaults.headers.common['Authorization'] = `Bearer ${tokenPayload}`
+    localStorage.setItem('token', tokenPayload)
+    localStorage.setItem('user', JSON.stringify(userPayload))
+    api.defaults.headers.common['Authorization'] = `Bearer ${tokenPayload}`
 
-        set({ user: userPayload, token: tokenPayload, isAuthenticated: true, isLoading: false })
-      } catch (error: any) {
-        const errorMessage =
-          error.response?.data?.message || error.message || 'Login failed. Please try again.'
-        set({ error: errorMessage, isLoading: false })
-        throw error
-      }
-    },
+    set({ user: userPayload, token: tokenPayload, isAuthenticated: true, isLoading: false })
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message || error.message || 'Login failed'
+    set({ error: errorMessage, isLoading: false })
+    throw error
+  }
+},
 
-    register: async (data: any) => {
-      set({ isLoading: true, error: null })
-      try {
-        const response = await api.post('/auth/register', data)
-        const payload = response.data.data || response.data
-        const userPayload = payload.user
-        const tokenPayload = payload.token
+register: async (data: any) => {
+  set({ isLoading: true, error: null })
+  try {
+    // MUST use relative route '/auth/register', NOT full URL
+    const response = await api.post('/auth/register', data)
+    const payload = response.data.data || response.data
+    const userPayload = payload.user
+    const tokenPayload = payload.token
 
-        if (tokenPayload) {
-          localStorage.setItem('token', tokenPayload)
-          api.defaults.headers.common['Authorization'] = `Bearer ${tokenPayload}`
-        }
-        if (userPayload) {
-          localStorage.setItem('user', JSON.stringify(userPayload))
-        }
+    if (tokenPayload) {
+      localStorage.setItem('token', tokenPayload)
+      api.defaults.headers.common['Authorization'] = `Bearer ${tokenPayload}`
+    }
+    if (userPayload) {
+      localStorage.setItem('user', JSON.stringify(userPayload))
+    }
 
-        set({ user: userPayload, token: tokenPayload, isAuthenticated: true, isLoading: false })
-      } catch (error: any) {
-        const errorMessage =
-          error.response?.data?.message || error.message || 'Registration failed.'
-        set({ error: errorMessage, isLoading: false })
-        throw error
-      }
-    },
+    set({ user: userPayload, token: tokenPayload, isAuthenticated: true, isLoading: false })
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message || error.message || 'Registration failed'
+    set({ error: errorMessage, isLoading: false })
+    throw error
+  }
+},
 
     logout: () => {
       localStorage.removeItem('token')
