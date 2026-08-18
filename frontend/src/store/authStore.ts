@@ -79,9 +79,7 @@ export const useAuthStore = create<AuthState>((set) => {
     register: async (data: any) => {
       set({ isLoading: true, error: null })
       try {
-        // Use relative routes with the configured baseURL instance
         const response = await api.post('/auth/register', data)
-
         const payload = response.data.data || response.data
         const user = payload.user
         const token = payload.token
@@ -90,13 +88,13 @@ export const useAuthStore = create<AuthState>((set) => {
           localStorage.setItem('token', token)
           api.defaults.headers.common['Authorization'] = `Bearer ${token}`
         }
-
         if (user) {
           localStorage.setItem('user', JSON.stringify(user))
         }
-
         set({ user, token, isAuthenticated: true, isLoading: false })
       } catch (error: any) {
+        // Log detailed error from server
+        console.error('Registration server response error:', error.response?.data || error)
         const errorMessage = error.response?.data?.message || 'Registration failed'
         set({ error: errorMessage, isLoading: false })
         throw error
