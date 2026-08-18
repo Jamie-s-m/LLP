@@ -28,26 +28,24 @@ interface AuthState {
   setToken: (token: string | null) => void
 }
 
-// 1. Robust URL Sanitization Logic
+// Robust API URL cleaning logic
 const getSanitizedApiUrl = (): string => {
   let rawUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
-
-  // Remove surrounding brackets, quotes, and whitespace
+  // Remove quotes, brackets, whitespace
   rawUrl = rawUrl.replace(/[\[\]'"\s]+/g, '').trim()
 
-  // Ensure protocol prefix exists
+  // Guard missing protocol
   if (!/^https?:\/\//i.test(rawUrl)) {
     rawUrl = `https://${rawUrl}`
   }
 
-  // Remove trailing slashes only
+  // Remove trailing slashes
   return rawUrl.replace(/\/+$/, '')
 }
 
 const API_URL = getSanitizedApiUrl()
 
-// 2. Dedicated Axios instance
-const api = axios.create({
+export const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
@@ -56,7 +54,16 @@ const api = axios.create({
 
 export const useAuthStore = create<AuthState>((set) => {
   const token = localStorage.getItem('token')
-  const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) : null
+  const userStr = localStorage.getItem('user')
+  let user = null
+
+  if (userStr) {
+    try {
+      user = JSON.parse(userStr)
+    } catch {
+      localStorage.removeItem('user')
+    }
+  }
 
   if (token) {
     api.defaults.headers.common['Authorization'] = `Bearer ${token}`
@@ -74,14 +81,14 @@ export const useAuthStore = create<AuthState>((set) => {
       try {
         const response = await api.post('/auth/login', { email, password })
 
-        const user = response.data.data?.user || response.data.user
-        const token = response.data.data?.token || response.data.token
+        const userPayload = response.data.data?.user || response.data.user
+        const tokenPayload = response.data.data?.token || response.data.token
 
-        localStorage.setItem('token', token)
-        localStorage.setItem('user', JSON.stringify(user))
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`
+        localStorage.setItem('token', tokenPayload)
+        localStorage.setItem('user', JSON.stringify(userPayload))
+        api.defaults.headers.common['Authorization'] = `Bearer ${tokenPayload}`
 
-        set({ user, token, isAuthenticated: true, isLoading: false })
+        set({ user: userPayload, token: tokenPayload, isAuthenticated: true, isLoading: false })
       } catch (error: any) {
         const errorMessage =
           error.response?.data?.message || error.message || 'Login failed'
@@ -95,19 +102,18 @@ export const useAuthStore = create<AuthState>((set) => {
       try {
         const response = await api.post('/auth/register', data)
         const payload = response.data.data || response.data
-        const user = payload.user
-        const token = payload.token
+        const userPayload = payload.user
+        const tokenPayload = payload.token
 
-        if (token) {
-          localStorage.setItem('token', token)
-          api.defaults.headers.common['Authorization'] = `Bearer ${token}`
+        if (tokenPayload) {
+          localStorage.setItem('token', tokenPayload)
+          api.defaults.headers.common['Authorization'] = `Bearer ${tokenPayload}`
         }
-        if (user) {
-          localStorage.setItem('user', JSON.stringify(user))
+        if (userPayload) {
+          localStorage.setItem('user', JSON.stringify(userPayload))
         }
-        set({ user, token, isAuthenticated: true, isLoading: false })
+        set({ user: userPayload, token: tokenPayload, isAuthenticated: true, isLoading: false })
       } catch (error: any) {
-        console.error('Registration server response error:', error.response?.data || error)
         const errorMessage =
           error.response?.data?.message || error.message || 'Registration failed'
         set({ error: errorMessage, isLoading: false })
