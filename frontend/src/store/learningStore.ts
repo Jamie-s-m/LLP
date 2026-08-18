@@ -1,87 +1,47 @@
 import { create } from 'zustand'
-import axios from 'axios'
+import { api } from './authStore'
 
-interface Course {
+export interface Course {
   id: string
+  _id?: string
   title: string
   description: string
   language: string
   level: string
-  category: string
-  rating: number
-  enrollmentCount: number
   thumbnail?: string
 }
 
 interface LearningState {
   courses: Course[]
-  enrolledCourses: Course[]
   isLoading: boolean
   error: string | null
-  
-  fetchCourses: (filters?: any) => Promise<void>
-  fetchEnrolledCourses: () => Promise<void>
-  enrollCourse: (courseId: string) => Promise<void>
-  getProgress: (courseId: string) => Promise<any>
+  fetchCourses: (params?: { limit?: number }) => Promise<void>
 }
 
 export const useLearningStore = create<LearningState>((set) => ({
   courses: [],
-  enrolledCourses: [],
   isLoading: false,
   error: null,
 
-  fetchCourses: async (filters?: any) => {
+  fetchCourses: async (params) => {
     set({ isLoading: true, error: null })
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/courses`,
-        { params: filters }
-      )
-      set({ courses: response.data.data || [], isLoading: false })
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Failed to fetch courses'
-      set({ error: errorMessage, isLoading: false })
-    }
-  },
+      // Calls relative endpoint '/courses' via the base API client (https://.../api/courses)
+      const response = await api.get('/courses', { params })
+      const coursesData = response.data.data || response.data || []
+      
+      // Map _id to id if MongoDB returned _id
+      const formattedCourses = Array.isArray(coursesData)
+        ? coursesData.map((c: any) => ({ ...c, id: c.id || c._id }))
+        : []
 
-  fetchEnrolledCourses: async () => {
-    set({ isLoading: true, error: null })
-    try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/courses/enrolled`
-      )
-      set({ enrolledCourses: response.data.data || [], isLoading: false })
+      set({ courses: formattedCourses, isLoading: false })
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Failed to fetch enrolled courses'
-      set({ error: errorMessage, isLoading: false })
-    }
-  },
-
-  enrollCourse: async (courseId: string) => {
-    set({ isLoading: true, error: null })
-    try {
-      await axios.post(
-        `${import.meta.env.VITE_API_URL}/courses/${courseId}/enroll`
-      )
-      set({ isLoading: false })
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Failed to enroll in course'
-      set({ error: errorMessage, isLoading: false })
-      throw error
-    }
-  },
-
-  getProgress: async (courseId: string) => {
-    try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/progress/course/${courseId}`
-      )
-      return response.data.data
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Failed to fetch progress'
-      set({ error: errorMessage })
-      throw error
+      console.warn('Failed to load courses from API:', error.message)
+      set({ 
+        error: error.response?.data?.message || 'Failed to fetch courses', 
+        isLoading: false 
+      })
     }
   },
 }))

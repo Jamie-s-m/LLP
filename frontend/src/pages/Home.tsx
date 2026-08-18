@@ -8,7 +8,7 @@ export default function Home() {
 
   useEffect(() => {
     fetchCourses({ limit: 6 })
-  }, [])
+  }, [fetchCourses])
 
   return (
     <div className="min-h-screen">
@@ -91,31 +91,34 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {courses.slice(0, 6).map((course) => (
-              <Link
-                key={course.id}
-                to={`/courses/${course.id}`}
-                className="card hover:shadow-xl transition-shadow"
-              >
-                {course.thumbnail && (
-                  <img
-                    src={course.thumbnail}
-                    alt={course.title}
-                    className="w-full h-40 object-cover rounded mb-4"
-                  />
-                )}
-                <h3 className="text-xl font-bold mb-2">{course.title}</h3>
-                <p className="text-neutral-600 dark:text-neutral-400 text-sm mb-4">
-                  {course.description}
-                </p>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-primary-500 font-semibold">{course.language}</span>
-                  <span className="bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 px-3 py-1 rounded-full">
-                    {course.level}
-                  </span>
-                </div>
-              </Link>
-            ))}
+            {courses.slice(0, 6).map((course) => {
+              const courseId = course.id || course._id
+              return (
+                <Link
+                  key={courseId}
+                  to={`/courses/${courseId}`}
+                  className="card hover:shadow-xl transition-shadow"
+                >
+                  {course.thumbnail && (
+                    <img
+                      src={course.thumbnail}
+                      alt={course.title}
+                      className="w-full h-40 object-cover rounded mb-4"
+                    />
+                  )}
+                  <h3 className="text-xl font-bold mb-2">{course.title}</h3>
+                  <p className="text-neutral-600 dark:text-neutral-400 text-sm mb-4">
+                    {course.description}
+                  </p>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-primary-500 font-semibold">{course.language}</span>
+                    <span className="bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 px-3 py-1 rounded-full">
+                      {course.level}
+                    </span>
+                  </div>
+                </Link>
+              )
+            })}
           </div>
         </div>
       </section>

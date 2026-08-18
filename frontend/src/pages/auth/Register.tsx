@@ -1,22 +1,19 @@
-import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { useAuthStore } from '../../store/authStore'
-import toast from 'react-hot-toast'
+import React, { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuthStore } from '@/store/authStore'
 
-export default function Register() {
+export const Register: React.FC = () => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'student',
-    nativeLanguage: '',
-    targetLanguages: [],
   })
-  const [loading, setLoading] = useState(false)
+  const [localError, setLocalError] = useState('')
+
+  const { register, isLoading, error } = useAuthStore()
   const navigate = useNavigate()
-  const { register } = useAuthStore()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -24,124 +21,121 @@ export default function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setLocalError('')
 
     if (formData.password !== formData.confirmPassword) {
-      toast.error('Passwords do not match')
+      setLocalError('Passwords do not match')
       return
     }
 
-    setLoading(true)
     try {
-      // Omit confirmPassword from the payload sent to the API
-      const { confirmPassword, ...registerPayload } = formData
-
-      await register(registerPayload)
-      toast.success('Account created successfully!')
+      await register({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+      })
       navigate('/dashboard')
-    } catch (error: any) {
-      // Correct error message extraction from Axios/Zustand errors
-      const message =
-        error.response?.data?.message ||
-        error.message ||
-        'Registration failed'
-      toast.error(message)
-    } finally {
-      setLoading(false)
+    } catch (err: any) {
+      // Error handling managed in authStore
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
-        <div className="card">
-          <h1 className="text-3xl font-bold mb-2 text-center">Create Account</h1>
-          <p className="text-center text-neutral-600 dark:text-neutral-400 mb-8">
+    <div className="min-h-screen flex items-center justify-center bg-slate-900 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 bg-slate-800 p-8 rounded-xl border border-slate-700 shadow-2xl">
+        <div>
+          <h2 className="mt-2 text-center text-3xl font-extrabold text-white">
+            Create Account
+          </h2>
+          <p className="mt-2 text-center text-sm text-slate-400">
             Join our community and start learning languages
           </p>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="label">First Name</label>
-                <input
-                  type="text"
-                  name="firstName"
-                  className="input"
-                  placeholder="John"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div>
-                <label className="label">Last Name</label>
-                <input
-                  type="text"
-                  name="lastName"
-                  className="input"
-                  placeholder="Doe"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="label">Email Address</label>
-              <input
-                type="email"
-                name="email"
-                className="input"
-                placeholder="you@example.com"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="label">Password</label>
-              <input
-                type="password"
-                name="password"
-                className="input"
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="label">Confirm Password</label>
-              <input
-                type="password"
-                name="confirmPassword"
-                className="input"
-                placeholder="••••••••"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn btn-primary w-full"
-            >
-              {loading ? 'Creating account...' : 'Create Account'}
-            </button>
-          </form>
-
-          <p className="mt-6 text-center text-neutral-600 dark:text-neutral-400">
-            Already have an account?{' '}
-            <Link to="/login" className="text-primary-500 hover:text-primary-600 font-semibold">
-              Sign In
-            </Link>
-          </p>
         </div>
+
+        {(localError || error) && (
+          <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg text-sm">
+            {localError || error}
+          </div>
+        )}
+
+        <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-slate-300 mb-1">First Name</label>
+              <input
+                name="firstName"
+                type="text"
+                required
+                className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-500"
+                value={formData.firstName}
+                onChange={handleChange}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-300 mb-1">Last Name</label>
+              <input
+                name="lastName"
+                type="text"
+                required
+                className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-500"
+                value={formData.lastName}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-slate-300 mb-1">Email Address</label>
+            <input
+              name="email"
+              type="email"
+              required
+              className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-500"
+              value={formData.email}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-slate-300 mb-1">Password</label>
+            <input
+              name="password"
+              type="password"
+              required
+              className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-500"
+              value={formData.password}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-slate-300 mb-1">Confirm Password</label>
+            <input
+              name="confirmPassword"
+              type="password"
+              required
+              className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-500"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full py-3 px-4 bg-cyan-500 hover:bg-cyan-600 text-white font-medium rounded-lg transition-colors disabled:opacity-50"
+          >
+            {isLoading ? 'Creating Account...' : 'Create Account'}
+          </button>
+        </form>
+
+        <p className="text-center text-sm text-slate-400">
+          Already have an account?{' '}
+          <Link to="/login" className="text-cyan-400 hover:text-cyan-300 font-medium">
+            Sign In
+          </Link>
+        </p>
       </div>
     </div>
   )
