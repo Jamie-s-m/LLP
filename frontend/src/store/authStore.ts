@@ -28,25 +28,28 @@ interface AuthState {
   setToken: (token: string | null) => void
 }
 
-// Robust API URL cleaning logic
 const getSanitizedApiUrl = (): string => {
   let rawUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
-  // Remove quotes, brackets, whitespace
   rawUrl = rawUrl.replace(/[\[\]'"\s]+/g, '').trim()
 
-  // Guard missing protocol
   if (!/^https?:\/\//i.test(rawUrl)) {
     rawUrl = `https://${rawUrl}`
   }
 
-  // Remove trailing slashes
-  return rawUrl.replace(/\/+$/, '')
+  rawUrl = rawUrl.replace(/\/+$/, '')
+
+  if (!rawUrl.endsWith('/api')) {
+    rawUrl = `${rawUrl}/api`
+  }
+
+  return rawUrl
 }
 
 const API_URL = getSanitizedApiUrl()
 
 export const api = axios.create({
   baseURL: API_URL,
+  timeout: 30000, // Extended timeout for Render free tier cold-starts
   headers: {
     'Content-Type': 'application/json',
   },
@@ -80,7 +83,6 @@ export const useAuthStore = create<AuthState>((set) => {
       set({ isLoading: true, error: null })
       try {
         const response = await api.post('/auth/login', { email, password })
-
         const userPayload = response.data.data?.user || response.data.user
         const tokenPayload = response.data.data?.token || response.data.token
 
@@ -91,7 +93,7 @@ export const useAuthStore = create<AuthState>((set) => {
         set({ user: userPayload, token: tokenPayload, isAuthenticated: true, isLoading: false })
       } catch (error: any) {
         const errorMessage =
-          error.response?.data?.message || error.message || 'Login failed'
+          error.response?.data?.message || error.message || 'Login failed. Please try again.'
         set({ error: errorMessage, isLoading: false })
         throw error
       }
@@ -112,10 +114,11 @@ export const useAuthStore = create<AuthState>((set) => {
         if (userPayload) {
           localStorage.setItem('user', JSON.stringify(userPayload))
         }
+
         set({ user: userPayload, token: tokenPayload, isAuthenticated: true, isLoading: false })
       } catch (error: any) {
         const errorMessage =
-          error.response?.data?.message || error.message || 'Registration failed'
+          error.response?.data?.message || error.message || 'Registration failed.'
         set({ error: errorMessage, isLoading: false })
         throw error
       }

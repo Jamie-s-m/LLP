@@ -4,7 +4,6 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { errorHandler } from './middleware/errorHandler.js';
 
-// Import route modules
 import authRoutes from './routes/auth.js';
 import userRoutes from './routes/users.js';
 import courseRoutes from './routes/courses.js';
@@ -19,30 +18,26 @@ dotenv.config();
 
 const app = express();
 
-// Security middleware
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' },
   })
 );
 
-// Dynamic CORS configuration
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
   'https://jamie-s-m.github.io',
-  'https://llplatform.netlify.app',
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (mobile apps, curl, etc.) or matching origins
       if (!origin || allowedOrigins.some((o) => origin.startsWith(o))) {
         callback(null, true);
       } else {
-        callback(null, true); // Permissive mode for easy deployment
+        callback(null, true);
       }
     },
     credentials: true,
@@ -51,16 +46,12 @@ app.use(
   })
 );
 
-// Handle preflight requests
-app.options('*', cors());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-// Body parser
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
-
-// Health check endpoint
+// Health Check
 app.get('/api/health', (req, res) => {
-  res.status(200).json({ success: true, message: 'Server is running' });
+  res.status(200).json({ success: true, message: 'API is running successfully' });
 });
 
 // API Routes
@@ -74,12 +65,11 @@ app.use('/api/flashcards', flashcardRoutes);
 app.use('/api/groups', groupRoutes);
 app.use('/api/forum', forumRoutes);
 
-// 404 handler for undefined API routes
-app.use((req, res) => {
-  res.status(404).json({ success: false, message: 'Route not found' });
+// Catch-all API 404 handler
+app.use('/api/*', (req, res) => {
+  res.status(404).json({ success: false, message: 'API endpoint not found' });
 });
 
-// Global Error handling middleware
 app.use(errorHandler);
 
 export default app;
