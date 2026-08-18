@@ -19,7 +19,12 @@ export default function Login() {
       toast.success('Logged in successfully!')
       navigate('/dashboard')
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Login failed')
+      // Robust error message extraction from Axios, backend payload, or thrown error
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        'Login failed'
+      toast.error(message)
     } finally {
       setLoading(false)
     }

@@ -18,7 +18,7 @@ export default function Register() {
   const navigate = useNavigate()
   const { register } = useAuthStore()
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
@@ -32,11 +32,19 @@ export default function Register() {
 
     setLoading(true)
     try {
-      await register(formData)
+      // Omit confirmPassword from the payload sent to the API
+      const { confirmPassword, ...registerPayload } = formData
+
+      await register(registerPayload)
       toast.success('Account created successfully!')
       navigate('/dashboard')
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Registration failed')
+      // Correct error message extraction from Axios/Zustand errors
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        'Registration failed'
+      toast.error(message)
     } finally {
       setLoading(false)
     }
