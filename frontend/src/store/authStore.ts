@@ -28,11 +28,25 @@ interface AuthState {
   setToken: (token: string | null) => void
 }
 
-// 1. Sanitize the API_URL string: remove trailing slashes, quotes, or accidental whitespace
-const rawApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
-const API_URL = rawApiUrl.replace(/['"]+/g, '').replace(/\/+$|\/+(?=\/)/g, '')
+// 1. Robust URL Sanitization Logic
+const getSanitizedApiUrl = (): string => {
+  let rawUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
-// 2. Create a dedicated Axios instance
+  // Remove surrounding brackets, quotes, and whitespace
+  rawUrl = rawUrl.replace(/[\[\]'"\s]+/g, '').trim()
+
+  // Ensure protocol prefix exists
+  if (!/^https?:\/\//i.test(rawUrl)) {
+    rawUrl = `https://${rawUrl}`
+  }
+
+  // Remove trailing slashes only
+  return rawUrl.replace(/\/+$/, '')
+}
+
+const API_URL = getSanitizedApiUrl()
+
+// 2. Dedicated Axios instance
 const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -58,7 +72,6 @@ export const useAuthStore = create<AuthState>((set) => {
     login: async (email: string, password: string) => {
       set({ isLoading: true, error: null })
       try {
-        // Use relative routes with the configured baseURL instance
         const response = await api.post('/auth/login', { email, password })
 
         const user = response.data.data?.user || response.data.user
@@ -70,7 +83,8 @@ export const useAuthStore = create<AuthState>((set) => {
 
         set({ user, token, isAuthenticated: true, isLoading: false })
       } catch (error: any) {
-        const errorMessage = error.response?.data?.message || 'Login failed'
+        const errorMessage =
+          error.response?.data?.message || error.message || 'Login failed'
         set({ error: errorMessage, isLoading: false })
         throw error
       }
@@ -93,9 +107,9 @@ export const useAuthStore = create<AuthState>((set) => {
         }
         set({ user, token, isAuthenticated: true, isLoading: false })
       } catch (error: any) {
-        // Log detailed error from server
         console.error('Registration server response error:', error.response?.data || error)
-        const errorMessage = error.response?.data?.message || 'Registration failed'
+        const errorMessage =
+          error.response?.data?.message || error.message || 'Registration failed'
         set({ error: errorMessage, isLoading: false })
         throw error
       }
