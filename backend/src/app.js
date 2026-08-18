@@ -15,35 +15,43 @@ import flashcardRoutes from './routes/flashcards.js';
 import groupRoutes from './routes/groups.js';
 import forumRoutes from './routes/forum.js';
 
-// Load environment variables
 dotenv.config();
 
 const app = express();
 
 // Security middleware
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  })
+);
 
-// CORS
+// Dynamic CORS configuration
 const allowedOrigins = [
   'http://localhost:5173',
-  process.env.FRONTEND_URL
-].filter(Boolean); // Filters out undefined values
+  'http://localhost:3000',
+  'https://jamie-s-m.github.io',
+  'https://llplatform.netlify.app',
+  process.env.FRONTEND_URL,
+].filter(Boolean);
 
-// Permissive CORS middleware setup
 app.use(
   cors({
-    origin: [
-      'http://localhost:5173',
-      'https://llplatform.netlify.app',
-      process.env.FRONTEND_URL,
-    ].filter(Boolean),
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl, etc.) or matching origins
+      if (!origin || allowedOrigins.some((o) => origin.startsWith(o))) {
+        callback(null, true);
+      } else {
+        callback(null, true); // Permissive mode for easy deployment
+      }
+    },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
 
-// Explicitly handle preflight OPTIONS requests for all endpoints
+// Handle preflight requests
 app.options('*', cors());
 
 // Body parser
@@ -66,12 +74,12 @@ app.use('/api/flashcards', flashcardRoutes);
 app.use('/api/groups', groupRoutes);
 app.use('/api/forum', forumRoutes);
 
-// 404 handler
+// 404 handler for undefined API routes
 app.use((req, res) => {
   res.status(404).json({ success: false, message: 'Route not found' });
 });
 
-// Error handling middleware
+// Global Error handling middleware
 app.use(errorHandler);
 
 export default app;
