@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useAuthStore } from '@/store/authStore'
+import { useAuthStore } from '../../store/authStore'
 
 export const Register: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -37,7 +37,7 @@ export const Register: React.FC = () => {
       })
       navigate('/dashboard')
     } catch (err: any) {
-      // Error handling managed in authStore
+      // Handled in authStore
     }
   }
 
@@ -140,3 +140,4 @@ export const Register: React.FC = () => {
     </div>
   )
 }
+export default Register

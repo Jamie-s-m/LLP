@@ -26,18 +26,16 @@ export const useLearningStore = create<LearningState>((set) => ({
   fetchCourses: async (params) => {
     set({ isLoading: true, error: null })
     try {
-      // Calls relative endpoint '/courses' via the base API client (https://.../api/courses)
       const response = await api.get('/courses', { params })
       const coursesData = response.data.data || response.data || []
       
-      // Map _id to id if MongoDB returned _id
       const formattedCourses = Array.isArray(coursesData)
         ? coursesData.map((c: any) => ({ ...c, id: c.id || c._id }))
         : []
 
       set({ courses: formattedCourses, isLoading: false })
     } catch (error: any) {
-      console.warn('Failed to load courses from API:', error.message)
+      console.warn('Could not fetch courses:', error.message)
       set({ 
         error: error.response?.data?.message || 'Failed to fetch courses', 
         isLoading: false 
