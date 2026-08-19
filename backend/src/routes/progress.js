@@ -1,39 +1,11 @@
-import mongoose from 'mongoose';
+import express from 'express';
+import { protect } from '../middleware/auth.js';
+import { enrollCourse, completeLesson, getMyLearning } from '../controllers/progressController.js';
 
-const progressSchema = new mongoose.Schema(
-  {
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
-    course: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Course',
-      required: true,
-    },
-    completedLessons: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Lesson',
-      },
-    ],
-    progressPercentage: {
-      type: Number,
-      default: 0,
-    },
-    isCompleted: {
-      type: Boolean,
-      default: false,
-    },
-    lastAccessedAt: {
-      type: Date,
-      default: Date.now,
-    },
-  },
-  { timestamps: true }
-);
+const router = express.Router();
 
-const Progress = mongoose.model('Progress', progressSchema);
+router.post('/enroll/:courseId', protect, enrollCourse);
+router.post('/complete-lesson', protect, completeLesson);
+router.get('/my-learning', protect, getMyLearning);
 
-export default Progress;
+export default router;

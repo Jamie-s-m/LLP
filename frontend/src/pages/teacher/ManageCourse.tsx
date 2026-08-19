@@ -7,7 +7,7 @@ export default function ManageCourse() {
   return (
     <div className="p-8">
       <div className="max-w-4xl">
-        <h1 className="text-4xl font-bold mb-8">Manage Course</h1>
+        <h1 className="text-4xl font-bold mb-8">Manage Course {courseId || ''}</h1>
 
         <div className="card mb-8">
           <div className="mb-6">

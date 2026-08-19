@@ -1,11 +1,9 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-
-export default defineConfig(({ command }) => ({
+export default defineConfig(({ mode }) => ({
+  base: mode === 'production' ? '/LLP/' : '/',
   plugins: [react()],
-  // Sets base path for production (GitHub Pages) and root path for local dev
-  base: command === 'build' ? '/LLP/' : '/',
   server: {
     port: 5173,
     proxy: {

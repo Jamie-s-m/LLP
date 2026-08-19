@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const progressSchema = new mongoose.Schema(
   {
@@ -38,4 +38,4 @@ const progressSchema = new mongoose.Schema(
 
 progressSchema.index({ user: 1, course: 1 }, { unique: true });
 
-module.exports = mongoose.model('Progress', progressSchema);
+export default mongoose.model('Progress', progressSchema);

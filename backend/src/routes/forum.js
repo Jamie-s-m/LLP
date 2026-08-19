@@ -1,14 +1,11 @@
 import express from 'express';
+import { protect } from '../middleware/auth.js';
+import { getPosts, createPost, addReply } from '../controllers/forumController.js';
+
 const router = express.Router();
 
-// GET /api/forum/posts
-router.get('/posts', (req, res) => {
-  res.json({ success: true, posts: [] });
-});
-
-// POST /api/forum/posts
-router.post('/posts', (req, res) => {
-  res.json({ success: true, message: 'Post created' });
-});
+router.get('/posts', protect, getPosts);
+router.post('/posts', protect, createPost);
+router.post('/posts/:postId/replies', protect, addReply);
 
 export default router;

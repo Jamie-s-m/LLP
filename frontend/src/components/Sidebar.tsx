@@ -1,7 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import {
   FiBook,
-  FiBarChart2,
   FiUsers,
   FiMessageSquare,
   FiAward,
@@ -9,7 +8,6 @@ import {
   FiGrid,
   FiEdit3,
   FiTrendingUp,
-  FiShield,
 } from 'react-icons/fi'
 import { useAuthStore } from '../store/authStore'
 

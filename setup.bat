@@ -29,8 +29,8 @@ cd backend
 if exist node_modules (
     echo [SKIP] Backend dependencies already installed
 ) else (
-    echo [INSTALL] Installing backend dependencies...
-    call npm install
+    echo [INSTALL] Installing backend dependencies from package-lock.json...
+    call npm ci
     if %ERRORLEVEL% neq 0 (
         echo [ERROR] Failed to install backend dependencies
         pause
@@ -55,8 +55,8 @@ cd frontend
 if exist node_modules (
     echo [SKIP] Frontend dependencies already installed
 ) else (
-    echo [INSTALL] Installing frontend dependencies...
-    call npm install
+    echo [INSTALL] Installing frontend dependencies from package-lock.json...
+    call npm ci
     if %ERRORLEVEL% neq 0 (
         echo [ERROR] Failed to install frontend dependencies
         pause

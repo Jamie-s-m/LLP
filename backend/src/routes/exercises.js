@@ -1,14 +1,11 @@
 import express from 'express';
+import { protect } from '../middleware/auth.js';
+import { getExercises, createExercise, submitExercise } from '../controllers/exerciseController.js';
+
 const router = express.Router();
 
-// GET /api/exercises
-router.get('/', (req, res) => {
-  res.json({ success: true, exercises: [] });
-});
-
-// POST /api/exercises/submit
-router.post('/submit', (req, res) => {
-  res.json({ success: true, message: 'Exercise submitted' });
-});
+router.get('/', protect, getExercises);
+router.post('/', protect, createExercise);
+router.post('/submit', protect, submitExercise);
 
 export default router;

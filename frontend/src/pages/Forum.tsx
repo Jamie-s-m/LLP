@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FiMessageSquare, FiThumbsUp, FiPlus } from 'react-icons/fi'
+import { FiThumbsUp, FiPlus } from 'react-icons/fi'
 
 export default function Forum() {
   const [posts] = useState([

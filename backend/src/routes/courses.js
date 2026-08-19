@@ -1,68 +1,61 @@
 import express from 'express';
 import Course from '../models/Course.js';
-import Lesson from '../models/Lesson.js';
 import User from '../models/User.js';
+import Lesson from '../models/Lesson.js';
+import { protect, authorize } from '../middleware/auth.js';
+import { getCourses, getCourseById, createCourse, updateCourse, deleteCourse } from '../controllers/courseController.js';
 
 const router = express.Router();
 
-// Seed Route - Bypasses schema enum strict validation
 router.get('/seed', async (req, res) => {
   try {
     const count = await Course.countDocuments();
-    if (count > 0) return res.json({ message: 'Courses already seeded', count });
+    if (count > 0) {
+      return res.json({ success: true, message: 'Courses already seeded', count });
+    }
 
-    // Find or create dummy instructor
     let instructor = await User.findOne({ role: 'admin' });
     if (!instructor) {
       instructor = await User.create({
         firstName: 'System',
         lastName: 'Admin',
         email: 'admin@system.local',
-        password: 'password123',
+        password: 'Password123!',
         role: 'admin',
       });
     }
 
-    const rawCourseData = [
+    const courseData = [
       {
         title: 'IELTS Speaking Masterclass',
         description: 'Master Parts 1, 2, and 3 with focus on fluency and vocabulary.',
-        category: 'Language Learning',
+        category: 'Conversation',
         language: 'English',
         level: 'Advanced',
         instructor: instructor._id,
         isPublished: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
       },
       {
         title: 'Daily Turkish Conversation',
         description: 'Learn everyday expressions, essential grammar, and practical dialogues.',
-        category: 'Language Learning',
+        category: 'Conversation',
         language: 'Turkish',
         level: 'Intermediate',
         instructor: instructor._id,
         isPublished: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
       },
       {
         title: 'Korean Language Fundamentals',
         description: 'Master Hangul reading, essential particles, and daily structures.',
-        category: 'Language Learning',
-        language: 'Korean',
+        category: 'Grammar',
+        language: 'Uzbek',
         level: 'Beginner',
         instructor: instructor._id,
         isPublished: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
       },
     ];
 
-    // Native driver insert (bypasses Mongoose enum constraints)
-    const result = await Course.collection.insertMany(rawCourseData);
-
-    const insertedCourses = await Course.find();
+    const insertedCourses = await Course.insertMany(courseData);
 
     if (insertedCourses.length > 0) {
       await Lesson.create({
@@ -73,33 +66,16 @@ router.get('/seed', async (req, res) => {
       });
     }
 
-    res.json({ success: true, message: 'Seeded 3 courses successfully!', courses: insertedCourses });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.json({ success: true, message: 'Seeded 3 courses successfully!', data: insertedCourses });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message || 'Seeding failed' });
   }
 });
 
-// Fetch all courses
-router.get('/', async (req, res) => {
-  try {
-    const courses = await Course.find({ isPublished: true });
-    res.json(courses);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Fetch single course by ID
-router.get('/:id', async (req, res) => {
-  try {
-    const course = await Course.findById(req.params.id);
-    if (!course) return res.status(404).json({ message: 'Course not found' });
-    
-    const lessons = await Lesson.find({ course: req.params.id }).sort('order');
-    res.json({ course, lessons });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+router.get('/', getCourses);
+router.get('/:id', getCourseById);
+router.post('/', protect, authorize('teacher', 'admin'), createCourse);
+router.put('/:id', protect, authorize('teacher', 'admin'), updateCourse);
+router.delete('/:id', protect, authorize('teacher', 'admin'), deleteCourse);
 
 export default router;

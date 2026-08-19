@@ -1,27 +1,35 @@
-// backend/server.js
-import express from 'express';
+import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import cors from 'cors';
-import connectDB from './config/db.js';
-
-import authRoutes from './routes/authRoutes.js';
-import courseRoutes from './routes/courseRoutes.js';
+import app from './app.js';
 
 dotenv.config();
-connectDB();
 
-const app = express();
+const PORT = Number(process.env.PORT || 5000);
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/language-learn-platform';
 
-// CORS policy for GitHub Pages frontend
-app.use(cors({
-  origin: ['https://jamie-s-m.github.io', 'http://localhost:5173'],
-  credentials: true
-}));
+const startServer = async () => {
+  try {
+    await mongoose.connect(MONGODB_URI);
+    console.log(`MongoDB connected: ${mongoose.connection.host}`);
 
-app.use(express.json());
+    const server = app.listen(PORT, () => {
+      console.log(`API listening on port ${PORT}`);
+    });
 
-app.use('/api/auth', authRoutes);
-app.use('/api/courses', courseRoutes);
+    const shutdown = async (signal) => {
+      console.log(`${signal} received. Shutting down gracefully...`);
+      server.close(async () => {
+        await mongoose.connection.close();
+        process.exit(0);
+      });
+    };
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    process.once('SIGINT', () => shutdown('SIGINT'));
+    process.once('SIGTERM', () => shutdown('SIGTERM'));
+  } catch (error) {
+    console.error('Unable to start API:', error.message);
+    process.exit(1);
+  }
+};
+
+startServer();

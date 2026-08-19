@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const enrollmentSchema = new mongoose.Schema(
   {
@@ -36,7 +36,6 @@ const enrollmentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Prevent duplicate enrollments for the same student & course
 enrollmentSchema.index({ student: 1, course: 1 }, { unique: true });
 
-module.exports = mongoose.model('Enrollment', enrollmentSchema);
+export default mongoose.model('Enrollment', enrollmentSchema);

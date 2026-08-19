@@ -51,10 +51,13 @@ export default function Courses() {
           {isLoading ? (
             <div className="col-span-full text-center py-12">Loading...</div>
           ) : courses.length > 0 ? (
-            courses.map((course) => (
+            courses.map((course) => {
+              const courseId = course._id || course.id
+
+              return (
               <Link
-                key={course.id}
-                to={`/courses/${course.id}`}
+                key={courseId}
+                to={`/courses/${courseId}`}
                 className="card hover:shadow-xl transition-shadow"
               >
                 {course.thumbnail && (
@@ -75,7 +78,8 @@ export default function Courses() {
                   </span>
                 </div>
               </Link>
-            ))
+              )
+            })
           ) : (
             <div className="col-span-full text-center py-12 text-neutral-500">
               No courses found. Try adjusting your filters.

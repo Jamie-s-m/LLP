@@ -1,6 +1,4 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { FiMenu, FiX, FiLogOut, FiSettings } from 'react-icons/fi'
 import { useAuthStore } from '../store/authStore'
 import Navbar from './Navbar'
 import Sidebar from './Sidebar'
@@ -11,13 +9,7 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const { isAuthenticated, user, logout } = useAuthStore()
-  const navigate = useNavigate()
-
-  const handleLogout = () => {
-    logout()
-    navigate('/')
-  }
+  const { isAuthenticated } = useAuthStore()
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">

@@ -60,7 +60,7 @@ export default function ExercisePractice() {
           >
             <FiArrowLeft size={24} />
           </button>
-          <h1 className="text-3xl font-bold">Exercise Practice</h1>
+          <h1 className="text-3xl font-bold">Exercise {exerciseId || 'Practice'}</h1>
         </div>
 
         {/* Progress */}

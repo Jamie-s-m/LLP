@@ -1,17 +1,25 @@
-// backend/models/User.js
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
-const userSchema = new mongoose.Schema({
-  firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
-  email: { type: String, required: true, unique: true, lowercase: true },
-  password: { type: String, required: true },
-  role: { type: String, enum: ['user', 'admin', 'tutor'], default: 'user' },
-  isEmailVerified: { type: Boolean, default: false }
-}, { timestamps: true });
+const userSchema = new mongoose.Schema(
+  {
+    firstName: { type: String, required: true, trim: true },
+    lastName: { type: String, required: true, trim: true },
+    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    password: { type: String, required: true },
+    role: { type: String, enum: ['student', 'teacher', 'admin'], default: 'student' },
+    isEmailVerified: { type: Boolean, default: false },
+    avatar: { type: String, default: '' },
+    nativeLanguage: { type: String, default: 'English' },
+    targetLanguages: [{ type: String }],
+    xp: { type: Number, default: 0 },
+    streak: { type: Number, default: 0 },
+    lastActiveDate: { type: Date, default: Date.now },
+    isActive: { type: Boolean, default: true },
+  },
+  { timestamps: true }
+);
 
-// Hash password before saving ONLY if modified/new
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   const salt = await bcrypt.genSalt(10);
@@ -19,9 +27,8 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-// Helper method for password verification
 userSchema.methods.matchPassword = async function (enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
+  return bcrypt.compare(enteredPassword, this.password);
 };
 
 export default mongoose.model('User', userSchema);

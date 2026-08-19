@@ -7,7 +7,7 @@ export default function StudentProgress() {
   return (
     <div className="p-8">
       <div className="max-w-4xl">
-        <h1 className="text-4xl font-bold mb-8">Student Progress</h1>
+        <h1 className="text-4xl font-bold mb-8">Student Progress {studentId || ''}</h1>
 
         <div className="card mb-8">
           <div className="flex items-center gap-6 mb-6">

@@ -28,8 +28,8 @@ cd backend
 if [ -d "node_modules" ]; then
     echo "[SKIP] Backend dependencies already installed"
 else
-    echo "[INSTALL] Installing backend dependencies..."
-    npm install
+    echo "[INSTALL] Installing backend dependencies from package-lock.json..."
+    npm ci
     if [ $? -ne 0 ]; then
         echo "[ERROR] Failed to install backend dependencies"
         exit 1
@@ -53,8 +53,8 @@ cd frontend
 if [ -d "node_modules" ]; then
     echo "[SKIP] Frontend dependencies already installed"
 else
-    echo "[INSTALL] Installing frontend dependencies..."
-    npm install
+    echo "[INSTALL] Installing frontend dependencies from package-lock.json..."
+    npm ci
     if [ $? -ne 0 ]; then
         echo "[ERROR] Failed to install frontend dependencies"
         exit 1

@@ -1,14 +1,11 @@
 import express from 'express';
+import { protect } from '../middleware/auth.js';
+import { getFlashcards, createFlashcard, reviewFlashcard } from '../controllers/flashcardController.js';
+
 const router = express.Router();
 
-// GET /api/flashcards
-router.get('/', (req, res) => {
-  res.json({ success: true, flashcards: [] });
-});
-
-// POST /api/flashcards
-router.post('/', (req, res) => {
-  res.json({ success: true, message: 'Flashcard created' });
-});
+router.get('/', protect, getFlashcards);
+router.post('/', protect, createFlashcard);
+router.get('/:id/review', protect, reviewFlashcard);
 
 export default router;
