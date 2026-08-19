@@ -3,12 +3,14 @@ import api from '../services/api'
 
 export interface Course {
   _id: string
+  id?: string
   title: string
   description: string
   language: string
   level: string
   thumbnail?: string
   lessons?: any[]
+  [key: string]: any
 }
 
 export interface ProgressRecord {
@@ -26,7 +28,7 @@ interface LearningState {
   myLearning: ProgressRecord[]
   isLoading: boolean
   error: string | null
-  fetchCourses: () => Promise<void>
+  fetchCourses: (params?: Record<string, any>) => Promise<void>
   fetchMyLearning: () => Promise<void>
   enrollInCourse: (courseId: string) => Promise<boolean>
   completeLesson: (courseId: string, lessonId: string) => Promise<boolean>
@@ -38,12 +40,12 @@ export const useLearningStore = create<LearningState>((set, get) => ({
   isLoading: false,
   error: null,
 
-  // Fetch all available courses for the catalog
-  fetchCourses: async () => {
+  // Fetch all available courses with optional query filters like limit or search
+  fetchCourses: async (params) => {
     set({ isLoading: true, error: null })
     try {
-      const response = await api.get('/courses')
-      if (response.data.success) {
+      const response = await api.get('/courses', { params })
+      if (response.data?.success) {
         set({ courses: response.data.data, isLoading: false })
       } else {
         set({ courses: response.data || [], isLoading: false })
@@ -61,7 +63,7 @@ export const useLearningStore = create<LearningState>((set, get) => ({
     set({ isLoading: true, error: null })
     try {
       const response = await api.get('/progress/my-learning')
-      if (response.data.success) {
+      if (response.data?.success) {
         set({ myLearning: response.data.data, isLoading: false })
       }
     } catch (err: any) {
@@ -77,7 +79,7 @@ export const useLearningStore = create<LearningState>((set, get) => ({
     set({ isLoading: true, error: null })
     try {
       const response = await api.post(`/progress/enroll/${courseId}`)
-      if (response.data.success) {
+      if (response.data?.success) {
         await get().fetchMyLearning()
         set({ isLoading: false })
         return true
@@ -99,7 +101,7 @@ export const useLearningStore = create<LearningState>((set, get) => ({
         courseId,
         lessonId,
       })
-      if (response.data.success) {
+      if (response.data?.success) {
         await get().fetchMyLearning()
         return true
       }
