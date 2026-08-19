@@ -1,14 +1,12 @@
 import express from 'express';
-import { getCourses, getCourse } from '../controllers/courseController.js';
+import Course from '../models/Course.js';
+import Lesson from '../models/Lesson.js';
 
 const router = express.Router();
 
-// 1. Seed endpoint FIRST
+// 1. Seed endpoint (placed FIRST)
 router.get('/seed', async (req, res) => {
   try {
-    const Course = (await import('../models/Course.js')).default;
-    const Lesson = (await import('../models/Lesson.js')).default;
-
     const count = await Course.countDocuments();
     if (count > 0) {
       return res.json({ message: 'Courses already exist in database!', count });
@@ -53,8 +51,27 @@ router.get('/seed', async (req, res) => {
   }
 });
 
-// 2. Main course routes
-router.get('/', getCourses);
-router.get('/:id', getCourse); // Use 'getCourse' here instead of 'getCourseById'
+// 2. Fetch all courses
+router.get('/', async (req, res) => {
+  try {
+    const courses = await Course.find({ isPublished: true });
+    res.json(courses);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 3. Fetch single course by ID
+router.get('/:id', async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id);
+    if (!course) return res.status(404).json({ message: 'Course not found' });
+    
+    const lessons = await Lesson.find({ course: req.params.id }).sort('order');
+    res.json({ course, lessons });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 export default router;
