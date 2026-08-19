@@ -1,5 +1,4 @@
 // backend/controllers/authController.js
-import bcrypt from 'bcryptjs';
 import User from '../models/User.js';
 import generateToken from '../utils/generateToken.js';
 
@@ -8,29 +7,32 @@ export const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ message: 'Please provide both email and password' });
+      return res.status(400).json({ message: 'Email and password are required' });
     }
 
-    // Normalize email casing and whitespace
-    const normalizedEmail = email.trim().toLowerCase();
-    const user = await User.findOne({ email: normalizedEmail });
+    // Standardize input
+    const cleanEmail = email.trim().toLowerCase();
 
+    // Find user
+    const user = await User.findOne({ email: cleanEmail });
     if (!user) {
       return res.status(400).json({ message: 'Invalid email or password' });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    // Verify password via schema method
+    const isMatch = await user.matchPassword(password);
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid email or password' });
     }
 
-    res.json({
+    // Return User Data & Token
+    res.status(200).json({
       _id: user._id,
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
       role: user.role,
-      token: generateToken(user._id),
+      token: generateToken(user._id)
     });
   } catch (error) {
     console.error('Login Error:', error);
