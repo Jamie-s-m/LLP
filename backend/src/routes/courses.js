@@ -27,7 +27,7 @@ router.get('/seed', async (req, res) => {
       {
         title: 'IELTS Speaking Masterclass',
         description: 'Master Parts 1, 2, and 3 with focus on fluency and vocabulary.',
-        category: 'Speaking',
+        category: 'speaking',
         language: 'English',
         level: 'Advanced',
         instructor: instructor._id,
@@ -36,7 +36,7 @@ router.get('/seed', async (req, res) => {
       {
         title: 'Daily Turkish Conversation',
         description: 'Learn everyday expressions, essential grammar, and practical dialogues.',
-        category: 'Grammar',
+        category: 'grammar',
         language: 'Turkish',
         level: 'Intermediate',
         instructor: instructor._id,
@@ -45,7 +45,7 @@ router.get('/seed', async (req, res) => {
       {
         title: 'Korean Language Fundamentals',
         description: 'Master Hangul reading, essential particles, and daily structures.',
-        category: 'General',
+        category: 'general',
         language: 'Korean',
         level: 'Beginner',
         instructor: instructor._id,
