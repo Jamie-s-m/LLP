@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
-const progressSchema = new mongoose.Schema(
+const enrollmentSchema = new mongoose.Schema(
   {
-    user: {
+    student: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
@@ -36,6 +36,7 @@ const progressSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-progressSchema.index({ user: 1, course: 1 }, { unique: true });
+// Prevent duplicate enrollments for the same student & course
+enrollmentSchema.index({ student: 1, course: 1 }, { unique: true });
 
-module.exports = mongoose.model('Progress', progressSchema);
+module.exports = mongoose.model('Enrollment', enrollmentSchema);
