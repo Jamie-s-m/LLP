@@ -1,51 +1,49 @@
-import express from 'express';
-import { registerUser, loginUser } from '../controllers/authController.js';
-
-const router = express.Router();
-
-// Maps to POST http://localhost:5000/api/auth/register
-router.post('/register', registerUser);
-
-// Maps to POST http://localhost:5000/api/auth/login
-router.post('/login', loginUser);
-
-// TEMPORARY: Auto-create or promote admin user
-router.get('/make-me-admin', async (req, res) => {
+// TEMPORARY: Seed sample courses into MongoDB
+router.get('/seed-courses', async (req, res) => {
   try {
-    const User = (await import('../models/User.js')).default;
-    const bcrypt = (await import('bcryptjs')).default;
-    
-    let user = await User.findOne({ email: 'moreartyjames@gmail.com' });
+    const Course = (await import('../models/Course.js')).default;
+    const Lesson = (await import('../models/Lesson.js')).default;
 
-    if (!user) {
-      // Create user directly if database is empty
-      const hashedPassword = await bcrypt.hash('Password123!', 10);
-      user = await User.create({
-        firstName: 'Aziz',
-        lastName: 'Kayumkhodjaev',
-        email: 'moreartyjames@gmail.com',
-        password: hashedPassword,
-        role: 'admin',
-      });
-      return res.json({
-        success: true,
-        message: 'Admin user created successfully! Log in with Password123!',
-        user,
-      });
+    // Check if courses already exist
+    const count = await Course.countDocuments();
+    if (count > 0) {
+      return res.json({ message: 'Courses already exist in database!', count });
     }
 
-    // Update existing user to admin
-    user.role = 'admin';
-    await user.save();
+    const created = await Course.insertMany([
+      {
+        title: 'IELTS Speaking Masterclass',
+        description: 'Master Parts 1, 2, and 3 with focus on fluency and vocabulary.',
+        language: 'English',
+        level: 'B2-C1',
+        isPublished: true,
+      },
+      {
+        title: 'Daily Turkish Conversation',
+        description: 'Learn everyday expressions, essential grammar, and practical dialogues.',
+        language: 'Turkish',
+        level: 'A2-B1',
+        isPublished: true,
+      },
+      {
+        title: 'Korean Language Fundamentals',
+        description: 'Master Hangul reading, essential particles, and daily structures.',
+        language: 'Korean',
+        level: 'A1-A2',
+        isPublished: true,
+      },
+    ]);
 
-    res.json({
-      success: true,
-      message: 'User updated to admin successfully!',
-      user,
+    // Attach sample lesson to the first course
+    await Lesson.create({
+      course: created[0]._id,
+      title: 'Speaking Part 1 Strategies',
+      content: 'Learn structure and phrase patterns for personal questions.',
+      order: 1,
     });
+
+    res.json({ success: true, message: 'Seeded 3 courses and sample lesson!', courses: created });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
-
-export default router;
