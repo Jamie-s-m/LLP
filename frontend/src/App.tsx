@@ -40,10 +40,11 @@ import Forum from './pages/Forum'
 import NotFound from './pages/NotFound'
 
 function App() {
-  const { isAuthenticated, user } = useAuthStore()
+  const { isAuthenticated } = useAuthStore()
 
   return (
-    <Router>
+    // import.meta.env.BASE_URL dynamically reads '/LLP/' in production and '/' in dev
+    <Router basename={import.meta.env.BASE_URL}>
       <Toaster position="top-right" />
       <Routes>
         {/* Public Routes */}
