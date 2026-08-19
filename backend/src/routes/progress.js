@@ -1,7 +1,6 @@
 import express from 'express';
 import { enrollCourse, completeLesson, getMyLearning } from '../controllers/progressController.js';
-import { protect } = require('../middleware/auth.js'); // <-- REMOVE THIS LINE
-import { protect } from '../middleware/auth.js';      // <-- USE THIS INSTEAD
+import { protect } from '../middleware/auth.js'; // Must be 'from', not '='
 
 const router = express.Router();
 
