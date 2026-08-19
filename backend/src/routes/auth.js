@@ -9,27 +9,39 @@ router.post('/register', registerUser);
 // Maps to POST http://localhost:5000/api/auth/login
 router.post('/login', loginUser);
 
-// TEMPORARY: Make the first registered user or matching email an admin
+// TEMPORARY: Auto-create or promote admin user
 router.get('/make-me-admin', async (req, res) => {
   try {
     const User = (await import('../models/User.js')).default;
+    const bcrypt = (await import('bcryptjs')).default;
     
-    // Find all registered users
-    const users = await User.find({});
-    if (users.length === 0) {
-      return res.status(404).json({ message: 'No users exist in database yet.' });
+    let user = await User.findOne({ email: 'moreartyjames@gmail.com' });
+
+    if (!user) {
+      // Create user directly if database is empty
+      const hashedPassword = await bcrypt.hash('Password123!', 10);
+      user = await User.create({
+        firstName: 'Aziz',
+        lastName: 'Kayumkhodjaev',
+        email: 'moreartyjames@gmail.com',
+        password: hashedPassword,
+        role: 'admin',
+      });
+      return res.json({
+        success: true,
+        message: 'Admin user created successfully! Log in with Password123!',
+        user,
+      });
     }
 
-    // Promote the first registered user
-    const targetUser = users[0];
-    targetUser.role = 'admin';
-    await targetUser.save();
+    // Update existing user to admin
+    user.role = 'admin';
+    await user.save();
 
     res.json({
       success: true,
-      message: `User ${targetUser.email} updated to admin!`,
-      user: targetUser,
-      allUsers: users.map(u => ({ id: u._id, email: u.email, role: u.role }))
+      message: 'User updated to admin successfully!',
+      user,
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
