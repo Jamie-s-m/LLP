@@ -1,46 +1,27 @@
-import mongoose from 'mongoose';
+// backend/server.js
+import express from 'express';
 import dotenv from 'dotenv';
-import app from './app.js';
+import cors from 'cors';
+import connectDB from './config/db.js';
 
-// Load environment variables
+import authRoutes from './routes/authRoutes.js';
+import courseRoutes from './routes/courseRoutes.js';
+
 dotenv.config();
-
-const PORT = process.env.PORT || 5000;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/language-learn-platform';
-
-// Connect to MongoDB
-const connectDB = async () => {
-  try {
-    const conn = await mongoose.connect(MONGODB_URI);
-    console.log(`✓ MongoDB connected: ${conn.connection.host}`);
-  } catch (error) {
-    console.error(`✗ MongoDB connection error: ${error.message}`);
-    process.exit(1);
-  }
-};
-
-// Connect to database
 connectDB();
 
-// Start server
-const server = app.listen(PORT, () => {
-  console.log(`✓ Server running on port ${PORT}`);
-  console.log(`✓ Environment: ${process.env.NODE_ENV || 'development'}`);
-});
+const app = express();
 
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (err, promise) => {
-  console.error(`✗ Error: ${err.message}`);
-  server.close(() => process.exit(1));
-});
+// CORS policy for GitHub Pages frontend
+app.use(cors({
+  origin: ['https://jamie-s-m.github.io', 'http://localhost:5173'],
+  credentials: true
+}));
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('✓ SIGTERM received. Shutting down gracefully...');
-  server.close(() => {
-    console.log('✓ Server closed');
-    process.exit(0);
-  });
-});
+app.use(express.json());
 
-export default server;
+app.use('/api/auth', authRoutes);
+app.use('/api/courses', courseRoutes);
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

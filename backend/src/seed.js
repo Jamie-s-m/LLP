@@ -1,82 +1,43 @@
+// backend/seed.js
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import bcrypt from 'bcryptjs';
 import User from './models/User.js';
 import Course from './models/Course.js';
-import Lesson from './models/Lesson.js';
+import connectDB from './config/db.js';
 
 dotenv.config();
+await connectDB();
 
-const seedDB = async () => {
+const seedData = async () => {
   try {
-    const mongoUri = process.env.MONGODB_URI;
-    if (!mongoUri) throw new Error('MONGODB_URI missing in environment');
+    await User.deleteMany();
+    await Course.deleteMany();
 
-    await mongoose.connect(mongoUri);
-    console.log('✓ Connected to MongoDB');
+    const adminUser = await User.create({
+      firstName: 'Aziz',
+      lastName: 'Kayumkhodjaev',
+      email: 'admin@gmail.com',
+      password: 'Password123!', // Ensure pre-save hook handles bcrypt hashing
+      role: 'admin',
+      isEmailVerified: true,
+    });
 
-    // 1. Clear existing database collections to prevent duplicates
-    await User.deleteMany({});
-    await Course.deleteMany({});
-    await Lesson.deleteMany({});
+    await Course.create({
+      title: 'IELTS Speaking Masterclass',
+      description: 'Comprehensive practice for Parts 1, 2, and 3.',
+      language: 'English',
+      level: 'Beginner', // Must match schema enum exactly
+      category: 'Speaking',
+      instructor: adminUser._id,
+      isPublished: true,
+    });
 
-    // 2. Hash passwords
-    const adminPasswordHash = await bcrypt.hash('Password123!', 10);
-    const studentPasswordHash = await bcrypt.hash('Student123!', 10);
-
-    // 3. Seed Users
-    const users = await User.create([
-      {
-        firstName: 'Aziz',
-        lastName: 'Kayumkhodjaev',
-        email: 'moreartyjames@gmail.com',
-        password: adminPasswordHash,
-        role: 'admin',
-        isEmailVerified: true,
-      },
-      {
-        firstName: 'Sample',
-        lastName: 'Student',
-        email: 'student@example.com',
-        password: studentPasswordHash,
-        role: 'student',
-        isEmailVerified: true,
-      },
-    ]);
-    console.log(`✓ Created ${users.length} default users with hashed passwords!`);
-
-    // 4. Seed Courses
-    const sampleCourses = [
-  {
-    title: 'IELTS Speaking Masterclass',
-    description: 'Master Parts 1, 2, and 3 with focus on fluency, vocabulary, and discourse markers.',
-    language: 'English',
-    level: 'Advanced', // Must match allowed enum values (e.g., 'Beginner', 'Intermediate', 'Advanced')
-    category: 'Speaking', // Required by schema
-    instructor: '6a854dccb3f74cceaf49d9d8', // Provide a valid User ObjectId string
-    isPublished: true,
-  },
-];
-
-    const createdCourses = await Course.insertMany(sampleCourses);
-    console.log(`✓ Successfully seeded ${createdCourses.length} courses!`);
-
-    // 5. Seed Lessons
-    if (createdCourses[0]) {
-      await Lesson.create({
-        course: createdCourses[0]._id,
-        title: 'Introduction & Part 1 Overview',
-        content: 'Overview of common IELTS Speaking Part 1 topics and structuring answers.',
-        order: 1,
-      });
-      console.log('✓ Created initial lesson!');
-    }
-
-    process.exit(0);
-  } catch (err) {
-    console.error('✗ Seeding failed:', err.message);
+    console.log('Database successfully seeded!');
+    process.exit();
+  } catch (error) {
+    console.error('Seeding Error:', error);
     process.exit(1);
   }
 };
 
-seedDB();
+seedData();

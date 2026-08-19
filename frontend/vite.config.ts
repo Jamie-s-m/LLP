@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
+
 export default defineConfig(({ command }) => ({
   plugins: [react()],
   // Sets base path for production (GitHub Pages) and root path for local dev
