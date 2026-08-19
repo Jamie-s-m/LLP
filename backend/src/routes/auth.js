@@ -14,9 +14,15 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: 'Please provide email and password' });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() });
+    // Find user (case-insensitive email)
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    // Guard against users created without a password field
+    if (!user.password) {
+      return res.status(400).json({ message: 'Invalid credentials or missing password on account' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -51,7 +57,11 @@ router.post('/register', async (req, res) => {
   try {
     const { firstName, lastName, email, password } = req.body;
 
-    let user = await User.findOne({ email: email.toLowerCase() });
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+
+    let user = await User.findOne({ email: email.toLowerCase().trim() });
     if (user) {
       return res.status(400).json({ message: 'User already exists' });
     }
@@ -60,7 +70,7 @@ router.post('/register', async (req, res) => {
     user = await User.create({
       firstName: firstName || 'New',
       lastName: lastName || 'User',
-      email: email.toLowerCase(),
+      email: email.toLowerCase().trim(),
       password: hashedPassword,
       role: 'student',
     });
