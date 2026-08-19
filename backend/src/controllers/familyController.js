@@ -28,6 +28,9 @@ export const reviewFamilyLink = async (req, res, next) => {
   try {
     const link = await FamilyLink.findById(req.params.id);
     if (!link) return res.status(404).json({ success: false, message: 'Family request not found' });
+    if (req.user.role === 'student' && link.student.toString() !== req.user.id.toString()) {
+      return res.status(403).json({ success: false, message: 'You cannot review this family request' });
+    }
     link.status = req.body.status === 'approved' ? 'approved' : 'rejected';
     link.reviewedBy = req.user.id;
     link.reviewedAt = new Date();
