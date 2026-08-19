@@ -1,17 +1,13 @@
 import express from 'express';
+import {
+  getCourses,
+  getCourseById,
+  // ... imports
+} from '../controllers/courseController.js';
+
 const router = express.Router();
 
-// GET /api/courses
-router.get('/', (req, res) => {
-  res.json({ success: true, courses: [] });
-});
-
-// GET /api/courses/:id
-router.get('/:id', (req, res) => {
-  res.json({ success: true, courseId: req.params.id });
-});
-
-// GET /api/courses/seed
+// 1. PLACE /seed FIRST so Express matches it before /:id
 router.get('/seed', async (req, res) => {
   try {
     const Course = (await import('../models/Course.js')).default;
@@ -55,10 +51,14 @@ router.get('/seed', async (req, res) => {
       });
     }
 
-    res.json({ success: true, message: 'Seeded 3 courses!', courses: created });
+    res.json({ success: true, message: 'Seeded 3 courses successfully!', courses: created });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
+// 2. GENERAL & DYNAMIC ROUTES COME AFTER SPECIFIC ROUTES
+router.get('/', getCourses);
+router.get('/:id', getCourseById); // <-- This was hijacking /seed!
 
 export default router;
