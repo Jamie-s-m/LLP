@@ -1,6 +1,7 @@
 import express from 'express';
 import { enrollCourse, completeLesson, getMyLearning } from '../controllers/progressController.js';
-import { protect } from require('../middleware/auth.js'); // Ensure path/method matches your auth middleware
+import { protect } = require('../middleware/auth.js'); // <-- REMOVE THIS LINE
+import { protect } from '../middleware/auth.js';      // <-- USE THIS INSTEAD
 
 const router = express.Router();
 
