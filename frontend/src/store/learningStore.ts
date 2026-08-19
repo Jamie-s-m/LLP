@@ -41,22 +41,23 @@ export const useLearningStore = create<LearningState>((set, get) => ({
   error: null,
 
   // Fetch all available courses with optional query filters like limit or search
-  fetchCourses: async (params) => {
-    set({ isLoading: true, error: null })
-    try {
-      const response = await api.get('/courses', { params })
-      if (response.data?.success) {
-        set({ courses: response.data.data, isLoading: false })
-      } else {
-        set({ courses: response.data || [], isLoading: false })
-      }
-    } catch (err: any) {
-      set({
-        error: err.response?.data?.message || 'Failed to fetch courses',
-        isLoading: false,
-      })
-    }
-  },
+fetchCourses: async (params) => {
+  set({ isLoading: true, error: null })
+  try {
+    const response = await api.get('/courses', { params })
+    const fetchedData = response.data?.data || response.data || []
+    set({
+      courses: Array.isArray(fetchedData) ? fetchedData : [],
+      isLoading: false,
+    })
+  } catch (err: any) {
+    set({
+      courses: [], // Fallback to empty array to prevent slice() errors
+      error: err.response?.data?.message || 'Failed to fetch courses',
+      isLoading: false,
+    })
+  }
+},
 
   // Fetch enrolled courses and progress
   fetchMyLearning: async () => {
