@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,8 +10,12 @@
   }
 
   body {
-    @apply bg-neutral-50 text-neutral-900 dark:bg-neutral-900 dark:text-neutral-50;
+    @apply text-neutral-900 dark:text-neutral-50;
+    background: #f6efe7;
+    font-family: 'DM Sans', sans-serif;
   }
+
+  h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; letter-spacing: 0; }
 }
 
 @layer components {
@@ -73,4 +79,53 @@
 
 .animate-slideInUp {
   animation: slideInUp 0.3s ease-out;
+}
+
+@layer components {
+  .atlas-page { min-height: calc(100vh - 72px); background: radial-gradient(circle at 90% 0%, rgba(167,232,213,.45), transparent 28%), #f6efe7; }
+  .atlas-heading h1 { @apply text-5xl font-semibold text-ink; }
+  .atlas-heading > p:last-child, .atlas-hero p { @apply text-base text-slate-600 max-w-xl; }
+  .atlas-kicker { @apply uppercase text-xs font-bold tracking-widest text-coral mb-3; }
+  .atlas-hero { @apply grid grid-cols-1 lg:grid-cols-2 gap-8 items-center p-8 md:p-12 rounded-3xl overflow-hidden; background: #102a43; color: #fffdf9; animation: slideInUp .55s ease-out both; }
+  .atlas-hero h1 { @apply text-5xl md:text-6xl font-semibold text-white; }
+  .atlas-hero img { @apply w-full max-h-80 object-contain rounded-2xl; }
+  .atlas-panel { @apply bg-white/80 border border-white rounded-2xl shadow-sm; }
+  .atlas-stat-grid { @apply grid grid-cols-1 md:grid-cols-3 gap-4; }
+  .atlas-stat { @apply atlas-panel p-5 flex flex-col gap-2; }
+  .atlas-stat svg { @apply text-coral text-xl; }
+  .atlas-stat strong { @apply text-3xl text-ink; }
+  .atlas-stat span, .text-muted { @apply text-slate-500; }
+  .text-ink { color: #102a43; }
+  .text-coral { color: #f26b5b; }
+  .chat-layout { @apply grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 min-h-[560px]; }
+  .chat-list { @apply p-4; }
+  .chat-thread { @apply w-full flex gap-3 items-center text-left p-3 rounded-xl transition-colors hover:bg-[#f6efe7]; }
+  .chat-thread.active { @apply bg-[#a7e8d5]/50; }
+  .chat-thread small { @apply block text-xs text-slate-500 capitalize mt-1; }
+  .chat-avatar { @apply w-10 h-10 rounded-full bg-[#102a43] text-white flex items-center justify-center; }
+  .chat-window { @apply flex flex-col overflow-hidden; }
+  .chat-header { @apply flex justify-between items-center p-5 border-b border-slate-100; }
+  .chat-header h2 { @apply text-2xl text-ink; }
+  .status-dot { @apply text-xs text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full; }
+  .message-list { @apply flex-1 p-5 space-y-3 overflow-y-auto bg-[#fffdf9]; }
+  .message-bubble { @apply max-w-xl bg-[#f6efe7] rounded-2xl rounded-bl-sm p-3; }
+  .message-bubble p { @apply mt-1 text-slate-700; }
+  .message-bubble time { @apply text-xs text-slate-400; }
+  .chat-compose { @apply flex gap-2 p-4 border-t border-slate-100; }
+  .chat-compose input, .inline-form input { @apply input bg-white; }
+  .empty-state { @apply flex flex-col items-center justify-center gap-2 text-slate-400 py-10 text-center; }
+  .empty-state.full { @apply flex-1; }
+  .admin-tabs { @apply flex flex-wrap gap-2; }
+  .admin-tabs button { @apply inline-flex items-center gap-2 px-4 py-2 rounded-full text-slate-600 hover:bg-white transition-colors; }
+  .admin-tabs button.active { @apply bg-[#102a43] text-white; }
+  .inline-form { @apply flex gap-2; }
+  .inline-form input { @apply w-56; }
+  .admin-table { @apply divide-y divide-slate-100; }
+  .admin-row { @apply flex items-center gap-4 py-4; }
+  .admin-row > div:first-child { @apply flex-1; }
+  .admin-row small { @apply block text-sm text-slate-500 mt-1; }
+  .status-pill { @apply text-xs font-semibold px-3 py-1 rounded-full bg-emerald-100 text-emerald-700; }
+  .status-pill.muted { @apply bg-slate-100 text-slate-500; }
+  .icon-button { @apply p-2 rounded-lg text-slate-500 hover:bg-slate-100; }
+  .icon-button.danger { @apply text-red-500 hover:bg-red-50; }
 }

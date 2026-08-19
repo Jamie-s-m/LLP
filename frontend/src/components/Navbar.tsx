@@ -22,11 +22,9 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-lg">L</span>
-          </div>
+            <img src={`${import.meta.env.BASE_URL}linguanest-mark.svg`} alt="LinguaNest" className="w-8 h-8 rounded-lg" />
           <span className="hidden sm:inline font-bold text-xl text-neutral-900 dark:text-white">
-            Language Learn
+            LinguaNest
           </span>
         </Link>
 

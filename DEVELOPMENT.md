@@ -133,6 +133,17 @@ language-learn-platform/
 - React/Vite production build and GitHub Pages deployment.
 - Axios API client with JWT authorization.
 - Course catalog, course details, enrollment, and learning progress screens.
+- Role-aware spaces for students, teachers, parents, and admins.
+- LinguaNest brand mark, atlas illustration, editorial typography, and motion system.
+- Realtime direct, group, and support chat with REST fallback.
+- Admin control center for users, courses, lessons, flashcards, forum posts, and groups.
+
+### Family & Communication APIs
+- `GET/POST /api/family` for parent-child requests.
+- `PATCH /api/family/:id/review` for student/admin approval or rejection.
+- `GET/POST /api/chat/conversations` for direct, group, and support rooms.
+- `GET/POST /api/chat/conversations/:id/messages` for message history and fallback delivery.
+- Socket.io events `conversation:join`, `message:send`, and `message:new` for realtime delivery.
 
 ## 🚀 Release Checklist
 

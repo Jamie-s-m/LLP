@@ -17,7 +17,15 @@ export default function Login() {
     try {
       await login(email, password)
       toast.success('Logged in successfully!')
-      navigate('/dashboard')
+      const role = useAuthStore.getState().user?.role
+      const destination = role === 'admin'
+        ? '/admin/control-center'
+        : role === 'parent'
+          ? '/parent/dashboard'
+          : role === 'teacher'
+            ? '/teacher/dashboard'
+            : '/dashboard'
+      navigate(destination)
     } catch (error: any) {
       // Robust error message extraction from Axios, backend payload, or thrown error
       const message =

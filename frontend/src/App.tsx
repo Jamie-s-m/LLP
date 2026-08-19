@@ -37,6 +37,9 @@ import ManageContent from './pages/admin/ManageContent'
 
 // Pages - Common
 import Forum from './pages/Forum'
+import Chat from './pages/Chat'
+import ParentDashboard from './pages/ParentDashboard'
+import ControlCenter from './pages/admin/ControlCenter'
 import NotFound from './pages/NotFound'
 
 function App() {
@@ -64,6 +67,8 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/parent/dashboard" element={<ProtectedRoute allowedRoles={['parent']}><Layout><ParentDashboard /></Layout></ProtectedRoute>} />
+        <Route path="/chat" element={<ProtectedRoute allowedRoles={['student', 'teacher', 'parent', 'admin']}><Layout><Chat /></Layout></ProtectedRoute>} />
         <Route
           path="/my-learning"
           element={
@@ -180,6 +185,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/admin/control-center" element={<ProtectedRoute allowedRoles={['admin']}><Layout><ControlCenter /></Layout></ProtectedRoute>} />
 
         {/* Common Routes */}
         <Route path="/forum" element={<Layout><Forum /></Layout>} />

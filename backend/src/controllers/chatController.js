@@ -1,0 +1,125 @@
+import mongoose from 'mongoose';
+import ChatConversation from '../models/ChatConversation.js';
+import ChatMessage from '../models/ChatMessage.js';
+import Group from '../models/Group.js';
+import User from '../models/User.js';
+
+const isParticipant = (conversation, userId) =>
+  conversation.participants.some((participant) => participant.toString() === userId.toString());
+
+export const listConversations = async (req, res, next) => {
+  try {
+    const conversations = await ChatConversation.find({ participants: req.user.id })
+      .populate('participants', 'firstName lastName role avatar')
+      .populate('group', 'name')
+      .sort({ lastMessageAt: -1 });
+
+    res.status(200).json({ success: true, data: conversations });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const createConversation = async (req, res, next) => {
+  try {
+    const { type = 'direct', participantIds = [], groupId, name } = req.body;
+    const participants = [...new Set([req.user.id, ...participantIds])];
+
+    if (!['direct', 'group', 'support'].includes(type)) {
+      return res.status(400).json({ success: false, message: 'Invalid conversation type' });
+    }
+
+    if (type === 'direct' && participants.length !== 2) {
+      return res.status(400).json({ success: false, message: 'Direct chat requires exactly two participants' });
+    }
+
+    if (type === 'group') {
+      const group = await Group.findById(groupId);
+      if (!group || !group.members.some((member) => member.toString() === req.user.id.toString())) {
+        return res.status(403).json({ success: false, message: 'You are not a member of this group' });
+      }
+    }
+
+    const conversation = await ChatConversation.create({
+      type,
+      name,
+      participants,
+      group: groupId,
+      createdBy: req.user.id,
+    });
+
+    res.status(201).json({ success: true, data: conversation });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const listMessages = async (req, res, next) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(404).json({ success: false, message: 'Conversation not found' });
+    }
+
+    const conversation = await ChatConversation.findById(req.params.id);
+    if (!conversation || !isParticipant(conversation, req.user.id)) {
+      return res.status(404).json({ success: false, message: 'Conversation not found' });
+    }
+
+    const messages = await ChatMessage.find({ conversation: conversation._id })
+      .populate('sender', 'firstName lastName role avatar')
+      .sort({ createdAt: 1 })
+      .limit(100);
+
+    res.status(200).json({ success: true, data: messages });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const sendMessage = async (req, res, next) => {
+  try {
+    const conversation = await ChatConversation.findById(req.params.id);
+    if (!conversation || !isParticipant(conversation, req.user.id)) {
+      return res.status(404).json({ success: false, message: 'Conversation not found' });
+    }
+
+    const body = String(req.body.body || '').trim();
+    if (!body) {
+      return res.status(400).json({ success: false, message: 'Message body is required' });
+    }
+
+    const message = await ChatMessage.create({
+      conversation: conversation._id,
+      sender: req.user.id,
+      body,
+    });
+
+    conversation.lastMessageAt = new Date();
+    await conversation.save();
+
+    res.status(201).json({ success: true, data: await message.populate('sender', 'firstName lastName role avatar') });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const searchChatUsers = async (req, res, next) => {
+  try {
+    const query = String(req.query.q || '').trim();
+    if (query.length < 2) return res.status(200).json({ success: true, data: [] });
+
+    const users = await User.find({
+      isActive: true,
+      _id: { $ne: req.user.id },
+      $or: [
+        { email: new RegExp(query, 'i') },
+        { firstName: new RegExp(query, 'i') },
+        { lastName: new RegExp(query, 'i') },
+      ],
+    }).select('firstName lastName email role avatar').limit(20);
+
+    res.status(200).json({ success: true, data: users });
+  } catch (error) {
+    next(error);
+  }
+};

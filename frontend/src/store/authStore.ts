@@ -6,7 +6,7 @@ interface User {
   firstName: string
   lastName: string
   email: string
-  role: 'student' | 'teacher' | 'admin'
+  role: 'student' | 'teacher' | 'parent' | 'admin'
   avatar?: string
   nativeLanguage?: string
   targetLanguages?: string[]

@@ -35,7 +35,7 @@ export const Register: React.FC = () => {
         email: formData.email,
         password: formData.password,
       })
-      navigate('/dashboard')
+      navigate(useAuthStore.getState().user?.role === 'parent' ? '/parent/dashboard' : '/dashboard')
     } catch (err: any) {
       // Handled in authStore
     }

@@ -8,6 +8,7 @@ import {
   FiGrid,
   FiEdit3,
   FiTrendingUp,
+  FiMessageCircle,
 } from 'react-icons/fi'
 import { useAuthStore } from '../store/authStore'
 
@@ -37,6 +38,11 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     { label: 'Leaderboard', path: '/leaderboard', icon: FiTrendingUp },
   ]
 
+  const parentLinks = [
+    { label: 'Family Desk', path: '/parent/dashboard', icon: FiGrid },
+    { label: 'Chat', path: '/chat', icon: FiMessageCircle },
+  ]
+
   const teacherLinks = [
     { label: 'Dashboard', path: '/teacher/dashboard', icon: FiGrid },
     { label: 'Create Course', path: '/teacher/create-course', icon: FiEdit3 },
@@ -51,6 +57,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
 
   let navLinks = studentLinks
   if (user?.role === 'teacher') navLinks = teacherLinks
+  if (user?.role === 'parent') navLinks = parentLinks
   if (user?.role === 'admin') navLinks = [...adminLinks, ...teacherLinks]
 
   return (
@@ -99,6 +106,14 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
             >
               <FiMessageSquare size={20} />
               <span>Forum</span>
+            </Link>
+            <Link
+              to="/chat"
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${isActive('/chat') ? 'bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 font-semibold' : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
+              onClick={() => onClose()}
+            >
+              <FiMessageCircle size={20} />
+              <span>Chat</span>
             </Link>
             <Link
               to="/profile"

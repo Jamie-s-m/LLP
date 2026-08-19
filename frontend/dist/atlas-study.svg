@@ -1,0 +1,15 @@
+<svg width="900" height="560" viewBox="0 0 900 560" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Language atlas illustration</title>
+  <desc id="desc">Abstract editorial illustration of a map, cards, and conversation bubbles</desc>
+  <rect width="900" height="560" rx="36" fill="#F6EFE7"/>
+  <path d="M87 404c102-122 161-222 315-238 137-15 197 90 411 24" stroke="#A7E8D5" stroke-width="54" stroke-linecap="round"/>
+  <path d="M76 414c114-105 191-174 323-183 116-8 182 78 424-7" stroke="#102A43" stroke-width="7" stroke-linecap="round" stroke-dasharray="2 22"/>
+  <circle cx="232" cy="271" r="22" fill="#F26B5B"/>
+  <circle cx="635" cy="244" r="18" fill="#F7C873"/>
+  <rect x="164" y="111" width="202" height="152" rx="16" transform="rotate(-8 164 111)" fill="#FFFDF9" stroke="#102A43" stroke-width="6"/>
+  <path d="m204 181 37 17 64-52M207 214l108-17" stroke="#F26B5B" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="566" y="316" width="208" height="139" rx="18" transform="rotate(8 566 316)" fill="#102A43"/>
+  <path d="M606 365h100M606 396h61" stroke="#FFFDF9" stroke-width="9" stroke-linecap="round"/>
+  <path d="M445 108c54 0 98 44 98 98s-44 98-98 98c-19 0-37-5-52-15l-47 24 20-48c-12-17-19-37-19-59 0-54 44-98 98-98Z" fill="#F26B5B" stroke="#102A43" stroke-width="7"/>
+  <circle cx="415" cy="205" r="8" fill="#FFFDF9"/><circle cx="445" cy="205" r="8" fill="#FFFDF9"/><circle cx="475" cy="205" r="8" fill="#FFFDF9"/>
+</svg>

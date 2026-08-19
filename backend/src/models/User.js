@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema(
     lastName: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, required: true },
-    role: { type: String, enum: ['student', 'teacher', 'admin'], default: 'student' },
+    role: { type: String, enum: ['student', 'teacher', 'parent', 'admin'], default: 'student' },
     isEmailVerified: { type: Boolean, default: false },
     avatar: { type: String, default: '' },
     nativeLanguage: { type: String, default: 'English' },
@@ -16,6 +16,8 @@ const userSchema = new mongoose.Schema(
     streak: { type: Number, default: 0 },
     lastActiveDate: { type: Date, default: Date.now },
     isActive: { type: Boolean, default: true },
+    children: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    parents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   },
   { timestamps: true }
 );

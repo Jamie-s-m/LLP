@@ -14,6 +14,9 @@ import progressRoutes from './routes/progress.js';
 import flashcardRoutes from './routes/flashcards.js';
 import groupRoutes from './routes/groups.js';
 import forumRoutes from './routes/forum.js';
+import chatRoutes from './routes/chat.js';
+import adminRoutes from './routes/admin.js';
+import familyRoutes from './routes/family.js';
 
 dotenv.config();
 
@@ -84,6 +87,9 @@ app.use('/api/progress', progressRoutes);
 app.use('/api/flashcards', flashcardRoutes);
 app.use('/api/groups', groupRoutes);
 app.use('/api/forum', forumRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/family', familyRoutes);
 
 // Catch-all API 404 handler
 app.use('/api/*', (req, res) => {

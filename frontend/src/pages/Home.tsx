@@ -15,9 +15,11 @@ export default function Home() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Hero Section */}
-      <div className="text-center py-12 px-4 bg-slate-800/50 rounded-2xl border border-slate-700/50 mb-12">
+      <div className="atlas-hero mb-12">
+        <div>
+          <p className="atlas-kicker">A living atlas for language learners</p>
         <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4">
-          Master Any Language with Interactive Learning
+          Find your next fluent sentence.
         </h1>
         <p className="text-lg text-slate-300 max-w-2xl mx-auto mb-8">
           Build vocabulary, complete lessons, and track your progress in real-time.
@@ -28,6 +30,8 @@ export default function Home() {
         >
           Explore All Courses
         </Link>
+        </div>
+        <img src={`${import.meta.env.BASE_URL}atlas-study.svg`} alt="Illustration of language learning cards and conversation" />
       </div>
 
       {/* Featured Courses Section */}
