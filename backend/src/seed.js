@@ -47,28 +47,16 @@ const seedDB = async () => {
 
     // 4. Seed Courses
     const sampleCourses = [
-      {
-        title: 'IELTS Speaking Masterclass',
-        description: 'Master Parts 1, 2, and 3 with focus on fluency, vocabulary, and discourse markers.',
-        language: 'English',
-        level: 'B2-C1',
-        isPublished: true,
-      },
-      {
-        title: 'Daily Turkish Conversation',
-        description: 'Learn everyday expressions, essential grammar, and practical dialogue patterns.',
-        language: 'Turkish',
-        level: 'A2-B1',
-        isPublished: true,
-      },
-      {
-        title: 'Korean Language Fundamentals',
-        description: 'Master Hangul reading, essential particles, and foundational sentence structures.',
-        language: 'Korean',
-        level: 'A1-A2',
-        isPublished: true,
-      },
-    ];
+  {
+    title: 'IELTS Speaking Masterclass',
+    description: 'Master Parts 1, 2, and 3 with focus on fluency, vocabulary, and discourse markers.',
+    language: 'English',
+    level: 'Advanced', // Must match allowed enum values (e.g., 'Beginner', 'Intermediate', 'Advanced')
+    category: 'Speaking', // Required by schema
+    instructor: '6a854dccb3f74cceaf49d9d8', // Provide a valid User ObjectId string
+    isPublished: true,
+  },
+];
 
     const createdCourses = await Course.insertMany(sampleCourses);
     console.log(`✓ Successfully seeded ${createdCourses.length} courses!`);
