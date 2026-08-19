@@ -14,13 +14,13 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: 'Please provide email and password' });
     }
 
-    // Find user (case-insensitive email)
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    // Explicitly include the hidden password field in query results
+    const user = await User.findOne({ email: email.toLowerCase().trim() }).select('+password');
+    
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // Guard against users created without a password field
     if (!user.password) {
       return res.status(400).json({ message: 'Invalid credentials or missing password on account' });
     }
