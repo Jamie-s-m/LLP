@@ -11,11 +11,19 @@ export interface Course {
   thumbnail?: string
 }
 
+export interface FetchCoursesParams {
+  limit?: number
+  language?: string
+  level?: string
+  search?: string
+  [key: string]: any
+}
+
 interface LearningState {
   courses: Course[]
   isLoading: boolean
   error: string | null
-  fetchCourses: (params?: { limit?: number }) => Promise<void>
+  fetchCourses: (params?: FetchCoursesParams) => Promise<void>
 }
 
 export const useLearningStore = create<LearningState>((set) => ({
