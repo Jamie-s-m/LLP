@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Course from '../models/Course.js';
 import Lesson from '../models/Lesson.js';
 
@@ -20,6 +21,10 @@ export const getCourses = async (req, res, next) => {
 
 export const getCourseById = async (req, res, next) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(404).json({ success: false, message: 'Course not found' });
+    }
+
     const course = await Course.findById(req.params.id).populate('instructor', 'firstName lastName email role');
     if (!course) {
       return res.status(404).json({ success: false, message: 'Course not found' });

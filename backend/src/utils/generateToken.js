@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 
 const generateToken = (id, role = 'student') => {
-  return jwt.sign({ id, role }, process.env.JWT_SECRET || 'fallback_secret_key_123', {
+  return jwt.sign({ id, role }, process.env.JWT_SECRET || 'local-development-only-secret', {
     expiresIn: '7d',
   });
 };

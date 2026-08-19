@@ -5,7 +5,15 @@ import app from './app.js';
 dotenv.config();
 
 const PORT = Number(process.env.PORT || 5000);
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/language-learn-platform';
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (process.env.NODE_ENV === 'production' && (!MONGODB_URI || !process.env.JWT_SECRET)) {
+  throw new Error('MONGODB_URI and JWT_SECRET must be configured in production');
+}
+
+if (!MONGODB_URI) {
+  throw new Error('MONGODB_URI must be configured before starting the API');
+}
 
 const startServer = async () => {
   try {

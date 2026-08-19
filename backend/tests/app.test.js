@@ -8,4 +8,25 @@ describe('API app', () => {
     expect(response.status).toBe(200);
     expect(response.body.success).toBe(true);
   });
+
+  it('rejects incomplete authentication requests', async () => {
+    const response = await request(app).post('/api/auth/login').send({ email: 'user@example.com' });
+
+    expect(response.status).toBe(400);
+    expect(response.body.message).toMatch(/password/i);
+  });
+
+  it('protects authenticated resources', async () => {
+    const response = await request(app).get('/api/users/profile');
+
+    expect(response.status).toBe(401);
+    expect(response.body.success).toBe(false);
+  });
+
+  it('does not expose the database seed endpoint', async () => {
+    const response = await request(app).get('/api/courses/seed');
+
+    expect(response.status).toBe(404);
+    expect(response.body.success).toBe(false);
+  });
 });

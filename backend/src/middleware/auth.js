@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_key_123';
+const JWT_SECRET = process.env.JWT_SECRET || 'local-development-only-secret';
 
 export const protect = async (req, res, next) => {
   let token;
