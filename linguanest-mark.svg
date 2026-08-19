@@ -1,0 +1,8 @@
+<svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">LinguaNest mark</title>
+  <desc id="desc">An atlas pin folded into a speech bubble</desc>
+  <rect width="96" height="96" rx="24" fill="#102A43"/>
+  <path d="M25 22h25c11.046 0 20 8.954 20 20v7c0 11.046-8.954 20-20 20H39l-12 9 2.5-9H25c-6.627 0-12-5.373-12-12V34c0-6.627 5.373-12 12-12Z" fill="#F26B5B"/>
+  <path d="M37 35h20M37 47h12" stroke="#FFF8F0" stroke-width="6" stroke-linecap="round"/>
+  <path d="M68 26c7 4 11 11 11 19 0 13-10 23-23 23" stroke="#A7E8D5" stroke-width="5" stroke-linecap="round"/>
+</svg>
