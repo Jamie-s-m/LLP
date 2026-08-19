@@ -121,48 +121,27 @@ language-learn-platform/
 
 ## ✅ Implemented Application Areas
 
-### Backend Development
-1. **Create API Routes** (`src/routes/`)
-   - Auth routes: register, login, logout, refresh
-   - User routes: profile, leaderboard
-   - Course routes: CRUD operations
-   - Lesson routes: CRUD operations
-   - Exercise routes: CRUD operations
-   - Progress routes: track learning progress
-   - Flashcard routes: spaced repetition
-   - Group & Forum routes
+### Backend
+- JWT authentication with student, teacher, and admin roles.
+- Course, lesson, exercise, progress, flashcard, group, and forum APIs.
+- Protected user and learning endpoints.
+- Rate limiting and Helmet security headers.
+- Production startup validation for `MONGODB_URI` and `JWT_SECRET`.
+- Database seed script: `npm run seed`; no public seed HTTP endpoint.
 
-2. **Create Controllers** (`src/controllers/`)
-   - Implement business logic for each route
-   - Handle validation and error cases
+### Frontend
+- React/Vite production build and GitHub Pages deployment.
+- Axios API client with JWT authorization.
+- Course catalog, course details, enrollment, and learning progress screens.
 
-3. **Create Services** (`src/services/`)
-   - Reusable business logic
-   - Database queries
-   - External API integrations
+## 🚀 Release Checklist
 
-4. **Add Database Seeding** (`src/scripts/seed.js`)
-   - Initial courses, lessons, exercises
-   - Sample users for testing
-
-### Frontend Development
-1. **Complete Page Components**
-   - Fill in placeholder pages with actual content
-   - Implement API integration
-
-2. **Create API Services** (`src/services/`)
-   - Axios instances for API calls
-   - Request/response interceptors
-
-3. **Add Custom Hooks** (`src/hooks/`)
-   - useFetch for API calls
-   - useLocalStorage for persistence
-   - useAuth for authentication
-
-4. **Create Utility Functions** (`src/utils/`)
-   - Date formatting
-   - String manipulation
-   - Validation functions
+1. Rotate credentials that were ever committed or shared.
+2. Set `MONGODB_URI`, a long random `JWT_SECRET`, and `FRONTEND_URL` in Render.
+3. Run `npm test`, `npx eslint src`, and `npm run build` before deployment.
+4. Verify deployed `/api/health` returns `200`.
+5. Verify deployed `/api/courses/seed` returns `404`.
+6. Test registration, login, enrollment, lesson completion, and logout against the deployed database.
 
 ## 🧪 Testing
 
