@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import { FiLifeBuoy, FiMessageCircle, FiSearch, FiSend, FiUsers } from 'react-icons/fi'
 import { io, Socket } from 'socket.io-client'
@@ -19,6 +19,7 @@ interface Message {
   body: string
   createdAt: string
   sender: { firstName: string; lastName: string }
+  conversation?: string
 }
 
 export default function Chat() {
@@ -30,10 +31,16 @@ export default function Chat() {
   const [draft, setDraft] = useState('')
   const [loading, setLoading] = useState(true)
   const [socket, setSocket] = useState<Socket | null>(null)
+  const [socketConnected, setSocketConnected] = useState(false)
   const [search, setSearch] = useState('')
   const [searchResults, setSearchResults] = useState<Array<{ _id: string; firstName: string; lastName: string; role: string }>>([])
   const [creatingConversation, setCreatingConversation] = useState(false)
+  const activeConversationRef = useRef(activeId)
   const isDocumentVisible = () => document.visibilityState === 'visible'
+
+  useEffect(() => {
+    activeConversationRef.current = activeId
+  }, [activeId])
 
   const loadConversations = async () => {
     try {
@@ -54,14 +61,26 @@ export default function Chat() {
     const token = localStorage.getItem('token')
     if (!token) return
     const connection = io(import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, '') || 'http://localhost:5000', { auth: { token } })
+    connection.on('connect', () => setSocketConnected(true))
+    connection.on('disconnect', () => setSocketConnected(false))
     connection.on('message:new', (message: Message) => {
-      setMessages((current) => current.some((item) => item._id === message._id) ? current : [...current, message])
-      fetchUnreadSummary()
+      const incomingConversationId = message.conversation
+
+      if (incomingConversationId && incomingConversationId === activeConversationRef.current && isDocumentVisible()) {
+        setMessages((current) => current.some((item) => item._id === message._id) ? current : [...current, message])
+        clearConversationUnread(incomingConversationId)
+        setConversations((current) => current.map((conversation) => conversation._id === incomingConversationId ? { ...conversation, unreadCount: 0 } : conversation))
+        return
+      }
+
       loadConversations()
     })
     setSocket(connection)
-    return () => { connection.disconnect() }
-  }, [])
+    return () => {
+      setSocketConnected(false)
+      connection.disconnect()
+    }
+  }, [clearConversationUnread, fetchUnreadSummary])
 
   useEffect(() => {
     if (search.trim().length < 2) {
@@ -81,35 +100,37 @@ export default function Chat() {
   useEffect(() => {
     if (!activeId) return
 
-    const loadMessages = () => {
+    const loadMessages = (syncUnread = false) => {
       if (!isDocumentVisible()) return Promise.resolve()
 
       return api.get(`/chat/conversations/${activeId}/messages`).then((response) => {
         setMessages(response.data.data || [])
         clearConversationUnread(activeId)
-        fetchUnreadSummary()
         setConversations((current) => current.map((conversation) => conversation._id === activeId ? { ...conversation, unreadCount: 0 } : conversation))
+        if (syncUnread) {
+          fetchUnreadSummary()
+        }
       }).catch(() => undefined)
     }
 
     const handleVisibilityRefresh = () => {
       if (document.visibilityState === 'visible') {
-        loadMessages()
+        loadMessages(true)
       }
     }
 
-    loadMessages()
+    loadMessages(true)
     socket?.emit('conversation:join', activeId)
-    const timer = window.setInterval(loadMessages, 15000)
+    const timer = socketConnected ? undefined : window.setInterval(() => { loadMessages(false) }, 60000)
     document.addEventListener('visibilitychange', handleVisibilityRefresh)
     window.addEventListener('focus', handleVisibilityRefresh)
 
     return () => {
-      window.clearInterval(timer)
+      if (timer) window.clearInterval(timer)
       document.removeEventListener('visibilitychange', handleVisibilityRefresh)
       window.removeEventListener('focus', handleVisibilityRefresh)
     }
-  }, [activeId, clearConversationUnread, fetchUnreadSummary, socket])
+  }, [activeId, clearConversationUnread, fetchUnreadSummary, socket, socketConnected])
 
   const sendMessage = async (event: React.FormEvent) => {
     event.preventDefault()
