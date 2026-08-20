@@ -1,0 +1,16 @@
+{
+  "name": "LinguaNest",
+  "short_name": "LinguaNest",
+  "start_url": "/LLP/",
+  "display": "standalone",
+  "background_color": "#08131f",
+  "theme_color": "#102a43",
+  "icons": [
+    {
+      "src": "/LLP/linguanest-mark.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

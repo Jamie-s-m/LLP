@@ -5,6 +5,7 @@ import toast from 'react-hot-toast'
 import { useAuthStore } from '../store/authStore'
 import { useChatStore } from '../store/chatStore'
 import { enablePushNotifications, getNotificationPermission, isPushSupported } from '../utils/push'
+import ThemeToggle from './ThemeToggle'
 
 interface NavbarProps {
   onMenuClick: () => void
@@ -25,12 +26,44 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 
   useEffect(() => {
     if (!isAuthenticated) return
-    fetchUnreadSummary()
-    const timer = window.setInterval(() => {
-      fetchUnreadSummary()
-    }, 15000)
 
-    return () => window.clearInterval(timer)
+    let timer: number | undefined
+
+    const syncUnreadSummary = () => {
+      if (document.visibilityState !== 'visible') return
+      fetchUnreadSummary()
+    }
+
+    const startPolling = () => {
+      if (timer) window.clearInterval(timer)
+      if (document.visibilityState === 'visible') {
+        timer = window.setInterval(syncUnreadSummary, 30000)
+      }
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        syncUnreadSummary()
+        startPolling()
+        return
+      }
+
+      if (timer) {
+        window.clearInterval(timer)
+        timer = undefined
+      }
+    }
+
+    syncUnreadSummary()
+    startPolling()
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('focus', syncUnreadSummary)
+
+    return () => {
+      if (timer) window.clearInterval(timer)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('focus', syncUnreadSummary)
+    }
   }, [fetchUnreadSummary, isAuthenticated])
 
   useEffect(() => {
@@ -102,6 +135,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 
         {/* Right Section */}
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           {isAuthenticated ? (
             <button
               onClick={onMenuClick}
@@ -142,7 +176,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
             <div ref={dropdownRef} className="relative">
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-2 py-1.5 hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-800 dark:hover:bg-neutral-700 transition-colors"
+                className="flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-2 py-1.5 text-neutral-900 hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700 transition-colors"
                 aria-expanded={dropdownOpen}
                 aria-haspopup="menu"
               >

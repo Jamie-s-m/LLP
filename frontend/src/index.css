@@ -7,12 +7,21 @@
 @layer base {
   html {
     @apply scroll-smooth;
+    background: #f6efe7;
   }
 
   body {
-    @apply text-neutral-900 dark:text-neutral-50;
+    @apply text-neutral-900 dark:text-neutral-50 transition-colors duration-300;
     background: #f6efe7;
     font-family: 'DM Sans', sans-serif;
+  }
+
+  html.dark {
+    background: #08131f;
+  }
+
+  html.dark body {
+    background: #08131f;
   }
 
   h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; letter-spacing: 0; }
@@ -40,11 +49,11 @@
   }
 
   .card {
-    @apply bg-white dark:bg-neutral-800 rounded-lg shadow-md p-6 transition-shadow duration-200 hover:shadow-lg;
+    @apply rounded-2xl border border-white/70 bg-white/90 p-6 shadow-md transition-all duration-200 hover:shadow-lg dark:border-white/10 dark:bg-slate-900/90;
   }
 
   .input {
-    @apply w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 dark:bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all;
+    @apply w-full rounded-xl border border-neutral-300 bg-white px-4 py-2 text-neutral-900 transition-all focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-white/10 dark:bg-[#13283d] dark:text-white;
   }
 
   .label {
@@ -82,60 +91,64 @@
 }
 
 @layer components {
-  .atlas-page { min-height: calc(100vh - 72px); background: radial-gradient(circle at 90% 0%, rgba(167,232,213,.45), transparent 28%), #f6efe7; }
-  .atlas-heading h1 { @apply text-5xl font-semibold text-ink; }
-  .atlas-heading > p:last-child, .atlas-hero p { @apply text-base text-slate-600 max-w-xl; }
+  .atlas-page { min-height: calc(100vh - 72px); background: radial-gradient(circle at 90% 0%, rgba(167,232,213,.45), transparent 28%), linear-gradient(180deg, #f7efe7 0%, #f4ebdf 100%); @apply transition-colors duration-300; }
+  .dark .atlas-page { background: radial-gradient(circle at 10% 0%, rgba(14,165,233,.16), transparent 26%), radial-gradient(circle at 90% 0%, rgba(167,232,213,.12), transparent 24%), linear-gradient(180deg, #08131f 0%, #0d1d2d 100%); }
+  .atlas-heading h1 { @apply text-4xl md:text-5xl font-semibold text-ink dark:text-white; }
+  .atlas-heading > p:last-child, .atlas-hero p { @apply max-w-xl text-base text-slate-600 dark:text-slate-300; }
   .atlas-kicker { @apply uppercase text-xs font-bold tracking-widest text-coral mb-3; }
-  .atlas-hero { @apply grid grid-cols-1 lg:grid-cols-2 gap-8 items-center p-8 md:p-12 rounded-3xl overflow-hidden; background: #102a43; color: #fffdf9; animation: slideInUp .55s ease-out both; }
+  .atlas-hero { @apply grid grid-cols-1 lg:grid-cols-2 gap-8 items-center p-8 md:p-12 rounded-3xl overflow-hidden shadow-xl; background: linear-gradient(135deg, #102a43 0%, #173f63 56%, #0ea5e9 150%); color: #fffdf9; animation: slideInUp .55s ease-out both; }
   .atlas-hero h1 { @apply text-5xl md:text-6xl font-semibold text-white; }
   .atlas-hero img { @apply w-full max-h-80 object-contain rounded-2xl; }
-  .atlas-panel { @apply bg-white/80 border border-white rounded-2xl shadow-sm; }
+  .atlas-panel { @apply rounded-3xl border border-white/70 bg-white/90 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-slate-900/90; }
   .atlas-stat-grid { @apply grid grid-cols-1 md:grid-cols-3 gap-4; }
   .atlas-stat { @apply atlas-panel p-5 flex flex-col gap-2; }
   .atlas-stat svg { @apply text-coral text-xl; }
-  .atlas-stat strong { @apply text-3xl text-ink; }
-  .atlas-stat span, .text-muted { @apply text-slate-500; }
+  .atlas-stat strong { @apply text-3xl text-ink dark:text-white; }
+  .atlas-stat span, .text-muted { @apply text-slate-500 dark:text-slate-400; }
   .text-ink { color: #102a43; }
+  .dark .text-ink { color: #f8fafc; }
   .text-coral { color: #f26b5b; }
   .chat-layout { @apply grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 min-h-[560px]; }
   .chat-list { @apply p-4; }
-  .chat-thread { @apply w-full flex gap-3 items-center text-left p-3 rounded-xl transition-colors hover:bg-[#f6efe7]; }
-  .chat-thread.active { @apply bg-[#a7e8d5]/50; }
-  .chat-thread small { @apply block text-xs text-slate-500 capitalize mt-1; }
+  .chat-thread { @apply w-full flex gap-3 items-center text-left p-3 rounded-xl text-slate-700 transition-colors hover:bg-[#f6efe7] dark:text-slate-100 dark:hover:bg-white/10; }
+  .chat-thread.active { @apply bg-[#a7e8d5]/50 dark:bg-sky-500/15; }
+  .chat-thread small { @apply mt-1 block text-xs capitalize text-slate-500 dark:text-slate-400; }
   .chat-avatar { @apply w-10 h-10 rounded-full bg-[#102a43] text-white flex items-center justify-center; }
   .chat-window { @apply flex flex-col overflow-hidden; }
-  .chat-header { @apply flex justify-between items-center p-5 border-b border-slate-100; }
-  .chat-header h2 { @apply text-2xl text-ink; }
-  .status-dot { @apply text-xs text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full; }
-  .message-list { @apply flex-1 p-5 space-y-3 overflow-y-auto bg-[#fffdf9]; }
-  .message-bubble { @apply max-w-xl bg-[#f6efe7] rounded-2xl rounded-bl-sm p-3; }
-  .message-bubble p { @apply mt-1 text-slate-700; }
-  .message-bubble time { @apply text-xs text-slate-400; }
-  .chat-compose { @apply flex gap-2 p-4 border-t border-slate-100; }
+  .chat-header { @apply flex items-center justify-between border-b border-slate-100 p-5 dark:border-white/10; }
+  .chat-header h2 { @apply text-2xl text-ink dark:text-white; }
+  .status-dot { @apply rounded-full bg-emerald-100 px-3 py-1 text-xs text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300; }
+  .message-list { @apply flex-1 space-y-3 overflow-y-auto bg-[#fffdf9] p-5 dark:bg-[#0c1a29]; }
+  .message-bubble { @apply max-w-xl rounded-2xl rounded-bl-sm bg-[#f6efe7] p-3 text-slate-900 dark:bg-[#17324a] dark:text-white; }
+  .message-bubble p { @apply mt-1 text-slate-700 dark:text-slate-100; }
+  .message-bubble time { @apply text-xs text-slate-400 dark:text-slate-300; }
+  .chat-compose { @apply flex gap-2 border-t border-slate-100 p-4 dark:border-white/10; }
   .chat-compose input, .inline-form input { @apply input bg-white; }
-  .empty-state { @apply flex flex-col items-center justify-center gap-2 text-slate-400 py-10 text-center; }
+  .empty-state { @apply flex flex-col items-center justify-center gap-2 py-10 text-center text-slate-400 dark:text-slate-500; }
   .empty-state.full { @apply flex-1; }
-  .floating-chat-launcher { @apply fixed bottom-6 left-6 z-30 inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#102a43] text-white shadow-xl transition hover:-translate-y-1 hover:bg-[#0f3554]; }
+  .floating-chat-launcher { @apply fixed bottom-6 left-6 z-30 inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#102a43] text-white shadow-xl transition hover:-translate-y-1 hover:bg-[#0f3554] dark:bg-sky-500 dark:hover:bg-sky-400; }
   .admin-tabs { @apply flex flex-wrap gap-2; }
-  .admin-tabs button { @apply inline-flex items-center gap-2 px-4 py-2 rounded-full text-slate-600 hover:bg-white transition-colors; }
-  .admin-tabs button.active { @apply bg-[#102a43] text-white; }
+  .admin-tabs button { @apply inline-flex items-center gap-2 rounded-full px-4 py-2 text-slate-700 transition-colors hover:bg-white/80 dark:text-slate-200 dark:hover:bg-white/10; }
+  .admin-tabs button.active { @apply bg-[#102a43] text-white dark:bg-sky-500 dark:text-slate-950; }
   .inline-form { @apply flex gap-2; }
   .inline-form input { @apply w-56; }
-  .admin-table { @apply divide-y divide-slate-100; }
+  .admin-table { @apply divide-y divide-slate-100 dark:divide-white/10; }
   .admin-row { @apply flex items-center gap-4 py-4; }
   .admin-row > div:first-child { @apply flex-1; }
-  .admin-row small { @apply block text-sm text-slate-500 mt-1; }
-  .status-pill { @apply text-xs font-semibold px-3 py-1 rounded-full bg-emerald-100 text-emerald-700; }
-  .status-pill.muted { @apply bg-slate-100 text-slate-500; }
-  .icon-button { @apply p-2 rounded-lg text-slate-500 hover:bg-slate-100; }
-  .icon-button.danger { @apply text-red-500 hover:bg-red-50; }
+  .admin-row strong { @apply text-ink dark:text-white; }
+  .admin-row small { @apply mt-1 block text-sm text-slate-500 dark:text-slate-400; }
+  .status-pill { @apply rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300; }
+  .status-pill.muted { @apply bg-slate-100 text-slate-500 dark:bg-white/10 dark:text-slate-300; }
+  .icon-button { @apply rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/10; }
+  .icon-button.danger { @apply text-red-500 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-500/10; }
   .modal-backdrop { @apply fixed inset-0 z-[100] flex items-center justify-center bg-[#102a43]/60 p-4; }
-  .modal-panel { @apply w-full max-w-xl rounded-2xl bg-[#fffdf9] p-6 shadow-2xl; }
+  .modal-panel { @apply w-full max-w-xl rounded-3xl bg-[#fffdf9] p-6 shadow-2xl dark:bg-[#102235]; }
   .role-card-grid { @apply grid grid-cols-2 gap-3; }
-  .role-card { @apply flex flex-col items-start gap-1 p-4 rounded-xl border-2 border-transparent bg-white text-left transition-all hover:-translate-y-0.5 hover:shadow-md; }
-  .role-card.selected { @apply border-[#102a43] bg-[#f6efe7]; }
+  .role-card { @apply flex flex-col items-start gap-1 rounded-xl border-2 border-transparent bg-white p-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-md dark:bg-[#13283d]; }
+  .role-card.selected { @apply border-[#102a43] bg-[#f6efe7] dark:border-sky-400 dark:bg-sky-500/10; }
   .role-card strong { @apply text-ink; }
-  .role-card span { @apply text-xs text-slate-500; }
+  .role-card span { @apply text-xs text-slate-500 dark:text-slate-400; }
   .card { @apply transition-transform duration-200 hover:-translate-y-0.5; }
   .btn { @apply transition-transform duration-150 active:scale-95; }
+  .theme-toggle { @apply inline-flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-700 transition hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700; }
 }

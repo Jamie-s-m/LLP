@@ -27,7 +27,7 @@ export const useChatStore = create<ChatUnreadState>((set) => ({
         byConversation: data.byConversation || {},
       })
     } catch {
-      set({ totalUnread: 0, byConversation: {} })
+      return
     }
   },
 

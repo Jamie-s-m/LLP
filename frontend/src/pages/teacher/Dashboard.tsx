@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { FiBarChart2, FiUsers, FiBook, FiAward } from 'react-icons/fi'
+import { FiArrowRight, FiBarChart2, FiBook, FiBookOpen, FiUsers } from 'react-icons/fi'
 import { Link } from 'react-router-dom'
 import api from '../../services/api'
 
@@ -32,59 +32,83 @@ export default function TeacherDashboard() {
   }, [])
 
   return (
-    <div className="p-8">
-      <h1 className="text-4xl font-bold mb-8">Teacher Dashboard</h1>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="card text-center">
-          <FiBook className="w-8 h-8 mx-auto mb-2 text-primary-500" />
-          <p className="text-3xl font-bold text-primary-500">{overview?.publishedCourses ?? 0}</p>
-          <p className="text-neutral-600 dark:text-neutral-400">Published Courses</p>
+    <div className="atlas-page px-4 py-8">
+      <div className="mx-auto max-w-7xl">
+        <div className="atlas-hero mb-8">
+          <div>
+            <p className="atlas-kicker">Instructor studio</p>
+            <h1>Shape lessons with clarity.</h1>
+            <p>Manage curriculum, review engagement, and keep every class moving with confidence.</p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link to="/teacher/create-course" className="btn btn-primary">Create a course</Link>
+              <Link to="/teacher/courses" className="btn btn-outline border-white/70 text-white hover:bg-white/10 dark:border-white/30 dark:text-white dark:hover:bg-white/10">Open my courses</Link>
+            </div>
+          </div>
+          <div className="atlas-panel p-6 dark:bg-white/10">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/70">Teaching snapshot</p>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div className="rounded-2xl bg-white/10 p-4">
+                <FiUsers className="mb-3 text-xl text-[#a7e8d5]" />
+                <strong className="block text-3xl text-white">{overview?.totalStudents ?? 0}</strong>
+                <span className="text-sm text-white/80">Active learners</span>
+              </div>
+              <div className="rounded-2xl bg-white/10 p-4">
+                <FiBarChart2 className="mb-3 text-xl text-[#f8c16c]" />
+                <strong className="block text-3xl text-white">{overview?.avgRating ?? 0}</strong>
+                <span className="text-sm text-white/80">Average rating</span>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="card text-center">
-          <FiUsers className="w-8 h-8 mx-auto mb-2 text-secondary-500" />
-          <p className="text-3xl font-bold text-secondary-500">{overview?.totalStudents ?? 0}</p>
-          <p className="text-neutral-600 dark:text-neutral-400">Total Students</p>
+        <div className="atlas-stat-grid mb-8">
+          <div className="atlas-stat"><FiBook /><strong>{overview?.publishedCourses ?? 0}</strong><span>Published courses</span></div>
+          <div className="atlas-stat"><FiUsers /><strong>{overview?.totalStudents ?? 0}</strong><span>Total students</span></div>
+          <div className="atlas-stat"><FiBarChart2 /><strong>{overview?.avgRating ?? 0}</strong><span>Average rating</span></div>
         </div>
-        <div className="card text-center">
-          <FiBarChart2 className="w-8 h-8 mx-auto mb-2 text-success" />
-          <p className="text-3xl font-bold text-success">{overview?.avgRating ?? 0}</p>
-          <p className="text-neutral-600 dark:text-neutral-400">Avg Rating</p>
+        <div className="grid gap-6 md:grid-cols-2 mb-8">
+          <Link to="/teacher/create-course" className="atlas-panel p-6">
+            <p className="atlas-kicker">Curriculum build</p>
+            <h2 className="text-2xl text-ink dark:text-white">Create a new course</h2>
+            <p className="mt-2 text-muted">Launch a guided learning path with lessons, flashcards, and exercises.</p>
+          </Link>
+          <Link to="/teacher/courses" className="atlas-panel p-6">
+            <p className="atlas-kicker">Teaching workspace</p>
+            <h2 className="text-2xl text-ink dark:text-white">Review your course library</h2>
+            <p className="mt-2 text-muted">Open drafts, publish updates, and jump into lesson management.</p>
+          </Link>
         </div>
-        <div className="card text-center">
-          <FiAward className="w-8 h-8 mx-auto mb-2 text-warning" />
-          <p className="text-3xl font-bold text-warning">{overview?.totalCourses ?? 0}</p>
-          <p className="text-neutral-600 dark:text-neutral-400">Total Courses</p>
-        </div>
-      </div>
-
-      {/* Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <Link to="/teacher/create-course" className="card hover:shadow-lg transition-shadow">
-          <h3 className="text-xl font-bold mb-2">Create New Course</h3>
-          <p className="text-neutral-600 dark:text-neutral-400">Start creating a new language course</p>
-        </Link>
-      </div>
-
-      <h2 className="text-2xl font-bold mb-4">My Courses</h2>
-      {loading ? (
-        <p>Loading your courses...</p>
-      ) : courses.length === 0 ? (
-        <p className="text-neutral-500">You haven't created any courses yet.</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {courses.map((course) => (
-            <Link key={course._id} to={`/teacher/manage/${course._id}`} className="card hover:shadow-lg transition-shadow">
-              <h3 className="text-xl font-bold mb-2">{course.title}</h3>
-              <p className="text-neutral-600 dark:text-neutral-400">{course.language} · {course.level}</p>
-              <span className={`inline-block mt-3 text-xs font-semibold px-3 py-1 rounded-full ${course.isPublished ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
-                {course.isPublished ? 'Published' : 'Draft'}
-              </span>
+        <div className="atlas-panel p-6">
+          <div className="mb-6 flex items-center justify-between gap-4">
+            <div>
+              <p className="atlas-kicker">Course desk</p>
+              <h2 className="text-2xl text-ink dark:text-white">My courses</h2>
+            </div>
+            <Link to="/teacher/courses" className="inline-flex items-center gap-2 text-sm font-semibold text-primary-500">
+              View all <FiArrowRight />
             </Link>
-          ))}
+          </div>
+          {loading ? (
+            <p className="text-slate-600 dark:text-slate-300">Loading your courses...</p>
+          ) : courses.length === 0 ? (
+            <div className="empty-state">
+              <FiBookOpen />
+              <p>You haven&apos;t created any courses yet.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {courses.map((course) => (
+                <Link key={course._id} to={`/teacher/manage/${course._id}`} className="rounded-2xl border border-slate-200 bg-white/80 p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
+                  <h3 className="mb-2 text-xl font-bold text-ink dark:text-white">{course.title}</h3>
+                  <p className="text-neutral-600 dark:text-neutral-400">{course.language} · {course.level}</p>
+                  <span className={`inline-block mt-3 rounded-full px-3 py-1 text-xs font-semibold ${course.isPublished ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300'}`}>
+                    {course.isPublished ? 'Published' : 'Draft'}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   )
 }

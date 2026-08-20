@@ -33,6 +33,7 @@ export default function Chat() {
   const [search, setSearch] = useState('')
   const [searchResults, setSearchResults] = useState<Array<{ _id: string; firstName: string; lastName: string; role: string }>>([])
   const [creatingConversation, setCreatingConversation] = useState(false)
+  const isDocumentVisible = () => document.visibilityState === 'visible'
 
   const loadConversations = async () => {
     try {
@@ -79,16 +80,35 @@ export default function Chat() {
 
   useEffect(() => {
     if (!activeId) return
-    const loadMessages = () => api.get(`/chat/conversations/${activeId}/messages`).then((response) => {
-      setMessages(response.data.data || [])
-      clearConversationUnread(activeId)
-      fetchUnreadSummary()
-      setConversations((current) => current.map((conversation) => conversation._id === activeId ? { ...conversation, unreadCount: 0 } : conversation))
-    }).catch(() => undefined)
+
+    const loadMessages = () => {
+      if (!isDocumentVisible()) return Promise.resolve()
+
+      return api.get(`/chat/conversations/${activeId}/messages`).then((response) => {
+        setMessages(response.data.data || [])
+        clearConversationUnread(activeId)
+        fetchUnreadSummary()
+        setConversations((current) => current.map((conversation) => conversation._id === activeId ? { ...conversation, unreadCount: 0 } : conversation))
+      }).catch(() => undefined)
+    }
+
+    const handleVisibilityRefresh = () => {
+      if (document.visibilityState === 'visible') {
+        loadMessages()
+      }
+    }
+
     loadMessages()
     socket?.emit('conversation:join', activeId)
-    const timer = window.setInterval(loadMessages, 5000)
-    return () => window.clearInterval(timer)
+    const timer = window.setInterval(loadMessages, 15000)
+    document.addEventListener('visibilitychange', handleVisibilityRefresh)
+    window.addEventListener('focus', handleVisibilityRefresh)
+
+    return () => {
+      window.clearInterval(timer)
+      document.removeEventListener('visibilitychange', handleVisibilityRefresh)
+      window.removeEventListener('focus', handleVisibilityRefresh)
+    }
   }, [activeId, clearConversationUnread, fetchUnreadSummary, socket])
 
   const sendMessage = async (event: React.FormEvent) => {
