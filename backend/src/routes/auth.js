@@ -43,12 +43,13 @@ router.post('/login', async (req, res) => {
 
 router.post('/register', async (req, res) => {
   try {
-    const { firstName, lastName, email, password } = req.body;
+    const { firstName, lastName, email, password, role, requestTeacherRole } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ message: 'Email and password are required' });
     }
 
+    const selectedRole = ['student', 'parent'].includes(role) ? role : 'student';
     const cleanEmail = String(email).toLowerCase().trim();
     const existingUser = await User.findOne({ email: cleanEmail });
     if (existingUser) {
@@ -60,7 +61,8 @@ router.post('/register', async (req, res) => {
       lastName: lastName || 'User',
       email: cleanEmail,
       password,
-      role: 'student',
+      role: selectedRole,
+      teacherApplicationStatus: selectedRole === 'student' && requestTeacherRole ? 'pending' : 'none',
     });
 
     const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
@@ -73,6 +75,7 @@ router.post('/register', async (req, res) => {
         lastName: user.lastName,
         email: user.email,
         role: user.role,
+        teacherApplicationStatus: user.teacherApplicationStatus,
       },
     });
   } catch (error) {

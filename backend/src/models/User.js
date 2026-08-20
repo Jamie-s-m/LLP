@@ -18,6 +18,7 @@ const userSchema = new mongoose.Schema(
     isActive: { type: Boolean, default: true },
     children: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     parents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    teacherApplicationStatus: { type: String, enum: ['none', 'pending', 'approved', 'rejected'], default: 'none' },
   },
   { timestamps: true }
 );

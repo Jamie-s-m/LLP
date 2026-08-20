@@ -36,6 +36,30 @@ export const deleteUser = async (req, res, next) => {
   } catch (error) { next(error); }
 };
 
+export const listTeacherApplications = async (req, res, next) => {
+  try {
+    const applicants = await User.find({ teacherApplicationStatus: 'pending' }).select('-password').sort({ createdAt: 1 });
+    res.status(200).json({ success: true, data: applicants });
+  } catch (error) { next(error); }
+};
+
+export const reviewTeacherApplication = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user || user.teacherApplicationStatus !== 'pending') {
+      return res.status(404).json({ success: false, message: 'Teacher application not found' });
+    }
+    if (req.body.approve) {
+      user.role = 'teacher';
+      user.teacherApplicationStatus = 'approved';
+    } else {
+      user.teacherApplicationStatus = 'rejected';
+    }
+    await user.save();
+    res.status(200).json({ success: true, data: user });
+  } catch (error) { next(error); }
+};
+
 export const getOverview = async (req, res, next) => {
   try {
     const [users, courses, lessons, flashcards, posts] = await Promise.all([

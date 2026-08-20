@@ -50,9 +50,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   ]
 
   const adminLinks = [
-    { label: 'Dashboard', path: '/admin/dashboard', icon: FiGrid },
-    { label: 'Users', path: '/admin/users', icon: FiUsers },
-    { label: 'Content', path: '/admin/content', icon: FiEdit3 },
+    { label: 'Control Center', path: '/admin/control-center', icon: FiGrid },
   ]
 
   let navLinks = studentLinks

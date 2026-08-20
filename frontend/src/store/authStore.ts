@@ -12,6 +12,7 @@ interface User {
   targetLanguages?: string[]
   totalPoints?: number
   currentStreak?: number
+  teacherApplicationStatus?: 'none' | 'pending' | 'approved' | 'rejected'
 }
 
 interface AuthState {

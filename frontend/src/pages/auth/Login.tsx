@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { useAuthStore } from '../../store/authStore'
 import toast from 'react-hot-toast'
 
@@ -39,64 +40,68 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
-        <div className="card">
-          <h1 className="text-3xl font-bold mb-2 text-center">Welcome Back</h1>
-          <p className="text-center text-neutral-600 dark:text-neutral-400 mb-8">
-            Sign in to your account to continue learning
-          </p>
+    <div className="atlas-page flex items-center justify-center px-4 py-12">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: 'easeOut' }}
+        className="atlas-panel w-full max-w-md p-8"
+      >
+        <p className="atlas-kicker">Welcome back</p>
+        <h1 className="text-3xl font-semibold text-ink mb-2">Sign in</h1>
+        <p className="text-muted mb-8">
+          Continue your streak and pick up where you left off.
+        </p>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="label">Email Address</label>
-              <input
-                type="email"
-                className="input"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="label">Password</label>
-              <input
-                type="password"
-                className="input"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn btn-primary w-full"
-            >
-              {loading ? 'Signing in...' : 'Sign In'}
-            </button>
-          </form>
-
-          <div className="mt-6 text-center space-y-2">
-            <Link
-              to="/forgot-password"
-              className="block text-sm text-primary-500 hover:text-primary-600"
-            >
-              Forgot Password?
-            </Link>
-            <p className="text-neutral-600 dark:text-neutral-400">
-              Don't have an account?{' '}
-              <Link to="/register" className="text-primary-500 hover:text-primary-600 font-semibold">
-                Sign Up
-              </Link>
-            </p>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="label">Email Address</label>
+            <input
+              type="email"
+              className="input"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </div>
+
+          <div>
+            <label className="label">Password</label>
+            <input
+              type="password"
+              className="input"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn btn-primary w-full"
+          >
+            {loading ? 'Signing in...' : 'Sign In'}
+          </button>
+        </form>
+
+        <div className="mt-6 text-center space-y-2">
+          <Link
+            to="/forgot-password"
+            className="block text-sm text-coral font-medium"
+          >
+            Forgot Password?
+          </Link>
+          <p className="text-muted">
+            Don't have an account?{' '}
+            <Link to="/register" className="text-coral font-semibold">
+              Sign Up
+            </Link>
+          </p>
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }

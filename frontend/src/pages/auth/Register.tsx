@@ -1,8 +1,12 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { FiBookOpen, FiUsers } from 'react-icons/fi'
 import { useAuthStore } from '../../store/authStore'
 
-export const Register: React.FC = () => {
+type SignupRole = 'student' | 'parent'
+
+export default function Register() {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -10,6 +14,8 @@ export const Register: React.FC = () => {
     password: '',
     confirmPassword: '',
   })
+  const [role, setRole] = useState<SignupRole>('student')
+  const [requestTeacherRole, setRequestTeacherRole] = useState(false)
   const [localError, setLocalError] = useState('')
 
   const { register, isLoading, error } = useAuthStore()
@@ -34,6 +40,8 @@ export const Register: React.FC = () => {
         lastName: formData.lastName,
         email: formData.email,
         password: formData.password,
+        role,
+        requestTeacherRole: role === 'student' && requestTeacherRole,
       })
       navigate(useAuthStore.getState().user?.role === 'parent' ? '/parent/dashboard' : '/dashboard')
     } catch (err: any) {
@@ -42,43 +50,56 @@ export const Register: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-900 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-slate-800 p-8 rounded-xl border border-slate-700 shadow-2xl">
-        <div>
-          <h2 className="mt-2 text-center text-3xl font-extrabold text-white">
-            Create Account
-          </h2>
-          <p className="mt-2 text-center text-sm text-slate-400">
-            Join our community and start learning languages
-          </p>
-        </div>
+    <div className="atlas-page flex items-center justify-center px-4 py-12">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: 'easeOut' }}
+        className="atlas-panel w-full max-w-lg p-8"
+      >
+        <p className="atlas-kicker">Join the atlas</p>
+        <h1 className="text-3xl font-semibold text-ink mb-2">Create your account</h1>
+        <p className="text-muted mb-6">Choose how you'll use LinguaNest. You can apply for mentor access as a student.</p>
 
         {(localError || error) && (
-          <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg text-sm">
+          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm mb-6">
             {localError || error}
           </div>
         )}
 
-        <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
+        <div className="role-card-grid mb-6">
+          <button type="button" onClick={() => setRole('student')} className={`role-card ${role === 'student' ? 'selected' : ''}`}>
+            <FiBookOpen className="text-coral text-xl" />
+            <strong>Student</strong>
+            <span>Learn lessons, flashcards, and track your streak.</span>
+          </button>
+          <button type="button" onClick={() => { setRole('parent'); setRequestTeacherRole(false) }} className={`role-card ${role === 'parent' ? 'selected' : ''}`}>
+            <FiUsers className="text-coral text-xl" />
+            <strong>Parent</strong>
+            <span>Follow a learner's progress and stay in touch.</span>
+          </button>
+        </div>
+
+        <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">First Name</label>
+              <label className="label">First Name</label>
               <input
                 name="firstName"
                 type="text"
                 required
-                className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-500"
+                className="input"
                 value={formData.firstName}
                 onChange={handleChange}
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Last Name</label>
+              <label className="label">Last Name</label>
               <input
                 name="lastName"
                 type="text"
                 required
-                className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-500"
+                className="input"
                 value={formData.lastName}
                 onChange={handleChange}
               />
@@ -86,58 +107,69 @@ export const Register: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">Email Address</label>
+            <label className="label">Email Address</label>
             <input
               name="email"
               type="email"
               required
-              className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-500"
+              className="input"
               value={formData.email}
               onChange={handleChange}
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">Password</label>
+            <label className="label">Password</label>
             <input
               name="password"
               type="password"
               required
-              className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-500"
+              className="input"
               value={formData.password}
               onChange={handleChange}
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">Confirm Password</label>
+            <label className="label">Confirm Password</label>
             <input
               name="confirmPassword"
               type="password"
               required
-              className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-500"
+              className="input"
               value={formData.confirmPassword}
               onChange={handleChange}
             />
           </div>
 
+          {role === 'student' && (
+            <label className="flex items-start gap-3 p-3 rounded-lg bg-[#f6efe7] text-sm text-slate-600">
+              <input
+                type="checkbox"
+                className="mt-1"
+                checked={requestTeacherRole}
+                onChange={(e) => setRequestTeacherRole(e.target.checked)}
+              />
+              <span>I'd also like to apply to teach on LinguaNest. An admin will review this request after signup.</span>
+            </label>
+          )}
+
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 px-4 bg-cyan-500 hover:bg-cyan-600 text-white font-medium rounded-lg transition-colors disabled:opacity-50"
+            className="btn btn-primary w-full"
           >
             {isLoading ? 'Creating Account...' : 'Create Account'}
           </button>
         </form>
 
-        <p className="text-center text-sm text-slate-400">
+        <p className="text-center text-muted mt-6">
           Already have an account?{' '}
-          <Link to="/login" className="text-cyan-400 hover:text-cyan-300 font-medium">
+          <Link to="/login" className="text-coral font-semibold">
             Sign In
           </Link>
         </p>
-      </div>
+      </motion.div>
     </div>
   )
 }
-export default Register

@@ -30,11 +30,6 @@ import CreateCourse from './pages/teacher/CreateCourse'
 import ManageCourse from './pages/teacher/ManageCourse'
 import StudentProgress from './pages/teacher/StudentProgress'
 
-// Pages - Admin
-import AdminDashboard from './pages/admin/Dashboard'
-import ManageUsers from './pages/admin/ManageUsers'
-import ManageContent from './pages/admin/ManageContent'
-
 // Pages - Common
 import Forum from './pages/Forum'
 import Chat from './pages/Chat'
@@ -161,30 +156,9 @@ function App() {
         />
 
         {/* Admin Routes */}
-        <Route
-          path="/admin/dashboard"
-          element={
-            <ProtectedRoute allowedRoles={['admin']}>
-              <Layout><AdminDashboard /></Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/users"
-          element={
-            <ProtectedRoute allowedRoles={['admin']}>
-              <Layout><ManageUsers /></Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/content"
-          element={
-            <ProtectedRoute allowedRoles={['admin']}>
-              <Layout><ManageContent /></Layout>
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/admin/dashboard" element={<Navigate to="/admin/control-center" replace />} />
+        <Route path="/admin/users" element={<Navigate to="/admin/control-center" replace />} />
+        <Route path="/admin/content" element={<Navigate to="/admin/control-center" replace />} />
         <Route path="/admin/control-center" element={<ProtectedRoute allowedRoles={['admin']}><Layout><ControlCenter /></Layout></ProtectedRoute>} />
 
         {/* Common Routes */}
