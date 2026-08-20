@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
+import api from '../../services/api'
 
 export default function CreateCourse() {
   const navigate = useNavigate()
+  const [submitting, setSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -16,10 +18,18 @@ export default function CreateCourse() {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    toast.success('Course created successfully!')
-    navigate('/teacher/dashboard')
+    setSubmitting(true)
+    try {
+      const response = await api.post('/courses', formData)
+      toast.success('Course created successfully!')
+      navigate(`/teacher/manage/${response.data.data._id}`)
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Course could not be created')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -86,8 +96,8 @@ export default function CreateCourse() {
           </div>
 
           <div className="flex gap-4">
-            <button type="submit" className="btn btn-primary flex-1">
-              Create Course
+            <button type="submit" disabled={submitting} className="btn btn-primary flex-1">
+              {submitting ? 'Creating...' : 'Create Course'}
             </button>
             <button
               type="button"

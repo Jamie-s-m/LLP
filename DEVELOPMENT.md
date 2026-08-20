@@ -1,280 +1,151 @@
-# Language Learn Platform - Developer Setup Guide
+# LinguaNest Development Guide
 
-## 📋 Prerequisites
+## Requirements
 
-Before you begin, ensure you have the following installed:
-- **Node.js** 18+ - [Download](https://nodejs.org/)
-- **MongoDB** 5+ - [Download](https://www.mongodb.com/try/download/community) or use MongoDB Atlas
-- **Git** - [Download](https://git-scm.com/)
-- **Docker** (optional) - [Download](https://www.docker.com/)
+- Node.js 20+
+- npm
+- MongoDB locally or MongoDB Atlas
+- Git
+- Docker is optional
 
-## 🚀 Local Development Setup
+## Setup scripts
 
-### Option 1: Manual Setup (Recommended for development)
+From the repository root on Windows:
 
-#### 1. Clone and Setup Backend
+```powershell
+.\setup.bat --no-pause
+```
+
+The script uses `npm ci`, creates `backend/.env` and `frontend/.env.local` from templates, and exits non-zero when setup fails. Without `--no-pause`, it waits at the end for a key press.
+
+On macOS/Linux:
 
 ```bash
-# Navigate to backend directory
-cd backend
-
-# Install dependencies
-npm install
-
-# Create .env file
-cp .env.example .env
-
-# Edit .env and update:
-# MONGODB_URI=mongodb://localhost:27017/language-learn-platform
-# JWT_SECRET=your_development_secret_key
-
-# Start MongoDB (if running locally)
-# macOS with Homebrew:
-# brew services start mongodb-community
-# Windows: Use MongoDB Compass or run mongod.exe
-
-# Start backend server
-npm run dev
+bash ./setup.sh
 ```
 
-Backend will be running at: `http://localhost:5000`
+The scripts do not start MongoDB or dev servers.
 
-#### 2. Setup Frontend (in another terminal)
+## Local configuration
 
-```bash
-# Navigate to frontend directory
-cd frontend
+Create `backend/.env` from `backend/.env.example` and set:
 
-# Install dependencies
-npm install
-
-# Create .env.local file
-cp .env.example .env.local
-
-# Start development server
-npm run dev
-```
-
-Frontend will be running at: `http://localhost:5173`
-
-### Option 2: Docker Setup
-
-```bash
-# From project root
-docker-compose up -d
-
-# To stop:
-docker-compose down
-
-# View logs:
-docker-compose logs -f backend
-docker-compose logs -f frontend
-```
-
-Access points:
-- Frontend: `http://localhost:5173`
-- Backend API: `http://localhost:5000`
-- MongoDB Express: `http://localhost:8081` (admin/password)
-
-## 🔧 Configuration Files
-
-### Backend Environment Variables (.env)
-```
+```env
 PORT=5000
 NODE_ENV=development
-MONGODB_URI=mongodb://localhost:27017/language-learn-platform
-JWT_SECRET=your_development_secret_key
+MONGODB_URI=mongodb://127.0.0.1:27017/language-learn-platform
+JWT_SECRET=replace_with_a_long_random_secret
 JWT_EXPIRE=7d
 FRONTEND_URL=http://localhost:5173
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=100
+VAPID_PUBLIC_KEY=<public-key>
+VAPID_PRIVATE_KEY=<private-key>
+VAPID_SUBJECT=mailto:support@linguanest.app
 ```
 
-### Frontend Environment Variables (.env.local)
-```
-VITE_API_URL=http://localhost:5000/api
-VITE_APP_NAME=Language Learn Platform
-VITE_APP_VERSION=1.0.0
-```
+Only the VAPID public key belongs in frontend configuration as `VITE_VAPID_PUBLIC_KEY`. Never commit `.env` files or a VAPID private key.
 
-## 📁 Project Structure
+## Run locally
 
-```
-language-learn-platform/
-├── backend/              # Node.js/Express API
-│   ├── src/
-│   │   ├── models/      # MongoDB schemas
-│   │   ├── routes/      # API routes (to implement)
-│   │   ├── controllers/ # Business logic (to implement)
-│   │   ├── middleware/  # Auth & error handling
-│   │   └── server.js    # Entry point
-│   └── package.json
-├── frontend/             # React application
-│   ├── src/
-│   │   ├── components/  # Reusable components
-│   │   ├── pages/       # Page components
-│   │   ├── store/       # State management
-│   │   ├── App.tsx      # Main app component
-│   │   └── main.tsx     # Entry point
-│   └── package.json
-├── docker-compose.yml   # Docker configuration
-└── README.md
+Backend terminal:
+
+```bash
+cd backend
+npm ci
+npm run dev
 ```
 
-## ✅ Implemented Application Areas
+Frontend terminal:
 
-### Backend
-- JWT authentication with student, teacher, and admin roles.
-- Course, lesson, exercise, progress, flashcard, group, and forum APIs.
-- Protected user and learning endpoints.
-- Rate limiting and Helmet security headers.
-- Production startup validation for `MONGODB_URI` and `JWT_SECRET`.
-- Database seed script: `npm run seed`; no public seed HTTP endpoint.
+```bash
+cd frontend
+npm ci
+npm run dev
+```
 
-### Frontend
-- React/Vite production build and GitHub Pages deployment.
-- Axios API client with JWT authorization.
-- Course catalog, course details, enrollment, and learning progress screens.
-- Role-aware spaces for students, teachers, parents, and admins.
-- LinguaNest brand mark, atlas illustration, editorial typography, and motion system.
-- Realtime direct, group, and support chat with REST fallback.
-- Admin control center for users, courses, lessons, flashcards, forum posts, and groups.
+URLs:
 
-### Family & Communication APIs
-- `GET/POST /api/family` for parent-child requests.
-- `PATCH /api/family/:id/review` for student/admin approval or rejection.
-- `GET/POST /api/chat/conversations` for direct, group, and support rooms.
-- `GET/POST /api/chat/conversations/:id/messages` for message history and fallback delivery.
-- Socket.io events `conversation:join`, `message:send`, and `message:new` for realtime delivery.
+- Frontend: `http://localhost:5173`
+- API: `http://localhost:5000`
+- Health: `http://localhost:5000/api/health`
 
-## 🚀 Release Checklist
+## Current role model
 
-1. Rotate credentials that were ever committed or shared.
-2. Set `MONGODB_URI`, a long random `JWT_SECRET`, and `FRONTEND_URL` in Render.
-3. Run `npm test`, `npx eslint src`, and `npm run build` before deployment.
-4. Verify deployed `/api/health` returns `200`.
-5. Verify deployed `/api/courses/seed` returns `404`.
-6. Test registration, login, enrollment, lesson completion, and logout against the deployed database.
+- Student: learning, progress, flashcards, exercises, groups, chat, optional teacher application.
+- Teacher: approved instructor, own courses, lessons, learner progress, chat.
+- Parent: approved family links, child progress, chat.
+- Admin: users, teacher applications, courses, lessons, flashcards, groups, posts, moderation, chat.
 
-## 🧪 Testing
+Admin and teacher accounts must not be created by selecting privileged roles in the public signup form. Student signup can include a teacher application; admin approval promotes it to teacher.
 
-### Backend Testing
+## Important API areas
+
+- `/api/auth` — register/login
+- `/api/users` — profile, dashboard summary, leaderboard, achievements
+- `/api/courses` — catalog and teacher/admin CRUD
+- `/api/lessons` — lesson CRUD with ownership checks
+- `/api/exercises` — exercises and submissions
+- `/api/flashcards` — flashcards and review
+- `/api/progress` — enrollment, completion, teacher progress
+- `/api/groups` and `/api/forum` — community
+- `/api/family` — parent requests and child progress aggregation
+- `/api/chat` — REST conversation/message fallback
+- Socket.io — authenticated realtime chat
+- `/api/push` — browser push subscriptions
+- `/api/admin` — protected admin operations
+
+## Verification
+
 ```bash
 cd backend
 npm test
-```
+npx eslint src
+npm audit --omit=dev
 
-### Frontend Testing
-```bash
-cd frontend
-npm test
-```
-
-## 📦 Building for Production
-
-### Backend
-```bash
-cd backend
+cd ../frontend
 npm run build
-npm start
+npm audit --omit=dev
 ```
 
-### Frontend
+`npm test` currently runs the Express smoke suite without MongoDB. Full registration, database, Socket.io, and push click-through testing requires a configured test MongoDB URI in the local, ignored `backend/.env`.
+
+## Deployment
+
+Frontend:
+
 ```bash
 cd frontend
 npm run build
-npm run preview
+npm run deploy
 ```
 
-## 🐛 Debugging
+Production frontend: `https://jamie-s-m.github.io/LLP/`.
 
-### Backend Debugging with VS Code
-1. Add breakpoint in code
-2. Create `.vscode/launch.json`:
-```json
-{
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Launch Backend",
-      "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}/backend/src/server.js",
-      "restart": true,
-      "console": "integratedTerminal"
-    }
-  ]
-}
-```
-3. Press F5 to start debugging
+Backend is deployed on Render. Configure these Render variables before deploy:
 
-### Backend
-- JWT authentication with role authorization.
-- Course, lesson, exercise, progress, flashcard, group, and forum routes.
-- Protected user and learning endpoints.
-- Request rate limiting and Helmet security headers.
-- Production startup validation for `MONGODB_URI` and `JWT_SECRET`.
-- Database seed script: `npm run seed` (run manually, never expose as an HTTP route).
-
-### Frontend
-- React/Vite production build.
-- API client with JWT authorization.
-- Course catalog, course details, enrollment, and learning progress screens.
-
-## 🚀 Release Checklist
-
-1. Rotate any credentials that were ever committed or shared.
-2. Configure `MONGODB_URI`, a long random `JWT_SECRET`, and `FRONTEND_URL` in Render.
-3. Run `npm test` and `npm run build` before deployment.
-4. Deploy the backend and verify `/api/health` returns `200`.
-5. Verify `/api/courses/seed` returns `404` in the deployed environment.
-6. Verify registration, login, enrollment, lesson completion, and logout against the deployed database.
-
-### Port Already in Use
-```bash
-# Kill process on port 5000 (backend)
-lsof -ti:5000 | xargs kill -9
-
-# Kill process on port 5173 (frontend)
-lsof -ti:5173 | xargs kill -9
+```env
+NODE_ENV=production
+MONGODB_URI=<rotated-atlas-uri>
+JWT_SECRET=<long-random-secret>
+FRONTEND_URL=https://jamie-s-m.github.io
+VAPID_PUBLIC_KEY=<public-key>
+VAPID_PRIVATE_KEY=<private-key>
+VAPID_SUBJECT=mailto:support@linguanest.app
 ```
 
-### Dependencies Issues
-```bash
-# Clear cache and reinstall
-rm -rf node_modules package-lock.json
-npm install
+After deployment:
+
+```text
+GET /api/health       -> 200
+GET /api/courses/seed -> 404
 ```
 
-## 📞 Support
+## Security checklist
 
-For issues and questions:
-1. Check documentation in README.md files
-2. Review error messages carefully
-3. Check browser console (frontend) or terminal logs (backend)
-4. Open an issue on GitHub
-
-## 🎯 Development Workflow
-
-1. **Feature Development**
-   - Create feature branch
-   - Implement frontend + backend together
-   - Test thoroughly
-
-2. **Code Quality**
-   - Run linter: `npm run lint`
-   - Format code: `npm run format`
-   - Check for TypeScript errors
-
-3. **Testing**
-   - Write unit tests
-   - Test API endpoints with Postman/Insomnia
-   - Test UI interactions
-
-4. **Deployment**
-   - Build production bundles
-   - Run Docker containers
-   - Deploy to server
-
----
-
-Happy coding! 🎉
+- Rotate credentials that were ever committed or shared.
+- Keep MongoDB, JWT, and VAPID private values only in local ignored files or Render secrets.
+- Do not expose a seed endpoint.
+- Keep CORS limited to the deployed frontend and local development origins.
+- Run npm audits before release.
+- Use `NODE_ENV=production` on Render.

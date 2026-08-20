@@ -1,21 +1,40 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FiVolume2, FiRotateCw } from 'react-icons/fi'
+import api from '../../services/api'
+
+interface FlashcardItem {
+  _id: string
+  front: { text: string }
+  back: { text: string }
+}
 
 export default function Flashcards() {
+  const [cards, setCards] = useState<FlashcardItem[]>([])
   const [currentCard, setCurrentCard] = useState(0)
   const [isFlipped, setIsFlipped] = useState(false)
-  const [mastered, setMastered] = useState<number[]>([])
+  const [mastered, setMastered] = useState<string[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const cards = [
-    { id: 1, front: 'Hello', back: 'A greeting' },
-    { id: 2, front: 'Thank you', back: 'Expression of gratitude' },
-    { id: 3, front: 'Please', back: 'Polite request' },
-    { id: 4, front: 'Goodbye', back: 'Farewell' },
-    { id: 5, front: 'How are you?', back: 'Inquiry about wellbeing' },
-  ]
+  useEffect(() => {
+    api.get('/flashcards')
+      .then((response) => setCards(response.data.data || []))
+      .finally(() => setLoading(false))
+  }, [])
+
+  if (loading) {
+    return <div className="min-h-screen py-12 px-4 text-center">Loading flashcards...</div>
+  }
+
+  if (cards.length === 0) {
+    return (
+      <div className="min-h-screen py-12 px-4 text-center">
+        <p className="text-neutral-500">No flashcards available yet. Check back soon!</p>
+      </div>
+    )
+  }
 
   const card = cards[currentCard]
-  const isMastered = mastered.includes(card.id)
+  const isMastered = mastered.includes(card._id)
 
   const handleNext = () => {
     if (currentCard < cards.length - 1) {
@@ -33,9 +52,10 @@ export default function Flashcards() {
 
   const handleMastered = () => {
     if (isMastered) {
-      setMastered(mastered.filter((id) => id !== card.id))
+      setMastered(mastered.filter((id) => id !== card._id))
     } else {
-      setMastered([...mastered, card.id])
+      setMastered([...mastered, card._id])
+      api.get(`/flashcards/${card._id}/review`).catch(() => {})
     }
   }
 
@@ -80,14 +100,14 @@ export default function Flashcards() {
               style={{ backfaceVisibility: 'hidden' }}
             >
               <p className="text-sm opacity-75 mb-4">FRONT</p>
-              <p className="text-4xl font-bold text-center">{card.front}</p>
+              <p className="text-4xl font-bold text-center">{card.front.text}</p>
             </div>
             <div
               className="w-full h-full bg-gradient-to-br from-secondary-500 to-primary-500 rounded-xl p-8 flex flex-col items-center justify-center text-white absolute"
               style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
             >
               <p className="text-sm opacity-75 mb-4">BACK</p>
-              <p className="text-2xl text-center">{card.back}</p>
+              <p className="text-2xl text-center">{card.back.text}</p>
             </div>
           </div>
         </div>

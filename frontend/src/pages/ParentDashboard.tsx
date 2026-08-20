@@ -6,11 +6,21 @@ import api from '../services/api'
 
 export default function ParentDashboard() {
   const [studentEmail, setStudentEmail] = useState('')
-  const [links, setLinks] = useState<Array<{ _id: string; status: string; student?: { firstName: string; lastName: string } }>>([])
+  const [links, setLinks] = useState<Array<{ _id: string; status: string; student?: { _id: string; firstName: string; lastName: string; xp: number; streak: number } }>>([])
+  const [averageProgress, setAverageProgress] = useState(0)
+  const [activeThisWeek, setActiveThisWeek] = useState(0)
 
-  useEffect(() => {
-    api.get('/family').then((response) => setLinks(response.data.data || [])).catch(() => undefined)
-  }, [])
+  const loadFamily = () => {
+    Promise.all([api.get('/family'), api.get('/family/children-progress')])
+      .then(([linksResponse, progressResponse]) => {
+        setLinks(linksResponse.data.data || [])
+        setAverageProgress(progressResponse.data.data?.averageProgress || 0)
+        setActiveThisWeek(progressResponse.data.data?.activeThisWeek || 0)
+      })
+      .catch(() => undefined)
+  }
+
+  useEffect(() => { loadFamily() }, [])
 
   const requestLink = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -31,11 +41,11 @@ export default function ParentDashboard() {
         <img src={`${import.meta.env.BASE_URL}atlas-study.svg`} alt="Language atlas study illustration" />
       </div>
       <div className="atlas-stat-grid mb-8">
-        <div className="atlas-stat"><FiUsers /><strong>0</strong><span>Linked learners</span></div>
-        <div className="atlas-stat"><FiBarChart2 /><strong>0%</strong><span>Average progress</span></div>
-        <div className="atlas-stat"><FiBookOpen /><strong>0</strong><span>Lessons this week</span></div>
+        <div className="atlas-stat"><FiUsers /><strong>{links.filter((link) => link.status === 'approved').length}</strong><span>Linked learners</span></div>
+        <div className="atlas-stat"><FiBarChart2 /><strong>{averageProgress}%</strong><span>Average progress</span></div>
+        <div className="atlas-stat"><FiBookOpen /><strong>{activeThisWeek}</strong><span>Active courses this week</span></div>
       </div>
-      <div className="atlas-panel p-6"><div className="flex items-center gap-3 mb-3"><FiMessageCircle className="text-coral" /><h2>Family support</h2></div><p className="text-muted mb-5">Connect a learner through an approved family request, then message their teacher or support team.</p><form onSubmit={requestLink} className="inline-form mb-5"><input className="input" type="email" required value={studentEmail} onChange={(event) => setStudentEmail(event.target.value)} placeholder="Learner email" /><button className="btn btn-primary">Request link</button></form><div className="space-y-2 mb-5">{links.map((link) => <div key={link._id} className="flex justify-between items-center p-3 rounded-lg bg-[#f6efe7]"><span>{link.student ? `${link.student.firstName} ${link.student.lastName}` : 'Learner'}</span><span className="status-pill">{link.status}</span></div>)}</div><Link to="/chat" className="btn btn-primary inline-flex items-center gap-2">Open family chat <FiMessageCircle /></Link></div>
+      <div className="atlas-panel p-6"><div className="flex items-center gap-3 mb-3"><FiMessageCircle className="text-coral" /><h2>Family support</h2></div><p className="text-muted mb-5">Connect a learner through an approved family request, then message their teacher or support team.</p><form onSubmit={requestLink} className="inline-form mb-5"><input className="input" type="email" required value={studentEmail} onChange={(event) => setStudentEmail(event.target.value)} placeholder="Learner email" /><button className="btn btn-primary">Request link</button></form><div className="space-y-2 mb-5">{links.map((link) => <div key={link._id} className="flex justify-between items-center p-3 rounded-lg bg-[#f6efe7]"><span>{link.student ? <Link className="font-semibold text-ink" to={`/parent/children/${link.student._id}`}>{link.student.firstName} {link.student.lastName}</Link> : 'Learner'}</span><span className="status-pill">{link.status}</span></div>)}</div><Link to="/chat" className="btn btn-primary inline-flex items-center gap-2">Open family chat <FiMessageCircle /></Link></div>
     </div>
   )
 }

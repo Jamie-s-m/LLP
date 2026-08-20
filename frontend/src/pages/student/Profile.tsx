@@ -1,25 +1,69 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useAuthStore } from '../../store/authStore'
-import { FiEdit2, FiSave } from 'react-icons/fi'
+import { FiAward, FiEdit2, FiSave } from 'react-icons/fi'
 import toast from 'react-hot-toast'
+import api from '../../services/api'
+
+interface ProfileData {
+  firstName: string
+  lastName: string
+  email: string
+  nativeLanguage?: string
+  xp?: number
+  streak?: number
+}
+interface Achievement {
+  _id: string
+  badge?: { name: string }
+}
 
 export default function Profile() {
-  const { user } = useAuthStore()
+  const { setUser } = useAuthStore()
+  const [profile, setProfile] = useState<ProfileData | null>(null)
+  const [achievements, setAchievements] = useState<Achievement[]>([])
   const [isEditing, setIsEditing] = useState(false)
-  const [formData, setFormData] = useState({
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
-    email: user?.email || '',
-    nativeLanguage: user?.nativeLanguage || '',
-  })
+  const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', nativeLanguage: '' })
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    Promise.all([api.get('/users/profile'), api.get('/users/achievements')])
+      .then(([profileResponse, achievementsResponse]) => {
+        const data = profileResponse.data.data
+        setProfile(data)
+        setFormData({
+          firstName: data.firstName || '',
+          lastName: data.lastName || '',
+          email: data.email || '',
+          nativeLanguage: data.nativeLanguage || '',
+        })
+        setAchievements(achievementsResponse.data.data || [])
+      })
+      .catch(() => toast.error('Unable to load profile'))
+      .finally(() => setLoading(false))
+  }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const handleSave = () => {
-    toast.success('Profile updated successfully!')
-    setIsEditing(false)
+  const handleSave = async () => {
+    try {
+      const response = await api.put('/users/profile', {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        nativeLanguage: formData.nativeLanguage,
+      })
+      setProfile(response.data.data)
+      setUser(response.data.data)
+      toast.success('Profile updated successfully!')
+      setIsEditing(false)
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Profile could not be updated')
+    }
+  }
+
+  if (loading) {
+    return <div className="min-h-screen py-12 px-4 text-center">Loading profile...</div>
   }
 
   return (
@@ -31,11 +75,11 @@ export default function Profile() {
           {/* Avatar Section */}
           <div className="flex items-center gap-6 mb-8 pb-8 border-b border-neutral-200 dark:border-neutral-700">
             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white text-3xl font-bold">
-              {user?.firstName?.charAt(0)}
+              {profile?.firstName?.charAt(0)}
             </div>
             <div>
-              <p className="text-2xl font-bold">{user?.firstName} {user?.lastName}</p>
-              <p className="text-neutral-600 dark:text-neutral-400">{user?.role}</p>
+              <p className="text-2xl font-bold">{profile?.firstName} {profile?.lastName}</p>
+              <p className="text-neutral-600 dark:text-neutral-400">{profile?.email}</p>
             </div>
           </div>
 
@@ -73,8 +117,7 @@ export default function Profile() {
                 name="email"
                 className="input"
                 value={formData.email}
-                onChange={handleChange}
-                disabled={!isEditing}
+                disabled
               />
             </div>
 
@@ -96,19 +139,30 @@ export default function Profile() {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-4 py-6 border-t border-neutral-200 dark:border-neutral-700">
+            <div className="grid grid-cols-2 gap-4 py-6 border-t border-neutral-200 dark:border-neutral-700">
               <div className="text-center">
-                <p className="text-2xl font-bold text-primary-500">1,250</p>
+                <p className="text-2xl font-bold text-primary-500">{profile?.xp ?? 0}</p>
                 <p className="text-sm text-neutral-600 dark:text-neutral-400">Points</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-bold text-secondary-500">12</p>
+                <p className="text-2xl font-bold text-secondary-500">{profile?.streak ?? 0}</p>
                 <p className="text-sm text-neutral-600 dark:text-neutral-400">Streak</p>
               </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-success">5</p>
-                <p className="text-sm text-neutral-600 dark:text-neutral-400">Badges</p>
-              </div>
+            </div>
+
+            <div className="pt-6 border-t border-neutral-200 dark:border-neutral-700">
+              <h3 className="font-bold mb-4 flex items-center gap-2"><FiAward className="text-primary-500" /> Badges</h3>
+              {achievements.length === 0 ? (
+                <p className="text-sm text-neutral-500">No badges earned yet — keep learning to unlock some!</p>
+              ) : (
+                <div className="flex flex-wrap gap-3">
+                  {achievements.map((achievement) => (
+                    <span key={achievement._id} className="px-3 py-1.5 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 text-sm font-medium">
+                      {achievement.badge?.name}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

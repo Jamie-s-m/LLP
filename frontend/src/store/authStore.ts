@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import axios from 'axios'
+import api from '../services/api'
 
 interface User {
   id: string
@@ -29,37 +29,7 @@ interface AuthState {
   setToken: (token: string | null) => void
 }
 
-// Clean and format API URL string safely
-const getSanitizedApiUrl = (): string => {
-  let rawUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
-  
-  // Remove brackets [], quotes '', "", parentheses (), and whitespace
-  rawUrl = rawUrl.replace(/[\[\]'"\(\)\s]+/g, '').trim()
-
-  if (!/^https?:\/\//i.test(rawUrl)) {
-    rawUrl = `https://${rawUrl}`
-  }
-
-  // Remove trailing slashes
-  rawUrl = rawUrl.replace(/\/+$/, '')
-
-  // Ensure /api suffix exists
-  if (!rawUrl.endsWith('/api')) {
-    rawUrl = `${rawUrl}/api`
-  }
-
-  return rawUrl
-}
-
-const API_URL = getSanitizedApiUrl()
-
-export const api = axios.create({
-  baseURL: API_URL,
-  timeout: 45000, // 45s timeout for Render free tier cold starts
-  headers: {
-    'Content-Type': 'application/json',
-  },
-})
+export { api }
 
 export const useAuthStore = create<AuthState>((set) => {
   const token = localStorage.getItem('token')
@@ -72,10 +42,6 @@ export const useAuthStore = create<AuthState>((set) => {
     } catch {
       localStorage.removeItem('user')
     }
-  }
-
-  if (token) {
-    api.defaults.headers.common['Authorization'] = `Bearer ${token}`
   }
 
   return {
@@ -94,7 +60,6 @@ export const useAuthStore = create<AuthState>((set) => {
 
         localStorage.setItem('token', tokenPayload)
         localStorage.setItem('user', JSON.stringify(userPayload))
-        api.defaults.headers.common['Authorization'] = `Bearer ${tokenPayload}`
 
         set({ user: userPayload, token: tokenPayload, isAuthenticated: true, isLoading: false })
       } catch (error: any) {
@@ -115,7 +80,6 @@ export const useAuthStore = create<AuthState>((set) => {
 
         if (tokenPayload) {
           localStorage.setItem('token', tokenPayload)
-          api.defaults.headers.common['Authorization'] = `Bearer ${tokenPayload}`
         }
         if (userPayload) {
           localStorage.setItem('user', JSON.stringify(userPayload))
@@ -133,7 +97,6 @@ export const useAuthStore = create<AuthState>((set) => {
     logout: () => {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
-      delete api.defaults.headers.common['Authorization']
       set({ user: null, token: null, isAuthenticated: false, error: null })
     },
 
@@ -142,10 +105,8 @@ export const useAuthStore = create<AuthState>((set) => {
     setToken: (token) => {
       if (token) {
         localStorage.setItem('token', token)
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`
       } else {
         localStorage.removeItem('token')
-        delete api.defaults.headers.common['Authorization']
       }
       set({ token, isAuthenticated: !!token })
     },

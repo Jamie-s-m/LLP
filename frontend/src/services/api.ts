@@ -1,20 +1,42 @@
-// frontend/src/services/api.js
-import axios from 'axios';
+import axios from 'axios'
 
-const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://language-learn-platform-api.onrender.com/api',
+// Clean and format API URL string safely
+const getSanitizedApiUrl = (): string => {
+  let rawUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+
+  // Remove brackets [], quotes '', "", parentheses (), and whitespace
+  rawUrl = rawUrl.replace(/[\[\]'"()\s]+/g, '').trim()
+
+  if (!/^https?:\/\//i.test(rawUrl)) {
+    rawUrl = `https://${rawUrl}`
+  }
+
+  // Remove trailing slashes
+  rawUrl = rawUrl.replace(/\/+$/, '')
+
+  // Ensure /api suffix exists
+  if (!rawUrl.endsWith('/api')) {
+    rawUrl = `${rawUrl}/api`
+  }
+
+  return rawUrl
+}
+
+const api = axios.create({
+  baseURL: getSanitizedApiUrl(),
+  timeout: 45000, // 45s timeout for Render free tier cold starts
   headers: {
     'Content-Type': 'application/json',
   },
-});
+})
 
 // Attach JWT token automatically
-API.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token')
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    config.headers.Authorization = `Bearer ${token}`
   }
-  return config;
-});
+  return config
+})
 
-export default API;
+export default api

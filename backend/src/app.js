@@ -17,6 +17,7 @@ import forumRoutes from './routes/forum.js';
 import chatRoutes from './routes/chat.js';
 import adminRoutes from './routes/admin.js';
 import familyRoutes from './routes/family.js';
+import pushRoutes from './routes/push.js';
 
 dotenv.config();
 
@@ -90,6 +91,7 @@ app.use('/api/forum', forumRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/family', familyRoutes);
+app.use('/api/push', pushRoutes);
 
 // Catch-all API 404 handler
 app.use('/api/*', (req, res) => {

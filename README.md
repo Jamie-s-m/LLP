@@ -1,174 +1,170 @@
-# Language Learn Platform
+# LinguaNest
 
-A comprehensive full-stack web application for learning languages with interactive lessons, flashcards, grammar exercises, speaking practice, progress tracking, and gamification features.
+LinguaNest is a full-stack language learning workspace for students, teachers, parents, and platform administrators. It combines courses, lessons, exercises, flashcards, progress tracking, family links, realtime chat, browser notifications, and content moderation.
 
-## 🌍 Supported Languages
-- English
-- Turkish
-- Russian
-- Uzbek
+## Features
 
-## 🎯 Features
+### Students
+- Course enrollment and lesson completion
+- API-backed dashboard, progress, profile, badges, and leaderboard
+- Flashcards loaded from MongoDB
+- Exercises submitted to the backend
+- Study groups and community forum
+- Realtime chat and browser notifications
+- Optional teacher application reviewed by an admin
 
-### For Students
-- 📚 Interactive lessons and courses
-- 🎴 Vocabulary flashcards with spaced repetition
-- ✏️ Grammar exercises
-- 🎤 Speaking/pronunciation practice
-- 📊 Progress tracking and analytics
-- 🏆 Leaderboard and gamification (points, badges, streaks)
-- 👥 Social features (groups, forums, study partners)
+### Teachers
+- Teacher accounts are created by admin approval
+- Real course overview and instructor-owned course list
+- Create courses and manage lessons
+- View progress for learners enrolled in the teacher's courses
+- Realtime chat and browser notifications
 
-### For Teachers
-- 📖 Create and manage courses
-- 📝 Design custom lessons and exercises
-- 📈 Monitor student progress
-- 🎨 Customize content
+### Parents
+- Parent signup with a dedicated family dashboard
+- Request a link to a learner by email
+- View approved learner XP, streak, weekly activity, and course progress
+- Open a detailed child progress view
+- Realtime chat and browser notifications
 
-### For Admins
-- 👤 User management
-- 📊 Platform analytics
-- 🌐 Language and content management
-- ⚙️ System settings
+### Admins
+- Unified Control Center
+- User search, pagination, status management, and role management
+- Teacher application approval/rejection
+- Course create/edit/delete modal
+- Content collections for lessons, flashcards, posts, and groups
+- Forum/group moderation with pin and delete actions
+- Platform overview and protected admin APIs
 
-## 🛠️ Tech Stack
+## Stack
 
-### Backend
-- **Node.js** with Express.js
-- **MongoDB** for data storage
-- **JWT** for authentication
-- **WebSocket** for real-time features
-- **Socket.io** for live notifications
+- Frontend: React 18, TypeScript, Vite, Tailwind CSS, Zustand, Axios, React Router, Framer Motion
+- Backend: Node.js 20+, Express, MongoDB, Mongoose, JWT, Socket.io, web-push
+- Deployment: GitHub Pages for frontend, Render for backend, MongoDB Atlas for production data
 
-### Frontend
-- **React 18** with TypeScript
-- **Redux** for state management
-- **Vite** as build tool
-- **Tailwind CSS** for styling
-- **React Router** for navigation
-- **Axios** for API calls
+## Quick Start
 
-### DevOps
-- **Docker** for containerization
-- **Docker Compose** for multi-container setup
+### Requirements
 
-## 📁 Project Structure
+- Node.js 20+
+- MongoDB locally or MongoDB Atlas
+- npm
+- Docker is optional; the setup scripts do not require Docker
 
-```
-language-learn-platform/
-├── backend/                 # Node.js/Express API server
-│   ├── src/
-│   │   ├── models/         # MongoDB schemas
-│   │   ├── routes/         # API endpoints
-│   │   ├── controllers/    # Business logic
-│   │   ├── middleware/     # Auth, validation, etc.
-│   │   ├── services/       # Business services
-│   │   └── app.js          # Express app setup
-│   ├── .env.example        # Environment variables template
-│   ├── package.json
-│   └── Dockerfile
-├── frontend/                # React application
-│   ├── src/
-│   │   ├── components/     # Reusable React components
-│   │   ├── pages/          # Page components
-│   │   ├── hooks/          # Custom React hooks
-│   │   ├── services/       # API client services
-│   │   ├── store/          # Redux store
-│   │   ├── utils/          # Utility functions
-│   │   └── App.tsx         # Main app component
-│   ├── public/
-│   ├── index.html
-│   ├── vite.config.ts
-│   └── package.json
-├── docker-compose.yml      # Multi-container setup
-├── .gitignore
-└── README.md              # This file
+### Automated setup
+
+Windows PowerShell or Command Prompt:
+
+```powershell
+.\setup.bat --no-pause
 ```
 
-## 🚀 Quick Start
+macOS/Linux:
 
-### Prerequisites
-- Node.js 18+
-- MongoDB 5+
-- npm or yarn
+```bash
+bash ./setup.sh
+```
 
-### Installation
+The scripts install missing dependencies with `npm ci` and create local env files from templates. They do not start MongoDB or either development server.
 
-#### Clone and Setup Backend
+### Configure backend
+
+Copy or edit `backend/.env`:
+
+```env
+PORT=5000
+NODE_ENV=development
+MONGODB_URI=mongodb://127.0.0.1:27017/language-learn-platform
+JWT_SECRET=replace_with_a_long_random_secret
+FRONTEND_URL=http://localhost:5173
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=100
+VAPID_PUBLIC_KEY=replace_with_vapid_public_key
+VAPID_PRIVATE_KEY=replace_with_vapid_private_key
+VAPID_SUBJECT=mailto:support@linguanest.app
+```
+
+Never commit `.env` files or private VAPID keys. Use a separate production `MONGODB_URI`, `JWT_SECRET`, and VAPID private key in Render environment variables.
+
+### Start backend
+
 ```bash
 cd backend
-npm install
-cp .env.example .env
-# Edit .env with your configuration
+npm ci
 npm run dev
 ```
 
-#### Setup Frontend (in another terminal)
+The API runs at `http://localhost:5000`.
+
+### Start frontend
+
+In another terminal:
+
 ```bash
 cd frontend
-npm install
+npm ci
 npm run dev
 ```
 
-The application will be available at `http://localhost:5173`
+The app runs at `http://localhost:5173`.
 
-### Using Docker
+### Docker
+
+Docker is optional. When installed:
+
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
-## 📚 Documentation
+The compose file starts MongoDB, backend, frontend, and Mongo Express for local development. Change all development passwords before using any shared or production environment.
 
-- [Backend Setup Guide](./backend/README.md)
-- [Frontend Setup Guide](./frontend/README.md)
-- [API Documentation](./backend/API.md)
-- [Database Schema](./backend/DATABASE.md)
+## Verification
 
-## 🔐 Environment Variables
+```bash
+cd backend
+npm test
+npx eslint src
+npm audit --omit=dev
 
-See `.env.example` files in both backend and frontend directories for required environment variables.
+cd ../frontend
+npm run build
+npm audit --omit=dev
+```
 
-## 👥 User Roles
+## Production deployment
 
-1. **Student** - Learn languages, complete exercises, track progress
-2. **Teacher** - Create courses, design lessons, monitor students
-3. **Admin** - Manage users, system settings, platform analytics
+Frontend:
 
-## 📊 Key Features Implementation
+```bash
+cd frontend
+npm run build
+npm run deploy
+```
 
-### Authentication
-- JWT-based authentication
-- Email verification
-- Password reset functionality
-- Social login integration (optional)
+Production frontend: `https://jamie-s-m.github.io/LLP/`
 
-### Learning Path
-- Structured courses with lessons
-- Difficulty levels (Beginner, Intermediate, Advanced)
-- Progressive learning with prerequisites
+Backend production environment must include:
 
-### Gamification
-- Points system
-- Badges and achievements
-- Leaderboards (daily, weekly, monthly)
-- Streaks and milestones
+```env
+NODE_ENV=production
+MONGODB_URI=<rotated-atlas-connection-string>
+JWT_SECRET=<long-random-secret>
+FRONTEND_URL=https://jamie-s-m.github.io
+VAPID_PUBLIC_KEY=<public-key>
+VAPID_PRIVATE_KEY=<private-key>
+VAPID_SUBJECT=mailto:support@linguanest.app
+```
 
-### Progress Tracking
-- Learning time analytics
-- Completion percentages
-- Difficulty analysis
-- Performance reports
+After a Render deploy, verify:
 
-## 🤝 Contributing
+```text
+GET /api/health       -> 200
+GET /api/courses/seed -> 404
+```
 
-1. Create a feature branch
-2. Make your changes
-3. Submit a pull request
+## Documentation
 
-## 📄 License
-
-MIT License - see LICENSE file for details
-
-## 📞 Support
-
-For issues and questions, please open an issue in the repository.
+- [Development guide](./DEVELOPMENT.md)
+- [Quick start](./QUICKSTART.md)
+- [Backend guide](./backend/README.md)
+- [Frontend guide](./frontend/README.md)

@@ -1,5 +1,6 @@
 import FamilyLink from '../models/FamilyLink.js';
 import User from '../models/User.js';
+import Progress from '../models/Progress.js';
 
 export const listFamilyLinks = async (req, res, next) => {
   try {
@@ -42,5 +43,48 @@ export const reviewFamilyLink = async (req, res, next) => {
       ]);
     }
     res.status(200).json({ success: true, data: link });
+  } catch (error) { next(error); }
+};
+
+export const getChildrenProgress = async (req, res, next) => {
+  try {
+    const approvedLinks = await FamilyLink.find({ parent: req.user.id, status: 'approved' }).select('student');
+    const studentIds = approvedLinks.map((link) => link.student);
+    const [children, progressRecords] = await Promise.all([
+      User.find({ _id: { $in: studentIds } }).select('firstName lastName xp streak'),
+      Progress.find({ user: { $in: studentIds } }).select('progressPercentage lastAccessedAt'),
+    ]);
+    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const activeThisWeek = progressRecords.filter((record) => record.lastAccessedAt >= weekAgo).length;
+    const averageProgress = progressRecords.length > 0
+      ? Math.round(progressRecords.reduce((sum, record) => sum + record.progressPercentage, 0) / progressRecords.length)
+      : 0;
+
+    res.status(200).json({ success: true, data: { children, activeThisWeek, averageProgress } });
+  } catch (error) { next(error); }
+};
+
+export const getChildDetail = async (req, res, next) => {
+  try {
+    const link = await FamilyLink.findOne({ parent: req.user.id, student: req.params.studentId, status: 'approved' });
+    if (!link) return res.status(403).json({ success: false, message: 'You are not linked to this learner' });
+
+    const [student, progressRecords] = await Promise.all([
+      User.findById(req.params.studentId).select('firstName lastName email xp streak'),
+      Progress.find({ user: req.params.studentId }).populate('course', 'title language level'),
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        student,
+        courses: progressRecords.map((record) => ({
+          courseId: record.course._id,
+          title: record.course.title,
+          progressPercentage: record.progressPercentage,
+          isCompleted: record.isCompleted,
+        })),
+      },
+    });
   } catch (error) { next(error); }
 };

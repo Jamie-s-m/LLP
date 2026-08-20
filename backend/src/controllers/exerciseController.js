@@ -12,6 +12,18 @@ export const getExercises = async (req, res, next) => {
   }
 };
 
+export const getExerciseById = async (req, res, next) => {
+  try {
+    const exercise = await Exercise.findById(req.params.id);
+    if (!exercise) {
+      return res.status(404).json({ success: false, message: 'Exercise not found' });
+    }
+    res.status(200).json({ success: true, data: exercise });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const createExercise = async (req, res, next) => {
   try {
     const { lessonId, title, description, type, question, options, correctAnswer, points } = req.body;

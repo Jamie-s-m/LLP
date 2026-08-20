@@ -3,6 +3,7 @@ import ChatConversation from '../models/ChatConversation.js';
 import ChatMessage from '../models/ChatMessage.js';
 import Group from '../models/Group.js';
 import User from '../models/User.js';
+import { sendPushToUsers } from '../utils/push.js';
 
 const isParticipant = (conversation, userId) =>
   conversation.participants.some((participant) => participant.toString() === userId.toString());
@@ -96,6 +97,13 @@ export const sendMessage = async (req, res, next) => {
 
     conversation.lastMessageAt = new Date();
     await conversation.save();
+
+    const recipients = conversation.participants.filter((participantId) => participantId.toString() !== req.user.id.toString());
+    sendPushToUsers(recipients, {
+      title: `New message from ${req.user.firstName}`,
+      body: body.slice(0, 120),
+      url: '/chat',
+    }).catch(() => {});
 
     res.status(201).json({ success: true, data: await message.populate('sender', 'firstName lastName role avatar') });
   } catch (error) {

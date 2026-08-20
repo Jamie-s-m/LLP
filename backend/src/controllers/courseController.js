@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import Course from '../models/Course.js';
 import Lesson from '../models/Lesson.js';
+import Progress from '../models/Progress.js';
 
 export const getCourses = async (req, res, next) => {
   try {
@@ -87,6 +88,42 @@ export const deleteCourse = async (req, res, next) => {
     }
 
     res.status(200).json({ success: true, message: 'Course deleted successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getMyCourses = async (req, res, next) => {
+  try {
+    const courses = await Course.find({ instructor: req.user.id }).sort({ createdAt: -1 });
+    res.status(200).json({ success: true, data: courses });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getMyCourseOverview = async (req, res, next) => {
+  try {
+    const myCourses = await Course.find({ instructor: req.user.id }).select('_id rating isPublished');
+    const courseIds = myCourses.map((course) => course._id);
+
+    const totalStudents = courseIds.length > 0
+      ? (await Progress.distinct('user', { course: { $in: courseIds } })).length
+      : 0;
+
+    const avgRating = myCourses.length > 0
+      ? Math.round((myCourses.reduce((sum, course) => sum + (course.rating || 0), 0) / myCourses.length) * 10) / 10
+      : 0;
+
+    res.status(200).json({
+      success: true,
+      data: {
+        totalCourses: myCourses.length,
+        publishedCourses: myCourses.filter((course) => course.isPublished).length,
+        totalStudents,
+        avgRating,
+      },
+    });
   } catch (error) {
     next(error);
   }

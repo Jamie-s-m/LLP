@@ -111,3 +111,37 @@ export const getMyLearning = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Get a student's progress across the requesting teacher's own courses
+// @route   GET /api/progress/student/:studentId
+// @access  Private (Teacher/Admin)
+export const getStudentProgressForTeacher = async (req, res, next) => {
+  try {
+    const { studentId } = req.params;
+    const courseFilter = req.user.role === 'admin' ? {} : { instructor: req.user.id };
+    const myCourseIds = (await Course.find(courseFilter).select('_id')).map((course) => course._id);
+
+    const progressRecords = await Progress.find({ user: studentId, course: { $in: myCourseIds } })
+      .populate('course', 'title language level')
+      .populate('user', 'firstName lastName email xp streak');
+
+    if (progressRecords.length === 0) {
+      return res.status(404).json({ success: false, message: 'No progress records found for this student in your courses' });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        student: progressRecords[0].user,
+        courses: progressRecords.map((record) => ({
+          courseId: record.course._id,
+          title: record.course.title,
+          progressPercentage: record.progressPercentage,
+          isCompleted: record.isCompleted,
+        })),
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};

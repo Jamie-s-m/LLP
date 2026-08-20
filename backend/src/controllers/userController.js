@@ -1,5 +1,6 @@
 import User from '../models/User.js';
 import Progress from '../models/Progress.js';
+import UserAchievement from '../models/UserAchievement.js';
 
 export const getProfile = async (req, res, next) => {
   try {
@@ -54,6 +55,38 @@ export const getDashboardSummary = async (req, res, next) => {
         streak: user?.streak || 0,
       },
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getLeaderboard = async (req, res, next) => {
+  try {
+    const leaderboard = await User.find({ role: 'student', isActive: true })
+      .select('firstName lastName xp streak avatar')
+      .sort({ xp: -1 })
+      .limit(20);
+
+    const currentUser = await User.findById(req.user.id).select('xp');
+    const myRank = await User.countDocuments({
+      role: 'student',
+      isActive: true,
+      xp: { $gt: currentUser?.xp || 0 },
+    }) + 1;
+
+    res.status(200).json({ success: true, data: { leaderboard, myRank } });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getAchievements = async (req, res, next) => {
+  try {
+    const achievements = await UserAchievement.find({ student: req.user.id })
+      .populate('badge')
+      .sort({ unlockedAt: -1 });
+
+    res.status(200).json({ success: true, data: achievements });
   } catch (error) {
     next(error);
   }

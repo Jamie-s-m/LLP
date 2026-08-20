@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { FiMenu, FiLogOut, FiSettings, FiUser } from 'react-icons/fi'
+import { FiBell, FiBellOff, FiMenu, FiLogOut, FiSettings, FiUser } from 'react-icons/fi'
+import toast from 'react-hot-toast'
 import { useAuthStore } from '../store/authStore'
+import { enablePushNotifications, getNotificationPermission, isPushSupported } from '../utils/push'
 
 interface NavbarProps {
   onMenuClick: () => void
@@ -9,12 +11,27 @@ interface NavbarProps {
 
 export default function Navbar({ onMenuClick }: NavbarProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [notifPermission, setNotifPermission] = useState<NotificationPermission | 'unsupported'>('default')
   const { isAuthenticated, user, logout } = useAuthStore()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (isAuthenticated) setNotifPermission(getNotificationPermission())
+  }, [isAuthenticated])
 
   const handleLogout = () => {
     logout()
     navigate('/')
+  }
+
+  const handleEnableNotifications = async () => {
+    const enabled = await enablePushNotifications()
+    setNotifPermission(getNotificationPermission())
+    if (enabled) {
+      toast.success('Notifications enabled for chat and updates')
+    } else {
+      toast.error('Notifications were not enabled')
+    }
   }
 
   return (
@@ -43,6 +60,21 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 
         {/* Right Section */}
         <div className="flex items-center gap-4">
+          {isAuthenticated && isPushSupported() && notifPermission !== 'granted' ? (
+            <button
+              onClick={handleEnableNotifications}
+              className="p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 text-neutral-500"
+              aria-label="Enable notifications"
+              title="Enable notifications for chat and updates"
+            >
+              <FiBellOff size={20} />
+            </button>
+          ) : null}
+          {isAuthenticated && notifPermission === 'granted' ? (
+            <span className="p-2 text-primary-500" title="Notifications enabled">
+              <FiBell size={20} />
+            </span>
+          ) : null}
           {isAuthenticated ? (
             <div className="relative">
               <button

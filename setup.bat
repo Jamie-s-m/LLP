@@ -1,4 +1,6 @@
 @echo off
+setlocal
+cd /d "%~dp0"
 REM Language Learn Platform - Windows Setup Script
 
 echo.
@@ -19,12 +21,12 @@ if %ERRORLEVEL% neq 0 (
 
 echo [OK] Node.js found: 
 node --version
-npm --version
+call npm --version
 echo.
 
 REM Setup Backend
 echo [Step 1] Setting up Backend...
-cd backend
+pushd backend
 
 if exist node_modules (
     echo [SKIP] Backend dependencies already installed
@@ -41,16 +43,20 @@ if exist node_modules (
 if not exist .env (
     echo [CREATE] Creating .env file from template...
     copy .env.example .env
+    if %ERRORLEVEL% neq 0 (
+        echo [ERROR] Failed to create backend .env
+        exit /b 1
+    )
     echo [INFO] Please edit backend\.env with your settings
 )
 
-cd ..
+popd
 echo [OK] Backend setup complete!
 echo.
 
 REM Setup Frontend
 echo [Step 2] Setting up Frontend...
-cd frontend
+pushd frontend
 
 if exist node_modules (
     echo [SKIP] Frontend dependencies already installed
@@ -67,10 +73,14 @@ if exist node_modules (
 if not exist .env.local (
     echo [CREATE] Creating .env.local file from template...
     copy .env.example .env.local
+    if %ERRORLEVEL% neq 0 (
+        echo [ERROR] Failed to create frontend .env.local
+        exit /b 1
+    )
     echo [INFO] Please edit frontend\.env.local with your settings
 )
 
-cd ..
+popd
 echo [OK] Frontend setup complete!
 echo.
 
@@ -103,4 +113,4 @@ echo    http://localhost:5173
 echo.
 echo ==========================================
 echo.
-pause
+if /i not "%~1"=="--no-pause" pause

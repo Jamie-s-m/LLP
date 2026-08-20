@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+cd "$(dirname "$0")"
 
 # Language Learn Platform - Setup Script (macOS/Linux)
 

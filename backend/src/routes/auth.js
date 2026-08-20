@@ -1,6 +1,7 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import { sendPushToUsers } from '../utils/push.js';
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'local-development-only-secret';
@@ -66,6 +67,16 @@ router.post('/register', async (req, res) => {
     });
 
     const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+
+    if (user.teacherApplicationStatus === 'pending') {
+      User.find({ role: 'admin' }).select('_id').then((admins) => {
+        sendPushToUsers(admins.map((admin) => admin._id), {
+          title: 'New teacher application',
+          body: `${user.firstName} ${user.lastName} applied to teach on LinguaNest.`,
+          url: '/admin/control-center',
+        }).catch(() => {});
+      }).catch(() => {});
+    }
 
     res.status(201).json({
       token,

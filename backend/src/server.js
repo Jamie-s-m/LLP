@@ -6,6 +6,7 @@ import { Server } from 'socket.io';
 import app from './app.js';
 import ChatConversation from './models/ChatConversation.js';
 import ChatMessage from './models/ChatMessage.js';
+import { sendPushToUsers } from './utils/push.js';
 
 dotenv.config();
 
@@ -58,6 +59,14 @@ const startServer = async () => {
           await conversation.save();
           const populated = await message.populate('sender', 'firstName lastName role avatar');
           io.to(conversationId).emit('message:new', populated);
+
+          const recipients = conversation.participants.filter((participantId) => participantId.toString() !== socket.user.id.toString());
+          sendPushToUsers(recipients, {
+            title: `New message from ${populated.sender.firstName}`,
+            body: String(body).trim().slice(0, 120),
+            url: '/chat',
+          }).catch(() => {});
+
           acknowledge?.({ success: true });
         } catch (error) {
           acknowledge?.({ success: false, message: 'Message could not be sent' });

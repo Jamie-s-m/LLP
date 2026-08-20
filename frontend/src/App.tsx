@@ -34,6 +34,7 @@ import StudentProgress from './pages/teacher/StudentProgress'
 import Forum from './pages/Forum'
 import Chat from './pages/Chat'
 import ParentDashboard from './pages/ParentDashboard'
+import ChildProgress from './pages/ChildProgress'
 import ControlCenter from './pages/admin/ControlCenter'
 import NotFound from './pages/NotFound'
 
@@ -63,6 +64,7 @@ function App() {
           }
         />
         <Route path="/parent/dashboard" element={<ProtectedRoute allowedRoles={['parent']}><Layout><ParentDashboard /></Layout></ProtectedRoute>} />
+        <Route path="/parent/children/:studentId" element={<ProtectedRoute allowedRoles={['parent']}><Layout><ChildProgress /></Layout></ProtectedRoute>} />
         <Route path="/chat" element={<ProtectedRoute allowedRoles={['student', 'teacher', 'parent', 'admin']}><Layout><Chat /></Layout></ProtectedRoute>} />
         <Route
           path="/my-learning"

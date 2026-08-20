@@ -1,9 +1,11 @@
 import express from 'express';
 import { protect, authorize } from '../middleware/auth.js';
-import { getCourses, getCourseById, createCourse, updateCourse, deleteCourse } from '../controllers/courseController.js';
+import { getCourses, getCourseById, createCourse, updateCourse, deleteCourse, getMyCourses, getMyCourseOverview } from '../controllers/courseController.js';
 
 const router = express.Router();
 
+router.get('/mine', protect, authorize('teacher', 'admin'), getMyCourses);
+router.get('/mine/overview', protect, authorize('teacher', 'admin'), getMyCourseOverview);
 router.get('/', getCourses);
 router.get('/:id', getCourseById);
 router.post('/', protect, authorize('teacher', 'admin'), createCourse);
