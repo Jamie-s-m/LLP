@@ -49,7 +49,7 @@ export default function Layout({ children }: LayoutProps) {
       {/* Mobile menu backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/45 backdrop-blur-[1px]"
+          className="fixed inset-0 z-[140] bg-black/45 backdrop-blur-[1px]"
           onClick={() => setSidebarOpen(false)}
         />
       )}

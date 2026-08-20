@@ -68,7 +68,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] overflow-y-auto border-r border-neutral-200 bg-white shadow-2xl transition-transform dark:border-neutral-700 dark:bg-neutral-800 ${
+      className={`fixed inset-y-0 left-0 z-[150] w-72 max-w-[85vw] overflow-y-auto border-r border-neutral-200 bg-white shadow-2xl transition-transform dark:border-neutral-700 dark:bg-neutral-800 ${
         open ? 'translate-x-0' : '-translate-x-full'
       }`}
       aria-hidden={!open}
