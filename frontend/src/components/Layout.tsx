@@ -54,7 +54,7 @@ export default function Layout({ children }: LayoutProps) {
       {isAuthenticated && location.pathname !== '/chat' ? (
         <Link
           to="/chat"
-          className="floating-chat-launcher"
+          className="floating-chat-launcher lg:hidden"
           aria-label="Open chat"
           title="Open chat"
         >

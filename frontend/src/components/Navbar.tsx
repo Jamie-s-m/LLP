@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { FiBell, FiBellOff, FiChevronDown, FiLogOut, FiMenu, FiMessageCircle, FiSettings, FiUser } from 'react-icons/fi'
+import { FiBell, FiBellOff, FiChevronDown, FiGrid, FiLogOut, FiMessageCircle, FiSettings, FiUser } from 'react-icons/fi'
 import toast from 'react-hot-toast'
 import { useAuthStore } from '../store/authStore'
 import { useChatStore } from '../store/chatStore'
@@ -19,6 +19,23 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
   const navigate = useNavigate()
   const location = useLocation()
   const dropdownRef = useRef<HTMLDivElement | null>(null)
+  const isTopNavActive = (path: string) => (path === '/' ? location.pathname === '/' : location.pathname.startsWith(path))
+
+  const topNavClasses = (path: string) =>
+    `rounded-full px-3 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-800 ${
+      isTopNavActive(path)
+        ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/40 dark:text-primary-300'
+        : 'text-neutral-700 hover:bg-neutral-100 hover:text-primary-500 dark:text-neutral-300 dark:hover:bg-neutral-700/80 dark:hover:text-white'
+    }`
+
+  const roleLabel = user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : ''
+  const dashboardConfig = user?.role === 'admin'
+    ? { to: '/admin/control-center', label: 'Control Center' }
+    : user?.role === 'teacher'
+      ? { to: '/teacher/dashboard', label: 'Teaching Dashboard' }
+      : user?.role === 'parent'
+        ? { to: '/parent/dashboard', label: 'Family Desk' }
+        : { to: '/dashboard', label: 'Learner Dashboard' }
 
   useEffect(() => {
     if (isAuthenticated) setNotifPermission(getNotificationPermission())
@@ -122,34 +139,23 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 
         {/* Center Navigation */}
         <div className="hidden md:flex items-center gap-8">
-          <Link to="/" className="text-neutral-700 dark:text-neutral-300 hover:text-primary-500">
+          <Link to="/" className={topNavClasses('/')} title="Go to home">
             Home
           </Link>
-          <Link to="/courses" className="text-neutral-700 dark:text-neutral-300 hover:text-primary-500">
+          <Link to="/courses" className={topNavClasses('/courses')} title="Browse courses">
             Courses
           </Link>
-          <Link to="/forum" className="text-neutral-700 dark:text-neutral-300 hover:text-primary-500">
+          <Link to="/forum" className={topNavClasses('/forum')} title="Open forum">
             Forum
           </Link>
         </div>
 
         {/* Right Section */}
         <div className="flex items-center gap-3">
-          <ThemeToggle />
-          {isAuthenticated ? (
-            <button
-              onClick={onMenuClick}
-              className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
-              aria-label="Open navigation menu"
-            >
-              <FiMenu size={18} />
-              <span className="hidden sm:inline">Menu</span>
-            </button>
-          ) : null}
           {isAuthenticated ? (
             <Link
               to="/chat"
-              className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-700 transition hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
+              className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-700 transition hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700 dark:focus-visible:ring-offset-neutral-800"
               aria-label="Open chat"
               title="Open chat"
             >
@@ -160,7 +166,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
           {isAuthenticated && isPushSupported() && notifPermission !== 'granted' ? (
             <button
               onClick={handleEnableNotifications}
-              className="p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 text-neutral-500"
+              className="rounded-full p-2 text-neutral-500 transition hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:hover:bg-neutral-700 dark:focus-visible:ring-offset-neutral-800"
               aria-label="Enable notifications"
               title="Enable notifications for chat and updates"
             >
@@ -168,30 +174,62 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
             </button>
           ) : null}
           {isAuthenticated && notifPermission === 'granted' ? (
-            <span className="p-2 text-primary-500" title="Notifications enabled">
+            <span className="rounded-full p-2 text-primary-500" title="Notifications enabled">
               <FiBell size={20} />
             </span>
+          ) : null}
+          <ThemeToggle />
+          {isAuthenticated ? (
+            <button
+              onClick={onMenuClick}
+              className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700 dark:focus-visible:ring-offset-neutral-800"
+              aria-label="Open workspace menu"
+              title="Open workspace navigation"
+            >
+              <FiGrid size={18} />
+              <span className="hidden sm:inline">Workspace</span>
+            </button>
           ) : null}
           {isAuthenticated ? (
             <div ref={dropdownRef} className="relative">
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-2 py-1.5 text-neutral-900 hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700 transition-colors"
+                className="flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-2 py-1.5 text-neutral-900 transition-colors hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700 dark:focus-visible:ring-offset-neutral-800"
                 aria-expanded={dropdownOpen}
                 aria-haspopup="menu"
+                title="Open account menu"
               >
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white font-bold">
                   {user?.firstName?.charAt(0)}
                 </div>
-                <span className="hidden sm:inline text-sm font-medium text-neutral-900 dark:text-white">
-                  {user?.firstName}
-                </span>
+                <div className="hidden min-w-0 sm:block">
+                  <span className="block max-w-24 truncate text-sm font-medium text-neutral-900 dark:text-white">
+                    {user?.firstName}
+                  </span>
+                  <span className="block text-[11px] uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+                    {roleLabel}
+                  </span>
+                </div>
                 <FiChevronDown className={`hidden sm:block transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} size={16} />
               </button>
 
               {/* Dropdown Menu */}
               {dropdownOpen && (
                 <div className="absolute right-0 mt-2 w-56 overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-800" role="menu">
+                  <div className="border-b border-neutral-200 px-4 py-3 dark:border-neutral-700">
+                    <p className="text-sm font-semibold text-neutral-900 dark:text-white">{user?.firstName} {user?.lastName}</p>
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400">{user?.email}</p>
+                    <span className="mt-2 inline-flex rounded-full bg-primary-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-primary-600 dark:bg-primary-900/40 dark:text-primary-300">
+                      {roleLabel}
+                    </span>
+                  </div>
+                  <Link
+                    to={dashboardConfig.to}
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-2 px-4 py-3 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
+                  >
+                    <FiGrid size={16} /> {dashboardConfig.label}
+                  </Link>
                   <Link
                     to="/profile"
                     onClick={() => setDropdownOpen(false)}
@@ -228,16 +266,14 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
             </div>
           ) : (
             <div className="flex items-center gap-2">
+              <ThemeToggle />
               <Link
                 to="/login"
                 className="btn btn-outline text-sm px-3 py-1.5"
               >
                 Login
               </Link>
-              <Link
-                to="/register"
-                className="btn btn-primary text-sm px-3 py-1.5"
-              >
+              <Link to="/register" className="btn btn-primary text-sm px-3 py-1.5">
                 Sign Up
               </Link>
             </div>

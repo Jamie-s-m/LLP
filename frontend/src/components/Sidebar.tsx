@@ -21,6 +21,13 @@ interface SidebarProps {
 export default function Sidebar({ open, onClose }: SidebarProps) {
   const { user } = useAuthStore()
   const location = useLocation()
+  const workspaceTitle = user?.role === 'admin'
+    ? 'Admin workspace'
+    : user?.role === 'teacher'
+      ? 'Teacher workspace'
+      : user?.role === 'parent'
+        ? 'Parent workspace'
+        : 'Student workspace'
 
   const isActive = (path: string) => location.pathname.startsWith(path)
 
@@ -70,7 +77,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           <div className="mb-6 flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-coral">Workspace</p>
-              <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Navigation</h2>
+              <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">{workspaceTitle}</h2>
             </div>
             <button
               type="button"

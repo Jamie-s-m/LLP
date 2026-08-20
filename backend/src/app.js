@@ -70,13 +70,13 @@ const authLimiter = rateLimit({
   message: { success: false, message: 'Too many authentication attempts. Please try again later.' },
 });
 
-app.use('/api', apiLimiter);
-app.use('/api/auth', authLimiter);
-
 // Health Check
 app.get('/api/health', (req, res) => {
   res.status(200).json({ success: true, message: 'API is running successfully' });
 });
+
+app.use('/api', apiLimiter);
+app.use('/api/auth', authLimiter);
 
 // API Routes
 app.use('/api/auth', authRoutes);
