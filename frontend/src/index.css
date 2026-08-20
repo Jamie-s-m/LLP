@@ -138,8 +138,7 @@
     @apply text-4xl font-semibold text-ink dark:text-white md:text-5xl;
   }
 
-  .atlas-heading > p:last-child,
-  .atlas-hero p {
+  .atlas-heading > p:last-child {
     @apply max-w-xl text-base text-slate-700 dark:text-slate-200;
   }
 
@@ -173,6 +172,15 @@
 
   .atlas-hero h1 {
     @apply text-5xl font-semibold text-white md:text-6xl;
+  }
+
+  .atlas-hero .atlas-kicker {
+    color: #99f6e4;
+    text-shadow: 0 10px 25px rgba(10, 29, 47, 0.28);
+  }
+
+  .atlas-hero p {
+    color: rgba(240, 249, 255, 0.88);
   }
 
   .atlas-hero img {
