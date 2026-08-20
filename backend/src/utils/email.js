@@ -48,3 +48,31 @@ export const sendVerificationEmail = async ({ user, token }) => {
 
   return { delivered: true, previewUrl: verificationUrl };
 };
+
+export const sendPasswordResetEmail = async ({ user, token }) => {
+  const resetUrl = `${getFrontendAppUrl()}/reset-password?token=${encodeURIComponent(token)}&email=${encodeURIComponent(user.email)}`;
+  const transporter = getTransporter();
+
+  if (!transporter) {
+    console.warn(`Email transport is not configured. Password reset URL for ${user.email}: ${resetUrl}`);
+    return { delivered: false, previewUrl: resetUrl };
+  }
+
+  await transporter.sendMail({
+    from: process.env.EMAIL_FROM || 'LinguaNest <no-reply@linguanest.app>',
+    to: user.email,
+    subject: 'Reset your LinguaNest password',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto; color: #102a43;">
+        <h1 style="margin-bottom: 12px;">Reset your password</h1>
+        <p style="font-size: 16px; line-height: 1.5;">Hi ${user.firstName}, use the link below to create a new password for your LinguaNest account.</p>
+        <p style="margin: 24px 0;">
+          <a href="${resetUrl}" style="display: inline-block; background: #102a43; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 10px; font-weight: 700;">Reset password</a>
+        </p>
+        <p style="font-size: 14px; color: #486581;">This link expires in 30 minutes. If you did not request it, you can ignore this email.</p>
+      </div>
+    `,
+  });
+
+  return { delivered: true, previewUrl: resetUrl };
+};

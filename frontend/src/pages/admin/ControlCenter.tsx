@@ -7,6 +7,7 @@ interface Course { _id: string; title: string; description?: string; language: s
 interface User { _id: string; firstName: string; lastName: string; email: string; role: string; isActive: boolean }
 interface Application { _id: string; firstName: string; lastName: string; email: string }
 interface CourseForm { title: string; description: string; language: string; level: string; category: string }
+interface Overview { totals: { users: number; students: number; teachers: number; parents: number; admins: number; courses: number; publishedCourses: number; lessons: number; flashcards: number; posts: number; pinnedPosts: number; groups: number; pendingTeacherApplications: number; approvedFamilyLinks: number; chatConversations: number; chatMessages: number; enrollments: number; completedEnrollments: number } }
 
 type Tab = 'courses' | 'users' | 'content' | 'applications' | 'moderation'
 
@@ -22,15 +23,17 @@ export default function ControlCenter() {
   const [courseModal, setCourseModal] = useState<Course | null | false>(false)
   const [courseForm, setCourseForm] = useState<CourseForm>({ title: '', description: '', language: 'English', level: 'Beginner', category: 'Conversation' })
   const [moderationResource, setModerationResource] = useState<'posts' | 'groups'>('posts')
+  const [overview, setOverview] = useState<Overview | null>(null)
   const [loading, setLoading] = useState(true)
   const pageSize = 8
 
   const load = async () => {
     setLoading(true)
     try {
-      const [courseResponse, userResponse] = await Promise.all([api.get('/courses'), api.get('/admin/users')])
+      const [courseResponse, userResponse, overviewResponse] = await Promise.all([api.get('/courses'), api.get('/admin/users'), api.get('/admin/overview')])
       setCourses(courseResponse.data.data || courseResponse.data || [])
       setUsers(userResponse.data.data || [])
+      setOverview(overviewResponse.data.data || null)
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Admin data could not be loaded')
     } finally { setLoading(false) }
@@ -116,6 +119,14 @@ export default function ControlCenter() {
   return (
     <div className="atlas-page max-w-7xl mx-auto px-4 py-8">
       <div className="atlas-heading mb-8"><p className="atlas-kicker">Operations desk</p><h1>Run the learning atlas.</h1><p>Manage people, curriculum, and community from one focused control center.</p></div>
+      {overview ? <div className="atlas-stat-grid mb-8">{[
+        ['Users', overview.totals.users],
+        ['Courses', overview.totals.courses],
+        ['Published', overview.totals.publishedCourses],
+        ['Messages', overview.totals.chatMessages],
+        ['Posts', overview.totals.posts],
+        ['Pending teachers', overview.totals.pendingTeacherApplications],
+      ].map(([label, value]) => <div key={String(label)} className="atlas-stat"><strong>{value}</strong><span>{label}</span></div>)}</div> : null}
       <div className="admin-tabs mb-6">{([['courses', FiBookOpen, 'Courses'], ['users', FiUsers, 'People'], ['content', FiEdit3, 'Content'], ['applications', FiUserCheck, 'Applications'], ['moderation', FiMessageSquare, 'Moderation']] as const).map(([value, Icon, label]) => <button key={value} onClick={() => { setTab(value); if (value === 'content') loadContent(); if (value === 'applications') loadApplications(); if (value === 'moderation') loadContent(moderationResource) }} className={tab === value ? 'active' : ''}><Icon />{label}</button>)}</div>
       {tab === 'courses' && <section className="atlas-panel p-6"><div className="flex flex-wrap justify-between gap-4 mb-6"><div><p className="atlas-kicker">Content inventory</p><h2>Courses</h2></div><button onClick={() => openCourseModal()} className="btn btn-primary inline-flex items-center gap-2"><FiPlus /> New Course</button></div>{loading ? <p>Loading curriculum...</p> : <div className="admin-table">{courses.map((course) => <div className="admin-row" key={course._id}><div><strong>{course.title}</strong><small>{course.language} · {course.level} · {course.totalLessons || 0} lessons</small></div><span className="status-pill">{course.isPublished ? 'Published' : 'Draft'}</span><button onClick={() => openCourseModal(course)} className="icon-button" aria-label={`Edit ${course.title}`}><FiEdit3 /></button><button onClick={() => removeCourse(course._id)} className="icon-button danger" aria-label={`Delete ${course.title}`}><FiTrash2 /></button></div>)}{courses.length === 0 && <div className="empty-state"><FiBookOpen /><p>No courses yet.</p></div>}</div>}</section>}
       {tab === 'users' && <section className="atlas-panel p-6"><div className="flex flex-wrap justify-between gap-4 mb-6"><h2>People & roles</h2><input className="input max-w-sm" value={userSearch} onChange={(event) => { setUserSearch(event.target.value); setUserPage(1) }} placeholder="Search name, email, or role" /></div><div className="admin-table">{visibleUsers.map((user) => <div className="admin-row" key={user._id}><div><strong>{user.firstName} {user.lastName}</strong><small>{user.email} · {user.role}</small></div><span className={`status-pill ${user.isActive ? '' : 'muted'}`}>{user.isActive ? 'Active' : 'Suspended'}</span><button onClick={() => toggleUser(user)} className="icon-button" aria-label={`Toggle ${user.email}`}><FiEdit3 /></button></div>)}</div><div className="flex items-center justify-between mt-5 text-sm"><span>{filteredUsers.length} users</span><div className="flex gap-2"><button className="btn btn-outline" disabled={userPage === 1} onClick={() => setUserPage((page) => page - 1)}>Previous</button><span className="px-3 py-2">{userPage} / {totalUserPages}</span><button className="btn btn-outline" disabled={userPage === totalUserPages} onClick={() => setUserPage((page) => page + 1)}>Next</button></div></div></section>}

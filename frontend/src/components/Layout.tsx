@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Link, useLocation } from 'react-router-dom'
 import { FiMessageCircle } from 'react-icons/fi'
 import { useAuthStore } from '../store/authStore'
+import { useChatStore } from '../store/chatStore'
 import Navbar from './Navbar'
 import Sidebar from './Sidebar'
 
@@ -13,6 +14,7 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const { isAuthenticated } = useAuthStore()
+  const totalUnread = useChatStore((state) => state.totalUnread)
   const location = useLocation()
 
   React.useEffect(() => {
@@ -57,6 +59,7 @@ export default function Layout({ children }: LayoutProps) {
           title="Open chat"
         >
           <FiMessageCircle size={22} />
+          {totalUnread > 0 ? <span className="absolute -right-1 -top-1 min-w-5 rounded-full bg-coral px-1.5 py-0.5 text-center text-[10px] font-bold text-white">{totalUnread > 99 ? '99+' : totalUnread}</span> : null}
         </Link>
       ) : null}
     </div>

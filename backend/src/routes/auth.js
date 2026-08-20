@@ -2,8 +2,8 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import { sendPushToUsers } from '../utils/push.js';
-import { sendVerificationEmail } from '../utils/email.js';
-import { generateEmailVerificationToken, hashEmailVerificationToken } from '../utils/emailVerification.js';
+import { sendPasswordResetEmail, sendVerificationEmail } from '../utils/email.js';
+import { generateEmailVerificationToken, generatePasswordResetToken, hashEmailVerificationToken, hashToken } from '../utils/emailVerification.js';
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'local-development-only-secret';
@@ -223,6 +223,66 @@ router.post('/resend-verification', async (req, res) => {
   } catch (error) {
     console.error('Resend Verification Error:', error);
     res.status(500).json({ success: false, message: 'Unable to resend verification email' });
+  }
+});
+
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const email = normalizeEmail(req.body.email);
+    if (!email || !EMAIL_RE.test(email)) {
+      return res.status(400).json({ success: false, message: 'Please provide a valid email address' });
+    }
+
+    const user = await User.findOne({ email });
+    if (user) {
+      const resetToken = generatePasswordResetToken();
+      user.passwordResetToken = resetToken.tokenHash;
+      user.passwordResetExpiresAt = resetToken.expiresAt;
+      user.passwordResetSentAt = new Date();
+      await user.save();
+      await sendPasswordResetEmail({ user, token: resetToken.token });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'If an account exists for this email, a password reset link has been sent.',
+    });
+  } catch (error) {
+    console.error('Forgot Password Error:', error);
+    res.status(500).json({ success: false, message: 'Unable to start password reset right now' });
+  }
+});
+
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { token, password } = req.body;
+    if (!token || !password) {
+      return res.status(400).json({ success: false, message: 'Reset token and new password are required' });
+    }
+
+    if (String(password).length < 8) {
+      return res.status(400).json({ success: false, message: 'Password must be at least 8 characters long' });
+    }
+
+    const user = await User.findOne({
+      passwordResetToken: hashToken(token),
+      passwordResetExpiresAt: { $gt: new Date() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ success: false, message: 'Password reset link is invalid or expired' });
+    }
+
+    user.password = password;
+    user.passwordResetToken = '';
+    user.passwordResetExpiresAt = null;
+    user.passwordResetSentAt = null;
+    await user.save();
+
+    res.status(200).json({ success: true, message: 'Password updated successfully. You can now sign in.' });
+  } catch (error) {
+    console.error('Reset Password Error:', error);
+    res.status(500).json({ success: false, message: 'Password reset failed' });
   }
 });
 

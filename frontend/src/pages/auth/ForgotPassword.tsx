@@ -2,23 +2,19 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
-import axios from 'axios'
+import api from '../../services/api'
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
 
-  // Clean API base URL fallback matching your app setup
-  const rawApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
-  const API_URL = rawApiUrl.replace(/[\[\]'"]+/g, '').replace(/\/+$/, '')
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
     try {
-      await axios.post(`${API_URL}/auth/forgot-password`, { email })
+      await api.post('/auth/forgot-password', { email })
       toast.success('Reset link sent to your email!')
       setSubmitted(true)
     } catch (error: any) {

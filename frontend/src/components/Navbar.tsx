@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { FiBell, FiBellOff, FiChevronDown, FiLogOut, FiMenu, FiSettings, FiUser } from 'react-icons/fi'
+import { FiBell, FiBellOff, FiChevronDown, FiLogOut, FiMenu, FiMessageCircle, FiSettings, FiUser } from 'react-icons/fi'
 import toast from 'react-hot-toast'
 import { useAuthStore } from '../store/authStore'
+import { useChatStore } from '../store/chatStore'
 import { enablePushNotifications, getNotificationPermission, isPushSupported } from '../utils/push'
 
 interface NavbarProps {
@@ -13,6 +14,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [notifPermission, setNotifPermission] = useState<NotificationPermission | 'unsupported'>('default')
   const { isAuthenticated, user, logout } = useAuthStore()
+  const { totalUnread, fetchUnreadSummary } = useChatStore()
   const navigate = useNavigate()
   const location = useLocation()
   const dropdownRef = useRef<HTMLDivElement | null>(null)
@@ -20,6 +22,16 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
   useEffect(() => {
     if (isAuthenticated) setNotifPermission(getNotificationPermission())
   }, [isAuthenticated])
+
+  useEffect(() => {
+    if (!isAuthenticated) return
+    fetchUnreadSummary()
+    const timer = window.setInterval(() => {
+      fetchUnreadSummary()
+    }, 15000)
+
+    return () => window.clearInterval(timer)
+  }, [fetchUnreadSummary, isAuthenticated])
 
   useEffect(() => {
     setDropdownOpen(false)
@@ -99,6 +111,17 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
               <FiMenu size={18} />
               <span className="hidden sm:inline">Menu</span>
             </button>
+          ) : null}
+          {isAuthenticated ? (
+            <Link
+              to="/chat"
+              className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-700 transition hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
+              aria-label="Open chat"
+              title="Open chat"
+            >
+              <FiMessageCircle size={18} />
+              {totalUnread > 0 ? <span className="absolute -right-1 -top-1 min-w-5 rounded-full bg-coral px-1.5 py-0.5 text-center text-[10px] font-bold text-white">{totalUnread > 99 ? '99+' : totalUnread}</span> : null}
+            </Link>
           ) : null}
           {isAuthenticated && isPushSupported() && notifPermission !== 'granted' ? (
             <button

@@ -22,6 +22,8 @@ The VAPID public key is safe in frontend configuration. Never put the private ke
 
 Email verification links land on [VerifyEmail.tsx](C:/Users/morea/language-learn-platform/frontend/src/pages/auth/VerifyEmail.tsx), which calls the backend `/api/auth/verify-email` endpoint and lets the user resend verification emails when needed.
 
+Password reset uses [ForgotPassword.tsx](C:/Users/morea/language-learn-platform/frontend/src/pages/auth/ForgotPassword.tsx) and [ResetPassword.tsx](C:/Users/morea/language-learn-platform/frontend/src/pages/auth/ResetPassword.tsx). Chat unread counts are surfaced in the navbar, floating launcher, and [Chat.tsx](C:/Users/morea/language-learn-platform/frontend/src/pages/Chat.tsx).
+
 ## Routes
 
 Public:
@@ -32,6 +34,7 @@ Public:
 - `/login`
 - `/register`
 - `/forgot-password`
+- `/reset-password`
 - `/forum`
 
 Student:

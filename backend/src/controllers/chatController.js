@@ -15,7 +15,29 @@ export const listConversations = async (req, res, next) => {
       .populate('group', 'name')
       .sort({ lastMessageAt: -1 });
 
-    res.status(200).json({ success: true, data: conversations });
+    const unreadStats = await ChatMessage.aggregate([
+      {
+        $match: {
+          conversation: { $in: conversations.map((conversation) => conversation._id) },
+          sender: { $ne: new mongoose.Types.ObjectId(req.user.id) },
+          readBy: { $nin: [new mongoose.Types.ObjectId(req.user.id)] },
+        },
+      },
+      { $group: { _id: '$conversation', unreadCount: { $sum: 1 } } },
+    ]);
+
+    const unreadByConversation = unreadStats.reduce((accumulator, item) => {
+      accumulator[item._id.toString()] = item.unreadCount;
+      return accumulator;
+    }, {});
+
+    res.status(200).json({
+      success: true,
+      data: conversations.map((conversation) => ({
+        ...conversation.toObject(),
+        unreadCount: unreadByConversation[conversation._id.toString()] || 0,
+      })),
+    });
   } catch (error) {
     next(error);
   }
@@ -114,6 +136,15 @@ export const listMessages = async (req, res, next) => {
       .sort({ createdAt: 1 })
       .limit(100);
 
+    await ChatMessage.updateMany(
+      {
+        conversation: conversation._id,
+        sender: { $ne: req.user.id },
+        readBy: { $nin: [req.user.id] },
+      },
+      { $addToSet: { readBy: req.user.id } }
+    );
+
     res.status(200).json({ success: true, data: messages });
   } catch (error) {
     next(error);
@@ -136,6 +167,7 @@ export const sendMessage = async (req, res, next) => {
       conversation: conversation._id,
       sender: req.user.id,
       body,
+      readBy: [req.user.id],
     });
 
     conversation.lastMessageAt = new Date();
@@ -149,6 +181,32 @@ export const sendMessage = async (req, res, next) => {
     }).catch(() => {});
 
     res.status(201).json({ success: true, data: await message.populate('sender', 'firstName lastName role avatar') });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getUnreadSummary = async (req, res, next) => {
+  try {
+    const conversations = await ChatConversation.find({ participants: req.user.id }).select('_id');
+    const summary = await ChatMessage.aggregate([
+      {
+        $match: {
+          conversation: { $in: conversations.map((conversation) => conversation._id) },
+          sender: { $ne: new mongoose.Types.ObjectId(req.user.id) },
+          readBy: { $nin: [new mongoose.Types.ObjectId(req.user.id)] },
+        },
+      },
+      { $group: { _id: '$conversation', unreadCount: { $sum: 1 } } },
+    ]);
+
+    const byConversation = summary.reduce((accumulator, item) => {
+      accumulator[item._id.toString()] = item.unreadCount;
+      return accumulator;
+    }, {});
+    const totalUnread = summary.reduce((count, item) => count + item.unreadCount, 0);
+
+    res.status(200).json({ success: true, data: { totalUnread, byConversation } });
   } catch (error) {
     next(error);
   }

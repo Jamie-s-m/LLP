@@ -51,7 +51,7 @@ SMTP_PASS=
 EMAIL_FROM="LinguaNest <no-reply@linguanest.app>"
 ```
 
-Only the VAPID public key belongs in frontend configuration as `VITE_VAPID_PUBLIC_KEY`. Never commit `.env` files or a VAPID private key. Email verification uses `FRONTEND_APP_URL` to build the verification link and SMTP variables to deliver it.
+Only the VAPID public key belongs in frontend configuration as `VITE_VAPID_PUBLIC_KEY`. Never commit `.env` files or a VAPID private key. Email verification and password reset both use `FRONTEND_APP_URL` to build secure links and SMTP variables to deliver them.
 
 ## Run locally
 

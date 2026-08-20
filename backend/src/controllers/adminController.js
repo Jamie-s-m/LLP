@@ -4,6 +4,10 @@ import Lesson from '../models/Lesson.js';
 import Flashcard from '../models/Flashcard.js';
 import ForumPost from '../models/ForumPost.js';
 import Group from '../models/Group.js';
+import FamilyLink from '../models/FamilyLink.js';
+import ChatConversation from '../models/ChatConversation.js';
+import ChatMessage from '../models/ChatMessage.js';
+import Progress from '../models/Progress.js';
 
 const contentModels = { courses: Course, lessons: Lesson, flashcards: Flashcard, posts: ForumPost, groups: Group };
 
@@ -62,10 +66,32 @@ export const reviewTeacherApplication = async (req, res, next) => {
 
 export const getOverview = async (req, res, next) => {
   try {
-    const [users, courses, lessons, flashcards, posts] = await Promise.all([
-      User.countDocuments(), Course.countDocuments(), Lesson.countDocuments(), Flashcard.countDocuments(), ForumPost.countDocuments(),
+    const [users, students, teachers, parents, admins, courses, publishedCourses, lessons, flashcards, posts, pinnedPosts, groups, pendingTeacherApplications, approvedFamilyLinks, chatConversations, chatMessages, enrollments, completedEnrollments] = await Promise.all([
+      User.countDocuments(),
+      User.countDocuments({ role: 'student' }),
+      User.countDocuments({ role: 'teacher' }),
+      User.countDocuments({ role: 'parent' }),
+      User.countDocuments({ role: 'admin' }),
+      Course.countDocuments(),
+      Course.countDocuments({ isPublished: true }),
+      Lesson.countDocuments(),
+      Flashcard.countDocuments(),
+      ForumPost.countDocuments(),
+      ForumPost.countDocuments({ isPinned: true }),
+      Group.countDocuments(),
+      User.countDocuments({ teacherApplicationStatus: 'pending' }),
+      FamilyLink.countDocuments({ status: 'approved' }),
+      ChatConversation.countDocuments(),
+      ChatMessage.countDocuments(),
+      Progress.countDocuments(),
+      Progress.countDocuments({ isCompleted: true }),
     ]);
-    res.status(200).json({ success: true, data: { users, courses, lessons, flashcards, posts } });
+    res.status(200).json({
+      success: true,
+      data: {
+        totals: { users, students, teachers, parents, admins, courses, publishedCourses, lessons, flashcards, posts, pinnedPosts, groups, pendingTeacherApplications, approvedFamilyLinks, chatConversations, chatMessages, enrollments, completedEnrollments },
+      },
+    });
   } catch (error) { next(error); }
 };
 

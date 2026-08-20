@@ -4,12 +4,14 @@ import { FiLifeBuoy, FiMessageCircle, FiSearch, FiSend, FiUsers } from 'react-ic
 import { io, Socket } from 'socket.io-client'
 import api from '../services/api'
 import { useAuthStore } from '../store/authStore'
+import { useChatStore } from '../store/chatStore'
 
 interface Conversation {
   _id: string
   type: 'direct' | 'group' | 'support'
   name?: string
   participants: Array<{ _id: string; firstName: string; lastName: string; role: string }>
+  unreadCount?: number
 }
 
 interface Message {
@@ -21,6 +23,7 @@ interface Message {
 
 export default function Chat() {
   const { user } = useAuthStore()
+  const { byConversation, fetchUnreadSummary, clearConversationUnread } = useChatStore()
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [messages, setMessages] = useState<Message[]>([])
   const [activeId, setActiveId] = useState('')
@@ -37,6 +40,7 @@ export default function Chat() {
       const data = response.data.data || []
       setConversations(data)
       if (!activeId && data[0]) setActiveId(data[0]._id)
+      fetchUnreadSummary()
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Unable to load conversations')
     } finally {
@@ -49,7 +53,11 @@ export default function Chat() {
     const token = localStorage.getItem('token')
     if (!token) return
     const connection = io(import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, '') || 'http://localhost:5000', { auth: { token } })
-    connection.on('message:new', (message: Message) => setMessages((current) => current.some((item) => item._id === message._id) ? current : [...current, message]))
+    connection.on('message:new', (message: Message) => {
+      setMessages((current) => current.some((item) => item._id === message._id) ? current : [...current, message])
+      fetchUnreadSummary()
+      loadConversations()
+    })
     setSocket(connection)
     return () => { connection.disconnect() }
   }, [])
@@ -71,12 +79,17 @@ export default function Chat() {
 
   useEffect(() => {
     if (!activeId) return
-    const loadMessages = () => api.get(`/chat/conversations/${activeId}/messages`).then((response) => setMessages(response.data.data || [])).catch(() => undefined)
+    const loadMessages = () => api.get(`/chat/conversations/${activeId}/messages`).then((response) => {
+      setMessages(response.data.data || [])
+      clearConversationUnread(activeId)
+      fetchUnreadSummary()
+      setConversations((current) => current.map((conversation) => conversation._id === activeId ? { ...conversation, unreadCount: 0 } : conversation))
+    }).catch(() => undefined)
     loadMessages()
     socket?.emit('conversation:join', activeId)
     const timer = window.setInterval(loadMessages, 5000)
     return () => window.clearInterval(timer)
-  }, [activeId, socket])
+  }, [activeId, clearConversationUnread, fetchUnreadSummary, socket])
 
   const sendMessage = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -85,6 +98,7 @@ export default function Chat() {
     try {
       const response = await api.post(`/chat/conversations/${activeId}/messages`, { body: draft })
       setMessages((current) => current.some((item) => item._id === response.data.data._id) ? current : [...current, response.data.data])
+      fetchUnreadSummary()
       setDraft('')
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Message could not be sent')
@@ -171,7 +185,8 @@ export default function Chat() {
           ) : conversations.map((conversation) => (
             <button key={conversation._id} onClick={() => setActiveId(conversation._id)} className={`chat-thread ${activeId === conversation._id ? 'active' : ''}`}>
               <span className="chat-avatar">{conversation.type === 'group' ? <FiUsers /> : <FiMessageCircle />}</span>
-              <span><strong>{getConversationName(conversation)}</strong><small>{conversation.type}</small></span>
+              <span className="flex-1"><strong>{getConversationName(conversation)}</strong><small>{conversation.type}</small></span>
+              {(conversation.unreadCount || byConversation[conversation._id]) ? <span className="rounded-full bg-coral px-2 py-1 text-xs font-bold text-white">{conversation.unreadCount || byConversation[conversation._id]}</span> : null}
             </button>
           ))}
         </aside>

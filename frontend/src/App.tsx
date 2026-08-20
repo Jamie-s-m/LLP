@@ -8,6 +8,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 const Login = lazy(() => import('./pages/auth/Login'))
 const Register = lazy(() => import('./pages/auth/Register'))
 const ForgotPassword = lazy(() => import('./pages/auth/ForgotPassword'))
+const ResetPassword = lazy(() => import('./pages/auth/ResetPassword'))
 const VerifyEmail = lazy(() => import('./pages/auth/VerifyEmail'))
 const Home = lazy(() => import('./pages/Home'))
 const Courses = lazy(() => import('./pages/Courses'))
@@ -55,6 +56,7 @@ function App() {
         <Route path="/register" element={isAuthenticated ? <Navigate to={authenticatedLandingPath} replace /> : <Layout><Register /></Layout>} />
         <Route path="/verify-email" element={<Layout><VerifyEmail /></Layout>} />
         <Route path="/forgot-password" element={<Layout><ForgotPassword /></Layout>} />
+        <Route path="/reset-password" element={<Layout><ResetPassword /></Layout>} />
 
         {/* Student Routes */}
         <Route
