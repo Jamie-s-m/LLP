@@ -77,26 +77,27 @@ export default function CourseDetail() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="atlas-page">
+      <div className="max-w-4xl mx-auto p-6">
       {loading ? <p>Loading course...</p> : null}
       {!loading && !course ? <p>Course not found.</p> : null}
-      {course ? <h1 className="text-3xl font-bold text-white mb-4">{course.title}</h1> : null}
+      {course ? <h1 className="mb-4 text-4xl font-bold text-ink">{course.title}</h1> : null}
       {/* Course metadata card */}
-      {course ? <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 mb-6">
-        <div className="flex flex-wrap gap-2 text-sm text-slate-300 mb-4">
-          <span>{course.language}</span>
-          <span>{course.level}</span>
-          <span>{course.category}</span>
+      {course ? <div className="atlas-panel mb-6 rounded-3xl p-6">
+        <div className="mb-4 flex flex-wrap gap-2 text-sm text-slate-600">
+          <span className="rounded-full bg-[#102a43]/10 px-3 py-1">{course.language}</span>
+          <span className="rounded-full bg-[#102a43]/10 px-3 py-1">{course.level}</span>
+          <span className="rounded-full bg-[#102a43]/10 px-3 py-1">{course.category}</span>
         </div>
-        <p className="text-slate-300 mb-6">{course.description}</p>
+        <p className="mb-6 text-slate-700">{course.description}</p>
 
-        <h2 className="text-xl font-semibold text-white mb-3">Lessons</h2>
+        <h2 className="mb-3 text-xl font-semibold text-ink">Lessons</h2>
         {lessons.length > 0 ? <div className="space-y-2 mb-6">
           {lessons.map((lesson) => (
             <button
               key={lesson._id}
               onClick={() => navigate(`/lesson/${lesson._id}`)}
-              className="w-full text-left p-3 rounded-lg bg-slate-700/60 hover:bg-slate-700 text-slate-100"
+              className="w-full rounded-2xl border border-[#102a43]/10 bg-white px-4 py-3 text-left text-slate-700 transition hover:border-primary-300 hover:bg-[#f6efe7]"
             >
               {lesson.order}. {lesson.title}
             </button>
@@ -106,7 +107,7 @@ export default function CourseDetail() {
         {isEnrolled ? (
           <button
             onClick={() => navigate('/my-learning')}
-            className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg transition"
+            className="btn bg-emerald-600 px-6 py-3 font-semibold text-white hover:bg-emerald-500"
           >
             Continue Learning
           </button>
@@ -114,12 +115,13 @@ export default function CourseDetail() {
           <button
             onClick={handleEnroll}
             disabled={enrolling}
-            className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-semibold rounded-lg transition"
+            className="btn bg-indigo-600 px-6 py-3 font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
           >
             {enrolling ? 'Enrolling...' : 'Enroll in Course'}
           </button>
         )}
       </div> : null}
+      </div>
     </div>
   )
 }

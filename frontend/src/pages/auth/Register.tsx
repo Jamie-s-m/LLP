@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { FiBookOpen, FiUsers } from 'react-icons/fi'
 import { useAuthStore } from '../../store/authStore'
+import api from '../../services/api'
+import toast from 'react-hot-toast'
 
 type SignupRole = 'student' | 'parent'
 
@@ -17,12 +19,39 @@ export default function Register() {
   const [role, setRole] = useState<SignupRole>('student')
   const [requestTeacherRole, setRequestTeacherRole] = useState(false)
   const [localError, setLocalError] = useState('')
+  const [emailStatus, setEmailStatus] = useState<'idle' | 'checking' | 'available' | 'exists'>('idle')
+  const [emailStatusMessage, setEmailStatusMessage] = useState('')
 
   const { register, isLoading, error } = useAuthStore()
   const navigate = useNavigate()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
+    if (e.target.name === 'email') {
+      setEmailStatus('idle')
+      setEmailStatusMessage('')
+    }
+  }
+
+  const handleEmailBlur = async () => {
+    const email = formData.email.trim()
+    if (!email) return
+
+    setEmailStatus('checking')
+    try {
+      const response = await api.get(`/auth/check-email?email=${encodeURIComponent(email)}`)
+      const data = response.data.data
+      if (data.available) {
+        setEmailStatus('available')
+        setEmailStatusMessage('This email is available.')
+      } else {
+        setEmailStatus('exists')
+        setEmailStatusMessage(data.isEmailVerified ? 'This email is already registered.' : 'This account exists but is waiting for verification.')
+      }
+    } catch (error: any) {
+      setEmailStatus('idle')
+      setEmailStatusMessage(error.response?.data?.message || 'Email could not be checked')
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,7 +64,7 @@ export default function Register() {
     }
 
     try {
-      await register({
+      const payload = await register({
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
@@ -43,9 +72,16 @@ export default function Register() {
         role,
         requestTeacherRole: role === 'student' && requestTeacherRole,
       })
-      navigate(useAuthStore.getState().user?.role === 'parent' ? '/parent/dashboard' : '/dashboard')
+      toast.success('Account created. Please verify your email to sign in.')
+      const query = new URLSearchParams({ email: formData.email.trim() })
+      if (payload?.previewUrl) {
+        query.set('previewUrl', payload.previewUrl)
+      }
+      navigate(`/verify-email?${query.toString()}`)
     } catch (err: any) {
-      // Handled in authStore
+      if (err.response?.status === 409 && err.response?.data?.data?.requiresVerification) {
+        navigate(`/verify-email?email=${encodeURIComponent(formData.email.trim())}`)
+      }
     }
   }
 
@@ -115,7 +151,13 @@ export default function Register() {
               className="input"
               value={formData.email}
               onChange={handleChange}
+              onBlur={handleEmailBlur}
             />
+            {emailStatusMessage ? (
+              <p className={`mt-2 text-sm ${emailStatus === 'available' ? 'text-emerald-600' : emailStatus === 'exists' ? 'text-amber-700' : 'text-slate-500'}`}>
+                {emailStatus === 'checking' ? 'Checking email...' : emailStatusMessage}
+              </p>
+            ) : null}
           </div>
 
           <div>

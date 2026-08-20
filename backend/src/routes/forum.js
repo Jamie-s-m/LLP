@@ -4,7 +4,7 @@ import { getPosts, createPost, addReply } from '../controllers/forumController.j
 
 const router = express.Router();
 
-router.get('/posts', protect, getPosts);
+router.get('/posts', getPosts);
 router.post('/posts', protect, createPost);
 router.post('/posts/:postId/replies', protect, addReply);
 

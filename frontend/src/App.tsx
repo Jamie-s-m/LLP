@@ -1,57 +1,59 @@
+import { Suspense, lazy } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { useAuthStore } from './store/authStore'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 
-// Pages - Auth
-import Login from './pages/auth/Login'
-import Register from './pages/auth/Register'
-import ForgotPassword from './pages/auth/ForgotPassword'
-
-// Pages - Public
-import Home from './pages/Home'
-import Courses from './pages/Courses'
-import CourseDetail from './pages/CourseDetail'
-
-// Pages - Student
-import Dashboard from './pages/student/Dashboard'
-import MyLearning from './pages/student/MyLearning'
-import LessonView from './pages/student/LessonView'
-import ExercisePractice from './pages/student/ExercisePractice'
-import Flashcards from './pages/student/Flashcards'
-import Profile from './pages/student/Profile'
-import Groups from './pages/student/Groups'
-import Leaderboard from './pages/student/Leaderboard'
-
-// Pages - Teacher
-import TeacherDashboard from './pages/teacher/Dashboard'
-import CreateCourse from './pages/teacher/CreateCourse'
-import ManageCourse from './pages/teacher/ManageCourse'
-import StudentProgress from './pages/teacher/StudentProgress'
-
-// Pages - Common
-import Forum from './pages/Forum'
-import Chat from './pages/Chat'
-import ParentDashboard from './pages/ParentDashboard'
-import ChildProgress from './pages/ChildProgress'
-import ControlCenter from './pages/admin/ControlCenter'
-import NotFound from './pages/NotFound'
+const Login = lazy(() => import('./pages/auth/Login'))
+const Register = lazy(() => import('./pages/auth/Register'))
+const ForgotPassword = lazy(() => import('./pages/auth/ForgotPassword'))
+const VerifyEmail = lazy(() => import('./pages/auth/VerifyEmail'))
+const Home = lazy(() => import('./pages/Home'))
+const Courses = lazy(() => import('./pages/Courses'))
+const CourseDetail = lazy(() => import('./pages/CourseDetail'))
+const Dashboard = lazy(() => import('./pages/student/Dashboard'))
+const MyLearning = lazy(() => import('./pages/student/MyLearning'))
+const LessonView = lazy(() => import('./pages/student/LessonView'))
+const ExercisePractice = lazy(() => import('./pages/student/ExercisePractice'))
+const Flashcards = lazy(() => import('./pages/student/Flashcards'))
+const Profile = lazy(() => import('./pages/student/Profile'))
+const Groups = lazy(() => import('./pages/student/Groups'))
+const Leaderboard = lazy(() => import('./pages/student/Leaderboard'))
+const TeacherDashboard = lazy(() => import('./pages/teacher/Dashboard'))
+const CreateCourse = lazy(() => import('./pages/teacher/CreateCourse'))
+const ManageCourse = lazy(() => import('./pages/teacher/ManageCourse'))
+const StudentProgress = lazy(() => import('./pages/teacher/StudentProgress'))
+const Forum = lazy(() => import('./pages/Forum'))
+const Chat = lazy(() => import('./pages/Chat'))
+const ParentDashboard = lazy(() => import('./pages/ParentDashboard'))
+const ChildProgress = lazy(() => import('./pages/ChildProgress'))
+const ControlCenter = lazy(() => import('./pages/admin/ControlCenter'))
+const NotFound = lazy(() => import('./pages/NotFound'))
 
 function App() {
-  const { isAuthenticated } = useAuthStore()
+  const { isAuthenticated, user } = useAuthStore()
+  const authenticatedLandingPath = user?.role === 'admin'
+    ? '/admin/control-center'
+    : user?.role === 'teacher'
+      ? '/teacher/dashboard'
+      : user?.role === 'parent'
+        ? '/parent/dashboard'
+        : '/dashboard'
 
   return (
     // import.meta.env.BASE_URL dynamically reads '/LLP/' in production and '/' in dev
     <Router basename={import.meta.env.BASE_URL}>
       <Toaster position="top-right" />
+      <Suspense fallback={<Layout><div className="atlas-page flex items-center justify-center px-4 py-16"><div className="atlas-panel p-6 text-center text-slate-600">Loading...</div></div></Layout>}>
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Layout><Home /></Layout>} />
         <Route path="/courses" element={<Layout><Courses /></Layout>} />
         <Route path="/courses/:id" element={<Layout><CourseDetail /></Layout>} />
-        <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Layout><Login /></Layout>} />
-        <Route path="/register" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Layout><Register /></Layout>} />
+        <Route path="/login" element={isAuthenticated ? <Navigate to={authenticatedLandingPath} replace /> : <Layout><Login /></Layout>} />
+        <Route path="/register" element={isAuthenticated ? <Navigate to={authenticatedLandingPath} replace /> : <Layout><Register /></Layout>} />
+        <Route path="/verify-email" element={<Layout><VerifyEmail /></Layout>} />
         <Route path="/forgot-password" element={<Layout><ForgotPassword /></Layout>} />
 
         {/* Student Routes */}
@@ -101,7 +103,7 @@ function App() {
         <Route
           path="/profile"
           element={
-            <ProtectedRoute allowedRoles={['student']}>
+            <ProtectedRoute allowedRoles={['student', 'teacher', 'parent', 'admin']}>
               <Layout><Profile /></Layout>
             </ProtectedRoute>
           }
@@ -169,6 +171,7 @@ function App() {
         {/* 404 */}
         <Route path="*" element={<Layout><NotFound /></Layout>} />
       </Routes>
+      </Suspense>
     </Router>
   )
 }

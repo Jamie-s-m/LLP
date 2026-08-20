@@ -20,6 +20,8 @@ VITE_VAPID_PUBLIC_KEY=<backend-vapid-public-key>
 
 The VAPID public key is safe in frontend configuration. Never put the private key in this directory or in a Vite variable.
 
+Email verification links land on [VerifyEmail.tsx](C:/Users/morea/language-learn-platform/frontend/src/pages/auth/VerifyEmail.tsx), which calls the backend `/api/auth/verify-email` endpoint and lets the user resend verification emails when needed.
+
 ## Routes
 
 Public:

@@ -3,7 +3,14 @@ import ForumReply from '../models/ForumReply.js';
 
 export const getPosts = async (req, res, next) => {
   try {
-    const posts = await ForumPost.find().populate('author', 'firstName lastName').sort({ createdAt: -1 });
+    const posts = await ForumPost.find()
+      .populate('author', 'firstName lastName role')
+      .populate({
+        path: 'replies',
+        populate: { path: 'author', select: 'firstName lastName role' },
+        options: { sort: { createdAt: 1 } },
+      })
+      .sort({ isPinned: -1, createdAt: -1 });
     res.status(200).json({ success: true, data: posts });
   } catch (error) {
     next(error);
@@ -47,7 +54,7 @@ export const addReply = async (req, res, next) => {
     post.replies.push(reply._id);
     await post.save();
 
-    res.status(201).json({ success: true, data: reply });
+    res.status(201).json({ success: true, data: await reply.populate('author', 'firstName lastName role') });
   } catch (error) {
     next(error);
   }

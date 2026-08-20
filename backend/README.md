@@ -22,6 +22,20 @@ FRONTEND_URL=http://localhost:5173
 
 For browser push, configure `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, and `VAPID_SUBJECT`. Keep the private key out of Git.
 
+For signup email verification, also configure:
+
+```env
+FRONTEND_APP_URL=https://jamie-s-m.github.io/LLP
+SMTP_HOST=<smtp-host>
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=<smtp-user>
+SMTP_PASS=<smtp-password>
+EMAIL_FROM="LinguaNest <no-reply@linguanest.app>"
+```
+
+If SMTP is not configured, the API logs a development-only verification URL instead of sending an email.
+
 ## Roles
 
 - `student`: learning, progress, groups, exercises, flashcards, chat

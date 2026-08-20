@@ -28,11 +28,13 @@ export default function Login() {
             : '/dashboard'
       navigate(destination)
     } catch (error: any) {
-      // Robust error message extraction from Axios, backend payload, or thrown error
       const message =
         error.response?.data?.message ||
         error.message ||
         'Login failed'
+      if (error.response?.status === 403 && error.response?.data?.data?.requiresVerification) {
+        navigate(`/verify-email?email=${encodeURIComponent(error.response.data.data.email)}`)
+      }
       toast.error(message)
     } finally {
       setLoading(false)

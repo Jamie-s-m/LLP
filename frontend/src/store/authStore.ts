@@ -23,7 +23,7 @@ interface AuthState {
   error: string | null
 
   login: (email: string, password: string) => Promise<void>
-  register: (data: any) => Promise<void>
+  register: (data: any) => Promise<any>
   logout: () => void
   setUser: (user: User | null) => void
   setToken: (token: string | null) => void
@@ -85,7 +85,13 @@ export const useAuthStore = create<AuthState>((set) => {
           localStorage.setItem('user', JSON.stringify(userPayload))
         }
 
-        set({ user: userPayload, token: tokenPayload, isAuthenticated: true, isLoading: false })
+        set({
+          user: userPayload || null,
+          token: tokenPayload || null,
+          isAuthenticated: !!tokenPayload && !!userPayload,
+          isLoading: false,
+        })
+        return payload
       } catch (error: any) {
         const errorMessage =
           error.response?.data?.message || error.message || 'Registration failed'

@@ -77,11 +77,18 @@ NODE_ENV=development
 MONGODB_URI=mongodb://127.0.0.1:27017/language-learn-platform
 JWT_SECRET=replace_with_a_long_random_secret
 FRONTEND_URL=http://localhost:5173
+FRONTEND_APP_URL=http://localhost:5173
 RATE_LIMIT_WINDOW_MS=900000
 RATE_LIMIT_MAX_REQUESTS=100
 VAPID_PUBLIC_KEY=replace_with_vapid_public_key
 VAPID_PRIVATE_KEY=replace_with_vapid_private_key
 VAPID_SUBJECT=mailto:support@linguanest.app
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=
+SMTP_PASS=
+EMAIL_FROM="LinguaNest <no-reply@linguanest.app>"
 ```
 
 Never commit `.env` files or private VAPID keys. Use a separate production `MONGODB_URI`, `JWT_SECRET`, and VAPID private key in Render environment variables.
@@ -150,9 +157,16 @@ NODE_ENV=production
 MONGODB_URI=<rotated-atlas-connection-string>
 JWT_SECRET=<long-random-secret>
 FRONTEND_URL=https://jamie-s-m.github.io
+FRONTEND_APP_URL=https://jamie-s-m.github.io/LLP
 VAPID_PUBLIC_KEY=<public-key>
 VAPID_PRIVATE_KEY=<private-key>
 VAPID_SUBJECT=mailto:support@linguanest.app
+SMTP_HOST=<smtp-host>
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=<smtp-user>
+SMTP_PASS=<smtp-password>
+EMAIL_FROM="LinguaNest <no-reply@linguanest.app>"
 ```
 
 After a Render deploy, verify:

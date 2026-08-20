@@ -13,7 +13,8 @@ export default function Home() {
   const safeCourses = Array.isArray(courses) ? courses : []
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="atlas-page">
+      <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Hero Section */}
       <div className="atlas-hero mb-12">
         <div>
@@ -35,7 +36,7 @@ export default function Home() {
       </div>
 
       {/* Featured Courses Section */}
-      <h2 className="text-2xl font-bold text-white mb-6">Featured Courses</h2>
+      <h2 className="mb-6 text-3xl font-bold text-ink">Featured Courses</h2>
 
       {isLoading ? (
         <div className="flex justify-center py-12">
@@ -50,18 +51,18 @@ export default function Home() {
             return (
               <div
                 key={courseId}
-                className="bg-slate-800 rounded-xl p-6 border border-slate-700 flex flex-col justify-between"
+                className="atlas-panel rounded-3xl p-6 flex flex-col justify-between"
               >
                 <div>
-                  <span className="text-xs font-semibold px-2.5 py-1 bg-indigo-900/50 text-indigo-300 rounded-full border border-indigo-700/50">
+                  <span className="inline-flex rounded-full bg-[#102a43]/10 px-2.5 py-1 text-xs font-semibold text-ink">
                     {course.level || 'All Levels'}
                   </span>
-                  <h3 className="text-xl font-bold text-white mt-3 mb-2">{course.title}</h3>
-                  <p className="text-slate-300 text-sm line-clamp-2">{course.description}</p>
+                  <h3 className="mt-3 mb-2 text-xl font-bold text-ink">{course.title}</h3>
+                  <p className="text-sm text-slate-600 line-clamp-2">{course.description}</p>
                 </div>
                 <Link
                   to={`/courses/${courseId}`}
-                  className="mt-6 block text-center py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition text-sm font-semibold"
+                  className="btn btn-primary mt-6 block text-center text-sm font-semibold"
                 >
                   View Details
                 </Link>
@@ -70,6 +71,7 @@ export default function Home() {
           })}
         </div>
       )}
+      </div>
     </div>
   )
 }

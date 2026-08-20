@@ -24,7 +24,7 @@ export const listConversations = async (req, res, next) => {
 export const createConversation = async (req, res, next) => {
   try {
     const { type = 'direct', participantIds = [], groupId, name } = req.body;
-    const participants = [...new Set([req.user.id, ...participantIds])];
+    let participants = [...new Set([req.user.id, ...participantIds])];
 
     if (!['direct', 'group', 'support'].includes(type)) {
       return res.status(400).json({ success: false, message: 'Invalid conversation type' });
@@ -34,22 +34,65 @@ export const createConversation = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Direct chat requires exactly two participants' });
     }
 
+    if (type === 'direct') {
+      const existingConversation = await ChatConversation.findOne({
+        type: 'direct',
+        participants: { $all: participants, $size: 2 },
+      })
+        .populate('participants', 'firstName lastName role avatar')
+        .populate('group', 'name');
+
+      if (existingConversation) {
+        return res.status(200).json({ success: true, data: existingConversation });
+      }
+    }
+
     if (type === 'group') {
+      const existingConversation = await ChatConversation.findOne({ type: 'group', group: groupId })
+        .populate('participants', 'firstName lastName role avatar')
+        .populate('group', 'name');
+      if (existingConversation) {
+        return res.status(200).json({ success: true, data: existingConversation });
+      }
+
       const group = await Group.findById(groupId);
       if (!group || !group.members.some((member) => member.toString() === req.user.id.toString())) {
         return res.status(403).json({ success: false, message: 'You are not a member of this group' });
       }
     }
 
+    if (type === 'support') {
+      const admins = await User.find({ role: 'admin', isActive: true }).select('_id');
+      if (admins.length === 0) {
+        return res.status(400).json({ success: false, message: 'Support is not available right now' });
+      }
+
+      participants = [...new Set([req.user.id, ...admins.map((admin) => admin._id.toString())])];
+      const existingConversation = await ChatConversation.findOne({
+        type: 'support',
+        participants: req.user.id,
+      })
+        .populate('participants', 'firstName lastName role avatar')
+        .populate('group', 'name');
+
+      if (existingConversation) {
+        return res.status(200).json({ success: true, data: existingConversation });
+      }
+    }
+
     const conversation = await ChatConversation.create({
       type,
-      name,
+      name: type === 'support' ? 'Support Desk' : name,
       participants,
       group: groupId,
       createdBy: req.user.id,
     });
 
-    res.status(201).json({ success: true, data: conversation });
+    const populatedConversation = await ChatConversation.findById(conversation._id)
+      .populate('participants', 'firstName lastName role avatar')
+      .populate('group', 'name');
+
+    res.status(201).json({ success: true, data: populatedConversation });
   } catch (error) {
     next(error);
   }

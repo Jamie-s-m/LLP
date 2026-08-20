@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
+import { FiMessageCircle } from 'react-icons/fi'
 import { useAuthStore } from '../store/authStore'
 import Navbar from './Navbar'
 import Sidebar from './Sidebar'
@@ -14,20 +15,18 @@ export default function Layout({ children }: LayoutProps) {
   const { isAuthenticated } = useAuthStore()
   const location = useLocation()
 
+  React.useEffect(() => {
+    setSidebarOpen(false)
+  }, [location.pathname])
+
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
       <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
-      
+
       <div className="flex">
-        {isAuthenticated && (
-          <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-        )}
-        
-        <main
-          className={`flex-1 transition-all duration-300 ${
-            isAuthenticated && sidebarOpen ? 'md:ml-64' : ''
-          }`}
-        >
+        {isAuthenticated ? <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} /> : null}
+
+        <main className="flex-1 transition-all duration-300">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
@@ -45,10 +44,21 @@ export default function Layout({ children }: LayoutProps) {
       {/* Mobile menu backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-30 md:hidden"
+          className="fixed inset-0 z-40 bg-black/45 backdrop-blur-[1px]"
           onClick={() => setSidebarOpen(false)}
         />
       )}
+
+      {isAuthenticated && location.pathname !== '/chat' ? (
+        <Link
+          to="/chat"
+          className="floating-chat-launcher"
+          aria-label="Open chat"
+          title="Open chat"
+        >
+          <FiMessageCircle size={22} />
+        </Link>
+      ) : null}
     </div>
   )
 }

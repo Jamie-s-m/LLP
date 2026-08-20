@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { FiBell, FiBellOff, FiMenu, FiLogOut, FiSettings, FiUser } from 'react-icons/fi'
+import { useEffect, useRef, useState } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { FiBell, FiBellOff, FiChevronDown, FiLogOut, FiMenu, FiSettings, FiUser } from 'react-icons/fi'
 import toast from 'react-hot-toast'
 import { useAuthStore } from '../store/authStore'
 import { enablePushNotifications, getNotificationPermission, isPushSupported } from '../utils/push'
@@ -14,10 +14,40 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
   const [notifPermission, setNotifPermission] = useState<NotificationPermission | 'unsupported'>('default')
   const { isAuthenticated, user, logout } = useAuthStore()
   const navigate = useNavigate()
+  const location = useLocation()
+  const dropdownRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     if (isAuthenticated) setNotifPermission(getNotificationPermission())
   }, [isAuthenticated])
+
+  useEffect(() => {
+    setDropdownOpen(false)
+  }, [location.pathname])
+
+  useEffect(() => {
+    if (!dropdownOpen) return
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!dropdownRef.current?.contains(event.target as Node)) {
+        setDropdownOpen(false)
+      }
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setDropdownOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handlePointerDown)
+    document.addEventListener('keydown', handleEscape)
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown)
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [dropdownOpen])
 
   const handleLogout = () => {
     logout()
@@ -35,7 +65,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
   }
 
   return (
-    <nav className="sticky top-0 z-50 bg-white dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700 shadow-sm">
+    <nav className="z-40 border-b border-neutral-200 bg-white/90 shadow-sm backdrop-blur dark:border-neutral-700 dark:bg-neutral-800/90">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
@@ -59,7 +89,17 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
         </div>
 
         {/* Right Section */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          {isAuthenticated ? (
+            <button
+              onClick={onMenuClick}
+              className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
+              aria-label="Open navigation menu"
+            >
+              <FiMenu size={18} />
+              <span className="hidden sm:inline">Menu</span>
+            </button>
+          ) : null}
           {isAuthenticated && isPushSupported() && notifPermission !== 'granted' ? (
             <button
               onClick={handleEnableNotifications}
@@ -76,10 +116,12 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
             </span>
           ) : null}
           {isAuthenticated ? (
-            <div className="relative">
+            <div ref={dropdownRef} className="relative">
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
+                className="flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-2 py-1.5 hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-800 dark:hover:bg-neutral-700 transition-colors"
+                aria-expanded={dropdownOpen}
+                aria-haspopup="menu"
               >
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white font-bold">
                   {user?.firstName?.charAt(0)}
@@ -87,21 +129,24 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
                 <span className="hidden sm:inline text-sm font-medium text-neutral-900 dark:text-white">
                   {user?.firstName}
                 </span>
+                <FiChevronDown className={`hidden sm:block transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} size={16} />
               </button>
 
               {/* Dropdown Menu */}
               {dropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-neutral-800 rounded-lg shadow-lg border border-neutral-200 dark:border-neutral-700">
+                <div className="absolute right-0 mt-2 w-56 overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-800" role="menu">
                   <Link
                     to="/profile"
-                    className="flex items-center gap-2 px-4 py-2 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-2 px-4 py-3 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
                   >
                     <FiUser size={16} /> Profile
                   </Link>
                   {user?.role === 'teacher' || user?.role === 'admin' ? (
                     <Link
                       to="/teacher/dashboard"
-                      className="flex items-center gap-2 px-4 py-2 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2 px-4 py-3 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
                     >
                       <FiSettings size={16} /> Teaching
                     </Link>
@@ -109,14 +154,15 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
                   {user?.role === 'admin' ? (
                     <Link
                       to="/admin/control-center"
-                      className="flex items-center gap-2 px-4 py-2 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2 px-4 py-3 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
                     >
                       <FiSettings size={16} /> Admin
                     </Link>
                   ) : null}
                   <button
                     onClick={handleLogout}
-                    className="w-full text-left flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors border-t border-neutral-200 dark:border-neutral-700"
+                    className="w-full text-left flex items-center gap-2 px-4 py-3 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors border-t border-neutral-200 dark:border-neutral-700"
                   >
                     <FiLogOut size={16} /> Logout
                   </button>
@@ -140,13 +186,6 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
             </div>
           )}
 
-          {/* Mobile menu button */}
-          <button
-            onClick={onMenuClick}
-            className="md:hidden p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700"
-          >
-            <FiMenu size={20} />
-          </button>
         </div>
       </div>
     </nav>

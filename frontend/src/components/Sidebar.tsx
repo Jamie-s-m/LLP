@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
 import {
   FiBook,
+  FiChevronLeft,
   FiUsers,
   FiMessageSquare,
   FiAward,
@@ -59,17 +60,27 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   if (user?.role === 'admin') navLinks = [...adminLinks, ...teacherLinks]
 
   return (
-    <>
-      {/* Sidebar */}
-      <aside
-        className={`fixed md:static inset-y-0 left-0 w-64 bg-white dark:bg-neutral-800 border-r border-neutral-200 dark:border-neutral-700 overflow-y-auto transition-all z-40 ${
-          open ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-        }`}
-      >
+    <aside
+      className={`fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] overflow-y-auto border-r border-neutral-200 bg-white shadow-2xl transition-transform dark:border-neutral-700 dark:bg-neutral-800 ${
+        open ? 'translate-x-0' : '-translate-x-full'
+      }`}
+      aria-hidden={!open}
+    >
         <div className="p-6">
-          <h2 className="text-sm font-semibold text-neutral-900 dark:text-white uppercase tracking-wider mb-6">
-            Navigation
-          </h2>
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-coral">Workspace</p>
+              <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Navigation</h2>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 text-neutral-600 transition hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700"
+              aria-label="Close navigation menu"
+            >
+              <FiChevronLeft size={20} />
+            </button>
+          </div>
           <nav className="space-y-2">
             {navLinks.map((link) => {
               const Icon = link.icon
@@ -128,6 +139,5 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           </nav>
         </div>
       </aside>
-    </>
   )
 }

@@ -11,12 +11,16 @@ export default function Courses() {
   }, [filters])
 
   return (
-    <div className="min-h-screen py-12 px-4">
+    <div className="atlas-page py-12 px-4">
       <div className="container mx-auto max-w-6xl">
-        <h1 className="text-4xl font-bold mb-8">Explore Courses</h1>
+        <div className="atlas-heading mb-8">
+          <p className="atlas-kicker">Course library</p>
+          <h1 className="mb-3 text-4xl font-bold text-ink">Explore Courses</h1>
+          <p>Filter by language and level to find the right next lesson path.</p>
+        </div>
 
         {/* Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div className="atlas-panel mb-8 grid grid-cols-1 gap-4 p-6 md:grid-cols-2">
           <div>
             <label className="label">Language</label>
             <select
@@ -58,7 +62,7 @@ export default function Courses() {
               <Link
                 key={courseId}
                 to={`/courses/${courseId}`}
-                className="card hover:shadow-xl transition-shadow"
+                className="card atlas-panel hover:shadow-xl transition-shadow"
               >
                 {course.thumbnail && (
                   <img
@@ -67,7 +71,7 @@ export default function Courses() {
                     className="w-full h-40 object-cover rounded mb-4"
                   />
                 )}
-                <h3 className="text-xl font-bold mb-2">{course.title}</h3>
+                <h3 className="text-xl font-bold mb-2 text-ink">{course.title}</h3>
                 <p className="text-neutral-600 dark:text-neutral-400 text-sm mb-4">
                   {course.description}
                 </p>

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import { FiMessageCircle, FiSend, FiUsers } from 'react-icons/fi'
+import { FiLifeBuoy, FiMessageCircle, FiSearch, FiSend, FiUsers } from 'react-icons/fi'
 import { io, Socket } from 'socket.io-client'
 import api from '../services/api'
+import { useAuthStore } from '../store/authStore'
 
 interface Conversation {
   _id: string
@@ -19,12 +20,16 @@ interface Message {
 }
 
 export default function Chat() {
+  const { user } = useAuthStore()
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [messages, setMessages] = useState<Message[]>([])
   const [activeId, setActiveId] = useState('')
   const [draft, setDraft] = useState('')
   const [loading, setLoading] = useState(true)
   const [socket, setSocket] = useState<Socket | null>(null)
+  const [search, setSearch] = useState('')
+  const [searchResults, setSearchResults] = useState<Array<{ _id: string; firstName: string; lastName: string; role: string }>>([])
+  const [creatingConversation, setCreatingConversation] = useState(false)
 
   const loadConversations = async () => {
     try {
@@ -50,6 +55,21 @@ export default function Chat() {
   }, [])
 
   useEffect(() => {
+    if (search.trim().length < 2) {
+      setSearchResults([])
+      return
+    }
+
+    const timer = window.setTimeout(() => {
+      api.get(`/chat/users?q=${encodeURIComponent(search.trim())}`)
+        .then((response) => setSearchResults(response.data.data || []))
+        .catch(() => setSearchResults([]))
+    }, 300)
+
+    return () => window.clearTimeout(timer)
+  }, [search])
+
+  useEffect(() => {
     if (!activeId) return
     const loadMessages = () => api.get(`/chat/conversations/${activeId}/messages`).then((response) => setMessages(response.data.data || [])).catch(() => undefined)
     loadMessages()
@@ -63,16 +83,48 @@ export default function Chat() {
     if (!draft.trim() || !activeId) return
 
     try {
-      if (socket?.connected) {
-        socket.emit('message:send', { conversationId: activeId, body: draft })
-      } else {
-        const response = await api.post(`/chat/conversations/${activeId}/messages`, { body: draft })
-        setMessages((current) => [...current, response.data.data])
-      }
+      const response = await api.post(`/chat/conversations/${activeId}/messages`, { body: draft })
+      setMessages((current) => current.some((item) => item._id === response.data.data._id) ? current : [...current, response.data.data])
       setDraft('')
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Message could not be sent')
     }
+  }
+
+  const createDirectConversation = async (participantId: string) => {
+    try {
+      setCreatingConversation(true)
+      const response = await api.post('/chat/conversations', { type: 'direct', participantIds: [participantId] })
+      const conversation = response.data.data
+      setConversations((current) => current.some((item) => item._id === conversation._id) ? current : [conversation, ...current])
+      setActiveId(conversation._id)
+      setSearch('')
+      setSearchResults([])
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Conversation could not be created')
+    } finally {
+      setCreatingConversation(false)
+    }
+  }
+
+  const createSupportConversation = async () => {
+    try {
+      setCreatingConversation(true)
+      const response = await api.post('/chat/conversations', { type: 'support' })
+      const conversation = response.data.data
+      setConversations((current) => current.some((item) => item._id === conversation._id) ? current : [conversation, ...current])
+      setActiveId(conversation._id)
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Support chat is unavailable right now')
+    } finally {
+      setCreatingConversation(false)
+    }
+  }
+
+  const getConversationName = (conversation: Conversation) => {
+    if (conversation.name) return conversation.name
+    const others = conversation.participants.filter((person) => person._id !== user?.id)
+    return (others.length > 0 ? others : conversation.participants).map((person) => person.firstName).join(', ')
   }
 
   const active = conversations.find((conversation) => conversation._id === activeId)
@@ -89,20 +141,48 @@ export default function Chat() {
           <div className="flex items-center justify-between mb-5">
             <h2>Inbox</h2><FiMessageCircle className="text-coral" />
           </div>
+          <div className="mb-4 space-y-3">
+            <div className="relative">
+              <FiSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                className="input pl-10"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Start a direct chat..."
+              />
+            </div>
+            {searchResults.length > 0 ? (
+              <div className="space-y-2 rounded-2xl bg-[#f6efe7] p-3">
+                {searchResults.map((person) => (
+                  <button key={person._id} type="button" className="chat-thread" onClick={() => createDirectConversation(person._id)} disabled={creatingConversation}>
+                    <span className="chat-avatar">{person.firstName.charAt(0)}</span>
+                    <span><strong>{person.firstName} {person.lastName}</strong><small>{person.role}</small></span>
+                  </button>
+                ))}
+              </div>
+            ) : null}
+            <button type="button" className="btn btn-outline w-full inline-flex items-center justify-center gap-2" onClick={createSupportConversation} disabled={creatingConversation}>
+              <FiLifeBuoy />
+              Message support
+            </button>
+          </div>
           {loading ? <p className="text-muted">Loading conversations...</p> : conversations.length === 0 ? (
             <div className="empty-state"><FiUsers /><p>No conversations yet.</p></div>
           ) : conversations.map((conversation) => (
             <button key={conversation._id} onClick={() => setActiveId(conversation._id)} className={`chat-thread ${activeId === conversation._id ? 'active' : ''}`}>
               <span className="chat-avatar">{conversation.type === 'group' ? <FiUsers /> : <FiMessageCircle />}</span>
-              <span><strong>{conversation.name || conversation.participants.map((person) => person.firstName).join(', ')}</strong><small>{conversation.type}</small></span>
+              <span><strong>{getConversationName(conversation)}</strong><small>{conversation.type}</small></span>
             </button>
           ))}
         </aside>
         <section className="atlas-panel chat-window">
           {active ? <>
-            <header className="chat-header"><div><p className="atlas-kicker">{active.type} room</p><h2>{active.name || active.participants.map((person) => person.firstName).join(', ')}</h2></div><span className="status-dot">Live</span></header>
+            <header className="chat-header"><div><p className="atlas-kicker">{active.type} room</p><h2>{getConversationName(active)}</h2></div><span className="status-dot">Live</span></header>
             <div className="message-list">
-              {messages.length === 0 ? <div className="empty-state"><FiMessageCircle /><p>Start the conversation.</p></div> : messages.map((message) => <article key={message._id} className="message-bubble"><strong>{message.sender.firstName} {message.sender.lastName}</strong><p>{message.body}</p><time>{new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</time></article>)}
+              {messages.length === 0 ? <div className="empty-state"><FiMessageCircle /><p>Start the conversation.</p></div> : messages.map((message) => {
+                const isOwn = message.sender.firstName === user?.firstName && message.sender.lastName === user?.lastName
+                return <article key={message._id} className={`message-bubble ${isOwn ? 'ml-auto bg-[#102a43] text-white rounded-bl-2xl rounded-br-sm' : ''}`}><strong>{message.sender.firstName} {message.sender.lastName}</strong><p>{message.body}</p><time className={isOwn ? '!text-white/70' : ''}>{new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</time></article>
+              })}
             </div>
             <form onSubmit={sendMessage} className="chat-compose"><input value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Write a message..." maxLength={4000} /><button className="btn btn-primary" aria-label="Send message"><FiSend /></button></form>
           </> : <div className="empty-state full"><FiMessageCircle /><h2>Choose a conversation</h2><p>Your conversations will appear here.</p></div>}

@@ -115,6 +115,7 @@
   .chat-compose input, .inline-form input { @apply input bg-white; }
   .empty-state { @apply flex flex-col items-center justify-center gap-2 text-slate-400 py-10 text-center; }
   .empty-state.full { @apply flex-1; }
+  .floating-chat-launcher { @apply fixed bottom-6 left-6 z-30 inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#102a43] text-white shadow-xl transition hover:-translate-y-1 hover:bg-[#0f3554]; }
   .admin-tabs { @apply flex flex-wrap gap-2; }
   .admin-tabs button { @apply inline-flex items-center gap-2 px-4 py-2 rounded-full text-slate-600 hover:bg-white transition-colors; }
   .admin-tabs button.active { @apply bg-[#102a43] text-white; }

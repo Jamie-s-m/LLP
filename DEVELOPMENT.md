@@ -37,14 +37,21 @@ MONGODB_URI=mongodb://127.0.0.1:27017/language-learn-platform
 JWT_SECRET=replace_with_a_long_random_secret
 JWT_EXPIRE=7d
 FRONTEND_URL=http://localhost:5173
+FRONTEND_APP_URL=http://localhost:5173
 RATE_LIMIT_WINDOW_MS=900000
 RATE_LIMIT_MAX_REQUESTS=100
 VAPID_PUBLIC_KEY=<public-key>
 VAPID_PRIVATE_KEY=<private-key>
 VAPID_SUBJECT=mailto:support@linguanest.app
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=
+SMTP_PASS=
+EMAIL_FROM="LinguaNest <no-reply@linguanest.app>"
 ```
 
-Only the VAPID public key belongs in frontend configuration as `VITE_VAPID_PUBLIC_KEY`. Never commit `.env` files or a VAPID private key.
+Only the VAPID public key belongs in frontend configuration as `VITE_VAPID_PUBLIC_KEY`. Never commit `.env` files or a VAPID private key. Email verification uses `FRONTEND_APP_URL` to build the verification link and SMTP variables to deliver it.
 
 ## Run locally
 
@@ -129,9 +136,16 @@ NODE_ENV=production
 MONGODB_URI=<rotated-atlas-uri>
 JWT_SECRET=<long-random-secret>
 FRONTEND_URL=https://jamie-s-m.github.io
+FRONTEND_APP_URL=https://jamie-s-m.github.io/LLP
 VAPID_PUBLIC_KEY=<public-key>
 VAPID_PRIVATE_KEY=<private-key>
 VAPID_SUBJECT=mailto:support@linguanest.app
+SMTP_HOST=<smtp-host>
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=<smtp-user>
+SMTP_PASS=<smtp-password>
+EMAIL_FROM="LinguaNest <no-reply@linguanest.app>"
 ```
 
 After deployment:
