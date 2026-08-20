@@ -2,6 +2,11 @@ import { create } from 'zustand'
 import api from '../services/api'
 import { useAuthStore } from './authStore'
 
+const UNREAD_SUMMARY_BACKOFF_MS = 5 * 60 * 1000
+
+let unreadSummaryCooldownUntil = 0
+let unreadSummaryRequest: Promise<void> | null = null
+
 interface ChatUnreadState {
   totalUnread: number
   byConversation: Record<string, number>
@@ -19,16 +24,28 @@ export const useChatStore = create<ChatUnreadState>((set) => ({
       return
     }
 
-    try {
-      const response = await api.get('/chat/unread-summary')
-      const data = response.data.data || {}
-      set({
-        totalUnread: data.totalUnread || 0,
-        byConversation: data.byConversation || {},
-      })
-    } catch {
-      return
-    }
+    if (Date.now() < unreadSummaryCooldownUntil) return
+    if (unreadSummaryRequest) return unreadSummaryRequest
+
+    unreadSummaryRequest = (async () => {
+      try {
+        const response = await api.get('/chat/unread-summary')
+        unreadSummaryCooldownUntil = 0
+        const data = response.data.data || {}
+        set({
+          totalUnread: data.totalUnread || 0,
+          byConversation: data.byConversation || {},
+        })
+      } catch (error: any) {
+        if (error?.response?.status === 429) {
+          unreadSummaryCooldownUntil = Date.now() + UNREAD_SUMMARY_BACKOFF_MS
+        }
+      } finally {
+        unreadSummaryRequest = null
+      }
+    })()
+
+    return unreadSummaryRequest
   },
 
   clearConversationUnread: (conversationId: string) =>
