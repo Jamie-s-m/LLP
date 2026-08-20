@@ -70,10 +70,11 @@ export default function Forum() {
   return (
     <div className="atlas-page py-12 px-4">
       <div className="container mx-auto max-w-4xl">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-ink">Community Forum</h1>
-            <p className="text-neutral-600 dark:text-neutral-400">Share ideas and help each other learn</p>
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="atlas-heading">
+            <p className="atlas-kicker">Community space</p>
+            <h1 className="text-4xl font-bold text-ink dark:text-white">Community Forum</h1>
+            <p>Share ideas and help each other learn.</p>
           </div>
           <button className="btn btn-primary flex items-center gap-2" onClick={() => setShowComposer((current) => !current)} disabled={!isAuthenticated}>
             <FiPlus size={20} /> New Post
@@ -130,14 +131,14 @@ export default function Forum() {
                     <p className="text-2xl font-bold">{post.replies?.length || 0}</p>
                     <p className="text-xs">Replies</p>
                   </div>
-                  <div className="rounded-lg bg-neutral-100 px-3 py-2 text-sm font-medium text-neutral-700">{post.upvotes || 0} likes</div>
+                  <div className="rounded-lg bg-neutral-100 px-3 py-2 text-sm font-medium text-neutral-700 dark:bg-white/10 dark:text-slate-200">{post.upvotes || 0} likes</div>
                 </div>
               </div>
               {post.replies?.length ? (
                 <div className="mt-5 space-y-3 border-t border-neutral-200 pt-4">
                   {post.replies.map((reply: any) => (
-                    <div key={reply._id} className="rounded-2xl bg-[#f6efe7] p-3 text-sm text-slate-700">
-                      <div className="mb-1 flex items-center gap-2 font-semibold text-ink">
+                    <div key={reply._id} className="rounded-2xl bg-[#f6efe7] p-3 text-sm text-slate-700 dark:bg-white/5 dark:text-slate-200">
+                      <div className="mb-1 flex items-center gap-2 font-semibold text-ink dark:text-white">
                         <FiCornerDownRight size={14} />
                         <span>{reply.author?.firstName} {reply.author?.lastName}</span>
                       </div>

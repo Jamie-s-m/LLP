@@ -184,6 +184,13 @@
     text-shadow: 0 8px 22px rgba(6, 21, 35, 0.24);
   }
 
+  .atlas-hero-card {
+    @apply rounded-[1.75rem] p-6 text-white;
+    background: linear-gradient(145deg, rgba(8, 27, 44, 0.94), rgba(20, 71, 106, 0.92));
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 24px 60px rgba(8, 24, 39, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
   .atlas-hero img {
     @apply max-h-80 w-full rounded-3xl object-contain;
     animation: floatingCard 7s ease-in-out infinite;
@@ -536,6 +543,10 @@
 
 .text-white\/70 {
   color: rgba(255, 255, 255, 0.82);
+}
+
+.text-white\/80 {
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .text-white\/85 {

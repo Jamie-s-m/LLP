@@ -63,29 +63,37 @@ export default function Profile() {
   }
 
   if (loading) {
-    return <div className="min-h-screen py-12 px-4 text-center">Loading profile...</div>
+    return (
+      <div className="atlas-page px-4 py-12">
+        <div className="mx-auto max-w-3xl">
+          <div className="atlas-panel p-6 text-center text-muted">Loading profile...</div>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen py-12 px-4">
-      <div className="container mx-auto max-w-2xl">
-        <h1 className="text-4xl font-bold mb-8">Profile Settings</h1>
+    <div className="atlas-page px-4 py-10">
+      <div className="mx-auto max-w-5xl">
+        <div className="atlas-heading mb-8">
+          <p className="atlas-kicker">Profile studio</p>
+          <h1>Profile Settings</h1>
+          <p>Keep your identity, language preferences, and learner milestones easy to review.</p>
+        </div>
 
-        <div className="card">
-          {/* Avatar Section */}
-          <div className="flex items-center gap-6 mb-8 pb-8 border-b border-neutral-200 dark:border-neutral-700">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white text-3xl font-bold">
+        <div className="atlas-panel p-6 sm:p-8">
+          <div className="mb-8 flex flex-col gap-5 border-b border-neutral-200 pb-8 dark:border-neutral-700 sm:flex-row sm:items-center">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 text-3xl font-bold text-white">
               {profile?.firstName?.charAt(0)}
             </div>
             <div>
-              <p className="text-2xl font-bold">{profile?.firstName} {profile?.lastName}</p>
-              <p className="text-neutral-600 dark:text-neutral-400">{profile?.email}</p>
+              <p className="text-2xl font-bold text-ink dark:text-white">{profile?.firstName} {profile?.lastName}</p>
+              <p className="text-muted">{profile?.email}</p>
             </div>
           </div>
 
-          {/* Profile Form */}
           <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-4 md:grid-cols-2">
               <div>
                 <label className="label">First Name</label>
                 <input
@@ -138,22 +146,21 @@ export default function Profile() {
               </select>
             </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-2 gap-4 py-6 border-t border-neutral-200 dark:border-neutral-700">
-              <div className="text-center">
+            <div className="grid gap-4 border-t border-neutral-200 py-6 dark:border-neutral-700 md:grid-cols-2">
+              <div className="rounded-2xl bg-[#f6efe7] p-4 text-center dark:bg-white/5">
                 <p className="text-2xl font-bold text-primary-500">{profile?.xp ?? 0}</p>
-                <p className="text-sm text-neutral-600 dark:text-neutral-400">Points</p>
+                <p className="text-sm text-muted">Points</p>
               </div>
-              <div className="text-center">
+              <div className="rounded-2xl bg-[#f6efe7] p-4 text-center dark:bg-white/5">
                 <p className="text-2xl font-bold text-secondary-500">{profile?.streak ?? 0}</p>
-                <p className="text-sm text-neutral-600 dark:text-neutral-400">Streak</p>
+                <p className="text-sm text-muted">Streak</p>
               </div>
             </div>
 
-            <div className="pt-6 border-t border-neutral-200 dark:border-neutral-700">
-              <h3 className="font-bold mb-4 flex items-center gap-2"><FiAward className="text-primary-500" /> Badges</h3>
+            <div className="border-t border-neutral-200 pt-6 dark:border-neutral-700">
+              <h3 className="mb-4 flex items-center gap-2 font-bold text-ink dark:text-white"><FiAward className="text-primary-500" /> Badges</h3>
               {achievements.length === 0 ? (
-                <p className="text-sm text-neutral-500">No badges earned yet — keep learning to unlock some!</p>
+                <p className="text-sm text-muted">No badges earned yet — keep learning to unlock some!</p>
               ) : (
                 <div className="flex flex-wrap gap-3">
                   {achievements.map((achievement) => (
@@ -166,8 +173,7 @@ export default function Profile() {
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex gap-4 pt-6 border-t border-neutral-200 dark:border-neutral-700">
+          <div className="flex flex-col gap-4 border-t border-neutral-200 pt-6 dark:border-neutral-700 sm:flex-row">
             {!isEditing ? (
               <button
                 onClick={() => setIsEditing(true)}
@@ -182,7 +188,7 @@ export default function Profile() {
                 </button>
                 <button
                   onClick={() => setIsEditing(false)}
-                  className="flex-1 btn btn-outline"
+                  className="btn btn-outline flex-1"
                 >
                   Cancel
                 </button>

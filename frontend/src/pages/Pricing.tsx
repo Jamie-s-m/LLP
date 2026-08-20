@@ -45,7 +45,7 @@ export default function Pricing() {
               <Link to="/courses" className="btn btn-outline w-full border-white/70 text-white hover:bg-white/10 dark:border-white/30 dark:text-white dark:hover:bg-white/10 sm:w-auto">Explore courses</Link>
             </div>
           </div>
-          <div className="rounded-[1.75rem] border border-white/15 bg-[linear-gradient(145deg,rgba(8,27,44,0.94),rgba(20,71,106,0.92))] p-6 text-white shadow-[0_24px_60px_rgba(8,24,39,0.24)]">
+          <div className="atlas-hero-card">
             <div className="space-y-4 text-sm text-white/85">
               <div className="flex items-start gap-3">
                 <FiCreditCard className="mt-0.5 text-lg text-[#f8c16c]" />

@@ -44,7 +44,7 @@ export default function TeacherDashboard() {
               <Link to="/teacher/courses" className="btn btn-outline border-white/70 text-white hover:bg-white/10 dark:border-white/30 dark:text-white dark:hover:bg-white/10">Open my courses</Link>
             </div>
           </div>
-          <div className="atlas-panel p-6 dark:bg-white/10">
+          <div className="atlas-hero-card">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/70">Teaching snapshot</p>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div className="rounded-2xl bg-white/10 p-4">
