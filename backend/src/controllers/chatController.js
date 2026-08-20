@@ -160,7 +160,7 @@ export const listMessages = async (req, res, next) => {
       .sort({ createdAt: 1 })
       .limit(100);
 
-    await ChatMessage.updateMany(
+    const readUpdate = await ChatMessage.updateMany(
       {
         conversation: conversation._id,
         sender: { $ne: req.user.id },
@@ -169,7 +169,9 @@ export const listMessages = async (req, res, next) => {
       { $addToSet: { readBy: req.user.id } }
     );
 
-    emitConversationRefresh(req, [req.user.id], conversation._id);
+    if (readUpdate.modifiedCount > 0) {
+      emitConversationRefresh(req, [req.user.id], conversation._id);
+    }
 
     res.status(200).json({ success: true, data: messages });
   } catch (error) {

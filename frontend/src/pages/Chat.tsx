@@ -141,10 +141,12 @@ export default function Chat() {
     })
 
     const unsubscribeRefresh = onConversationRefresh(({ conversationId }) => {
-      loadConversations()
       if (conversationId && conversationId === activeConversationRef.current && isDocumentVisible()) {
         loadMessages(conversationId, false)
+        return
       }
+
+      loadConversations()
     })
 
     return () => {
@@ -271,7 +273,7 @@ export default function Chat() {
             <div ref={messageListRef} className="message-list">
               {messages.length === 0 ? <div className="empty-state"><FiMessageCircle /><p>Start the conversation.</p></div> : messages.map((message) => {
                 const isOwn = message.sender.firstName === user?.firstName && message.sender.lastName === user?.lastName
-                return <article key={message._id} className={`message-bubble ${isOwn ? 'ml-auto bg-[#102a43] text-white rounded-bl-2xl rounded-br-sm' : ''}`}><strong>{message.sender.firstName} {message.sender.lastName}</strong><p>{message.body}</p><time className={isOwn ? '!text-white/70' : ''}>{new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</time></article>
+                return <article key={message._id} className={`message-bubble ${isOwn ? 'own ml-auto' : ''}`}><strong>{message.sender.firstName} {message.sender.lastName}</strong><p>{message.body}</p><time>{new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</time></article>
               })}
             </div>
             <form onSubmit={sendMessage} className="chat-compose"><input value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Write a message..." maxLength={4000} /><button className="btn btn-primary" aria-label="Send message"><FiSend /></button></form>

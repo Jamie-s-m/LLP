@@ -286,11 +286,26 @@
     @apply max-w-xl rounded-3xl rounded-bl-md p-3 text-slate-900 dark:text-white;
     background: rgba(255, 255, 255, 0.8);
     box-shadow: 0 16px 30px rgba(15, 35, 54, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.56);
   }
 
   .dark .message-bubble {
     background: rgba(23, 50, 74, 0.88);
     box-shadow: 0 16px 30px rgba(0, 0, 0, 0.18);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+
+  .message-bubble.own {
+    background: linear-gradient(135deg, #123453 0%, #17476a 52%, #3159b8 100%);
+    border-color: rgba(255, 255, 255, 0.08);
+    color: #f8fdff;
+    box-shadow: 0 22px 42px rgba(17, 39, 64, 0.2);
+    border-bottom-right-radius: 0.9rem;
+    border-bottom-left-radius: 1.5rem;
+  }
+
+  .dark .message-bubble.own {
+    background: linear-gradient(135deg, #123453 0%, #17476a 48%, #3f63d4 100%);
   }
 
   .message-bubble p {
@@ -299,6 +314,18 @@
 
   .message-bubble time {
     @apply text-xs text-slate-400 dark:text-slate-300;
+  }
+
+  .message-bubble.own strong {
+    color: #ffffff;
+  }
+
+  .message-bubble.own p {
+    color: rgba(248, 253, 255, 0.94);
+  }
+
+  .message-bubble.own time {
+    color: rgba(232, 244, 255, 0.78);
   }
 
   .chat-compose {
