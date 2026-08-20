@@ -4,9 +4,9 @@ import { listFamilyLinks, requestFamilyLink, reviewFamilyLink, getChildrenProgre
 
 const router = express.Router();
 router.use(protect);
-router.get('/', listFamilyLinks);
+router.get('/', authorize('parent', 'student', 'admin'), listFamilyLinks);
 router.post('/', authorize('parent'), requestFamilyLink);
-router.patch('/:id/review', authorize('student', 'admin'), reviewFamilyLink);
+router.patch('/:id/review', authorize('student', 'admin', 'moderator'), reviewFamilyLink);
 router.get('/children-progress', authorize('parent'), getChildrenProgress);
 router.get('/children/:studentId', authorize('parent'), getChildDetail);
 

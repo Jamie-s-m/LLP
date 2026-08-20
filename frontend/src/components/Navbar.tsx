@@ -31,6 +31,8 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
   const roleLabel = user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : ''
   const dashboardConfig = user?.role === 'admin'
     ? { to: '/admin/control-center', label: 'Control Center' }
+    : user?.role === 'moderator'
+      ? { to: '/admin/control-center', label: 'Moderation Desk' }
     : user?.role === 'teacher'
       ? { to: '/teacher/dashboard', label: 'Teaching Dashboard' }
       : user?.role === 'parent'
@@ -247,6 +249,15 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
                       className="flex items-center gap-2 px-4 py-3 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
                     >
                       <FiSettings size={16} /> Teaching
+                    </Link>
+                  ) : null}
+                  {user?.role === 'moderator' ? (
+                    <Link
+                      to="/admin/control-center"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2 px-4 py-3 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
+                    >
+                      <FiSettings size={16} /> Moderation
                     </Link>
                   ) : null}
                   {user?.role === 'admin' ? (

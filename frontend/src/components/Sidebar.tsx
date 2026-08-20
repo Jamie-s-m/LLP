@@ -23,6 +23,8 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   const location = useLocation()
   const workspaceTitle = user?.role === 'admin'
     ? 'Admin workspace'
+    : user?.role === 'moderator'
+      ? 'Moderator workspace'
     : user?.role === 'teacher'
       ? 'Teacher workspace'
       : user?.role === 'parent'
@@ -61,9 +63,14 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     { label: 'Control Center', path: '/admin/control-center', icon: FiGrid },
   ]
 
+  const moderatorLinks = [
+    { label: 'Moderation Desk', path: '/admin/control-center', icon: FiGrid },
+  ]
+
   let navLinks = studentLinks
   if (user?.role === 'teacher') navLinks = teacherLinks
   if (user?.role === 'parent') navLinks = parentLinks
+  if (user?.role === 'moderator') navLinks = moderatorLinks
   if (user?.role === 'admin') navLinks = [...adminLinks, ...teacherLinks]
 
   return (

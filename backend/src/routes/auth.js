@@ -4,6 +4,7 @@ import User from '../models/User.js';
 import { sendPushToUsers } from '../utils/push.js';
 import { sendPasswordResetEmail, sendVerificationEmail } from '../utils/email.js';
 import { generateEmailVerificationToken, generatePasswordResetToken, hashEmailVerificationToken, hashToken } from '../utils/emailVerification.js';
+import { normalizeModeratorPermissions } from '../middleware/auth.js';
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'local-development-only-secret';
@@ -19,6 +20,7 @@ const serializeUser = (user) => ({
   role: user.role || 'student',
   teacherApplicationStatus: user.teacherApplicationStatus,
   isEmailVerified: user.isEmailVerified,
+  moderatorPermissions: normalizeModeratorPermissions(user.moderatorPermissions),
 });
 
 router.get('/check-email', async (req, res) => {

@@ -2,6 +2,27 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'local-development-only-secret';
+export const MODERATOR_PERMISSION_KEYS = ['communityModeration', 'supportChat', 'catalogContentQa', 'limitedUserManagement'];
+export const defaultModeratorPermissions = () => ({
+  communityModeration: false,
+  supportChat: false,
+  catalogContentQa: false,
+  limitedUserManagement: false,
+});
+
+export const normalizeModeratorPermissions = (input = {}) => {
+  const normalized = defaultModeratorPermissions();
+  MODERATOR_PERMISSION_KEYS.forEach((key) => {
+    normalized[key] = Boolean(input[key]);
+  });
+  return normalized;
+};
+
+export const hasModeratorPermission = (user, permission) =>
+  user?.role === 'admin' || (user?.role === 'moderator' && Boolean(user?.moderatorPermissions?.[permission]));
+
+export const hasAnyModeratorPermission = (user, permissions = []) =>
+  user?.role === 'admin' || permissions.some((permission) => hasModeratorPermission(user, permission));
 
 export const protect = async (req, res, next) => {
   let token;
@@ -38,6 +59,19 @@ export const authorize = (...roles) => {
       });
     }
     next();
+  };
+};
+
+export const authorizeRoleOrPermission = ({ roles = [], permissions = [] }) => {
+  return (req, res, next) => {
+    if (roles.includes(req.user.role) || hasAnyModeratorPermission(req.user, permissions)) {
+      return next();
+    }
+
+    return res.status(403).json({
+      success: false,
+      message: `User role '${req.user.role}' is not authorized to access this route`,
+    });
   };
 };
 

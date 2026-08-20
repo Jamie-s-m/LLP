@@ -1,45 +1,71 @@
-import { Suspense, lazy } from 'react'
+import { Suspense, lazy, type ComponentType } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { useAuthStore } from './store/authStore'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 
-const Login = lazy(() => import('./pages/auth/Login'))
-const Register = lazy(() => import('./pages/auth/Register'))
-const ForgotPassword = lazy(() => import('./pages/auth/ForgotPassword'))
-const ResetPassword = lazy(() => import('./pages/auth/ResetPassword'))
-const VerifyEmail = lazy(() => import('./pages/auth/VerifyEmail'))
-const Home = lazy(() => import('./pages/Home'))
-const Courses = lazy(() => import('./pages/Courses'))
-const CourseDetail = lazy(() => import('./pages/CourseDetail'))
-const Dashboard = lazy(() => import('./pages/student/Dashboard'))
-const MyLearning = lazy(() => import('./pages/student/MyLearning'))
-const LessonView = lazy(() => import('./pages/student/LessonView'))
-const ExercisePractice = lazy(() => import('./pages/student/ExercisePractice'))
-const Flashcards = lazy(() => import('./pages/student/Flashcards'))
-const Profile = lazy(() => import('./pages/student/Profile'))
-const Groups = lazy(() => import('./pages/student/Groups'))
-const Leaderboard = lazy(() => import('./pages/student/Leaderboard'))
-const TeacherDashboard = lazy(() => import('./pages/teacher/Dashboard'))
-const CreateCourse = lazy(() => import('./pages/teacher/CreateCourse'))
-const ManageCourse = lazy(() => import('./pages/teacher/ManageCourse'))
-const StudentProgress = lazy(() => import('./pages/teacher/StudentProgress'))
-const Forum = lazy(() => import('./pages/Forum'))
-const Chat = lazy(() => import('./pages/Chat'))
-const ParentDashboard = lazy(() => import('./pages/ParentDashboard'))
-const ChildProgress = lazy(() => import('./pages/ChildProgress'))
-const ControlCenter = lazy(() => import('./pages/admin/ControlCenter'))
-const Pricing = lazy(() => import('./pages/Pricing'))
-const Terms = lazy(() => import('./pages/Terms'))
-const Privacy = lazy(() => import('./pages/Privacy'))
-const Cookies = lazy(() => import('./pages/Cookies'))
-const NotFound = lazy(() => import('./pages/NotFound'))
+const CHUNK_RELOAD_KEY = 'linguanest-lazy-chunk-reload'
+
+const lazyWithChunkRetry = <T extends { default: ComponentType<any> }>(importer: () => Promise<T>, chunkKey: string) =>
+  lazy(async () => {
+    try {
+      const module = await importer()
+      sessionStorage.removeItem(CHUNK_RELOAD_KEY)
+      return module
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      const alreadyRetried = sessionStorage.getItem(CHUNK_RELOAD_KEY) === chunkKey
+      const isChunkLoadFailure = /Failed to fetch dynamically imported module|Importing a module script failed|Loading chunk/i.test(message)
+
+      if (typeof window !== 'undefined' && isChunkLoadFailure && !alreadyRetried) {
+        sessionStorage.setItem(CHUNK_RELOAD_KEY, chunkKey)
+        window.location.reload()
+        return new Promise<T>(() => {})
+      }
+
+      sessionStorage.removeItem(CHUNK_RELOAD_KEY)
+      throw error
+    }
+  })
+
+const Login = lazyWithChunkRetry(() => import('./pages/auth/Login'), 'login')
+const Register = lazyWithChunkRetry(() => import('./pages/auth/Register'), 'register')
+const ForgotPassword = lazyWithChunkRetry(() => import('./pages/auth/ForgotPassword'), 'forgot-password')
+const ResetPassword = lazyWithChunkRetry(() => import('./pages/auth/ResetPassword'), 'reset-password')
+const VerifyEmail = lazyWithChunkRetry(() => import('./pages/auth/VerifyEmail'), 'verify-email')
+const Home = lazyWithChunkRetry(() => import('./pages/Home'), 'home')
+const Courses = lazyWithChunkRetry(() => import('./pages/Courses'), 'courses')
+const CourseDetail = lazyWithChunkRetry(() => import('./pages/CourseDetail'), 'course-detail')
+const Dashboard = lazyWithChunkRetry(() => import('./pages/student/Dashboard'), 'student-dashboard')
+const MyLearning = lazyWithChunkRetry(() => import('./pages/student/MyLearning'), 'my-learning')
+const LessonView = lazyWithChunkRetry(() => import('./pages/student/LessonView'), 'lesson-view')
+const ExercisePractice = lazyWithChunkRetry(() => import('./pages/student/ExercisePractice'), 'exercise-practice')
+const Flashcards = lazyWithChunkRetry(() => import('./pages/student/Flashcards'), 'flashcards')
+const Profile = lazyWithChunkRetry(() => import('./pages/student/Profile'), 'profile')
+const Groups = lazyWithChunkRetry(() => import('./pages/student/Groups'), 'groups')
+const Leaderboard = lazyWithChunkRetry(() => import('./pages/student/Leaderboard'), 'leaderboard')
+const TeacherDashboard = lazyWithChunkRetry(() => import('./pages/teacher/Dashboard'), 'teacher-dashboard')
+const CreateCourse = lazyWithChunkRetry(() => import('./pages/teacher/CreateCourse'), 'create-course')
+const ManageCourse = lazyWithChunkRetry(() => import('./pages/teacher/ManageCourse'), 'manage-course')
+const StudentProgress = lazyWithChunkRetry(() => import('./pages/teacher/StudentProgress'), 'student-progress')
+const Forum = lazyWithChunkRetry(() => import('./pages/Forum'), 'forum')
+const Chat = lazyWithChunkRetry(() => import('./pages/Chat'), 'chat')
+const ParentDashboard = lazyWithChunkRetry(() => import('./pages/ParentDashboard'), 'parent-dashboard')
+const ChildProgress = lazyWithChunkRetry(() => import('./pages/ChildProgress'), 'child-progress')
+const ControlCenter = lazyWithChunkRetry(() => import('./pages/admin/ControlCenter'), 'control-center')
+const Pricing = lazyWithChunkRetry(() => import('./pages/Pricing'), 'pricing')
+const Terms = lazyWithChunkRetry(() => import('./pages/Terms'), 'terms')
+const Privacy = lazyWithChunkRetry(() => import('./pages/Privacy'), 'privacy')
+const Cookies = lazyWithChunkRetry(() => import('./pages/Cookies'), 'cookies')
+const NotFound = lazyWithChunkRetry(() => import('./pages/NotFound'), 'not-found')
 
 function App() {
   const { isAuthenticated, user } = useAuthStore()
   const authenticatedLandingPath = user?.role === 'admin'
     ? '/admin/control-center'
+    : user?.role === 'moderator'
+      ? '/admin/control-center'
     : user?.role === 'teacher'
       ? '/teacher/dashboard'
       : user?.role === 'parent'
@@ -77,7 +103,7 @@ function App() {
         />
         <Route path="/parent/dashboard" element={<ProtectedRoute allowedRoles={['parent']}><Layout><ParentDashboard /></Layout></ProtectedRoute>} />
         <Route path="/parent/children/:studentId" element={<ProtectedRoute allowedRoles={['parent']}><Layout><ChildProgress /></Layout></ProtectedRoute>} />
-        <Route path="/chat" element={<ProtectedRoute allowedRoles={['student', 'teacher', 'parent', 'admin']}><Layout><Chat /></Layout></ProtectedRoute>} />
+        <Route path="/chat" element={<ProtectedRoute allowedRoles={['student', 'teacher', 'parent', 'moderator', 'admin']}><Layout><Chat /></Layout></ProtectedRoute>} />
         <Route
           path="/my-learning"
           element={
@@ -113,7 +139,7 @@ function App() {
         <Route
           path="/profile"
           element={
-            <ProtectedRoute allowedRoles={['student', 'teacher', 'parent', 'admin']}>
+            <ProtectedRoute allowedRoles={['student', 'teacher', 'parent', 'moderator', 'admin']}>
               <Layout><Profile /></Layout>
             </ProtectedRoute>
           }
@@ -173,7 +199,7 @@ function App() {
         <Route path="/admin/dashboard" element={<Navigate to="/admin/control-center" replace />} />
         <Route path="/admin/users" element={<Navigate to="/admin/control-center" replace />} />
         <Route path="/admin/content" element={<Navigate to="/admin/control-center" replace />} />
-        <Route path="/admin/control-center" element={<ProtectedRoute allowedRoles={['admin']}><Layout><ControlCenter /></Layout></ProtectedRoute>} />
+        <Route path="/admin/control-center" element={<ProtectedRoute allowedRoles={['admin', 'moderator']}><Layout><ControlCenter /></Layout></ProtectedRoute>} />
 
         {/* Common Routes */}
         <Route path="/forum" element={<Layout><Forum /></Layout>} />

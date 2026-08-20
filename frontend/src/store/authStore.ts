@@ -6,13 +6,20 @@ interface User {
   firstName: string
   lastName: string
   email: string
-  role: 'student' | 'teacher' | 'parent' | 'admin'
+  role: 'student' | 'teacher' | 'parent' | 'moderator' | 'admin'
   avatar?: string
   nativeLanguage?: string
   targetLanguages?: string[]
   totalPoints?: number
   currentStreak?: number
   teacherApplicationStatus?: 'none' | 'pending' | 'approved' | 'rejected'
+  isEmailVerified?: boolean
+  moderatorPermissions?: {
+    communityModeration: boolean
+    supportChat: boolean
+    catalogContentQa: boolean
+    limitedUserManagement: boolean
+  }
 }
 
 interface AuthState {

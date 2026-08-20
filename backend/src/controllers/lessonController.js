@@ -1,5 +1,6 @@
 import Lesson from '../models/Lesson.js';
 import Course from '../models/Course.js';
+import { hasModeratorPermission } from '../middleware/auth.js';
 
 export const getLessons = async (req, res, next) => {
   try {
@@ -32,6 +33,9 @@ export const createLesson = async (req, res, next) => {
     if (!course) {
       return res.status(404).json({ success: false, message: 'Course not found' });
     }
+    if (req.user.role !== 'admin' && !hasModeratorPermission(req.user, 'catalogContentQa') && course.instructor.toString() !== req.user.id.toString()) {
+      return res.status(403).json({ success: false, message: 'You do not manage this course' });
+    }
 
     const lesson = await Lesson.create({
       course: courseId,
@@ -55,7 +59,7 @@ export const createLesson = async (req, res, next) => {
 const assertLessonOwnership = async (lessonId, user) => {
   const lesson = await Lesson.findById(lessonId).populate('course', 'instructor');
   if (!lesson) return { error: { status: 404, message: 'Lesson not found' } };
-  if (user.role !== 'admin' && lesson.course.instructor.toString() !== user.id.toString()) {
+  if (user.role !== 'admin' && !hasModeratorPermission(user, 'catalogContentQa') && lesson.course.instructor.toString() !== user.id.toString()) {
     return { error: { status: 403, message: 'You do not manage this course' } };
   }
   return { lesson };

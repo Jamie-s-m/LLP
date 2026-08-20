@@ -1,10 +1,17 @@
 import FamilyLink from '../models/FamilyLink.js';
 import User from '../models/User.js';
 import Progress from '../models/Progress.js';
+import { hasModeratorPermission } from '../middleware/auth.js';
 
 export const listFamilyLinks = async (req, res, next) => {
   try {
-    const filter = req.user.role === 'parent' ? { parent: req.user.id } : req.user.role === 'student' ? { student: req.user.id } : {};
+    const filter = req.user.role === 'parent'
+      ? { parent: req.user.id }
+      : req.user.role === 'student'
+        ? { student: req.user.id }
+        : req.user.role === 'admin' || hasModeratorPermission(req.user, 'limitedUserManagement')
+          ? {}
+          : { _id: null };
     const links = await FamilyLink.find(filter)
       .populate('parent', 'firstName lastName email role')
       .populate('student', 'firstName lastName email role xp streak')
@@ -30,6 +37,9 @@ export const reviewFamilyLink = async (req, res, next) => {
     const link = await FamilyLink.findById(req.params.id);
     if (!link) return res.status(404).json({ success: false, message: 'Family request not found' });
     if (req.user.role === 'student' && link.student.toString() !== req.user.id.toString()) {
+      return res.status(403).json({ success: false, message: 'You cannot review this family request' });
+    }
+    if (req.user.role === 'moderator' && !hasModeratorPermission(req.user, 'limitedUserManagement')) {
       return res.status(403).json({ success: false, message: 'You cannot review this family request' });
     }
     link.status = req.body.status === 'approved' ? 'approved' : 'rejected';

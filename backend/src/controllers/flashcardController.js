@@ -1,4 +1,6 @@
 import Flashcard from '../models/Flashcard.js';
+import Course from '../models/Course.js';
+import { hasModeratorPermission } from '../middleware/auth.js';
 
 export const getFlashcards = async (req, res, next) => {
   try {
@@ -16,6 +18,16 @@ export const createFlashcard = async (req, res, next) => {
     const { courseId, language, front, back, category, difficulty } = req.body;
     if (!front?.text || !back?.text || !language) {
       return res.status(400).json({ success: false, message: 'Flashcard text and language are required' });
+    }
+    if (!courseId) {
+      return res.status(400).json({ success: false, message: 'Flashcards must be attached to a course' });
+    }
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ success: false, message: 'Course not found' });
+    }
+    if (req.user.role !== 'admin' && !hasModeratorPermission(req.user, 'catalogContentQa') && course.instructor.toString() !== req.user.id.toString()) {
+      return res.status(403).json({ success: false, message: 'You do not manage this course' });
     }
 
     const card = await Flashcard.create({

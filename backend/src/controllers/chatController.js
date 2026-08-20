@@ -4,6 +4,7 @@ import ChatMessage from '../models/ChatMessage.js';
 import Group from '../models/Group.js';
 import User from '../models/User.js';
 import { sendPushToUsers } from '../utils/push.js';
+import { hasModeratorPermission } from '../middleware/auth.js';
 
 const isParticipant = (conversation, userId) =>
   conversation.participants.some((participant) => participant.toString() === userId.toString());
@@ -84,12 +85,18 @@ export const createConversation = async (req, res, next) => {
     }
 
     if (type === 'support') {
-      const admins = await User.find({ role: 'admin', isActive: true }).select('_id');
-      if (admins.length === 0) {
+      const staff = await User.find({
+        isActive: true,
+        $or: [
+          { role: 'admin' },
+          { role: 'moderator', 'moderatorPermissions.supportChat': true },
+        ],
+      }).select('_id');
+      if (staff.length === 0) {
         return res.status(400).json({ success: false, message: 'Support is not available right now' });
       }
 
-      participants = [...new Set([req.user.id, ...admins.map((admin) => admin._id.toString())])];
+      participants = [...new Set([req.user.id, ...staff.map((member) => member._id.toString())])];
       const existingConversation = await ChatConversation.findOne({
         type: 'support',
         participants: req.user.id,

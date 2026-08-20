@@ -2,6 +2,12 @@ import mongoose from 'mongoose';
 import Course from '../models/Course.js';
 import Lesson from '../models/Lesson.js';
 import Progress from '../models/Progress.js';
+import { hasModeratorPermission } from '../middleware/auth.js';
+
+const canManageCourse = (course, user) =>
+  user.role === 'admin' ||
+  hasModeratorPermission(user, 'catalogContentQa') ||
+  course.instructor.toString() === user.id.toString();
 
 export const getCourses = async (req, res, next) => {
   try {
@@ -70,6 +76,9 @@ export const updateCourse = async (req, res, next) => {
     if (!course) {
       return res.status(404).json({ success: false, message: 'Course not found' });
     }
+    if (!canManageCourse(course, req.user)) {
+      return res.status(403).json({ success: false, message: 'You do not manage this course' });
+    }
 
     Object.assign(course, req.body);
     await course.save();
@@ -82,10 +91,14 @@ export const updateCourse = async (req, res, next) => {
 
 export const deleteCourse = async (req, res, next) => {
   try {
-    const course = await Course.findByIdAndDelete(req.params.id);
+    const course = await Course.findById(req.params.id);
     if (!course) {
       return res.status(404).json({ success: false, message: 'Course not found' });
     }
+    if (!canManageCourse(course, req.user)) {
+      return res.status(403).json({ success: false, message: 'You do not manage this course' });
+    }
+    await Course.findByIdAndDelete(req.params.id);
 
     res.status(200).json({ success: true, message: 'Course deleted successfully' });
   } catch (error) {
