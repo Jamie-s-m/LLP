@@ -17,7 +17,9 @@ import forumRoutes from './routes/forum.js';
 import chatRoutes from './routes/chat.js';
 import adminRoutes from './routes/admin.js';
 import familyRoutes from './routes/family.js';
+import billingRoutes from './routes/billing.js';
 import pushRoutes from './routes/push.js';
+import { handleStripeWebhook } from './controllers/billingController.js';
 
 dotenv.config();
 
@@ -50,6 +52,8 @@ app.use(
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
+
+app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), handleStripeWebhook);
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
@@ -99,6 +103,7 @@ app.use('/api/groups', groupRoutes);
 app.use('/api/forum', forumRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/family', familyRoutes);
+app.use('/api/billing', billingRoutes);
 app.use('/api/push', pushRoutes);
 
 // Catch-all API 404 handler

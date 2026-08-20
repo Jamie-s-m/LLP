@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { FiBookOpen, FiClock, FiTarget, FiZap } from 'react-icons/fi'
+import { FiBookOpen, FiCheck, FiClock, FiTarget, FiUsers, FiX, FiZap } from 'react-icons/fi'
 import api from '../../services/api'
 import { useAuthStore } from '../../store/authStore'
 
@@ -10,20 +10,45 @@ interface Summary {
   totalXp: number
   streak: number
 }
+
+interface FamilyLinkRequest {
+  _id: string
+  status: 'pending' | 'approved' | 'rejected'
+  parent?: {
+    _id: string
+    firstName: string
+    lastName: string
+    email: string
+  }
+}
 export default function Dashboard() {
   const { user } = useAuthStore()
   const [summary, setSummary] = useState<Summary | null>(null)
+  const [familyLinks, setFamilyLinks] = useState<FamilyLinkRequest[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    api.get('/users/dashboard-summary')
-      .then((response) => setSummary(response.data.data))
+    Promise.all([api.get('/users/dashboard-summary'), api.get('/family')])
+      .then(([summaryResponse, familyResponse]) => {
+        setSummary(summaryResponse.data.data)
+        setFamilyLinks(familyResponse.data.data || [])
+      })
       .finally(() => setLoading(false))
   }, [])
 
   const progressPercent = summary && summary.totalCourses > 0
     ? Math.round((summary.completedCourses / summary.totalCourses) * 100)
     : 0
+  const pendingFamilyRequests = familyLinks.filter((link) => link.status === 'pending')
+
+  const reviewFamilyRequest = async (id: string, status: 'approved' | 'rejected') => {
+    try {
+      await api.patch(`/family/${id}/review`, { status })
+      setFamilyLinks((current) => current.map((link) => link._id === id ? { ...link, status } : link))
+    } catch (error: any) {
+      throw error
+    }
+  }
 
   return (
     <div className="atlas-page px-4 py-8">
@@ -60,6 +85,45 @@ export default function Dashboard() {
             <p>Your application to teach on Auralex is pending admin review.</p>
           </div>
         )}
+        {pendingFamilyRequests.length > 0 ? (
+          <div className="atlas-panel mb-8 p-6">
+            <div className="mb-5 flex items-center gap-3">
+              <FiUsers className="text-coral" />
+              <div>
+                <h2 className="text-2xl text-ink dark:text-white">Family access requests</h2>
+                <p className="text-muted">Approve or reject parent requests before they can view your learning progress.</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              {pendingFamilyRequests.map((link) => (
+                <div key={link._id} className="flex flex-col gap-4 rounded-2xl bg-[#f6efe7] p-4 dark:bg-white/5 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <strong className="text-ink dark:text-white">{link.parent?.firstName} {link.parent?.lastName}</strong>
+                    <p className="mt-1 text-sm text-muted">{link.parent?.email}</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      className="btn btn-primary inline-flex items-center gap-2"
+                      onClick={() => reviewFamilyRequest(link._id, 'approved')}
+                    >
+                      <FiCheck />
+                      Approve
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-outline inline-flex items-center gap-2"
+                      onClick={() => reviewFamilyRequest(link._id, 'rejected')}
+                    >
+                      <FiX />
+                      Reject
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
         {loading ? (
           <div className="atlas-panel p-6 text-slate-600 dark:text-slate-300">Loading your progress...</div>
         ) : (

@@ -20,7 +20,7 @@ Auralex is built around five connected product surfaces:
 
 3. **Family visibility**
    - parent dashboard
-   - learner-link requests
+   - learner-link requests with learner/admin approval
    - child progress tracking
 
 4. **Community and support**
@@ -31,7 +31,7 @@ Auralex is built around five connected product surfaces:
 5. **Platform operations**
    - admin control center
    - moderator permission scopes
-   - user, course, content, moderation, support, and billing-readiness surfaces
+   - user, course, content, moderation, support, and Stripe billing surfaces
 
 ## Role-by-role experience
 
@@ -42,6 +42,7 @@ Auralex is built around five connected product surfaces:
 - studies with flashcards, lessons, groups, and leaderboard
 - uses forum and chat
 - can submit interest in becoming a teacher
+- can approve or reject parent family-link requests directly from the learner dashboard
 
 ### Teacher
 - is approved through the admin workflow
@@ -53,6 +54,7 @@ Auralex is built around five connected product surfaces:
 ### Parent
 - signs up as a parent
 - requests a link to a learner by email
+- sees pending approval state until the learner, admin, or moderator reviews the request
 - monitors linked learner progress, XP, and streaks
 - opens detailed child progress views
 - uses chat for support and communication
@@ -69,9 +71,10 @@ Auralex is built around five connected product surfaces:
 ### Admin
 - operates the control center
 - manages users, roles, activity status, and teacher applications
+- reviews pending family-link requests from the applications tab
 - manages courses and content collections
 - moderates forum and group content
-- oversees support and commercial-readiness surfaces
+- oversees support and Stripe billing surfaces
 
 ## Live product highlights
 
@@ -81,6 +84,8 @@ Auralex is built around five connected product surfaces:
 - unread badges and browser notification support
 - chat delivery/read indicators
 - moderator hierarchy with scoped permissions
+- family-link approval from learner and admin workflows
+- Stripe checkout, billing portal, and subscription syncing routes
 - lazy-route reload protection for fresh deploys
 
 ## How the app works in practice
@@ -107,13 +112,15 @@ Auralex is built around five connected product surfaces:
 ### Parent flow
 1. parent opens the family desk
 2. parent submits learner link requests
-3. approved links expose learner progress details
+3. learner or admin reviews the request
+4. approved links expose learner progress details
 
 ### Admin and moderator flow
 1. admin opens the control center
-2. admin reviews users, applications, content, moderation, and support
+2. admin reviews users, applications, family links, content, moderation, and support
 3. admin may create moderators with limited scopes
 4. moderators work only inside their allowed areas
+5. admin manages Stripe plan readiness and billing operations
 
 ## Best way to start using the app
 
@@ -137,6 +144,7 @@ For the best first run, use this order:
 4. **Parent setup**
    - sign in as a parent
    - link a learner account
+   - approve the request from the learner dashboard or admin applications tab
    - verify family progress visibility
 
 5. **Support/community setup**
@@ -200,6 +208,11 @@ SMTP_SECURE=false
 SMTP_USER=
 SMTP_PASS=
 EMAIL_FROM="Auralex <no-reply@auralex.app>"
+STRIPE_SECRET_KEY=<stripe-secret-key>
+STRIPE_WEBHOOK_SECRET=<stripe-webhook-secret>
+STRIPE_PRICE_LEARNER_MONTHLY=<price_id>
+STRIPE_PRICE_FAMILY_MONTHLY=<price_id>
+STRIPE_PRICE_TEACHING_MONTHLY=<price_id>
 ```
 
 ### Frontend
@@ -212,6 +225,17 @@ VITE_VAPID_PUBLIC_KEY=<public-vapid-key>
 ```
 
 Never commit `.env` files, private keys, or production secrets.
+
+### Stripe setup notes
+
+- create three recurring Stripe prices for learner, family, and teaching plans
+- point the Stripe webhook at `/api/billing/webhook`
+- subscribe at minimum to:
+  - `checkout.session.completed`
+  - `customer.subscription.created`
+  - `customer.subscription.updated`
+  - `customer.subscription.deleted`
+- enable the Stripe customer portal if you want users to change plans or cancel through the app flow
 
 ## Run locally
 

@@ -10,10 +10,12 @@ The current app already includes:
 - authentication and email verification flows
 - student, teacher, parent, moderator, and admin role handling
 - teacher application workflow
+- family-link approval workflow from learner and admin surfaces
 - admin control center
 - moderator permission scopes
 - forum and groups
 - live chat with unread indicators, notifications, and read receipts
+- Stripe checkout session, billing portal, and webhook-based subscription syncing
 - premium Auralex branding and updated UI system
 
 ## How to run the platform locally
@@ -89,8 +91,9 @@ Use this order for realistic end-to-end verification:
 
 1. **Admin first**
    - open control center
-   - verify users, courses, moderation, and support
+   - verify users, courses, moderation, support, and billing plan configuration
    - approve teacher applications if needed
+   - review any family-link requests if needed
    - assign moderator scopes if needed
 
 2. **Teacher second**
@@ -100,10 +103,12 @@ Use this order for realistic end-to-end verification:
 
 3. **Student third**
    - enroll in a course
+   - approve any pending family-link requests
    - verify dashboard, my learning, flashcards, groups, leaderboard, and chat
 
 4. **Parent fourth**
    - request learner link
+   - confirm pending state is visible until learner/admin approval
    - verify child progress view
 
 5. **Support/community last**
@@ -117,13 +122,13 @@ These are the most valuable next steps.
 
 ### 1. Commercial launch systems
 Focus:
-- Stripe or Lemon Squeezy integration
-- subscriptions and billing webhooks
+- Stripe live-key rollout
+- Stripe portal configuration and plan-change rules
 - invoices and refund workflows
 - entitlements mapped to plans
 
 Why:
-- the UI is billing-ready, but commercial transactions are not yet implemented
+- the subscription foundation now exists, but live operations, entitlements, and finance policy still need completion
 
 ### 2. Observability and ops
 Focus:
@@ -170,7 +175,7 @@ Why:
 
 ### 6. Payment and legal go-live
 Focus:
-- payment processor configuration
+- Stripe production configuration
 - invoice and cancellation policy
 - privacy/terms/cookies legal review
 - support ownership and escalation rules
@@ -248,6 +253,11 @@ SMTP_SECURE=false
 SMTP_USER=<smtp-user>
 SMTP_PASS=<smtp-password>
 EMAIL_FROM="Auralex <no-reply@auralex.app>"
+STRIPE_SECRET_KEY=<stripe-secret-key>
+STRIPE_WEBHOOK_SECRET=<stripe-webhook-secret>
+STRIPE_PRICE_LEARNER_MONTHLY=<price_id>
+STRIPE_PRICE_FAMILY_MONTHLY=<price_id>
+STRIPE_PRICE_TEACHING_MONTHLY=<price_id>
 ```
 
 ## Release checklist
@@ -258,6 +268,8 @@ Before each release:
 2. run frontend build
 3. verify public home, pricing, login, and legal pages
 4. verify student, teacher, parent, chat, and admin authenticated surfaces
+5. verify parent request -> learner/admin approval -> linked visibility flow
+6. verify Stripe checkout redirect, webhook sync, and billing portal return flow
 5. verify chat unread/read behavior
 6. verify role restrictions still hold
 7. deploy frontend

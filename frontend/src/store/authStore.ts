@@ -14,6 +14,12 @@ interface User {
   currentStreak?: number
   teacherApplicationStatus?: 'none' | 'pending' | 'approved' | 'rejected'
   isEmailVerified?: boolean
+  billing?: {
+    plan: 'none' | 'learner' | 'family' | 'teaching'
+    status: 'inactive' | 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid' | 'incomplete' | 'incomplete_expired'
+    currentPeriodEnd?: string | null
+    cancelAtPeriodEnd?: boolean
+  }
   moderatorPermissions?: {
     communityModeration: boolean
     supportChat: boolean

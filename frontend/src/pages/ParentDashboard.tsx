@@ -62,7 +62,7 @@ export default function ParentDashboard() {
           </form>
           <div className="rounded-2xl bg-[#f6efe7] p-4 dark:bg-white/5">
             <p className="text-sm font-semibold text-ink dark:text-white">How it works</p>
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">Send a request using your learner&apos;s email. Once approved, their progress and study activity will appear in your family dashboard.</p>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">Send a request using your learner&apos;s email. The learner can approve it from their dashboard, and admins or moderators can also review it from the control center.</p>
           </div>
           <Link to="/chat" className="btn btn-primary mt-5 inline-flex items-center gap-2">Open family chat <FiMessageCircle /></Link>
         </section>
@@ -80,6 +80,7 @@ export default function ParentDashboard() {
                 <div>
                   {link.student ? <Link className="font-semibold text-ink dark:text-white" to={`/parent/children/${link.student._id}`}>{link.student.firstName} {link.student.lastName}</Link> : <span className="font-semibold text-slate-700 dark:text-slate-100">Learner</span>}
                   {link.student ? <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{link.student.xp} XP · {link.student.streak} day streak</p> : null}
+                  {link.status === 'pending' ? <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Waiting for learner or admin approval.</p> : null}
                 </div>
                 <span className={`status-pill ${link.status === 'approved' ? '' : 'muted'}`}>{link.status}</span>
               </div>

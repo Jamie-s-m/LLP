@@ -41,6 +41,21 @@ interface Application {
   email: string
 }
 
+interface FamilyLinkRequest {
+  _id: string
+  status: 'pending' | 'approved' | 'rejected'
+  parent?: { firstName: string; lastName: string; email: string }
+  student?: { firstName: string; lastName: string; email: string }
+}
+
+interface BillingPlanStatus {
+  key: string
+  name: string
+  priceLabel: string
+  available: boolean
+  description: string
+}
+
 interface CourseForm {
   title: string
   description: string
@@ -154,6 +169,8 @@ export default function ControlCenter() {
   const [resource, setResource] = useState<ContentResource>('lessons')
   const [content, setContent] = useState<ManagedContent[]>([])
   const [applications, setApplications] = useState<Application[]>([])
+  const [familyLinks, setFamilyLinks] = useState<FamilyLinkRequest[]>([])
+  const [billingPlans, setBillingPlans] = useState<BillingPlanStatus[]>([])
   const [userSearch, setUserSearch] = useState('')
   const [userPage, setUserPage] = useState(1)
   const [courseModal, setCourseModal] = useState<Course | null | false>(false)
@@ -413,10 +430,23 @@ export default function ControlCenter() {
 
   const loadApplications = async () => {
     try {
-      const response = await api.get('/admin/teacher-applications')
-      setApplications(response.data.data || [])
+      const [applicationResponse, familyResponse] = await Promise.all([
+        api.get('/admin/teacher-applications'),
+        api.get('/family'),
+      ])
+      setApplications(applicationResponse.data.data || [])
+      setFamilyLinks((familyResponse.data.data || []).filter((link: FamilyLinkRequest) => link.status === 'pending'))
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Applications could not be loaded')
+    }
+  }
+
+  const loadBillingPlans = async () => {
+    try {
+      const response = await api.get('/billing/plans')
+      setBillingPlans(response.data.data?.plans || [])
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Billing plans could not be loaded')
     }
   }
 
@@ -427,6 +457,19 @@ export default function ControlCenter() {
       toast.success(approve ? 'Applicant promoted to teacher' : 'Application rejected')
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Application could not be reviewed')
+    }
+  }
+
+  const reviewFamilyLink = async (id: string, status: 'approved' | 'rejected') => {
+    try {
+      await api.patch(`/family/${id}/review`, { status })
+      setFamilyLinks((current) => current.filter((link) => link._id !== id))
+      if (status === 'approved') {
+        await load()
+      }
+      toast.success(status === 'approved' ? 'Family link approved' : 'Family link rejected')
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Family link request could not be reviewed')
     }
   }
 
@@ -470,6 +513,7 @@ export default function ControlCenter() {
               if (value === 'content') loadContent(resource)
               if (value === 'applications') loadApplications()
               if (value === 'moderation') loadContent(moderationResource)
+              if (value === 'billing') loadBillingPlans()
             }}
             className={tab === value ? 'active' : ''}
           >
@@ -581,18 +625,40 @@ export default function ControlCenter() {
 
       {tab === 'applications' ? (
         <section className="atlas-panel p-6">
-          <h2 className="mb-6 text-2xl text-ink dark:text-white">Teacher applications</h2>
-          <div className="admin-table">
-            {applications.map((applicant) => (
-              <div className="admin-row" key={applicant._id}>
-                <div><strong>{applicant.firstName} {applicant.lastName}</strong><small>{applicant.email}</small></div>
-                <div className="flex gap-2">
-                  <button onClick={() => reviewApplication(applicant._id, true)} className="icon-button" aria-label={`Approve ${applicant.email}`}><FiCheck /></button>
-                  <button onClick={() => reviewApplication(applicant._id, false)} className="icon-button danger" aria-label={`Reject ${applicant.email}`}><FiX /></button>
-                </div>
+          <div className="grid gap-8 lg:grid-cols-2">
+            <div>
+              <h2 className="mb-6 text-2xl text-ink dark:text-white">Teacher applications</h2>
+              <div className="admin-table">
+                {applications.map((applicant) => (
+                  <div className="admin-row" key={applicant._id}>
+                    <div><strong>{applicant.firstName} {applicant.lastName}</strong><small>{applicant.email}</small></div>
+                    <div className="flex gap-2">
+                      <button onClick={() => reviewApplication(applicant._id, true)} className="icon-button" aria-label={`Approve ${applicant.email}`}><FiCheck /></button>
+                      <button onClick={() => reviewApplication(applicant._id, false)} className="icon-button danger" aria-label={`Reject ${applicant.email}`}><FiX /></button>
+                    </div>
+                  </div>
+                ))}
+                {applications.length === 0 ? <div className="empty-state"><FiUserCheck /><p>No pending teacher applications.</p></div> : null}
               </div>
-            ))}
-            {applications.length === 0 ? <div className="empty-state"><FiUserCheck /><p>No pending teacher applications.</p></div> : null}
+            </div>
+            <div>
+              <h2 className="mb-6 text-2xl text-ink dark:text-white">Family link requests</h2>
+              <div className="admin-table">
+                {familyLinks.map((link) => (
+                  <div className="admin-row" key={link._id}>
+                    <div>
+                      <strong>{link.parent?.firstName} {link.parent?.lastName}</strong>
+                      <small>{link.parent?.email} → {link.student?.firstName} {link.student?.lastName} ({link.student?.email})</small>
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={() => reviewFamilyLink(link._id, 'approved')} className="icon-button" aria-label={`Approve family link for ${link.parent?.email}`}><FiCheck /></button>
+                      <button onClick={() => reviewFamilyLink(link._id, 'rejected')} className="icon-button danger" aria-label={`Reject family link for ${link.parent?.email}`}><FiX /></button>
+                    </div>
+                  </div>
+                ))}
+                {familyLinks.length === 0 ? <div className="empty-state"><FiUsers /><p>No pending family link requests.</p></div> : null}
+              </div>
+            </div>
           </div>
         </section>
       ) : null}
@@ -649,8 +715,8 @@ export default function ControlCenter() {
         <section className="atlas-panel p-6">
           <div className="mb-6">
             <p className="atlas-kicker">Commercial controls</p>
-            <h2 className="text-2xl text-ink dark:text-white">Billing readiness</h2>
-            <p className="mt-2 text-muted">Use this checklist before you start charging live customers.</p>
+            <h2 className="text-2xl text-ink dark:text-white">Stripe billing operation</h2>
+            <p className="mt-2 text-muted">Monitor plan readiness, account mix, and go-live billing actions from one place.</p>
           </div>
           <div className="grid gap-4 lg:grid-cols-3">
             {[
@@ -659,11 +725,26 @@ export default function ControlCenter() {
               { title: 'Potential teaching workspaces', value: overview?.totals.teachers ?? 0, note: 'Teacher accounts that could map to team or academy plans.' },
             ].map((card) => <div key={card.title} className="rounded-2xl bg-[#f6efe7] p-5 dark:bg-white/5"><p className="text-sm font-semibold text-slate-500 dark:text-slate-400">{card.title}</p><strong className="mt-3 block text-3xl text-ink dark:text-white">{card.value}</strong><p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{card.note}</p></div>)}
           </div>
+          <div className="mt-6 grid gap-4 lg:grid-cols-3">
+            {billingPlans.map((plan) => (
+              <div key={plan.key} className="rounded-2xl border border-slate-200 bg-white/80 p-5 dark:border-white/10 dark:bg-white/5">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">{plan.name}</p>
+                    <strong className="mt-2 block text-2xl text-ink dark:text-white">{plan.priceLabel}</strong>
+                  </div>
+                  <span className={`status-pill ${plan.available ? '' : 'muted'}`}>{plan.available ? 'configured' : 'missing price ID'}</span>
+                </div>
+                <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">{plan.description}</p>
+              </div>
+            ))}
+            {billingPlans.length === 0 ? <div className="empty-state lg:col-span-3"><FiCreditCard /><p>No Stripe plan metadata loaded yet.</p></div> : null}
+          </div>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             {[
-              'Connect a live payment processor and secure webhook handling.',
-              'Define taxes, invoices, cancellations, and refund workflows.',
-              'Review legal pages and jurisdiction-specific disclosures with counsel.',
+              'Set STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, and all plan price IDs in the backend environment.',
+              'Enable Stripe customer portal plan changes, cancellations, and invoice emails.',
+              'Define taxes, refunds, failed-payment handling, and cancellation policy ownership.',
               'Add finance monitoring, support ownership, and billing incident alerts.',
             ].map((item) => <div key={item} className="rounded-2xl border border-slate-200 bg-white/80 p-4 text-sm text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-200">{item}</div>)}
           </div>

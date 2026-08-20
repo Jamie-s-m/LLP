@@ -31,6 +31,19 @@ const userSchema = new mongoose.Schema(
     children: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     parents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     teacherApplicationStatus: { type: String, enum: ['none', 'pending', 'approved', 'rejected'], default: 'none' },
+    billing: {
+      plan: { type: String, enum: ['none', 'learner', 'family', 'teaching'], default: 'none' },
+      status: {
+        type: String,
+        enum: ['inactive', 'trialing', 'active', 'past_due', 'canceled', 'unpaid', 'incomplete', 'incomplete_expired'],
+        default: 'inactive',
+      },
+      stripeCustomerId: { type: String, default: '' },
+      stripeSubscriptionId: { type: String, default: '' },
+      stripePriceId: { type: String, default: '' },
+      currentPeriodEnd: { type: Date, default: null },
+      cancelAtPeriodEnd: { type: Boolean, default: false },
+    },
   },
   { timestamps: true }
 );
