@@ -4,6 +4,7 @@ import toast from 'react-hot-toast'
 import { FiBookOpen, FiCheck, FiCreditCard, FiEdit3, FiMessageSquare, FiPlus, FiTrash2, FiUserCheck, FiUsers, FiX } from 'react-icons/fi'
 import api from '../../services/api'
 import { useAuthStore } from '../../store/authStore'
+import { useLanguageStore } from '../../store/languageStore'
 
 type ModeratorPermissions = {
   communityModeration: boolean
@@ -161,8 +162,480 @@ const emptyContentForm = (): ContentForm => ({
   isPrivate: false,
 })
 
+const copy = {
+  en: {
+    adminLoadFailed: 'Admin data could not be loaded',
+    courseSaved: 'Course saved',
+    courseSaveFailed: 'Course could not be saved',
+    deleteCourseConfirm: 'Delete this course and its public listing?',
+    courseDeleted: 'Course deleted',
+    courseDeleteFailed: 'Course could not be deleted',
+    userAccessUpdated: 'User access updated',
+    userUpdateFailed: 'User could not be updated',
+    userSuspended: 'User suspended',
+    userReactivated: 'User reactivated',
+    deleteUserConfirm: 'Delete {email}? This cannot be undone.',
+    userDeleted: 'User deleted',
+    userDeleteFailed: 'User could not be deleted',
+    contentLoadFailed: 'Content could not be loaded',
+    contentSaved: 'Content saved',
+    contentSaveFailed: 'Content could not be saved',
+    deleteContentConfirm: 'Delete this content item?',
+    contentDeleted: 'Content deleted',
+    contentDeleteFailed: 'Content could not be deleted',
+    postPinned: 'Post pinned',
+    postUnpinned: 'Post unpinned',
+    postUpdateFailed: 'Post could not be updated',
+    applicationsLoadFailed: 'Applications could not be loaded',
+    billingLoadFailed: 'Billing plans could not be loaded',
+    applicantApproved: 'Applicant promoted to teacher',
+    applicantRejected: 'Application rejected',
+    applicationReviewFailed: 'Application could not be reviewed',
+    familyApproved: 'Family link approved',
+    familyRejected: 'Family link rejected',
+    familyReviewFailed: 'Family link request could not be reviewed',
+    tabCourses: 'Courses',
+    tabUsers: 'People',
+    tabContent: 'Content',
+    tabApplications: 'Applications',
+    tabModeration: 'Moderation',
+    tabSupport: 'Support',
+    tabBilling: 'Billing',
+    kicker: 'Operations desk',
+    title: 'Command the learning operation.',
+    text: 'Manage people, curriculum, and community from one focused control center.',
+    usersStat: 'Users',
+    coursesStat: 'Courses',
+    publishedStat: 'Published',
+    messagesStat: 'Messages',
+    moderatorsStat: 'Moderators',
+    pendingTeachersStat: 'Pending teachers',
+    contentInventory: 'Content inventory',
+    newCourse: 'New Course',
+    loadingCurriculum: 'Loading curriculum...',
+    lessonsCount: '{count} lessons',
+    published: 'Published',
+    draft: 'Draft',
+    emptyCourses: 'No courses yet. Create your first course to populate the catalog.',
+    peopleRoles: 'People & roles',
+    searchUsers: 'Search name, email, or role',
+    scopedAccess: 'scoped access',
+    active: 'Active',
+    suspended: 'Suspended',
+    suspend: 'Suspend',
+    reactivate: 'Reactivate',
+    noUsersMatch: 'No users match this search yet.',
+    noUsersPage: 'No users on this page.',
+    usersCount: '{count} users',
+    previous: 'Previous',
+    next: 'Next',
+    contentLibrary: 'Content library',
+    addItem: 'Add item',
+    noItems: 'No items in this collection.',
+    teacherApplications: 'Teacher applications',
+    familyLinkRequests: 'Family link requests',
+    noTeacherApplications: 'No pending teacher applications.',
+    noFamilyLinks: 'No pending family link requests.',
+    communityModeration: 'Community moderation',
+    untitledItem: 'Untitled item',
+    pinned: 'Pinned',
+    noModerationItems: 'No moderation items.',
+    supportKicker: 'Support coverage',
+    supportTitle: 'Support and chat operations',
+    supportText: 'Users opening support conversations are routed to active admin and moderator support staff. Use the chat workspace to respond.',
+    currentChatVolume: 'Current chat volume',
+    currentChatVolumeText: 'Total support and conversation messages in the platform.',
+    operationalAction: 'Operational action',
+    operationalActionText: 'Use the chat workspace to reply to support conversations and keep resolution times low.',
+    openSupportChat: 'Open support chat',
+    billingKicker: 'Commercial controls',
+    billingTitle: 'Stripe billing operation',
+    billingText: 'Monitor plan readiness, account mix, and go-live billing actions from one place.',
+    potentialLearnerSeats: 'Potential learner seats',
+    potentialLearnerSeatsText: 'Current student accounts that could map to paid seats.',
+    potentialFamilyAccounts: 'Potential family accounts',
+    potentialFamilyAccountsText: 'Parent users available for family subscriptions.',
+    potentialTeachingWorkspaces: 'Potential teaching workspaces',
+    potentialTeachingWorkspacesText: 'Teacher accounts that could map to team or academy plans.',
+    configured: 'configured',
+    missingPriceId: 'missing price ID',
+    noStripePlans: 'No Stripe plan metadata loaded yet.',
+    billingTask1: 'Set STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, and all plan price IDs in the backend environment.',
+    billingTask2: 'Enable Stripe customer portal plan changes, cancellations, and invoice emails.',
+    billingTask3: 'Define taxes, refunds, failed-payment handling, and cancellation policy ownership.',
+    billingTask4: 'Add finance monitoring, support ownership, and billing incident alerts.',
+    editCourse: 'Edit course',
+    newCourseModal: 'New course',
+    closeCourseModal: 'Close course modal',
+    titleLabel: 'Title',
+    descriptionLabel: 'Description',
+    languageLabel: 'Language',
+    levelLabel: 'Level',
+    categoryLabel: 'Category',
+    cancel: 'Cancel',
+    saveCourse: 'Save course',
+    createCourse: 'Create course',
+    manageUserAccess: 'Manage user access',
+    closeUserModal: 'Close user modal',
+    roleLabel: 'Role',
+    activeAccount: 'Active account',
+    emailVerified: 'Email verified',
+    moderatorScopes: 'Moderator scopes',
+    scopeCommunity: 'Community moderation',
+    scopeSupport: 'Support and chat',
+    scopeCatalog: 'Catalog and content QA',
+    scopeUsers: 'Limited user management',
+    saveAccess: 'Save access',
+    editContentItem: 'Edit content item',
+    createContentItem: 'Create content item',
+    closeContentModal: 'Close content modal',
+    courseId: 'Course ID',
+    order: 'Order',
+    titleField: 'Title',
+    descriptionField: 'Description',
+    contentField: 'Content',
+    difficulty: 'Difficulty',
+    frontText: 'Front text',
+    backText: 'Back text',
+    pinPost: 'Pin this post',
+    groupName: 'Group name',
+    maxMembers: 'Max members',
+    privateGroup: 'Private group',
+    saveItem: 'Save item',
+    createItem: 'Create item',
+  },
+  ru: {
+    adminLoadFailed: 'Не удалось загрузить данные администратора',
+    courseSaved: 'Курс сохранён',
+    courseSaveFailed: 'Не удалось сохранить курс',
+    deleteCourseConfirm: 'Удалить этот курс и его публичную страницу?',
+    courseDeleted: 'Курс удалён',
+    courseDeleteFailed: 'Не удалось удалить курс',
+    userAccessUpdated: 'Доступ пользователя обновлён',
+    userUpdateFailed: 'Не удалось обновить пользователя',
+    userSuspended: 'Пользователь приостановлен',
+    userReactivated: 'Пользователь восстановлен',
+    deleteUserConfirm: 'Удалить {email}? Это действие необратимо.',
+    userDeleted: 'Пользователь удалён',
+    userDeleteFailed: 'Не удалось удалить пользователя',
+    contentLoadFailed: 'Не удалось загрузить контент',
+    contentSaved: 'Контент сохранён',
+    contentSaveFailed: 'Не удалось сохранить контент',
+    deleteContentConfirm: 'Удалить этот элемент контента?',
+    contentDeleted: 'Контент удалён',
+    contentDeleteFailed: 'Не удалось удалить контент',
+    postPinned: 'Пост закреплён',
+    postUnpinned: 'Пост откреплён',
+    postUpdateFailed: 'Не удалось обновить пост',
+    applicationsLoadFailed: 'Не удалось загрузить заявки',
+    billingLoadFailed: 'Не удалось загрузить тарифы',
+    applicantApproved: 'Заявитель повышен до преподавателя',
+    applicantRejected: 'Заявка отклонена',
+    applicationReviewFailed: 'Не удалось обработать заявку',
+    familyApproved: 'Семейная связь одобрена',
+    familyRejected: 'Семейная связь отклонена',
+    familyReviewFailed: 'Не удалось обработать запрос семейной связи',
+    tabCourses: 'Курсы',
+    tabUsers: 'Люди',
+    tabContent: 'Контент',
+    tabApplications: 'Заявки',
+    tabModeration: 'Модерация',
+    tabSupport: 'Поддержка',
+    tabBilling: 'Биллинг',
+    kicker: 'Операционный центр',
+    title: 'Управляйте обучающей системой.',
+    text: 'Управляйте людьми, программой и сообществом из одного центра.',
+    usersStat: 'Пользователи',
+    coursesStat: 'Курсы',
+    publishedStat: 'Опубликовано',
+    messagesStat: 'Сообщения',
+    moderatorsStat: 'Модераторы',
+    pendingTeachersStat: 'Ожидают преподаватели',
+    contentInventory: 'Каталог контента',
+    newCourse: 'Новый курс',
+    loadingCurriculum: 'Загрузка программы...',
+    lessonsCount: '{count} уроков',
+    published: 'Опубликован',
+    draft: 'Черновик',
+    emptyCourses: 'Курсов пока нет. Создайте первый, чтобы наполнить каталог.',
+    peopleRoles: 'Люди и роли',
+    searchUsers: 'Искать по имени, email или роли',
+    scopedAccess: 'ограниченный доступ',
+    active: 'Активен',
+    suspended: 'Заблокирован',
+    suspend: 'Приостановить',
+    reactivate: 'Восстановить',
+    noUsersMatch: 'По этому запросу пользователи не найдены.',
+    noUsersPage: 'На этой странице нет пользователей.',
+    usersCount: '{count} пользователей',
+    previous: 'Назад',
+    next: 'Далее',
+    contentLibrary: 'Библиотека контента',
+    addItem: 'Добавить элемент',
+    noItems: 'В этой коллекции нет элементов.',
+    teacherApplications: 'Заявки преподавателей',
+    familyLinkRequests: 'Семейные запросы',
+    noTeacherApplications: 'Нет ожидающих заявок преподавателей.',
+    noFamilyLinks: 'Нет ожидающих семейных запросов.',
+    communityModeration: 'Модерация сообщества',
+    untitledItem: 'Элемент без названия',
+    pinned: 'Закреплено',
+    noModerationItems: 'Нет элементов для модерации.',
+    supportKicker: 'Покрытие поддержки',
+    supportTitle: 'Операции поддержки и чата',
+    supportText: 'Пользователи, открывающие обращения, направляются к активным администраторам и модераторам поддержки. Используйте чат для ответа.',
+    currentChatVolume: 'Текущий объём чата',
+    currentChatVolumeText: 'Общее число сообщений поддержки и диалогов на платформе.',
+    operationalAction: 'Операционное действие',
+    operationalActionText: 'Используйте рабочее пространство чата, чтобы отвечать на обращения и сокращать время решения.',
+    openSupportChat: 'Открыть чат поддержки',
+    billingKicker: 'Коммерческие настройки',
+    billingTitle: 'Операции Stripe',
+    billingText: 'Отслеживайте готовность тарифов, состав аккаунтов и действия перед запуском из одного места.',
+    potentialLearnerSeats: 'Потенциальные места учеников',
+    potentialLearnerSeatsText: 'Текущие студенческие аккаунты, которые могут стать платными местами.',
+    potentialFamilyAccounts: 'Потенциальные семейные аккаунты',
+    potentialFamilyAccountsText: 'Пользователи-родители, доступные для семейных подписок.',
+    potentialTeachingWorkspaces: 'Потенциальные преподавательские пространства',
+    potentialTeachingWorkspacesText: 'Аккаунты преподавателей, которые могут перейти на командные или академические тарифы.',
+    configured: 'настроено',
+    missingPriceId: 'нет price ID',
+    noStripePlans: 'Метаданные тарифов Stripe ещё не загружены.',
+    billingTask1: 'Задайте STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET и все price ID тарифов в окружении backend.',
+    billingTask2: 'Включите изменения тарифов, отмены и email-счета через клиентский портал Stripe.',
+    billingTask3: 'Определите налоги, возвраты, обработку неуспешных платежей и ответственность за политику отмен.',
+    billingTask4: 'Добавьте финансовый мониторинг, владельца поддержки и оповещения о сбоях биллинга.',
+    editCourse: 'Редактировать курс',
+    newCourseModal: 'Новый курс',
+    closeCourseModal: 'Закрыть окно курса',
+    titleLabel: 'Название',
+    descriptionLabel: 'Описание',
+    languageLabel: 'Язык',
+    levelLabel: 'Уровень',
+    categoryLabel: 'Категория',
+    cancel: 'Отмена',
+    saveCourse: 'Сохранить курс',
+    createCourse: 'Создать курс',
+    manageUserAccess: 'Управление доступом пользователя',
+    closeUserModal: 'Закрыть окно пользователя',
+    roleLabel: 'Роль',
+    activeAccount: 'Активный аккаунт',
+    emailVerified: 'Email подтверждён',
+    moderatorScopes: 'Права модератора',
+    scopeCommunity: 'Модерация сообщества',
+    scopeSupport: 'Поддержка и чат',
+    scopeCatalog: 'Каталог и контроль качества контента',
+    scopeUsers: 'Ограниченное управление пользователями',
+    saveAccess: 'Сохранить доступ',
+    editContentItem: 'Редактировать элемент',
+    createContentItem: 'Создать элемент',
+    closeContentModal: 'Закрыть окно контента',
+    courseId: 'ID курса',
+    order: 'Порядок',
+    titleField: 'Название',
+    descriptionField: 'Описание',
+    contentField: 'Содержимое',
+    difficulty: 'Сложность',
+    frontText: 'Текст лицевой стороны',
+    backText: 'Текст обратной стороны',
+    pinPost: 'Закрепить этот пост',
+    groupName: 'Название группы',
+    maxMembers: 'Макс. участников',
+    privateGroup: 'Приватная группа',
+    saveItem: 'Сохранить элемент',
+    createItem: 'Создать элемент',
+  },
+  uz: {
+    adminLoadFailed: 'Admin ma’lumotlarini yuklab bo‘lmadi',
+    courseSaved: 'Kurs saqlandi',
+    courseSaveFailed: 'Kursni saqlab bo‘lmadi',
+    deleteCourseConfirm: 'Bu kurs va uning ommaviy sahifasi o‘chirilsinmi?',
+    courseDeleted: 'Kurs o‘chirildi',
+    courseDeleteFailed: 'Kursni o‘chirib bo‘lmadi',
+    userAccessUpdated: 'Foydalanuvchi kirishi yangilandi',
+    userUpdateFailed: 'Foydalanuvchini yangilab bo‘lmadi',
+    userSuspended: 'Foydalanuvchi to‘xtatildi',
+    userReactivated: 'Foydalanuvchi qayta faollashtirildi',
+    deleteUserConfirm: '{email} o‘chirilsinmi? Bu amalni ortga qaytarib bo‘lmaydi.',
+    userDeleted: 'Foydalanuvchi o‘chirildi',
+    userDeleteFailed: 'Foydalanuvchini o‘chirib bo‘lmadi',
+    contentLoadFailed: 'Kontentni yuklab bo‘lmadi',
+    contentSaved: 'Kontent saqlandi',
+    contentSaveFailed: 'Kontentni saqlab bo‘lmadi',
+    deleteContentConfirm: 'Bu kontent elementi o‘chirilsinmi?',
+    contentDeleted: 'Kontent o‘chirildi',
+    contentDeleteFailed: 'Kontentni o‘chirib bo‘lmadi',
+    postPinned: 'Post mahkamlandi',
+    postUnpinned: 'Post yechildi',
+    postUpdateFailed: 'Postni yangilab bo‘lmadi',
+    applicationsLoadFailed: 'So‘rovlarni yuklab bo‘lmadi',
+    billingLoadFailed: 'To‘lov tariflarini yuklab bo‘lmadi',
+    applicantApproved: 'Nomzod ustozga ko‘tarildi',
+    applicantRejected: 'Ariza rad etildi',
+    applicationReviewFailed: 'Arizani ko‘rib chiqib bo‘lmadi',
+    familyApproved: 'Oilaviy ulanish tasdiqlandi',
+    familyRejected: 'Oilaviy ulanish rad etildi',
+    familyReviewFailed: 'Oilaviy ulanish so‘rovini ko‘rib chiqib bo‘lmadi',
+    tabCourses: 'Kurslar',
+    tabUsers: 'Odamlar',
+    tabContent: 'Kontent',
+    tabApplications: 'So‘rovlar',
+    tabModeration: 'Moderatsiya',
+    tabSupport: 'Yordam',
+    tabBilling: 'To‘lovlar',
+    kicker: 'Operatsion markaz',
+    title: 'O‘quv tizimini boshqaring.',
+    text: 'Bitta markazdan odamlar, dastur va hamjamiyatni boshqaring.',
+    usersStat: 'Foydalanuvchilar',
+    coursesStat: 'Kurslar',
+    publishedStat: 'Chop etilgan',
+    messagesStat: 'Xabarlar',
+    moderatorsStat: 'Moderatorlar',
+    pendingTeachersStat: 'Kutilayotgan ustozlar',
+    contentInventory: 'Kontent inventari',
+    newCourse: 'Yangi kurs',
+    loadingCurriculum: 'Dastur yuklanmoqda...',
+    lessonsCount: '{count} dars',
+    published: 'Chop etilgan',
+    draft: 'Qoralama',
+    emptyCourses: 'Hali kurslar yo‘q. Katalogni to‘ldirish uchun birinchisini yarating.',
+    peopleRoles: 'Odamlar va rollar',
+    searchUsers: 'Ism, email yoki rol bo‘yicha qidiring',
+    scopedAccess: 'cheklangan kirish',
+    active: 'Faol',
+    suspended: 'To‘xtatilgan',
+    suspend: 'To‘xtatish',
+    reactivate: 'Qayta faollashtirish',
+    noUsersMatch: 'Bu qidiruvga mos foydalanuvchi topilmadi.',
+    noUsersPage: 'Bu sahifada foydalanuvchi yo‘q.',
+    usersCount: '{count} foydalanuvchi',
+    previous: 'Oldingi',
+    next: 'Keyingi',
+    contentLibrary: 'Kontent kutubxonasi',
+    addItem: 'Element qo‘shish',
+    noItems: 'Bu kolleksiyada element yo‘q.',
+    teacherApplications: 'Ustoz arizalari',
+    familyLinkRequests: 'Oilaviy ulanish so‘rovlari',
+    noTeacherApplications: 'Kutilayotgan ustoz arizalari yo‘q.',
+    noFamilyLinks: 'Kutilayotgan oilaviy so‘rovlar yo‘q.',
+    communityModeration: 'Hamjamiyat moderatsiyasi',
+    untitledItem: 'Nomsiz element',
+    pinned: 'Mahkamlangan',
+    noModerationItems: 'Moderatsiya elementlari yo‘q.',
+    supportKicker: 'Yordam qamrovi',
+    supportTitle: 'Yordam va chat operatsiyalari',
+    supportText: 'Yordam suhbatlarini ochgan foydalanuvchilar faol admin va moderator xodimlariga yo‘naltiriladi. Javob berish uchun chat ish maydonidan foydalaning.',
+    currentChatVolume: 'Joriy chat hajmi',
+    currentChatVolumeText: 'Platformadagi barcha yordam va suhbat xabarlari soni.',
+    operationalAction: 'Operatsion harakat',
+    operationalActionText: 'Yordam suhbatlariga javob berish va yechim vaqtini qisqartirish uchun chat ish maydonidan foydalaning.',
+    openSupportChat: 'Yordam chatini ochish',
+    billingKicker: 'Tijorat boshqaruvi',
+    billingTitle: 'Stripe to‘lov operatsiyasi',
+    billingText: 'Tariflar tayyorligi, akkountlar tarkibi va start oldi to‘lov harakatlarini bitta joydan kuzating.',
+    potentialLearnerSeats: 'Potensial o‘quvchi o‘rinlari',
+    potentialLearnerSeatsText: 'Pulli o‘rinlarga aylanishi mumkin bo‘lgan joriy talaba akkountlari.',
+    potentialFamilyAccounts: 'Potensial oilaviy akkountlar',
+    potentialFamilyAccountsText: 'Oilaviy obunalar uchun mavjud ota-ona foydalanuvchilari.',
+    potentialTeachingWorkspaces: 'Potensial ustoz ish maydonlari',
+    potentialTeachingWorkspacesText: 'Jamoa yoki akademiya tariflariga mos kelishi mumkin bo‘lgan ustoz akkountlari.',
+    configured: 'sozlangan',
+    missingPriceId: 'price ID yo‘q',
+    noStripePlans: 'Stripe tarif metama’lumotlari hali yuklanmagan.',
+    billingTask1: 'Backend muhitida STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET va barcha tarif price ID larini sozlang.',
+    billingTask2: 'Stripe customer portal orqali tarif almashuvi, bekor qilish va invoice email larini yoqing.',
+    billingTask3: 'Soliqlar, refund, muvaffaqiyatsiz to‘lov ishlovi va bekor qilish siyosati egaligini belgilang.',
+    billingTask4: 'Moliyaviy monitoring, support egaligi va billing incident alert larini qo‘shing.',
+    editCourse: 'Kursni tahrirlash',
+    newCourseModal: 'Yangi kurs',
+    closeCourseModal: 'Kurs oynasini yopish',
+    titleLabel: 'Sarlavha',
+    descriptionLabel: 'Tavsif',
+    languageLabel: 'Til',
+    levelLabel: 'Daraja',
+    categoryLabel: 'Kategoriya',
+    cancel: 'Bekor qilish',
+    saveCourse: 'Kursni saqlash',
+    createCourse: 'Kurs yaratish',
+    manageUserAccess: 'Foydalanuvchi kirishini boshqarish',
+    closeUserModal: 'Foydalanuvchi oynasini yopish',
+    roleLabel: 'Rol',
+    activeAccount: 'Faol akkount',
+    emailVerified: 'Email tasdiqlangan',
+    moderatorScopes: 'Moderator vakolatlari',
+    scopeCommunity: 'Hamjamiyat moderatsiyasi',
+    scopeSupport: 'Yordam va chat',
+    scopeCatalog: 'Katalog va kontent QA',
+    scopeUsers: 'Cheklangan foydalanuvchi boshqaruvi',
+    saveAccess: 'Kirishni saqlash',
+    editContentItem: 'Kontent elementini tahrirlash',
+    createContentItem: 'Kontent elementi yaratish',
+    closeContentModal: 'Kontent oynasini yopish',
+    courseId: 'Kurs ID',
+    order: 'Tartib',
+    titleField: 'Sarlavha',
+    descriptionField: 'Tavsif',
+    contentField: 'Kontent',
+    difficulty: 'Qiyinlik',
+    frontText: 'Old tomondagi matn',
+    backText: 'Orqa tomondagi matn',
+    pinPost: 'Bu postni mahkamlash',
+    groupName: 'Guruh nomi',
+    maxMembers: 'Maks. a’zolar',
+    privateGroup: 'Yopiq guruh',
+    saveItem: 'Elementni saqlash',
+    createItem: 'Element yaratish',
+  },
+} as const
+
+const localizedLabels = {
+  roles: {
+    student: { en: 'Student', ru: 'Студент', uz: 'Talaba' },
+    parent: { en: 'Parent', ru: 'Родитель', uz: 'Ota-ona' },
+    teacher: { en: 'Teacher', ru: 'Преподаватель', uz: 'Ustoz' },
+    moderator: { en: 'Moderator', ru: 'Модератор', uz: 'Moderator' },
+    admin: { en: 'Admin', ru: 'Администратор', uz: 'Admin' },
+  },
+  languages: {
+    English: { en: 'English', ru: 'Английский', uz: 'Inglizcha' },
+    Turkish: { en: 'Turkish', ru: 'Турецкий', uz: 'Turkcha' },
+    Russian: { en: 'Russian', ru: 'Русский', uz: 'Ruscha' },
+    Uzbek: { en: 'Uzbek', ru: 'Узбекский', uz: 'O‘zbekcha' },
+  },
+  levels: {
+    Beginner: { en: 'Beginner', ru: 'Начальный', uz: 'Boshlang‘ich' },
+    Intermediate: { en: 'Intermediate', ru: 'Средний', uz: 'O‘rta' },
+    Advanced: { en: 'Advanced', ru: 'Продвинутый', uz: 'Yuqori' },
+  },
+  categories: {
+    Conversation: { en: 'Conversation', ru: 'Разговор', uz: 'Suhbat' },
+    Grammar: { en: 'Grammar', ru: 'Грамматика', uz: 'Grammatika' },
+    Vocabulary: { en: 'Vocabulary', ru: 'Словарь', uz: 'Lug‘at' },
+    Reading: { en: 'Reading', ru: 'Чтение', uz: 'O‘qish' },
+    Writing: { en: 'Writing', ru: 'Письмо', uz: 'Yozish' },
+    Listening: { en: 'Listening', ru: 'Аудирование', uz: 'Tinglash' },
+    discussion: { en: 'Discussion', ru: 'Обсуждение', uz: 'Muhokama' },
+    question: { en: 'Question', ru: 'Вопрос', uz: 'Savol' },
+    resource: { en: 'Resource', ru: 'Ресурс', uz: 'Resurs' },
+    event: { en: 'Event', ru: 'Событие', uz: 'Tadbir' },
+  },
+  resources: {
+    lessons: { en: 'Lessons', ru: 'Уроки', uz: 'Darslar' },
+    flashcards: { en: 'Flashcards', ru: 'Карточки', uz: 'Kartochkalar' },
+    posts: { en: 'Forum posts', ru: 'Посты форума', uz: 'Forum postlari' },
+    groups: { en: 'Groups', ru: 'Группы', uz: 'Guruhlar' },
+  },
+  difficulty: {
+    Easy: { en: 'Easy', ru: 'Легко', uz: 'Oson' },
+    Medium: { en: 'Medium', ru: 'Средне', uz: 'O‘rta' },
+    Hard: { en: 'Hard', ru: 'Сложно', uz: 'Qiyin' },
+  },
+} as const
+
 export default function ControlCenter() {
   const currentUser = useAuthStore((state) => state.user)
+  const language = useLanguageStore((state) => state.language)
+  const ui = copy[language]
   const [tab, setTab] = useState<Tab>('courses')
   const [courses, setCourses] = useState<Course[]>([])
   const [users, setUsers] = useState<User[]>([])
@@ -203,6 +676,8 @@ export default function ControlCenter() {
   }, [canHandleSupport, canManageCatalog, canManageUsers, canModerateCommunity, canSeeBilling])
 
   const currentContentResource = tab === 'moderation' ? moderationResource : resource
+  const localize = <T extends Record<string, Record<'en' | 'ru' | 'uz', string>>>(map: T, value?: string) =>
+    (value && map[value as keyof T]?.[language]) || value || ''
 
   const load = async () => {
     setLoading(true)
@@ -217,13 +692,13 @@ export default function ControlCenter() {
       setUsers(userResponse.data.data || [])
       setOverview(overviewResponse.data.data || null)
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Admin data could not be loaded')
+      toast.error(error.response?.data?.message || ui.adminLoadFailed)
     } finally {
       setLoading(false)
     }
   }
 
-  useEffect(() => { load() }, [])
+  useEffect(() => { load() }, [ui.adminLoadFailed])
 
   useEffect(() => {
     if (!availableTabs.includes(tab) && availableTabs[0]) {
@@ -252,20 +727,20 @@ export default function ControlCenter() {
       }
       setCourseModal(false)
       await load()
-      toast.success('Course saved')
+      toast.success(ui.courseSaved)
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Course could not be saved')
+      toast.error(error.response?.data?.message || ui.courseSaveFailed)
     }
   }
 
   const removeCourse = async (id: string) => {
-    if (!window.confirm('Delete this course and its public listing?')) return
+    if (!window.confirm(ui.deleteCourseConfirm)) return
     try {
       await api.delete(`/courses/${id}`)
       setCourses((current) => current.filter((course) => course._id !== id))
-      toast.success('Course deleted')
+      toast.success(ui.courseDeleted)
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Course could not be deleted')
+      toast.error(error.response?.data?.message || ui.courseDeleteFailed)
     }
   }
 
@@ -289,9 +764,9 @@ export default function ControlCenter() {
       await api.patch(`/admin/users/${userModal._id}`, userForm)
       setUserModal(false)
       await load()
-      toast.success('User access updated')
+      toast.success(ui.userAccessUpdated)
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'User could not be updated')
+      toast.error(error.response?.data?.message || ui.userUpdateFailed)
     }
   }
 
@@ -299,20 +774,20 @@ export default function ControlCenter() {
     try {
       await api.patch(`/admin/users/${user._id}`, { isActive: !user.isActive })
       setUsers((current) => current.map((item) => item._id === user._id ? { ...item, isActive: !item.isActive } : item))
-      toast.success(user.isActive ? 'User suspended' : 'User reactivated')
+      toast.success(user.isActive ? ui.userSuspended : ui.userReactivated)
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'User could not be updated')
+      toast.error(error.response?.data?.message || ui.userUpdateFailed)
     }
   }
 
   const deleteUser = async (user: User) => {
-    if (!window.confirm(`Delete ${user.email}? This cannot be undone.`)) return
+    if (!window.confirm(ui.deleteUserConfirm.replace('{email}', user.email))) return
     try {
       await api.delete(`/admin/users/${user._id}`)
       setUsers((current) => current.filter((item) => item._id !== user._id))
-      toast.success('User deleted')
+      toast.success(ui.userDeleted)
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'User could not be deleted')
+      toast.error(error.response?.data?.message || ui.userDeleteFailed)
     }
   }
 
@@ -321,7 +796,7 @@ export default function ControlCenter() {
       const response = await api.get(`/admin/content/${nextResource}`)
       setContent(response.data.data || [])
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Content could not be loaded')
+      toast.error(error.response?.data?.message || ui.contentLoadFailed)
     }
   }
 
@@ -397,20 +872,20 @@ export default function ControlCenter() {
       }
       setContentModal(false)
       await loadContent(currentContentResource)
-      toast.success('Content saved')
+      toast.success(ui.contentSaved)
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Content could not be saved')
+      toast.error(error.response?.data?.message || ui.contentSaveFailed)
     }
   }
 
   const removeContent = async (id: string) => {
-    if (!window.confirm('Delete this content item?')) return
+    if (!window.confirm(ui.deleteContentConfirm)) return
     try {
       await api.delete(`/admin/content/${currentContentResource}/${id}`)
       setContent((current) => current.filter((item) => item._id !== id))
-      toast.success('Content deleted')
+      toast.success(ui.contentDeleted)
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Content could not be deleted')
+      toast.error(error.response?.data?.message || ui.contentDeleteFailed)
     }
   }
 
@@ -418,9 +893,9 @@ export default function ControlCenter() {
     try {
       await api.patch(`/admin/content/posts/${item._id}`, { isPinned: !item.isPinned })
       setContent((current) => current.map((entry) => entry._id === item._id ? { ...entry, isPinned: !item.isPinned } : entry))
-      toast.success(item.isPinned ? 'Post unpinned' : 'Post pinned')
+      toast.success(item.isPinned ? ui.postUnpinned : ui.postPinned)
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Post could not be updated')
+      toast.error(error.response?.data?.message || ui.postUpdateFailed)
     }
   }
 
@@ -437,7 +912,7 @@ export default function ControlCenter() {
       setApplications(applicationResponse.data.data || [])
       setFamilyLinks((familyResponse.data.data || []).filter((link: FamilyLinkRequest) => link.status === 'pending'))
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Applications could not be loaded')
+      toast.error(error.response?.data?.message || ui.applicationsLoadFailed)
     }
   }
 
@@ -446,7 +921,7 @@ export default function ControlCenter() {
       const response = await api.get('/billing/plans')
       setBillingPlans(response.data.data?.plans || [])
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Billing plans could not be loaded')
+      toast.error(error.response?.data?.message || ui.billingLoadFailed)
     }
   }
 
@@ -454,9 +929,9 @@ export default function ControlCenter() {
     try {
       await api.patch(`/admin/teacher-applications/${id}`, { approve })
       setApplications((current) => current.filter((item) => item._id !== id))
-      toast.success(approve ? 'Applicant promoted to teacher' : 'Application rejected')
+      toast.success(approve ? ui.applicantApproved : ui.applicantRejected)
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Application could not be reviewed')
+      toast.error(error.response?.data?.message || ui.applicationReviewFailed)
     }
   }
 
@@ -467,39 +942,39 @@ export default function ControlCenter() {
       if (status === 'approved') {
         await load()
       }
-      toast.success(status === 'approved' ? 'Family link approved' : 'Family link rejected')
+      toast.success(status === 'approved' ? ui.familyApproved : ui.familyRejected)
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Family link request could not be reviewed')
+      toast.error(error.response?.data?.message || ui.familyReviewFailed)
     }
   }
 
   const tabEntries = [
-    canManageCatalog ? ['courses', FiBookOpen, 'Courses'] : null,
-    canManageUsers ? ['users', FiUsers, 'People'] : null,
-    canManageCatalog ? ['content', FiEdit3, 'Content'] : null,
-    canManageUsers ? ['applications', FiUserCheck, 'Applications'] : null,
-    canModerateCommunity ? ['moderation', FiMessageSquare, 'Moderation'] : null,
-    canHandleSupport ? ['support', FiMessageSquare, 'Support'] : null,
-    canSeeBilling ? ['billing', FiCreditCard, 'Billing'] : null,
+    canManageCatalog ? ['courses', FiBookOpen, ui.tabCourses] : null,
+    canManageUsers ? ['users', FiUsers, ui.tabUsers] : null,
+    canManageCatalog ? ['content', FiEdit3, ui.tabContent] : null,
+    canManageUsers ? ['applications', FiUserCheck, ui.tabApplications] : null,
+    canModerateCommunity ? ['moderation', FiMessageSquare, ui.tabModeration] : null,
+    canHandleSupport ? ['support', FiMessageSquare, ui.tabSupport] : null,
+    canSeeBilling ? ['billing', FiCreditCard, ui.tabBilling] : null,
   ].filter(Boolean) as Array<[Tab, typeof FiBookOpen, string]>
 
   return (
     <div className="atlas-page mx-auto max-w-7xl px-4 py-8">
       <div className="atlas-heading mb-8">
-        <p className="atlas-kicker">Operations desk</p>
-        <h1>Command the learning operation.</h1>
-        <p>Manage people, curriculum, and community from one focused control center.</p>
+        <p className="atlas-kicker">{ui.kicker}</p>
+        <h1>{ui.title}</h1>
+        <p>{ui.text}</p>
       </div>
 
       {overview ? (
         <div className="atlas-stat-grid mb-8">
           {[
-            ['Users', overview.totals.users],
-            ['Courses', overview.totals.courses],
-            ['Published', overview.totals.publishedCourses],
-            ['Messages', overview.totals.chatMessages],
-            ['Moderators', overview.totals.moderators],
-            ['Pending teachers', overview.totals.pendingTeacherApplications],
+            [ui.usersStat, overview.totals.users],
+            [ui.coursesStat, overview.totals.courses],
+            [ui.publishedStat, overview.totals.publishedCourses],
+            [ui.messagesStat, overview.totals.chatMessages],
+            [ui.moderatorsStat, overview.totals.moderators],
+            [ui.pendingTeachersStat, overview.totals.pendingTeacherApplications],
           ].map(([label, value]) => <div key={String(label)} className="atlas-stat"><strong>{value}</strong><span>{label}</span></div>)}
         </div>
       ) : null}
@@ -527,24 +1002,24 @@ export default function ControlCenter() {
         <section className="atlas-panel p-6">
           <div className="mb-6 flex flex-wrap justify-between gap-4">
             <div>
-              <p className="atlas-kicker">Content inventory</p>
-              <h2 className="text-2xl text-ink dark:text-white">Courses</h2>
+              <p className="atlas-kicker">{ui.contentInventory}</p>
+              <h2 className="text-2xl text-ink dark:text-white">{ui.tabCourses}</h2>
             </div>
-            <button onClick={() => openCourseModal()} className="btn btn-primary inline-flex items-center gap-2"><FiPlus /> New Course</button>
+            <button onClick={() => openCourseModal()} className="btn btn-primary inline-flex items-center gap-2"><FiPlus /> {ui.newCourse}</button>
           </div>
           {loading ? (
-            <div className="rounded-2xl bg-[#f6efe7] p-5 text-slate-600 dark:bg-white/5 dark:text-slate-300">Loading curriculum...</div>
+            <div className="rounded-2xl bg-[#f6efe7] p-5 text-slate-600 dark:bg-white/5 dark:text-slate-300">{ui.loadingCurriculum}</div>
           ) : (
             <div className="admin-table">
               {courses.map((course) => (
                 <div className="admin-row" key={course._id}>
-                  <div><strong>{course.title}</strong><small>{course.language} · {course.level} · {course.totalLessons || 0} lessons</small></div>
-                  <span className={`status-pill ${course.isPublished ? '' : 'muted'}`}>{course.isPublished ? 'Published' : 'Draft'}</span>
+                  <div><strong>{course.title}</strong><small>{localize(localizedLabels.languages, course.language)} · {localize(localizedLabels.levels, course.level)} · {ui.lessonsCount.replace('{count}', String(course.totalLessons || 0))}</small></div>
+                  <span className={`status-pill ${course.isPublished ? '' : 'muted'}`}>{course.isPublished ? ui.published : ui.draft}</span>
                   <button onClick={() => openCourseModal(course)} className="icon-button" aria-label={`Edit ${course.title}`}><FiEdit3 /></button>
                   <button onClick={() => removeCourse(course._id)} className="icon-button danger" aria-label={`Delete ${course.title}`}><FiTrash2 /></button>
                 </div>
               ))}
-              {courses.length === 0 ? <div className="empty-state"><FiBookOpen /><p>No courses yet. Create your first course to populate the catalog.</p></div> : null}
+              {courses.length === 0 ? <div className="empty-state"><FiBookOpen /><p>{ui.emptyCourses}</p></div> : null}
             </div>
           )}
         </section>
@@ -553,8 +1028,8 @@ export default function ControlCenter() {
       {tab === 'users' ? (
         <section className="atlas-panel p-6">
           <div className="mb-6 flex flex-wrap justify-between gap-4">
-            <h2 className="text-2xl text-ink dark:text-white">People & roles</h2>
-            <input className="input max-w-sm" value={userSearch} onChange={(event) => { setUserSearch(event.target.value); setUserPage(1) }} placeholder="Search name, email, or role" />
+            <h2 className="text-2xl text-ink dark:text-white">{ui.peopleRoles}</h2>
+            <input className="input max-w-sm" value={userSearch} onChange={(event) => { setUserSearch(event.target.value); setUserPage(1) }} placeholder={ui.searchUsers} />
           </div>
           <div className="admin-table">
             {visibleUsers.map((user) => {
@@ -563,10 +1038,10 @@ export default function ControlCenter() {
                 <div className="admin-row" key={user._id}>
                   <div>
                     <strong>{user.firstName} {user.lastName}</strong>
-                    <small>{user.email} · {user.role}{user.role === 'moderator' ? ' · scoped access' : ''}</small>
+                    <small>{user.email} · {localize(localizedLabels.roles, user.role)}{user.role === 'moderator' ? ` · ${ui.scopedAccess}` : ''}</small>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className={`status-pill ${user.isActive ? '' : 'muted'}`}>{user.isActive ? 'Active' : 'Suspended'}</span>
+                    <span className={`status-pill ${user.isActive ? '' : 'muted'}`}>{user.isActive ? ui.active : ui.suspended}</span>
                     {isAdmin ? (
                       <>
                         <button onClick={() => openUserModal(user)} className="icon-button" aria-label={`Manage ${user.email}`}><FiEdit3 /></button>
@@ -574,21 +1049,21 @@ export default function ControlCenter() {
                       </>
                     ) : (
                       <button onClick={() => toggleUser(user)} disabled={protectedUser} className="btn btn-outline text-sm">
-                        {user.isActive ? 'Suspend' : 'Reactivate'}
+                        {user.isActive ? ui.suspend : ui.reactivate}
                       </button>
                     )}
                   </div>
                 </div>
               )
             })}
-            {visibleUsers.length === 0 ? <div className="empty-state"><FiUsers /><p>{filteredUsers.length === 0 ? 'No users match this search yet.' : 'No users on this page.'}</p></div> : null}
+            {visibleUsers.length === 0 ? <div className="empty-state"><FiUsers /><p>{filteredUsers.length === 0 ? ui.noUsersMatch : ui.noUsersPage}</p></div> : null}
           </div>
           <div className="mt-5 flex items-center justify-between text-sm text-slate-600 dark:text-slate-300">
-            <span>{filteredUsers.length} users</span>
+            <span>{ui.usersCount.replace('{count}', String(filteredUsers.length))}</span>
             <div className="flex gap-2">
-              <button className="btn btn-outline" disabled={userPage === 1} onClick={() => setUserPage((page) => page - 1)}>Previous</button>
+              <button className="btn btn-outline" disabled={userPage === 1} onClick={() => setUserPage((page) => page - 1)}>{ui.previous}</button>
               <span className="px-3 py-2">{userPage} / {totalUserPages}</span>
-              <button className="btn btn-outline" disabled={userPage === totalUserPages} onClick={() => setUserPage((page) => page + 1)}>Next</button>
+              <button className="btn btn-outline" disabled={userPage === totalUserPages} onClick={() => setUserPage((page) => page + 1)}>{ui.next}</button>
             </div>
           </div>
         </section>
@@ -597,28 +1072,28 @@ export default function ControlCenter() {
       {tab === 'content' ? (
         <section className="atlas-panel p-6">
           <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-            <h2 className="text-2xl text-ink dark:text-white">Content library</h2>
+            <h2 className="text-2xl text-ink dark:text-white">{ui.contentLibrary}</h2>
             <div className="flex flex-wrap gap-3">
               <select className="input max-w-xs" value={resource} onChange={(event) => { const next = event.target.value as ContentResource; setResource(next); loadContent(next) }}>
-                <option value="lessons">Lessons</option>
-                <option value="flashcards">Flashcards</option>
-                <option value="posts">Forum posts</option>
-                <option value="groups">Groups</option>
+                <option value="lessons">{localizedLabels.resources.lessons[language]}</option>
+                <option value="flashcards">{localizedLabels.resources.flashcards[language]}</option>
+                <option value="posts">{localizedLabels.resources.posts[language]}</option>
+                <option value="groups">{localizedLabels.resources.groups[language]}</option>
               </select>
-              <button className="btn btn-primary inline-flex items-center gap-2" onClick={() => openContentModal()}><FiPlus /> Add item</button>
+              <button className="btn btn-primary inline-flex items-center gap-2" onClick={() => openContentModal()}><FiPlus /> {ui.addItem}</button>
             </div>
           </div>
           <div className="admin-table">
             {content.map((item) => (
               <div className="admin-row" key={item._id}>
-                <div><strong>{item.title || item.name || item.content?.slice(0, 70) || 'Untitled item'}</strong><small>{resource} · {item._id}</small></div>
+                <div><strong>{item.title || item.name || item.content?.slice(0, 70) || ui.untitledItem}</strong><small>{localizedLabels.resources[resource][language]} · {item._id}</small></div>
                 <div className="flex gap-2">
                   <button onClick={() => openContentModal(item)} className="icon-button" aria-label="Edit content"><FiEdit3 /></button>
                   <button onClick={() => removeContent(item._id)} className="icon-button danger" aria-label="Delete content"><FiTrash2 /></button>
                 </div>
               </div>
             ))}
-            {content.length === 0 ? <div className="empty-state"><FiEdit3 /><p>No items in this collection.</p></div> : null}
+            {content.length === 0 ? <div className="empty-state"><FiEdit3 /><p>{ui.noItems}</p></div> : null}
           </div>
         </section>
       ) : null}
@@ -627,7 +1102,7 @@ export default function ControlCenter() {
         <section className="atlas-panel p-6">
           <div className="grid gap-8 lg:grid-cols-2">
             <div>
-              <h2 className="mb-6 text-2xl text-ink dark:text-white">Teacher applications</h2>
+              <h2 className="mb-6 text-2xl text-ink dark:text-white">{ui.teacherApplications}</h2>
               <div className="admin-table">
                 {applications.map((applicant) => (
                   <div className="admin-row" key={applicant._id}>
@@ -638,11 +1113,11 @@ export default function ControlCenter() {
                     </div>
                   </div>
                 ))}
-                {applications.length === 0 ? <div className="empty-state"><FiUserCheck /><p>No pending teacher applications.</p></div> : null}
+                {applications.length === 0 ? <div className="empty-state"><FiUserCheck /><p>{ui.noTeacherApplications}</p></div> : null}
               </div>
             </div>
             <div>
-              <h2 className="mb-6 text-2xl text-ink dark:text-white">Family link requests</h2>
+              <h2 className="mb-6 text-2xl text-ink dark:text-white">{ui.familyLinkRequests}</h2>
               <div className="admin-table">
                 {familyLinks.map((link) => (
                   <div className="admin-row" key={link._id}>
@@ -656,7 +1131,7 @@ export default function ControlCenter() {
                     </div>
                   </div>
                 ))}
-                {familyLinks.length === 0 ? <div className="empty-state"><FiUsers /><p>No pending family link requests.</p></div> : null}
+                {familyLinks.length === 0 ? <div className="empty-state"><FiUsers /><p>{ui.noFamilyLinks}</p></div> : null}
               </div>
             </div>
           </div>
@@ -666,19 +1141,19 @@ export default function ControlCenter() {
       {tab === 'moderation' ? (
         <section className="atlas-panel p-6">
           <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-            <h2 className="text-2xl text-ink dark:text-white">Community moderation</h2>
+            <h2 className="text-2xl text-ink dark:text-white">{ui.communityModeration}</h2>
             <div className="flex flex-wrap gap-3">
               <select className="input max-w-xs" value={moderationResource} onChange={(event) => { const next = event.target.value as ModerationResource; setModerationResource(next); loadContent(next) }}>
-                <option value="posts">Forum posts</option>
-                <option value="groups">Groups</option>
+                <option value="posts">{localizedLabels.resources.posts[language]}</option>
+                <option value="groups">{localizedLabels.resources.groups[language]}</option>
               </select>
-              <button className="btn btn-primary inline-flex items-center gap-2" onClick={() => openContentModal()}><FiPlus /> Add item</button>
+              <button className="btn btn-primary inline-flex items-center gap-2" onClick={() => openContentModal()}><FiPlus /> {ui.addItem}</button>
             </div>
           </div>
           <div className="admin-table">
             {content.map((item) => (
               <div className="admin-row" key={item._id}>
-                <div><strong>{item.title || item.name || 'Untitled item'}</strong><small>{item.category || moderationResource} {item.isPinned ? '· Pinned' : ''}</small></div>
+                <div><strong>{item.title || item.name || ui.untitledItem}</strong><small>{localize(localizedLabels.categories, item.category || moderationResource)} {item.isPinned ? `· ${ui.pinned}` : ''}</small></div>
                 <div className="flex gap-2">
                   {moderationResource === 'posts' ? <button onClick={() => togglePinnedPost(item)} className="icon-button" aria-label="Toggle pinned status"><FiCheck /></button> : null}
                   <button onClick={() => openContentModal(item)} className="icon-button" aria-label="Edit community item"><FiEdit3 /></button>
@@ -686,26 +1161,26 @@ export default function ControlCenter() {
                 </div>
               </div>
             ))}
-            {content.length === 0 ? <div className="empty-state"><FiMessageSquare /><p>No moderation items.</p></div> : null}
+            {content.length === 0 ? <div className="empty-state"><FiMessageSquare /><p>{ui.noModerationItems}</p></div> : null}
           </div>
         </section>
       ) : null}
 
       {tab === 'support' ? (
         <section className="atlas-panel p-6">
-          <p className="atlas-kicker">Support coverage</p>
-          <h2 className="text-2xl text-ink dark:text-white">Support and chat operations</h2>
-          <p className="mt-2 text-muted">Users opening support conversations are routed to active admin and moderator support staff. Use the chat workspace to respond.</p>
+          <p className="atlas-kicker">{ui.supportKicker}</p>
+          <h2 className="text-2xl text-ink dark:text-white">{ui.supportTitle}</h2>
+          <p className="mt-2 text-muted">{ui.supportText}</p>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             <div className="rounded-2xl bg-[#f6efe7] p-5 dark:bg-white/5">
-              <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">Current chat volume</p>
+              <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">{ui.currentChatVolume}</p>
               <strong className="mt-3 block text-3xl text-ink dark:text-white">{overview?.totals.chatMessages ?? 0}</strong>
-              <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">Total support and conversation messages in the platform.</p>
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{ui.currentChatVolumeText}</p>
             </div>
             <div className="rounded-2xl border border-slate-200 bg-white/80 p-5 dark:border-white/10 dark:bg-white/5">
-              <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">Operational action</p>
-              <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">Use the chat workspace to reply to support conversations and keep resolution times low.</p>
-              <Link to="/chat" className="btn btn-primary mt-4 inline-flex">Open support chat</Link>
+              <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">{ui.operationalAction}</p>
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{ui.operationalActionText}</p>
+              <Link to="/chat" className="btn btn-primary mt-4 inline-flex">{ui.openSupportChat}</Link>
             </div>
           </div>
         </section>
@@ -714,15 +1189,15 @@ export default function ControlCenter() {
       {tab === 'billing' ? (
         <section className="atlas-panel p-6">
           <div className="mb-6">
-            <p className="atlas-kicker">Commercial controls</p>
-            <h2 className="text-2xl text-ink dark:text-white">Stripe billing operation</h2>
-            <p className="mt-2 text-muted">Monitor plan readiness, account mix, and go-live billing actions from one place.</p>
+            <p className="atlas-kicker">{ui.billingKicker}</p>
+            <h2 className="text-2xl text-ink dark:text-white">{ui.billingTitle}</h2>
+            <p className="mt-2 text-muted">{ui.billingText}</p>
           </div>
           <div className="grid gap-4 lg:grid-cols-3">
             {[
-              { title: 'Potential learner seats', value: overview?.totals.students ?? 0, note: 'Current student accounts that could map to paid seats.' },
-              { title: 'Potential family accounts', value: overview?.totals.parents ?? 0, note: 'Parent users available for family subscriptions.' },
-              { title: 'Potential teaching workspaces', value: overview?.totals.teachers ?? 0, note: 'Teacher accounts that could map to team or academy plans.' },
+              { title: ui.potentialLearnerSeats, value: overview?.totals.students ?? 0, note: ui.potentialLearnerSeatsText },
+              { title: ui.potentialFamilyAccounts, value: overview?.totals.parents ?? 0, note: ui.potentialFamilyAccountsText },
+              { title: ui.potentialTeachingWorkspaces, value: overview?.totals.teachers ?? 0, note: ui.potentialTeachingWorkspacesText },
             ].map((card) => <div key={card.title} className="rounded-2xl bg-[#f6efe7] p-5 dark:bg-white/5"><p className="text-sm font-semibold text-slate-500 dark:text-slate-400">{card.title}</p><strong className="mt-3 block text-3xl text-ink dark:text-white">{card.value}</strong><p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{card.note}</p></div>)}
           </div>
           <div className="mt-6 grid gap-4 lg:grid-cols-3">
@@ -733,19 +1208,19 @@ export default function ControlCenter() {
                     <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">{plan.name}</p>
                     <strong className="mt-2 block text-2xl text-ink dark:text-white">{plan.priceLabel}</strong>
                   </div>
-                  <span className={`status-pill ${plan.available ? '' : 'muted'}`}>{plan.available ? 'configured' : 'missing price ID'}</span>
+                  <span className={`status-pill ${plan.available ? '' : 'muted'}`}>{plan.available ? ui.configured : ui.missingPriceId}</span>
                 </div>
                 <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">{plan.description}</p>
               </div>
             ))}
-            {billingPlans.length === 0 ? <div className="empty-state lg:col-span-3"><FiCreditCard /><p>No Stripe plan metadata loaded yet.</p></div> : null}
+            {billingPlans.length === 0 ? <div className="empty-state lg:col-span-3"><FiCreditCard /><p>{ui.noStripePlans}</p></div> : null}
           </div>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             {[
-              'Set STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, and all plan price IDs in the backend environment.',
-              'Enable Stripe customer portal plan changes, cancellations, and invoice emails.',
-              'Define taxes, refunds, failed-payment handling, and cancellation policy ownership.',
-              'Add finance monitoring, support ownership, and billing incident alerts.',
+              ui.billingTask1,
+              ui.billingTask2,
+              ui.billingTask3,
+              ui.billingTask4,
             ].map((item) => <div key={item} className="rounded-2xl border border-slate-200 bg-white/80 p-4 text-sm text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-200">{item}</div>)}
           </div>
         </section>
@@ -755,17 +1230,17 @@ export default function ControlCenter() {
         <div className="fixed inset-0 z-[170] flex items-center justify-center bg-slate-950/45 px-4">
           <form className="atlas-panel w-full max-w-2xl p-6" onSubmit={saveCourseModal}>
             <div className="mb-6 flex items-center justify-between gap-4">
-              <h2 className="text-2xl text-ink dark:text-white">{courseModal ? 'Edit course' : 'New course'}</h2>
-              <button type="button" className="icon-button" onClick={() => setCourseModal(false)} aria-label="Close course modal"><FiX /></button>
+              <h2 className="text-2xl text-ink dark:text-white">{courseModal ? ui.editCourse : ui.newCourseModal}</h2>
+              <button type="button" className="icon-button" onClick={() => setCourseModal(false)} aria-label={ui.closeCourseModal}><FiX /></button>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="md:col-span-2"><label className="label">Title</label><input className="input" value={courseForm.title} onChange={(event) => setCourseForm((current) => ({ ...current, title: event.target.value }))} required /></div>
-              <div className="md:col-span-2"><label className="label">Description</label><textarea className="input min-h-28" value={courseForm.description} onChange={(event) => setCourseForm((current) => ({ ...current, description: event.target.value }))} required /></div>
-              <div><label className="label">Language</label><select className="input" value={courseForm.language} onChange={(event) => setCourseForm((current) => ({ ...current, language: event.target.value }))}><option>English</option><option>Turkish</option><option>Russian</option><option>Uzbek</option></select></div>
-              <div><label className="label">Level</label><select className="input" value={courseForm.level} onChange={(event) => setCourseForm((current) => ({ ...current, level: event.target.value }))}><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select></div>
-              <div className="md:col-span-2"><label className="label">Category</label><select className="input" value={courseForm.category} onChange={(event) => setCourseForm((current) => ({ ...current, category: event.target.value }))}><option>Conversation</option><option>Grammar</option><option>Vocabulary</option><option>Reading</option><option>Writing</option><option>Listening</option></select></div>
+              <div className="md:col-span-2"><label className="label">{ui.titleLabel}</label><input className="input" value={courseForm.title} onChange={(event) => setCourseForm((current) => ({ ...current, title: event.target.value }))} required /></div>
+              <div className="md:col-span-2"><label className="label">{ui.descriptionLabel}</label><textarea className="input min-h-28" value={courseForm.description} onChange={(event) => setCourseForm((current) => ({ ...current, description: event.target.value }))} required /></div>
+              <div><label className="label">{ui.languageLabel}</label><select className="input" value={courseForm.language} onChange={(event) => setCourseForm((current) => ({ ...current, language: event.target.value }))}><option value="English">{localizedLabels.languages.English[language]}</option><option value="Turkish">{localizedLabels.languages.Turkish[language]}</option><option value="Russian">{localizedLabels.languages.Russian[language]}</option><option value="Uzbek">{localizedLabels.languages.Uzbek[language]}</option></select></div>
+              <div><label className="label">{ui.levelLabel}</label><select className="input" value={courseForm.level} onChange={(event) => setCourseForm((current) => ({ ...current, level: event.target.value }))}><option value="Beginner">{localizedLabels.levels.Beginner[language]}</option><option value="Intermediate">{localizedLabels.levels.Intermediate[language]}</option><option value="Advanced">{localizedLabels.levels.Advanced[language]}</option></select></div>
+              <div className="md:col-span-2"><label className="label">{ui.categoryLabel}</label><select className="input" value={courseForm.category} onChange={(event) => setCourseForm((current) => ({ ...current, category: event.target.value }))}><option value="Conversation">{localizedLabels.categories.Conversation[language]}</option><option value="Grammar">{localizedLabels.categories.Grammar[language]}</option><option value="Vocabulary">{localizedLabels.categories.Vocabulary[language]}</option><option value="Reading">{localizedLabels.categories.Reading[language]}</option><option value="Writing">{localizedLabels.categories.Writing[language]}</option><option value="Listening">{localizedLabels.categories.Listening[language]}</option></select></div>
             </div>
-            <div className="mt-6 flex justify-end gap-3"><button type="button" className="btn btn-outline" onClick={() => setCourseModal(false)}>Cancel</button><button className="btn btn-primary">{courseModal ? 'Save course' : 'Create course'}</button></div>
+            <div className="mt-6 flex justify-end gap-3"><button type="button" className="btn btn-outline" onClick={() => setCourseModal(false)}>{ui.cancel}</button><button className="btn btn-primary">{courseModal ? ui.saveCourse : ui.createCourse}</button></div>
           </form>
         </div>
       ) : null}
@@ -775,27 +1250,27 @@ export default function ControlCenter() {
           <form className="atlas-panel w-full max-w-2xl p-6" onSubmit={saveUserModal}>
             <div className="mb-6 flex items-center justify-between gap-4">
               <div>
-                <h2 className="text-2xl text-ink dark:text-white">Manage user access</h2>
+                <h2 className="text-2xl text-ink dark:text-white">{ui.manageUserAccess}</h2>
                 <p className="text-sm text-slate-500 dark:text-slate-400">{userModal.email}</p>
               </div>
-              <button type="button" className="icon-button" onClick={() => setUserModal(false)} aria-label="Close user modal"><FiX /></button>
+              <button type="button" className="icon-button" onClick={() => setUserModal(false)} aria-label={ui.closeUserModal}><FiX /></button>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
-              <div><label className="label">Role</label><select className="input" value={userForm.role} onChange={(event) => setUserForm((current) => ({ ...current, role: event.target.value as User['role'] }))}><option value="student">Student</option><option value="parent">Parent</option><option value="teacher">Teacher</option><option value="moderator">Moderator</option><option value="admin">Admin</option></select></div>
+              <div><label className="label">{ui.roleLabel}</label><select className="input" value={userForm.role} onChange={(event) => setUserForm((current) => ({ ...current, role: event.target.value as User['role'] }))}><option value="student">{localizedLabels.roles.student[language]}</option><option value="parent">{localizedLabels.roles.parent[language]}</option><option value="teacher">{localizedLabels.roles.teacher[language]}</option><option value="moderator">{localizedLabels.roles.moderator[language]}</option><option value="admin">{localizedLabels.roles.admin[language]}</option></select></div>
               <div className="space-y-3 rounded-2xl bg-[#f6efe7] p-4 dark:bg-white/5">
-                <label className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-200"><input type="checkbox" checked={userForm.isActive} onChange={(event) => setUserForm((current) => ({ ...current, isActive: event.target.checked }))} /> Active account</label>
-                <label className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-200"><input type="checkbox" checked={userForm.isEmailVerified} onChange={(event) => setUserForm((current) => ({ ...current, isEmailVerified: event.target.checked }))} /> Email verified</label>
+                <label className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-200"><input type="checkbox" checked={userForm.isActive} onChange={(event) => setUserForm((current) => ({ ...current, isActive: event.target.checked }))} /> {ui.activeAccount}</label>
+                <label className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-200"><input type="checkbox" checked={userForm.isEmailVerified} onChange={(event) => setUserForm((current) => ({ ...current, isEmailVerified: event.target.checked }))} /> {ui.emailVerified}</label>
               </div>
             </div>
             {userForm.role === 'moderator' ? (
               <div className="mt-6 rounded-2xl border border-slate-200 p-5 dark:border-white/10">
-                <h3 className="text-lg font-semibold text-ink dark:text-white">Moderator scopes</h3>
+                <h3 className="text-lg font-semibold text-ink dark:text-white">{ui.moderatorScopes}</h3>
                 <div className="mt-4 grid gap-3 md:grid-cols-2">
                   {[
-                    ['communityModeration', 'Community moderation'],
-                    ['supportChat', 'Support and chat'],
-                    ['catalogContentQa', 'Catalog and content QA'],
-                    ['limitedUserManagement', 'Limited user management'],
+                    ['communityModeration', ui.scopeCommunity],
+                    ['supportChat', ui.scopeSupport],
+                    ['catalogContentQa', ui.scopeCatalog],
+                    ['limitedUserManagement', ui.scopeUsers],
                   ].map(([key, label]) => (
                     <label key={key} className="flex items-center gap-3 rounded-xl bg-[#f6efe7] p-3 text-sm text-slate-700 dark:bg-white/5 dark:text-slate-200">
                       <input type="checkbox" checked={userForm.moderatorPermissions[key as keyof ModeratorPermissions]} onChange={(event) => setUserForm((current) => ({ ...current, moderatorPermissions: { ...current.moderatorPermissions, [key]: event.target.checked } }))} />
@@ -805,7 +1280,7 @@ export default function ControlCenter() {
                 </div>
               </div>
             ) : null}
-            <div className="mt-6 flex justify-end gap-3"><button type="button" className="btn btn-outline" onClick={() => setUserModal(false)}>Cancel</button><button className="btn btn-primary">Save access</button></div>
+            <div className="mt-6 flex justify-end gap-3"><button type="button" className="btn btn-outline" onClick={() => setUserModal(false)}>{ui.cancel}</button><button className="btn btn-primary">{ui.saveAccess}</button></div>
           </form>
         </div>
       ) : null}
@@ -815,55 +1290,55 @@ export default function ControlCenter() {
           <form className="atlas-panel w-full max-w-3xl p-6" onSubmit={saveContentModal}>
             <div className="mb-6 flex items-center justify-between gap-4">
               <div>
-                <h2 className="text-2xl text-ink dark:text-white">{contentModal ? 'Edit content item' : 'Create content item'}</h2>
+                <h2 className="text-2xl text-ink dark:text-white">{contentModal ? ui.editContentItem : ui.createContentItem}</h2>
                 <p className="text-sm text-slate-500 dark:text-slate-400">{currentContentResource}</p>
               </div>
-              <button type="button" className="icon-button" onClick={() => setContentModal(false)} aria-label="Close content modal"><FiX /></button>
+              <button type="button" className="icon-button" onClick={() => setContentModal(false)} aria-label={ui.closeContentModal}><FiX /></button>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               {currentContentResource === 'lessons' ? (
                 <>
-                  <div><label className="label">Course ID</label><input className="input" value={contentForm.course} onChange={(event) => setContentForm((current) => ({ ...current, course: event.target.value }))} required /></div>
-                  <div><label className="label">Order</label><input className="input" type="number" min="1" value={contentForm.order} onChange={(event) => setContentForm((current) => ({ ...current, order: event.target.value }))} required /></div>
-                  <div className="md:col-span-2"><label className="label">Title</label><input className="input" value={contentForm.title} onChange={(event) => setContentForm((current) => ({ ...current, title: event.target.value }))} required /></div>
-                  <div className="md:col-span-2"><label className="label">Description</label><textarea className="input min-h-24" value={contentForm.description} onChange={(event) => setContentForm((current) => ({ ...current, description: event.target.value }))} /></div>
-                  <div className="md:col-span-2"><label className="label">Content</label><textarea className="input min-h-32" value={contentForm.content} onChange={(event) => setContentForm((current) => ({ ...current, content: event.target.value }))} required /></div>
-                  <div><label className="label">Difficulty</label><select className="input" value={contentForm.difficulty} onChange={(event) => setContentForm((current) => ({ ...current, difficulty: event.target.value }))}><option>Easy</option><option>Medium</option><option>Hard</option></select></div>
+                  <div><label className="label">{ui.courseId}</label><input className="input" value={contentForm.course} onChange={(event) => setContentForm((current) => ({ ...current, course: event.target.value }))} required /></div>
+                  <div><label className="label">{ui.order}</label><input className="input" type="number" min="1" value={contentForm.order} onChange={(event) => setContentForm((current) => ({ ...current, order: event.target.value }))} required /></div>
+                  <div className="md:col-span-2"><label className="label">{ui.titleField}</label><input className="input" value={contentForm.title} onChange={(event) => setContentForm((current) => ({ ...current, title: event.target.value }))} required /></div>
+                  <div className="md:col-span-2"><label className="label">{ui.descriptionField}</label><textarea className="input min-h-24" value={contentForm.description} onChange={(event) => setContentForm((current) => ({ ...current, description: event.target.value }))} /></div>
+                  <div className="md:col-span-2"><label className="label">{ui.contentField}</label><textarea className="input min-h-32" value={contentForm.content} onChange={(event) => setContentForm((current) => ({ ...current, content: event.target.value }))} required /></div>
+                  <div><label className="label">{ui.difficulty}</label><select className="input" value={contentForm.difficulty} onChange={(event) => setContentForm((current) => ({ ...current, difficulty: event.target.value }))}><option value="Easy">{localizedLabels.difficulty.Easy[language]}</option><option value="Medium">{localizedLabels.difficulty.Medium[language]}</option><option value="Hard">{localizedLabels.difficulty.Hard[language]}</option></select></div>
                 </>
               ) : null}
 
               {currentContentResource === 'flashcards' ? (
                 <>
-                  <div><label className="label">Course ID</label><input className="input" value={contentForm.course} onChange={(event) => setContentForm((current) => ({ ...current, course: event.target.value }))} required /></div>
-                  <div><label className="label">Language</label><select className="input" value={contentForm.language} onChange={(event) => setContentForm((current) => ({ ...current, language: event.target.value }))}><option>English</option><option>Turkish</option><option>Russian</option><option>Uzbek</option></select></div>
-                  <div className="md:col-span-2"><label className="label">Front text</label><input className="input" value={contentForm.frontText} onChange={(event) => setContentForm((current) => ({ ...current, frontText: event.target.value }))} required /></div>
-                  <div className="md:col-span-2"><label className="label">Back text</label><input className="input" value={contentForm.backText} onChange={(event) => setContentForm((current) => ({ ...current, backText: event.target.value }))} required /></div>
-                  <div><label className="label">Category</label><input className="input" value={contentForm.category} onChange={(event) => setContentForm((current) => ({ ...current, category: event.target.value }))} /></div>
-                  <div><label className="label">Difficulty</label><select className="input" value={contentForm.difficulty} onChange={(event) => setContentForm((current) => ({ ...current, difficulty: event.target.value }))}><option>Easy</option><option>Medium</option><option>Hard</option></select></div>
+                  <div><label className="label">{ui.courseId}</label><input className="input" value={contentForm.course} onChange={(event) => setContentForm((current) => ({ ...current, course: event.target.value }))} required /></div>
+                  <div><label className="label">{ui.languageLabel}</label><select className="input" value={contentForm.language} onChange={(event) => setContentForm((current) => ({ ...current, language: event.target.value }))}><option value="English">{localizedLabels.languages.English[language]}</option><option value="Turkish">{localizedLabels.languages.Turkish[language]}</option><option value="Russian">{localizedLabels.languages.Russian[language]}</option><option value="Uzbek">{localizedLabels.languages.Uzbek[language]}</option></select></div>
+                  <div className="md:col-span-2"><label className="label">{ui.frontText}</label><input className="input" value={contentForm.frontText} onChange={(event) => setContentForm((current) => ({ ...current, frontText: event.target.value }))} required /></div>
+                  <div className="md:col-span-2"><label className="label">{ui.backText}</label><input className="input" value={contentForm.backText} onChange={(event) => setContentForm((current) => ({ ...current, backText: event.target.value }))} required /></div>
+                  <div><label className="label">{ui.categoryLabel}</label><input className="input" value={contentForm.category} onChange={(event) => setContentForm((current) => ({ ...current, category: event.target.value }))} /></div>
+                  <div><label className="label">{ui.difficulty}</label><select className="input" value={contentForm.difficulty} onChange={(event) => setContentForm((current) => ({ ...current, difficulty: event.target.value }))}><option value="Easy">{localizedLabels.difficulty.Easy[language]}</option><option value="Medium">{localizedLabels.difficulty.Medium[language]}</option><option value="Hard">{localizedLabels.difficulty.Hard[language]}</option></select></div>
                 </>
               ) : null}
 
               {currentContentResource === 'posts' ? (
                 <>
-                  <div className="md:col-span-2"><label className="label">Title</label><input className="input" value={contentForm.title} onChange={(event) => setContentForm((current) => ({ ...current, title: event.target.value }))} required /></div>
-                  <div className="md:col-span-2"><label className="label">Content</label><textarea className="input min-h-32" value={contentForm.content} onChange={(event) => setContentForm((current) => ({ ...current, content: event.target.value }))} required /></div>
-                  <div><label className="label">Category</label><select className="input" value={contentForm.category} onChange={(event) => setContentForm((current) => ({ ...current, category: event.target.value }))}><option>discussion</option><option>question</option><option>resource</option><option>event</option></select></div>
-                  <label className="flex items-center gap-3 rounded-2xl bg-[#f6efe7] p-4 text-sm text-slate-700 dark:bg-white/5 dark:text-slate-200"><input type="checkbox" checked={contentForm.isPinned} onChange={(event) => setContentForm((current) => ({ ...current, isPinned: event.target.checked }))} /> Pin this post</label>
+                  <div className="md:col-span-2"><label className="label">{ui.titleField}</label><input className="input" value={contentForm.title} onChange={(event) => setContentForm((current) => ({ ...current, title: event.target.value }))} required /></div>
+                  <div className="md:col-span-2"><label className="label">{ui.contentField}</label><textarea className="input min-h-32" value={contentForm.content} onChange={(event) => setContentForm((current) => ({ ...current, content: event.target.value }))} required /></div>
+                  <div><label className="label">{ui.categoryLabel}</label><select className="input" value={contentForm.category} onChange={(event) => setContentForm((current) => ({ ...current, category: event.target.value }))}><option value="discussion">{localizedLabels.categories.discussion[language]}</option><option value="question">{localizedLabels.categories.question[language]}</option><option value="resource">{localizedLabels.categories.resource[language]}</option><option value="event">{localizedLabels.categories.event[language]}</option></select></div>
+                  <label className="flex items-center gap-3 rounded-2xl bg-[#f6efe7] p-4 text-sm text-slate-700 dark:bg-white/5 dark:text-slate-200"><input type="checkbox" checked={contentForm.isPinned} onChange={(event) => setContentForm((current) => ({ ...current, isPinned: event.target.checked }))} /> {ui.pinPost}</label>
                 </>
               ) : null}
 
               {currentContentResource === 'groups' ? (
                 <>
-                  <div className="md:col-span-2"><label className="label">Group name</label><input className="input" value={contentForm.name} onChange={(event) => setContentForm((current) => ({ ...current, name: event.target.value }))} required /></div>
-                  <div className="md:col-span-2"><label className="label">Description</label><textarea className="input min-h-24" value={contentForm.description} onChange={(event) => setContentForm((current) => ({ ...current, description: event.target.value }))} required /></div>
-                  <div><label className="label">Language</label><select className="input" value={contentForm.language} onChange={(event) => setContentForm((current) => ({ ...current, language: event.target.value }))}><option>English</option><option>Turkish</option><option>Russian</option><option>Uzbek</option></select></div>
-                  <div><label className="label">Level</label><select className="input" value={contentForm.level} onChange={(event) => setContentForm((current) => ({ ...current, level: event.target.value }))}><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select></div>
-                  <div><label className="label">Max members</label><input className="input" type="number" min="1" value={contentForm.maxMembers} onChange={(event) => setContentForm((current) => ({ ...current, maxMembers: event.target.value }))} /></div>
-                  <label className="flex items-center gap-3 rounded-2xl bg-[#f6efe7] p-4 text-sm text-slate-700 dark:bg-white/5 dark:text-slate-200"><input type="checkbox" checked={contentForm.isPrivate} onChange={(event) => setContentForm((current) => ({ ...current, isPrivate: event.target.checked }))} /> Private group</label>
+                  <div className="md:col-span-2"><label className="label">{ui.groupName}</label><input className="input" value={contentForm.name} onChange={(event) => setContentForm((current) => ({ ...current, name: event.target.value }))} required /></div>
+                  <div className="md:col-span-2"><label className="label">{ui.descriptionField}</label><textarea className="input min-h-24" value={contentForm.description} onChange={(event) => setContentForm((current) => ({ ...current, description: event.target.value }))} required /></div>
+                  <div><label className="label">{ui.languageLabel}</label><select className="input" value={contentForm.language} onChange={(event) => setContentForm((current) => ({ ...current, language: event.target.value }))}><option value="English">{localizedLabels.languages.English[language]}</option><option value="Turkish">{localizedLabels.languages.Turkish[language]}</option><option value="Russian">{localizedLabels.languages.Russian[language]}</option><option value="Uzbek">{localizedLabels.languages.Uzbek[language]}</option></select></div>
+                  <div><label className="label">{ui.levelLabel}</label><select className="input" value={contentForm.level} onChange={(event) => setContentForm((current) => ({ ...current, level: event.target.value }))}><option value="Beginner">{localizedLabels.levels.Beginner[language]}</option><option value="Intermediate">{localizedLabels.levels.Intermediate[language]}</option><option value="Advanced">{localizedLabels.levels.Advanced[language]}</option></select></div>
+                  <div><label className="label">{ui.maxMembers}</label><input className="input" type="number" min="1" value={contentForm.maxMembers} onChange={(event) => setContentForm((current) => ({ ...current, maxMembers: event.target.value }))} /></div>
+                  <label className="flex items-center gap-3 rounded-2xl bg-[#f6efe7] p-4 text-sm text-slate-700 dark:bg-white/5 dark:text-slate-200"><input type="checkbox" checked={contentForm.isPrivate} onChange={(event) => setContentForm((current) => ({ ...current, isPrivate: event.target.checked }))} /> {ui.privateGroup}</label>
                 </>
               ) : null}
             </div>
-            <div className="mt-6 flex justify-end gap-3"><button type="button" className="btn btn-outline" onClick={() => setContentModal(false)}>Cancel</button><button className="btn btn-primary">{contentModal ? 'Save item' : 'Create item'}</button></div>
+            <div className="mt-6 flex justify-end gap-3"><button type="button" className="btn btn-outline" onClick={() => setContentModal(false)}>{ui.cancel}</button><button className="btn btn-primary">{contentModal ? ui.saveItem : ui.createItem}</button></div>
           </form>
         </div>
       ) : null}

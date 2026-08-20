@@ -2,10 +2,35 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import api from '../../services/api'
+import { useLanguageStore } from '../../store/languageStore'
+
+const copy = {
+  en: { title: 'Create New Course', titleLabel: 'Course Title', titlePlaceholder: 'e.g., English Grammar Basics', description: 'Description', descriptionPlaceholder: 'Describe your course...', language: 'Language', level: 'Level', category: 'Category', create: 'Create Course', creating: 'Creating...', cancel: 'Cancel', success: 'Course created successfully!', failed: 'Course could not be created' },
+  ru: { title: 'Создать новый курс', titleLabel: 'Название курса', titlePlaceholder: 'например, Основы английской грамматики', description: 'Описание', descriptionPlaceholder: 'Опишите ваш курс...', language: 'Язык', level: 'Уровень', category: 'Категория', create: 'Создать курс', creating: 'Создание...', cancel: 'Отмена', success: 'Курс успешно создан!', failed: 'Не удалось создать курс' },
+  uz: { title: 'Yangi kurs yaratish', titleLabel: 'Kurs nomi', titlePlaceholder: 'masalan, Ingliz grammatikasi asoslari', description: 'Tavsif', descriptionPlaceholder: 'Kursingizni tasvirlang...', language: 'Til', level: 'Daraja', category: 'Kategoriya', create: 'Kurs yaratish', creating: 'Yaratilmoqda...', cancel: 'Bekor qilish', success: 'Kurs muvaffaqiyatli yaratildi!', failed: 'Kursni yaratib bo‘lmadi' },
+} as const
+
+const optionLabels = {
+  English: { en: 'English', ru: 'Английский', uz: 'Inglizcha' },
+  Turkish: { en: 'Turkish', ru: 'Турецкий', uz: 'Turkcha' },
+  Russian: { en: 'Russian', ru: 'Русский', uz: 'Ruscha' },
+  Uzbek: { en: 'Uzbek', ru: 'Узбекский', uz: 'O‘zbekcha' },
+  Beginner: { en: 'Beginner', ru: 'Начальный', uz: 'Boshlang‘ich' },
+  Intermediate: { en: 'Intermediate', ru: 'Средний', uz: 'O‘rta' },
+  Advanced: { en: 'Advanced', ru: 'Продвинутый', uz: 'Yuqori' },
+  Grammar: { en: 'Grammar', ru: 'Грамматика', uz: 'Grammatika' },
+  Vocabulary: { en: 'Vocabulary', ru: 'Словарь', uz: 'Lug‘at' },
+  Conversation: { en: 'Conversation', ru: 'Разговор', uz: 'Suhbat' },
+  Reading: { en: 'Reading', ru: 'Чтение', uz: 'O‘qish' },
+  Writing: { en: 'Writing', ru: 'Письмо', uz: 'Yozish' },
+  Listening: { en: 'Listening', ru: 'Аудирование', uz: 'Tinglash' },
+} as const
 
 export default function CreateCourse() {
   const navigate = useNavigate()
   const [submitting, setSubmitting] = useState(false)
+  const language = useLanguageStore((state) => state.language)
+  const ui = copy[language]
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -23,10 +48,10 @@ export default function CreateCourse() {
     setSubmitting(true)
     try {
       const response = await api.post('/courses', formData)
-      toast.success('Course created successfully!')
+      toast.success(ui.success)
       navigate(`/teacher/manage/${response.data.data._id}`)
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Course could not be created')
+      toast.error(error.response?.data?.message || ui.failed)
     } finally {
       setSubmitting(false)
     }
@@ -35,16 +60,16 @@ export default function CreateCourse() {
   return (
     <div className="p-8">
       <div className="max-w-2xl">
-        <h1 className="text-4xl font-bold mb-8">Create New Course</h1>
+        <h1 className="text-4xl font-bold mb-8">{ui.title}</h1>
 
         <form onSubmit={handleSubmit} className="card space-y-6">
           <div>
-            <label className="label">Course Title</label>
+            <label className="label">{ui.titleLabel}</label>
             <input
               type="text"
               name="title"
               className="input"
-              placeholder="e.g., English Grammar Basics"
+              placeholder={ui.titlePlaceholder}
               value={formData.title}
               onChange={handleChange}
               required
@@ -52,11 +77,11 @@ export default function CreateCourse() {
           </div>
 
           <div>
-            <label className="label">Description</label>
+            <label className="label">{ui.description}</label>
             <textarea
               name="description"
               className="input min-h-32"
-              placeholder="Describe your course..."
+              placeholder={ui.descriptionPlaceholder}
               value={formData.description}
               onChange={handleChange}
               required
@@ -65,46 +90,46 @@ export default function CreateCourse() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="label">Language</label>
+              <label className="label">{ui.language}</label>
               <select name="language" className="input" value={formData.language} onChange={handleChange}>
-                <option value="English">English</option>
-                <option value="Turkish">Turkish</option>
-                <option value="Russian">Russian</option>
-                <option value="Uzbek">Uzbek</option>
+                <option value="English">{optionLabels.English[language]}</option>
+                <option value="Turkish">{optionLabels.Turkish[language]}</option>
+                <option value="Russian">{optionLabels.Russian[language]}</option>
+                <option value="Uzbek">{optionLabels.Uzbek[language]}</option>
               </select>
             </div>
             <div>
-              <label className="label">Level</label>
+              <label className="label">{ui.level}</label>
               <select name="level" className="input" value={formData.level} onChange={handleChange}>
-                <option value="Beginner">Beginner</option>
-                <option value="Intermediate">Intermediate</option>
-                <option value="Advanced">Advanced</option>
+                <option value="Beginner">{optionLabels.Beginner[language]}</option>
+                <option value="Intermediate">{optionLabels.Intermediate[language]}</option>
+                <option value="Advanced">{optionLabels.Advanced[language]}</option>
               </select>
             </div>
           </div>
 
           <div>
-            <label className="label">Category</label>
+            <label className="label">{ui.category}</label>
             <select name="category" className="input" value={formData.category} onChange={handleChange}>
-              <option value="Grammar">Grammar</option>
-              <option value="Vocabulary">Vocabulary</option>
-              <option value="Conversation">Conversation</option>
-              <option value="Reading">Reading</option>
-              <option value="Writing">Writing</option>
-              <option value="Listening">Listening</option>
+            <option value="Grammar">{optionLabels.Grammar[language]}</option>
+            <option value="Vocabulary">{optionLabels.Vocabulary[language]}</option>
+            <option value="Conversation">{optionLabels.Conversation[language]}</option>
+            <option value="Reading">{optionLabels.Reading[language]}</option>
+            <option value="Writing">{optionLabels.Writing[language]}</option>
+            <option value="Listening">{optionLabels.Listening[language]}</option>
             </select>
           </div>
 
           <div className="flex gap-4">
             <button type="submit" disabled={submitting} className="btn btn-primary flex-1">
-              {submitting ? 'Creating...' : 'Create Course'}
+              {submitting ? ui.creating : ui.create}
             </button>
             <button
               type="button"
               onClick={() => navigate(-1)}
               className="btn btn-outline flex-1"
             >
-              Cancel
+              {ui.cancel}
             </button>
           </div>
         </form>

@@ -4,6 +4,7 @@ import toast from 'react-hot-toast'
 import { useLearningStore } from '../store/learningStore'
 import { useAuthStore } from '../store/authStore'
 import api from '../services/api'
+import { useI18n } from '../utils/i18n'
 
 interface CourseDetails {
   _id: string
@@ -26,6 +27,7 @@ export default function CourseDetail() {
   const navigate = useNavigate()
   const { enrollInCourse, myLearning } = useLearningStore()
   const { isAuthenticated } = useAuthStore()
+  const { t } = useI18n()
   const [enrolling, setEnrolling] = useState(false)
   const [course, setCourse] = useState<CourseDetails | null>(null)
   const [lessons, setLessons] = useState<LessonSummary[]>([])
@@ -41,7 +43,7 @@ export default function CourseDetail() {
         setCourse(payload.course)
         setLessons(payload.lessons || [])
       } catch (error: any) {
-        toast.error(error.response?.data?.message || 'Unable to load course')
+        toast.error(error.response?.data?.message || t('courseDetail.loadFailed'))
       } finally {
         setLoading(false)
       }
@@ -57,7 +59,7 @@ export default function CourseDetail() {
 
   const handleEnroll = async () => {
     if (!isAuthenticated) {
-      toast.error('Please log in to enroll in this course.')
+      toast.error(t('courseDetail.loginRequired'))
       navigate('/login')
       return
     }
@@ -69,18 +71,18 @@ export default function CourseDetail() {
     setEnrolling(false)
 
     if (success) {
-      toast.success('Successfully enrolled!')
+      toast.success(t('courseDetail.enrollSuccess'))
       navigate('/my-learning')
     } else {
-      toast.error('Enrollment failed or already enrolled.')
+      toast.error(t('courseDetail.enrollFailed'))
     }
   }
 
   return (
     <div className="atlas-page">
       <div className="max-w-4xl mx-auto p-6">
-      {loading ? <p>Loading course...</p> : null}
-      {!loading && !course ? <p>Course not found.</p> : null}
+      {loading ? <p>{t('common.loadingCourse')}</p> : null}
+      {!loading && !course ? <p>{t('courseDetail.notFound')}</p> : null}
       {course ? <h1 className="mb-4 text-4xl font-bold text-ink">{course.title}</h1> : null}
       {/* Course metadata card */}
       {course ? <div className="atlas-panel mb-6 rounded-3xl p-6">
@@ -91,7 +93,7 @@ export default function CourseDetail() {
         </div>
         <p className="mb-6 text-slate-700">{course.description}</p>
 
-        <h2 className="mb-3 text-xl font-semibold text-ink">Lessons</h2>
+        <h2 className="mb-3 text-xl font-semibold text-ink">{t('courseDetail.lessons')}</h2>
         {lessons.length > 0 ? <div className="space-y-2 mb-6">
           {lessons.map((lesson) => (
             <button
@@ -102,14 +104,28 @@ export default function CourseDetail() {
               {lesson.order}. {lesson.title}
             </button>
           ))}
-        </div> : <p className="text-slate-400 mb-6">Lessons will appear here when the mentor publishes them.</p>}
+        </div> : <p className="text-slate-400 mb-6">{t('courseDetail.lessonsEmpty')}</p>}
+
+        <div className="mb-6 rounded-2xl bg-[#f6efe7] p-5 dark:bg-white/5">
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{t('courseDetail.blueprintKicker')}</p>
+          <h3 className="mt-3 text-xl font-semibold text-ink dark:text-white">{t('courseDetail.blueprintHeading')}</h3>
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{t('courseDetail.blueprintGoal')}</p>
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            <div className="rounded-2xl border border-slate-200 bg-white/80 p-4 text-sm text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-200">
+              {lessons.length === 1 ? t('courseDetail.lessonCount', { count: lessons.length }) : t('courseDetail.lessonCountPlural', { count: lessons.length })}
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-white/80 p-4 text-sm text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-200">
+              {t('courseDetail.pathOutcome')}
+            </div>
+          </div>
+        </div>
 
         {isEnrolled ? (
           <button
             onClick={() => navigate('/my-learning')}
             className="btn bg-emerald-600 px-6 py-3 font-semibold text-white hover:bg-emerald-500"
           >
-            Continue Learning
+            {t('courseDetail.continueLearning')}
           </button>
         ) : (
           <button
@@ -117,7 +133,7 @@ export default function CourseDetail() {
             disabled={enrolling}
             className="btn bg-indigo-600 px-6 py-3 font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
           >
-            {enrolling ? 'Enrolling...' : 'Enroll in Course'}
+            {enrolling ? t('courseDetail.enrolling') : t('courseDetail.enroll')}
           </button>
         )}
       </div> : null}

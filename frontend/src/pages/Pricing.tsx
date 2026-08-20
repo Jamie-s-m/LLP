@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { FiCheckCircle, FiCreditCard, FiShield, FiUsers } from 'react-icons/fi'
+import { FiCheckCircle, FiCreditCard, FiShield, FiTarget, FiUsers } from 'react-icons/fi'
 import api from '../services/api'
 import { useAuthStore } from '../store/authStore'
+import { useI18n } from '../utils/i18n'
 
 type BillingPlanKey = 'learner' | 'family' | 'teaching'
 
@@ -19,6 +20,7 @@ interface BillingPlan {
   cta: string
   href: string
   features: string[]
+  bestFor: string
 }
 
 const plans: BillingPlan[] = [
@@ -31,6 +33,7 @@ const plans: BillingPlan[] = [
     cta: 'Start learning',
     href: '/register?role=student',
     available: true,
+    bestFor: 'Independent learners who want structured progress and daily fluency momentum.',
     features: ['Unlimited active courses', 'Flashcards and exercises', 'Progress tracking and streaks', 'Community chat access'],
   },
   {
@@ -42,6 +45,7 @@ const plans: BillingPlan[] = [
     cta: 'Create family account',
     href: '/register?role=parent',
     available: true,
+    bestFor: 'Parents who want visibility, accountability, and support across the home learning loop.',
     features: ['Parent dashboard', 'Linked learner progress', 'Family learning insights', 'Priority support chat'],
   },
   {
@@ -53,6 +57,7 @@ const plans: BillingPlan[] = [
     cta: 'Open teaching workspace',
     href: '/register?role=student&teacherInterest=1',
     available: true,
+    bestFor: 'Teachers and small programs who need course control, learner oversight, and admin visibility.',
     features: ['Course authoring workspace', 'Progress monitoring', 'Teacher applications and moderation', 'Admin-ready operations center'],
   },
 ]
@@ -73,6 +78,7 @@ export default function Pricing() {
   const [hasCustomerPortal, setHasCustomerPortal] = useState(false)
   const [configuredPlans, setConfiguredPlans] = useState<Record<string, boolean>>({})
   const { user, isAuthenticated, setUser } = useAuthStore()
+  const { t } = useI18n()
 
   const refreshBilling = async () => {
     const response = await api.get('/billing/me')
@@ -112,9 +118,7 @@ export default function Pricing() {
 
   useEffect(() => {
     const checkoutState = searchParams.get('checkout')
-    if (!checkoutState) {
-      return
-    }
+    if (!checkoutState) return
 
     if (checkoutState === 'success') {
       toast.success('Checkout completed. Stripe will finish syncing your subscription in a moment.')
@@ -136,8 +140,13 @@ export default function Pricing() {
   const hasManagedSubscription = activeStatuses.has((effectiveBilling?.status || 'inactive') as BillingStatus)
 
   const enrichedPlans = useMemo(
-    () => plans.map((plan) => ({ ...plan, available: configuredPlans[plan.key] ?? false })),
-    [configuredPlans]
+    () => plans.map((plan) => ({
+      ...plan,
+      available: configuredPlans[plan.key] ?? false,
+      name: plan.key === 'learner' ? t('pricing.learnerName') : plan.key === 'family' ? t('pricing.familyName') : t('pricing.teachingName'),
+      bestFor: plan.key === 'learner' ? t('pricing.learnerBestFor') : plan.key === 'family' ? t('pricing.familyBestFor') : t('pricing.teachingBestFor'),
+    })),
+    [configuredPlans, t]
   )
 
   const startCheckout = async (planKey: BillingPlanKey) => {
@@ -177,20 +186,20 @@ export default function Pricing() {
       <div className="mx-auto max-w-7xl px-4 py-10">
         <div className="atlas-hero mb-10">
           <div>
-            <p className="atlas-kicker">Commercial launchpad</p>
-            <h1>Choose a plan that matches your learning model.</h1>
-            <p>Start with a learner seat, grow into a family workspace, or run structured teaching programs with admin visibility.</p>
+            <p className="atlas-kicker">{t('pricing.kicker')}</p>
+            <h1>{t('pricing.title')}</h1>
+            <p>{t('pricing.copy')}</p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               {!isAuthenticated ? (
-                <Link to="/register" className="btn btn-primary w-full sm:w-auto">Create account</Link>
+                <Link to="/register" className="btn btn-primary w-full sm:w-auto">{t('pricing.createAccount')}</Link>
               ) : hasManagedSubscription ? (
                 <button type="button" className="btn btn-primary w-full sm:w-auto" onClick={openPortal} disabled={openingPortal || !hasCustomerPortal}>
-                  {openingPortal ? 'Opening billing...' : 'Manage billing'}
+                  {openingPortal ? t('pricing.openingBilling') : t('pricing.manageBilling')}
                 </button>
               ) : (
-                <Link to="/dashboard" className="btn btn-primary w-full sm:w-auto">Go to dashboard</Link>
+                <Link to="/dashboard" className="btn btn-primary w-full sm:w-auto">{t('pricing.goToDashboard')}</Link>
               )}
-              <Link to="/courses" className="btn btn-outline w-full border-white/70 text-white hover:bg-white/10 dark:border-white/30 dark:text-white dark:hover:bg-white/10 sm:w-auto">Explore courses</Link>
+              <Link to="/courses" className="btn btn-outline w-full border-white/70 text-white hover:bg-white/10 dark:border-white/30 dark:text-white dark:hover:bg-white/10 sm:w-auto">{t('pricing.exploreCourses')}</Link>
             </div>
           </div>
           <div className="atlas-hero-card">
@@ -198,24 +207,48 @@ export default function Pricing() {
               <div className="flex items-start gap-3">
                 <FiCreditCard className="mt-0.5 text-lg text-[#f8c16c]" />
                 <div>
-                  <p className="font-semibold text-white">Stripe subscriptions</p>
-                  <p>Real checkout, webhook syncing, and the billing portal are now wired into Auralex.</p>
+                  <p className="font-semibold text-white">{t('pricing.stripeTitle')}</p>
+                  <p>{t('pricing.stripeCopy')}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <FiShield className="mt-0.5 text-lg text-[#a7e8d5]" />
                 <div>
-                  <p className="font-semibold text-white">Account status</p>
+                  <p className="font-semibold text-white">{t('pricing.accountStatus')}</p>
                   <p>
                     {effectiveBilling
-                      ? `Current plan: ${effectiveBilling.plan} · ${effectiveBilling.status}${effectiveBilling.cancelAtPeriodEnd ? ' · cancels at period end' : ''}`
-                      : 'Sign in to launch checkout and manage your subscription.'}
+                      ? t('pricing.accountStatusValue', {
+                        plan: effectiveBilling.plan,
+                        status: effectiveBilling.status,
+                        cancelSuffix: effectiveBilling.cancelAtPeriodEnd ? t('pricing.cancelSuffix') : '',
+                      })
+                      : t('pricing.accountStatusEmpty')}
                   </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <FiTarget className="mt-0.5 text-lg text-[#cdd5ff]" />
+                <div>
+                  <p className="font-semibold text-white">{t('pricing.clearNextStep')}</p>
+                  <p>{t('pricing.clearNextStepCopy')}</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        <section className="atlas-panel mb-10 p-6">
+          <p className="atlas-kicker">{t('pricing.howToStart')}</p>
+          <h2 className="text-2xl text-ink dark:text-white">{t('pricing.simplerPath')}</h2>
+          <div className="mt-5 grid gap-4 md:grid-cols-3">
+            {[t('pricing.onboarding1'), t('pricing.onboarding2'), t('pricing.onboarding3')].map((step, index) => (
+              <div key={step} className="rounded-2xl bg-[#f6efe7] p-5 dark:bg-white/5">
+                <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">0{index + 1}</p>
+                <p className="mt-3 text-sm text-slate-700 dark:text-slate-200">{step}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
         <div className="grid gap-6 lg:grid-cols-3">
           {enrichedPlans.map((plan) => {
@@ -227,6 +260,10 @@ export default function Pricing() {
                 <p className="atlas-kicker">{plan.name}</p>
                 <strong className="mt-2 block text-4xl text-ink dark:text-white">{plan.priceLabel}</strong>
                 <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">{plan.description}</p>
+                <div className="mt-4 rounded-2xl bg-[#f6efe7] p-4 text-sm text-slate-700 dark:bg-white/5 dark:text-slate-200">
+                  <strong className="block text-ink dark:text-white">{t('common.bestFor')}</strong>
+                  <p className="mt-2">{plan.bestFor}</p>
+                </div>
                 <ul className="mt-5 space-y-3 text-sm text-slate-700 dark:text-slate-200">
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex items-start gap-2">
@@ -248,7 +285,7 @@ export default function Pricing() {
                     disabled={openingPortal || !hasCustomerPortal}
                   >
                     <FiCreditCard />
-                    {isCurrentPlan ? 'Manage current plan' : 'Change in billing portal'}
+                    {isCurrentPlan ? t('pricing.manageBilling') : t('pricing.changeInPortal')}
                   </button>
                 ) : (
                   <button
@@ -258,7 +295,7 @@ export default function Pricing() {
                     disabled={busyPlan === plan.key || !canSubscribeToPlan}
                   >
                     <FiCreditCard />
-                    {!plan.available ? 'Plan not configured' : busyPlan === plan.key ? 'Opening checkout...' : `Subscribe to ${plan.name}`}
+                    {!plan.available ? t('pricing.planNotConfigured') : busyPlan === plan.key ? t('pricing.openingCheckout') : t('pricing.subscribeTo', { plan: plan.name })}
                   </button>
                 )}
               </section>
@@ -267,16 +304,33 @@ export default function Pricing() {
         </div>
 
         <section className="atlas-panel mt-10 p-6">
-          <p className="atlas-kicker">Go-live operations</p>
-          <h2 className="text-2xl text-ink dark:text-white">What still needs live-business setup</h2>
+          <p className="atlas-kicker">{t('pricing.trustTitle')}</p>
+          <h2 className="text-2xl text-ink dark:text-white">{t('pricing.trustHeading')}</h2>
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             {[
-              'Add your live Stripe secret, webhook secret, and plan price IDs in the backend environment.',
-              'Enable customer portal plan changes, invoices, and cancellation behavior in Stripe.',
-              'Review Terms, Privacy, refund policy, and tax handling with legal and finance ownership.',
-              'Set billing support workflows for failed payments, refunds, disputes, and account recovery.',
+              t('pricing.trust1'),
+              t('pricing.trust2'),
+              t('pricing.trust3'),
+              t('pricing.trust4'),
             ].map((item) => (
               <div key={item} className="rounded-2xl bg-[#f6efe7] p-4 text-sm text-slate-700 dark:bg-white/5 dark:text-slate-200">{item}</div>
+            ))}
+          </div>
+        </section>
+
+        <section className="atlas-panel mt-10 p-6">
+          <p className="atlas-kicker">{t('pricing.faq')}</p>
+          <h2 className="text-2xl text-ink dark:text-white">{t('pricing.faqHeading')}</h2>
+          <div className="mt-5 grid gap-4">
+            {[
+              { question: t('pricing.faq1q'), answer: t('pricing.faq1a') },
+              { question: t('pricing.faq2q'), answer: t('pricing.faq2a') },
+              { question: t('pricing.faq3q'), answer: t('pricing.faq3a') },
+            ].map((item) => (
+              <div key={item.question} className="rounded-2xl border border-slate-200 bg-white/80 p-5 dark:border-white/10 dark:bg-white/5">
+                <h3 className="text-base font-semibold text-ink dark:text-white">{item.question}</h3>
+                <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{item.answer}</p>
+              </div>
             ))}
           </div>
         </section>

@@ -4,6 +4,7 @@ import { FiLifeBuoy, FiMessageCircle, FiSearch, FiSend, FiUsers } from 'react-ic
 import api from '../services/api'
 import { useAuthStore } from '../store/authStore'
 import { useChatStore } from '../store/chatStore'
+import { useLanguageStore } from '../store/languageStore'
 import { onChatMessage, onConversationRefresh, type LiveChatMessage } from '../utils/chatEvents'
 
 interface Conversation {
@@ -23,8 +24,22 @@ interface Message {
   readBy?: string[]
 }
 
+const copy = {
+  en: { loadFailed: 'Unable to load conversations', sendFailed: 'Message could not be sent', createFailed: 'Conversation could not be created', supportFailed: 'Support chat is unavailable right now', title: 'Stay in the loop', text: 'Talk with your study circle, mentor, or support team in one calm workspace.', inbox: 'Inbox', search: 'Start a direct chat...', messageSupport: 'Message support', retry: 'Retry chat inbox', loading: 'Loading conversations...', empty: 'No conversations yet.', room: '{type} room', live: 'Live', syncing: 'Syncing', start: 'Start the conversation.', write: 'Write a message...', choose: 'Choose a conversation', chooseText: 'Your conversations will appear here.', sent: 'Sent', readAll: 'Read by everyone', readBy: 'Read by {count}' },
+  ru: { loadFailed: 'Не удалось загрузить диалоги', sendFailed: 'Не удалось отправить сообщение', createFailed: 'Не удалось создать диалог', supportFailed: 'Чат поддержки сейчас недоступен', title: 'Оставайтесь в курсе', text: 'Общайтесь с учебной группой, наставником или поддержкой в одном спокойном пространстве.', inbox: 'Входящие', search: 'Начните личный чат...', messageSupport: 'Написать в поддержку', retry: 'Повторить загрузку чата', loading: 'Загрузка диалогов...', empty: 'Диалогов пока нет.', room: '{type} комната', live: 'Онлайн', syncing: 'Синхронизация', start: 'Начните разговор.', write: 'Напишите сообщение...', choose: 'Выберите диалог', chooseText: 'Ваши диалоги появятся здесь.', sent: 'Отправлено', readAll: 'Прочитано всеми', readBy: 'Прочитали: {count}' },
+  uz: { loadFailed: 'Suhbatlarni yuklab bo‘lmadi', sendFailed: 'Xabarni yuborib bo‘lmadi', createFailed: 'Suhbat yaratib bo‘lmadi', supportFailed: 'Yordam chati hozircha mavjud emas', title: 'Aloqada qoling', text: 'O‘quv guruhi, mentor yoki yordam jamoasi bilan bitta sokin ish maydonida suhbatlashing.', inbox: 'Kiruvchi xabarlar', search: 'Shaxsiy chat boshlang...', messageSupport: 'Yordamga yozish', retry: 'Chat inbox’ni qayta yuklash', loading: 'Suhbatlar yuklanmoqda...', empty: 'Hali suhbatlar yo‘q.', room: '{type} xona', live: 'Jonli', syncing: 'Sinxronlanmoqda', start: 'Suhbatni boshlang.', write: 'Xabar yozing...', choose: 'Suhbatni tanlang', chooseText: 'Suhbatlaringiz shu yerda ko‘rinadi.', sent: 'Yuborildi', readAll: 'Hamma o‘qidi', readBy: '{count} kishi o‘qidi' },
+} as const
+
+const typeLabels = {
+  direct: { en: 'Direct', ru: 'Личный', uz: 'Shaxsiy' },
+  group: { en: 'Group', ru: 'Группа', uz: 'Guruh' },
+  support: { en: 'Support', ru: 'Поддержка', uz: 'Yordam' },
+} as const
+
 export default function Chat() {
   const { user } = useAuthStore()
+  const language = useLanguageStore((state) => state.language)
+  const ui = copy[language]
   const {
     byConversation,
     fetchUnreadSummary,
@@ -58,13 +73,13 @@ export default function Chat() {
       if (!activeConversationRef.current && data[0]) setActiveId(data[0]._id)
       fetchUnreadSummary()
     } catch (error: any) {
-      const message = error.response?.data?.message || 'Unable to load conversations'
+      const message = error.response?.data?.message || ui.loadFailed
       setConversationLoadError(message)
       toast.error(message)
     } finally {
       setLoading(false)
     }
-  }, [fetchUnreadSummary])
+  }, [fetchUnreadSummary, ui.loadFailed])
 
   const loadMessages = useCallback(async (conversationId: string, syncUnread = false) => {
     if (!conversationId || !isDocumentVisible()) return
@@ -172,7 +187,7 @@ export default function Chat() {
       fetchUnreadSummary()
       setDraft('')
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Message could not be sent')
+      toast.error(error.response?.data?.message || ui.sendFailed)
     }
   }
 
@@ -186,7 +201,7 @@ export default function Chat() {
       setSearch('')
       setSearchResults([])
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Conversation could not be created')
+      toast.error(error.response?.data?.message || ui.createFailed)
     } finally {
       setCreatingConversation(false)
     }
@@ -200,7 +215,7 @@ export default function Chat() {
       setConversations((current) => current.some((item) => item._id === conversation._id) ? current : [conversation, ...current])
       setActiveId(conversation._id)
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Support chat is unavailable right now')
+      toast.error(error.response?.data?.message || ui.supportFailed)
     } finally {
       setCreatingConversation(false)
     }
@@ -221,14 +236,14 @@ export default function Chat() {
 
     if (readByOthers > 0) {
       return {
-        label: readByOthers === otherParticipantIds.length ? 'Read by everyone' : `Read by ${readByOthers}`,
+        label: readByOthers === otherParticipantIds.length ? ui.readAll : ui.readBy.replace('{count}', String(readByOthers)),
         ticks: '✓✓',
         className: 'read',
       }
     }
 
     return {
-      label: 'Sent',
+      label: ui.sent,
       ticks: '✓',
       className: 'sent',
     }
@@ -238,13 +253,13 @@ export default function Chat() {
     <div className="atlas-page max-w-7xl mx-auto px-4 py-8">
       <div className="atlas-heading mb-8">
         <p className="atlas-kicker">Conversation studio</p>
-        <h1>Stay in the loop</h1>
-        <p>Talk with your study circle, mentor, or support team in one calm workspace.</p>
+        <h1>{ui.title}</h1>
+        <p>{ui.text}</p>
       </div>
       <div className="chat-layout">
         <aside className="atlas-panel chat-list">
           <div className="mb-5 flex items-center justify-between">
-            <h2>Inbox</h2><FiMessageCircle className="text-coral" />
+            <h2>{ui.inbox}</h2><FiMessageCircle className="text-coral" />
           </div>
           <div className="space-y-4">
             <div className="relative">
@@ -253,7 +268,7 @@ export default function Chat() {
                 className="input pl-10"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Start a direct chat..."
+                placeholder={ui.search}
               />
             </div>
             {searchResults.length > 0 ? (
@@ -268,39 +283,39 @@ export default function Chat() {
             ) : null}
             <button type="button" className="btn btn-outline w-full inline-flex items-center justify-center gap-2" onClick={createSupportConversation} disabled={creatingConversation}>
               <FiLifeBuoy />
-              Message support
+              {ui.messageSupport}
             </button>
           </div>
           {conversationLoadError ? (
             <div className="space-y-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100">
               <p>{conversationLoadError}</p>
               <button type="button" className="btn btn-outline w-full" onClick={() => { setLoading(true); loadConversations() }}>
-                Retry chat inbox
+                {ui.retry}
               </button>
             </div>
-          ) : loading ? <p className="text-muted">Loading conversations...</p> : conversations.length === 0 ? (
-            <div className="empty-state"><FiUsers /><p>No conversations yet.</p></div>
+          ) : loading ? <p className="text-muted">{ui.loading}</p> : conversations.length === 0 ? (
+            <div className="empty-state"><FiUsers /><p>{ui.empty}</p></div>
           ) : conversations.map((conversation) => (
             <button key={conversation._id} onClick={() => setActiveId(conversation._id)} className={`chat-thread ${activeId === conversation._id ? 'active' : ''}`}>
               <span className="chat-avatar">{conversation.type === 'group' ? <FiUsers /> : <FiMessageCircle />}</span>
-              <span className="flex-1"><strong>{getConversationName(conversation)}</strong><small>{conversation.type}</small></span>
+              <span className="flex-1"><strong>{getConversationName(conversation)}</strong><small>{typeLabels[conversation.type][language]}</small></span>
               {(conversation.unreadCount || byConversation[conversation._id]) ? <span className="rounded-full bg-coral px-2 py-1 text-xs font-bold text-white">{conversation.unreadCount || byConversation[conversation._id]}</span> : null}
             </button>
           ))}
         </aside>
         <section className="atlas-panel chat-window">
           {active ? <>
-            <header className="chat-header"><div><p className="atlas-kicker">{active.type} room</p><h2>{getConversationName(active)}</h2></div><span className="status-dot">{socketConnected ? 'Live' : 'Syncing'}</span></header>
+            <header className="chat-header"><div><p className="atlas-kicker">{ui.room.replace('{type}', typeLabels[active.type][language])}</p><h2>{getConversationName(active)}</h2></div><span className="status-dot">{socketConnected ? ui.live : ui.syncing}</span></header>
             <div ref={messageListRef} className="message-list">
-              {messages.length === 0 ? <div className="empty-state"><FiMessageCircle /><p>Start the conversation.</p></div> : messages.map((message) => {
+              {messages.length === 0 ? <div className="empty-state"><FiMessageCircle /><p>{ui.start}</p></div> : messages.map((message) => {
                 const isOwn = message.sender._id ? message.sender._id === user?.id : message.sender.firstName === user?.firstName && message.sender.lastName === user?.lastName
                 const receipt = isOwn ? getOwnMessageReceipt(message) : null
 
                 return <article key={message._id} className={`message-bubble ${isOwn ? 'own ml-auto' : ''}`}><strong>{message.sender.firstName} {message.sender.lastName}</strong><p>{message.body}</p><div className="message-meta"><time>{new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</time>{receipt ? <span className={`message-receipt ${receipt.className}`} title={receipt.label} aria-label={receipt.label}>{receipt.ticks}</span> : null}</div></article>
               })}
             </div>
-            <form onSubmit={sendMessage} className="chat-compose"><input value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Write a message..." maxLength={4000} /><button className="btn btn-primary" aria-label="Send message"><FiSend /></button></form>
-          </> : <div className="empty-state full"><FiMessageCircle /><h2>Choose a conversation</h2><p>Your conversations will appear here.</p></div>}
+            <form onSubmit={sendMessage} className="chat-compose"><input value={draft} onChange={(event) => setDraft(event.target.value)} placeholder={ui.write} maxLength={4000} /><button className="btn btn-primary" aria-label={ui.write}><FiSend /></button></form>
+          </> : <div className="empty-state full"><FiMessageCircle /><h2>{ui.choose}</h2><p>{ui.chooseText}</p></div>}
         </section>
       </div>
     </div>

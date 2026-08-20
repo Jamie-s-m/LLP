@@ -4,6 +4,8 @@ import { Toaster } from 'react-hot-toast'
 import { useAuthStore } from './store/authStore'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
+import { initializeLanguage } from './store/languageStore'
+import { useI18n } from './utils/i18n'
 
 const CHUNK_RELOAD_KEY = 'linguanest-lazy-chunk-reload'
 
@@ -60,8 +62,11 @@ const Privacy = lazyWithChunkRetry(() => import('./pages/Privacy'), 'privacy')
 const Cookies = lazyWithChunkRetry(() => import('./pages/Cookies'), 'cookies')
 const NotFound = lazyWithChunkRetry(() => import('./pages/NotFound'), 'not-found')
 
+initializeLanguage()
+
 function App() {
   const { isAuthenticated, user } = useAuthStore()
+  const { t } = useI18n()
   const authenticatedLandingPath = user?.role === 'admin'
     ? '/admin/control-center'
     : user?.role === 'moderator'
@@ -76,7 +81,7 @@ function App() {
     // import.meta.env.BASE_URL dynamically reads '/LLP/' in production and '/' in dev
     <Router basename={import.meta.env.BASE_URL}>
       <Toaster position="top-right" />
-      <Suspense fallback={<Layout><div className="atlas-page flex items-center justify-center px-4 py-16"><div className="atlas-panel p-6 text-center text-slate-600">Loading...</div></div></Layout>}>
+      <Suspense fallback={<Layout><div className="atlas-page flex items-center justify-center px-4 py-16"><div className="atlas-panel p-6 text-center text-slate-600">{t('app.loadingPage')}</div></div></Layout>}>
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Layout><Home /></Layout>} />

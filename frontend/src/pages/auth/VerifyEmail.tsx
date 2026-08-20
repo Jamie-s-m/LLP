@@ -3,6 +3,64 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { FiCheckCircle, FiMail, FiRefreshCcw } from 'react-icons/fi'
 import toast from 'react-hot-toast'
 import api from '../../services/api'
+import { useLanguageStore } from '../../store/languageStore'
+
+const copy = {
+  en: {
+    created: 'Account created. Check your inbox for a verification link to finish creating your account.',
+    defaultMessage: 'Check your inbox for a verification link to finish creating your account.',
+    verifiedSuccess: 'Email verified successfully. You can now sign in.',
+    verifyFailed: 'Verification link is invalid or expired.',
+    resendSuccess: 'Verification email sent',
+    resendMessage: 'We sent a fresh verification link. Please check your inbox and spam folder.',
+    resendFailed: 'Unable to resend verification email',
+    kicker: 'Email verification',
+    title: 'Verify your account',
+    smtp: 'SMTP is not configured in this environment yet. For development only, you can open the verification link directly:',
+    verified: 'Email verified',
+    continue: 'Continue to sign in',
+    email: 'Email address',
+    working: 'Working...',
+    resend: 'Resend verification email',
+    back: 'Back to sign in',
+  },
+  ru: {
+    created: 'Аккаунт создан. Проверьте входящие, чтобы завершить создание аккаунта по ссылке подтверждения.',
+    defaultMessage: 'Проверьте входящие, чтобы завершить создание аккаунта по ссылке подтверждения.',
+    verifiedSuccess: 'Email успешно подтверждён. Теперь вы можете войти.',
+    verifyFailed: 'Ссылка подтверждения недействительна или истекла.',
+    resendSuccess: 'Письмо с подтверждением отправлено',
+    resendMessage: 'Мы отправили новую ссылку подтверждения. Проверьте входящие и папку спама.',
+    resendFailed: 'Не удалось отправить письмо повторно',
+    kicker: 'Подтверждение email',
+    title: 'Подтвердите аккаунт',
+    smtp: 'SMTP пока не настроен в этой среде. Только для разработки вы можете открыть ссылку напрямую:',
+    verified: 'Email подтверждён',
+    continue: 'Продолжить вход',
+    email: 'Email адрес',
+    working: 'Обработка...',
+    resend: 'Отправить письмо повторно',
+    back: 'Вернуться ко входу',
+  },
+  uz: {
+    created: 'Akkount yaratildi. Akkount yaratishni yakunlash uchun emaildagi tasdiq havolasini tekshiring.',
+    defaultMessage: 'Akkount yaratishni yakunlash uchun emaildagi tasdiq havolasini tekshiring.',
+    verifiedSuccess: 'Email muvaffaqiyatli tasdiqlandi. Endi kirishingiz mumkin.',
+    verifyFailed: 'Tasdiqlash havolasi noto‘g‘ri yoki muddati tugagan.',
+    resendSuccess: 'Tasdiqlash emaili yuborildi',
+    resendMessage: 'Yangi tasdiqlash havolasini yubordik. Iltimos, inbox va spam papkasini tekshiring.',
+    resendFailed: 'Tasdiqlash emailini qayta yuborib bo‘lmadi',
+    kicker: 'Email tasdig‘i',
+    title: 'Akkountingizni tasdiqlang',
+    smtp: 'Bu muhitda SMTP hali sozlanmagan. Faqat development uchun havolani to‘g‘ridan-to‘g‘ri ochishingiz mumkin:',
+    verified: 'Email tasdiqlandi',
+    continue: 'Kirishga o‘tish',
+    email: 'Email manzil',
+    working: 'Ishlanmoqda...',
+    resend: 'Tasdiqlash emailini qayta yuborish',
+    back: 'Kirishga qaytish',
+  },
+} as const
 
 export default function VerifyEmail() {
   const [searchParams] = useSearchParams()
@@ -10,10 +68,12 @@ export default function VerifyEmail() {
   const initialEmail = searchParams.get('email') || ''
   const initialPreviewUrl = searchParams.get('previewUrl') || ''
   const registered = searchParams.get('registered') === '1'
+  const language = useLanguageStore((state) => state.language)
+  const ui = copy[language]
   const [email, setEmail] = useState(initialEmail)
   const [previewUrl, setPreviewUrl] = useState(initialPreviewUrl)
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
-  const [message, setMessage] = useState(registered ? 'Account created. Check your inbox for a verification link to finish creating your account.' : 'Check your inbox for a verification link to finish creating your account.')
+  const [message, setMessage] = useState<string>(registered ? ui.created : ui.defaultMessage)
   const isTokenMode = useMemo(() => !!token, [token])
 
   useEffect(() => {
@@ -23,13 +83,13 @@ export default function VerifyEmail() {
     api.get(`/auth/verify-email?token=${encodeURIComponent(token)}`)
       .then((response) => {
         setStatus('success')
-        setMessage(response.data.message || 'Email verified successfully. You can now sign in.')
+        setMessage(response.data.message || ui.verifiedSuccess)
       })
       .catch((error: any) => {
         setStatus('error')
-        setMessage(error.response?.data?.message || 'Verification link is invalid or expired.')
+        setMessage(error.response?.data?.message || ui.verifyFailed)
       })
-  }, [token])
+  }, [token, ui.verifiedSuccess, ui.verifyFailed])
 
   const handleResend = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -38,24 +98,24 @@ export default function VerifyEmail() {
       const response = await api.post('/auth/resend-verification', { email })
       setPreviewUrl(response.data.data?.previewUrl || '')
       setStatus('idle')
-      toast.success(response.data.message || 'Verification email sent')
-      setMessage('We sent a fresh verification link. Please check your inbox and spam folder.')
+      toast.success(response.data.message || ui.resendSuccess)
+      setMessage(ui.resendMessage)
     } catch (error: any) {
       setStatus('error')
-      setMessage(error.response?.data?.message || 'Unable to resend verification email')
+      setMessage(error.response?.data?.message || ui.resendFailed)
     }
   }
 
   return (
     <div className="atlas-page flex items-center justify-center px-4 py-12">
       <div className="atlas-panel w-full max-w-xl p-8">
-        <p className="atlas-kicker">Email verification</p>
-        <h1 className="mb-2 text-3xl font-semibold text-ink">Verify your account</h1>
+        <p className="atlas-kicker">{ui.kicker}</p>
+        <h1 className="mb-2 text-3xl font-semibold text-ink">{ui.title}</h1>
         <p className="mb-6 text-muted">{message}</p>
 
         {previewUrl && !isTokenMode ? (
           <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-            SMTP is not configured in this environment yet. For development only, you can open the verification link directly:{' '}
+            {ui.smtp}{' '}
             <a href={previewUrl} className="break-all font-semibold underline">{previewUrl}</a>
           </div>
         ) : null}
@@ -64,16 +124,16 @@ export default function VerifyEmail() {
           <div className="rounded-2xl bg-emerald-50 p-5 text-emerald-800">
             <div className="mb-3 flex items-center gap-3">
               <FiCheckCircle size={22} />
-              <strong>Email verified</strong>
+              <strong>{ui.verified}</strong>
             </div>
             <Link to={`/login?${new URLSearchParams({ email, verified: '1' }).toString()}`} className="btn btn-primary mt-2 inline-flex items-center gap-2">
-              Continue to sign in
+              {ui.continue}
             </Link>
           </div>
         ) : (
           <form onSubmit={handleResend} className="space-y-4">
             <div>
-              <label className="label">Email address</label>
+            <label className="label">{ui.email}</label>
               <input
                 className="input"
                 type="email"
@@ -86,11 +146,11 @@ export default function VerifyEmail() {
             <div className="flex flex-wrap gap-3">
               <button type="submit" className="btn btn-primary inline-flex items-center gap-2" disabled={status === 'loading'}>
                 <FiRefreshCcw size={16} />
-                {status === 'loading' ? 'Working...' : 'Resend verification email'}
+                {status === 'loading' ? ui.working : ui.resend}
               </button>
               <Link to="/login" className="btn btn-outline inline-flex items-center gap-2">
                 <FiMail size={16} />
-                Back to sign in
+                {ui.back}
               </Link>
             </div>
           </form>

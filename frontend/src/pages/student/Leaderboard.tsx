@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { FiTrendingUp, FiAward, FiUser } from 'react-icons/fi'
 import api from '../../services/api'
+import { useLanguageStore } from '../../store/languageStore'
 
 interface LeaderboardEntry {
   _id: string
@@ -10,10 +11,18 @@ interface LeaderboardEntry {
   streak: number
 }
 
+const copy = {
+  en: { kicker: 'Learner ranking', title: 'Global Leaderboard', text: 'See top learners, compare momentum, and use your rank as a daily motivation signal.', yourRank: 'Your Rank', yourRankText: 'Keep learning to climb higher', loading: 'Loading leaderboard...', empty: 'No ranked learners yet.', rank: 'Rank', user: 'User', points: 'Points', streak: 'Streak' },
+  ru: { kicker: 'Рейтинг учеников', title: 'Глобальный рейтинг', text: 'Смотрите лучших учеников, сравнивайте темп и используйте свой ранг как ежедневную мотивацию.', yourRank: 'Ваше место', yourRankText: 'Продолжайте учиться, чтобы подняться выше', loading: 'Загрузка рейтинга...', empty: 'Пока нет ранжированных учеников.', rank: 'Место', user: 'Пользователь', points: 'Баллы', streak: 'Серия' },
+  uz: { kicker: 'Talabalar reytingi', title: 'Global reyting', text: 'Eng yaxshi o‘quvchilarni ko‘ring, sur’atni taqqoslang va o‘z o‘rningizni kundalik motivatsiya sifatida ishlating.', yourRank: 'Sizning o‘rningiz', yourRankText: 'Yuqoriga chiqish uchun o‘qishni davom ettiring', loading: 'Reyting yuklanmoqda...', empty: 'Hali reytingga kirgan o‘quvchilar yo‘q.', rank: 'O‘rin', user: 'Foydalanuvchi', points: 'Ballar', streak: 'Seriya' },
+} as const
+
 export default function Leaderboard() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [myRank, setMyRank] = useState(0)
   const [loading, setLoading] = useState(true)
+  const language = useLanguageStore((state) => state.language)
+  const ui = copy[language]
 
   useEffect(() => {
     api.get('/users/leaderboard')
@@ -28,9 +37,9 @@ export default function Leaderboard() {
     <div className="atlas-page px-4 py-10">
       <div className="mx-auto max-w-5xl">
         <div className="atlas-heading mb-8">
-          <p className="atlas-kicker">Learner ranking</p>
-          <h1>Global Leaderboard</h1>
-          <p>See top learners, compare momentum, and use your rank as a daily motivation signal.</p>
+          <p className="atlas-kicker">{ui.kicker}</p>
+          <h1>{ui.title}</h1>
+          <p>{ui.text}</p>
         </div>
 
         <div className="atlas-panel mb-8 border-2 border-primary-200 bg-gradient-to-r from-primary-50 to-secondary-50 p-6 dark:border-primary-700 dark:from-primary-900/20 dark:to-secondary-900/20">
@@ -40,8 +49,8 @@ export default function Leaderboard() {
                 {myRank || '—'}
               </div>
               <div>
-                <p className="text-xl font-bold">Your Rank</p>
-                <p className="text-muted">Keep learning to climb higher</p>
+                <p className="text-xl font-bold">{ui.yourRank}</p>
+                <p className="text-muted">{ui.yourRankText}</p>
               </div>
             </div>
             <FiTrendingUp className="w-8 h-8 text-primary-500" />
@@ -50,18 +59,18 @@ export default function Leaderboard() {
 
         <div className="atlas-panel p-2 sm:p-4">
           {loading ? (
-            <p className="text-center py-12">Loading leaderboard...</p>
+            <p className="text-center py-12">{ui.loading}</p>
           ) : leaderboard.length === 0 ? (
-            <p className="text-center py-12 text-muted">No ranked learners yet.</p>
+            <p className="text-center py-12 text-muted">{ui.empty}</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-neutral-200 dark:border-neutral-700">
-                    <th className="text-left py-4 px-4 font-bold">Rank</th>
-                    <th className="text-left py-4 px-4 font-bold">User</th>
-                    <th className="text-right py-4 px-4 font-bold">Points</th>
-                    <th className="text-right py-4 px-4 font-bold">Streak</th>
+                    <th className="text-left py-4 px-4 font-bold">{ui.rank}</th>
+                    <th className="text-left py-4 px-4 font-bold">{ui.user}</th>
+                    <th className="text-right py-4 px-4 font-bold">{ui.points}</th>
+                    <th className="text-right py-4 px-4 font-bold">{ui.streak}</th>
                   </tr>
                 </thead>
                 <tbody>

@@ -8,6 +8,7 @@ import Footer from './Footer'
 import Navbar from './Navbar'
 import Sidebar from './Sidebar'
 import ChatRealtimeBridge from './ChatRealtimeBridge'
+import { useI18n } from '../utils/i18n'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -18,6 +19,7 @@ export default function Layout({ children }: LayoutProps) {
   const { isAuthenticated } = useAuthStore()
   const totalUnread = useChatStore((state) => state.totalUnread)
   const location = useLocation()
+  const { t } = useI18n()
 
   React.useEffect(() => {
     setSidebarOpen(false)
@@ -61,8 +63,8 @@ export default function Layout({ children }: LayoutProps) {
         <Link
           to="/chat"
           className="floating-chat-launcher lg:hidden"
-          aria-label="Open chat"
-          title="Open chat"
+          aria-label={t('nav.openChat')}
+          title={t('nav.openChat')}
         >
           <FiMessageCircle size={22} />
           {totalUnread > 0 ? <span className="absolute -right-1 -top-1 min-w-5 rounded-full bg-coral px-1.5 py-0.5 text-center text-[10px] font-bold text-white">{totalUnread > 99 ? '99+' : totalUnread}</span> : null}

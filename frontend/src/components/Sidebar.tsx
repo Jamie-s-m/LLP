@@ -12,6 +12,7 @@ import {
   FiMessageCircle,
 } from 'react-icons/fi'
 import { useAuthStore } from '../store/authStore'
+import { useI18n } from '../utils/i18n'
 
 interface SidebarProps {
   open: boolean
@@ -21,15 +22,16 @@ interface SidebarProps {
 export default function Sidebar({ open, onClose }: SidebarProps) {
   const { user } = useAuthStore()
   const location = useLocation()
+  const { t } = useI18n()
   const workspaceTitle = user?.role === 'admin'
-    ? 'Admin workspace'
+    ? t('sidebar.adminWorkspace')
     : user?.role === 'moderator'
-      ? 'Moderator workspace'
+      ? t('sidebar.moderatorWorkspace')
     : user?.role === 'teacher'
-      ? 'Teacher workspace'
+      ? t('sidebar.teacherWorkspace')
       : user?.role === 'parent'
-        ? 'Parent workspace'
-        : 'Student workspace'
+        ? t('sidebar.parentWorkspace')
+        : t('sidebar.studentWorkspace')
 
   const isActive = (path: string) => location.pathname.startsWith(path)
 
@@ -41,30 +43,30 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     }`
 
   const studentLinks = [
-    { label: 'Dashboard', path: '/dashboard', icon: FiGrid },
-    { label: 'My Learning', path: '/my-learning', icon: FiBook },
-    { label: 'Flashcards', path: '/flashcards', icon: FiAward },
-    { label: 'Groups', path: '/groups', icon: FiUsers },
-    { label: 'Leaderboard', path: '/leaderboard', icon: FiTrendingUp },
+    { label: t('sidebar.dashboard'), path: '/dashboard', icon: FiGrid },
+    { label: t('sidebar.myLearning'), path: '/my-learning', icon: FiBook },
+    { label: t('sidebar.flashcards'), path: '/flashcards', icon: FiAward },
+    { label: t('sidebar.groups'), path: '/groups', icon: FiUsers },
+    { label: t('sidebar.leaderboard'), path: '/leaderboard', icon: FiTrendingUp },
   ]
 
   const parentLinks = [
-    { label: 'Family Desk', path: '/parent/dashboard', icon: FiGrid },
-    { label: 'Chat', path: '/chat', icon: FiMessageCircle },
+    { label: t('sidebar.familyDesk'), path: '/parent/dashboard', icon: FiGrid },
+    { label: t('sidebar.chat'), path: '/chat', icon: FiMessageCircle },
   ]
 
   const teacherLinks = [
-    { label: 'Dashboard', path: '/teacher/dashboard', icon: FiGrid },
-    { label: 'Create Course', path: '/teacher/create-course', icon: FiEdit3 },
-    { label: 'My Courses', path: '/teacher/courses', icon: FiBook },
+    { label: t('sidebar.dashboard'), path: '/teacher/dashboard', icon: FiGrid },
+    { label: t('sidebar.createCourse'), path: '/teacher/create-course', icon: FiEdit3 },
+    { label: t('sidebar.myCourses'), path: '/teacher/courses', icon: FiBook },
   ]
 
   const adminLinks = [
-    { label: 'Control Center', path: '/admin/control-center', icon: FiGrid },
+    { label: t('sidebar.controlCenter'), path: '/admin/control-center', icon: FiGrid },
   ]
 
   const moderatorLinks = [
-    { label: 'Moderation Desk', path: '/admin/control-center', icon: FiGrid },
+    { label: t('sidebar.moderationDesk'), path: '/admin/control-center', icon: FiGrid },
   ]
 
   let navLinks = studentLinks
@@ -83,14 +85,14 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         <div className="p-5 sm:p-6">
           <div className="mb-6 flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-coral">Workspace</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-coral">{t('common.workspace')}</p>
               <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">{workspaceTitle}</h2>
             </div>
             <button
               type="button"
               onClick={onClose}
               className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 text-neutral-600 transition hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700"
-              aria-label="Close navigation menu"
+              aria-label={t('sidebar.closeMenu')}
             >
               <FiChevronLeft size={20} />
             </button>
@@ -115,7 +117,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           <hr className="my-6 border-neutral-200 dark:border-neutral-700" />
 
           <h3 className="text-sm font-semibold text-neutral-900 dark:text-white uppercase tracking-wider mb-4">
-            Other
+            {t('common.other')}
           </h3>
           <nav className="space-y-2">
             <Link
@@ -128,7 +130,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
               onClick={() => onClose()}
             >
               <FiMessageSquare size={20} />
-              <span>Forum</span>
+              <span>{t('sidebar.forum')}</span>
             </Link>
             <Link
               to="/chat"
@@ -136,7 +138,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
               onClick={() => onClose()}
             >
               <FiMessageCircle size={20} />
-              <span>Chat</span>
+              <span>{t('sidebar.chat')}</span>
             </Link>
             <Link
               to="/profile"
@@ -148,7 +150,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
               onClick={() => onClose()}
             >
               <FiSettings size={20} />
-              <span>Settings</span>
+              <span>{t('sidebar.settings')}</span>
             </Link>
           </nav>
         </div>

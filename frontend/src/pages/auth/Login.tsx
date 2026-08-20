@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { FiEye, FiEyeOff } from 'react-icons/fi'
 import { useAuthStore } from '../../store/authStore'
 import toast from 'react-hot-toast'
+import { useI18n } from '../../utils/i18n'
 
 export default function Login() {
   const [searchParams] = useSearchParams()
@@ -13,12 +14,13 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const navigate = useNavigate()
   const { login } = useAuthStore()
+  const { t } = useI18n()
   const notice = searchParams.get('verified') === '1'
-    ? 'Email verified. You can sign in now.'
+    ? t('login.verified')
     : searchParams.get('reset') === '1'
-      ? 'Password updated. Sign in with your new password.'
+      ? t('login.reset')
       : searchParams.get('registered') === '1'
-        ? 'Account created. Check your email for a verification link before signing in.'
+        ? t('login.registered')
         : ''
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,7 +30,7 @@ export default function Login() {
 
     try {
       await login(normalizedEmail, password)
-      toast.success('Logged in successfully!')
+      toast.success(t('login.loginSuccess'))
       const role = useAuthStore.getState().user?.role
       const destination = role === 'admin'
         ? '/admin/control-center'
@@ -42,7 +44,7 @@ export default function Login() {
       const message =
         error.response?.data?.message ||
         error.message ||
-        'Login failed'
+        t('login.loginFailed')
       if (error.response?.status === 403 && error.response?.data?.data?.requiresVerification) {
         navigate(`/verify-email?email=${encodeURIComponent(error.response.data.data.email)}`)
       }
@@ -60,10 +62,10 @@ export default function Login() {
         transition={{ duration: 0.35, ease: 'easeOut' }}
         className="atlas-panel w-full max-w-md p-8"
       >
-        <p className="atlas-kicker">Welcome back</p>
-        <h1 className="text-3xl font-semibold text-ink mb-2">Sign in</h1>
+        <p className="atlas-kicker">{t('login.kicker')}</p>
+        <h1 className="text-3xl font-semibold text-ink mb-2">{t('login.title')}</h1>
         <p className="text-muted mb-8">
-          Continue your streak and pick up where you left off.
+          {t('login.copy')}
         </p>
         {notice ? (
           <div className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
@@ -73,11 +75,11 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="label">Email Address</label>
+            <label className="label">{t('login.email')}</label>
             <input
               type="email"
               className="input"
-              placeholder="you@example.com"
+              placeholder={t('login.emailPlaceholder')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
@@ -86,7 +88,7 @@ export default function Login() {
           </div>
 
           <div>
-            <label className="label">Password</label>
+            <label className="label">{t('login.password')}</label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -101,7 +103,7 @@ export default function Login() {
                 type="button"
                 onClick={() => setShowPassword((current) => !current)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-slate-700 dark:hover:text-slate-200"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                aria-label={showPassword ? t('login.hidePassword') : t('login.showPassword')}
               >
                 {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
               </button>
@@ -113,7 +115,7 @@ export default function Login() {
             disabled={loading}
             className="btn btn-primary w-full"
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? t('login.signingIn') : t('login.signIn')}
           </button>
         </form>
 
@@ -122,12 +124,12 @@ export default function Login() {
             to="/forgot-password"
             className="block text-sm text-coral font-medium"
           >
-            Forgot Password?
+            {t('login.forgotPassword')}
           </Link>
           <p className="text-muted">
-            Don't have an account?{' '}
+            {t('login.noAccount')}{' '}
             <Link to="/register" className="text-coral font-semibold">
-              Sign Up
+              {t('login.signUp')}
             </Link>
           </p>
         </div>

@@ -6,6 +6,8 @@ import { useAuthStore } from '../store/authStore'
 import { useChatStore } from '../store/chatStore'
 import { enablePushNotifications, getNotificationPermission, isPushSupported } from '../utils/push'
 import ThemeToggle from './ThemeToggle'
+import LanguageToggle from './LanguageToggle'
+import { useI18n } from '../utils/i18n'
 
 interface NavbarProps {
   onMenuClick: () => void
@@ -19,6 +21,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
   const navigate = useNavigate()
   const location = useLocation()
   const dropdownRef = useRef<HTMLDivElement | null>(null)
+  const { t } = useI18n()
   const isTopNavActive = (path: string) => (path === '/' ? location.pathname === '/' : location.pathname.startsWith(path))
 
   const topNavClasses = (path: string) =>
@@ -28,16 +31,16 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
         : 'text-neutral-700 hover:bg-neutral-100 hover:text-primary-500 dark:text-neutral-300 dark:hover:bg-neutral-700/80 dark:hover:text-white'
     }`
 
-  const roleLabel = user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : ''
+  const roleLabel = user?.role ? t(`roles.${user.role}`) : ''
   const dashboardConfig = user?.role === 'admin'
-    ? { to: '/admin/control-center', label: 'Control Center' }
+    ? { to: '/admin/control-center', label: t('nav.controlCenter') }
     : user?.role === 'moderator'
-      ? { to: '/admin/control-center', label: 'Moderation Desk' }
+      ? { to: '/admin/control-center', label: t('nav.moderationDesk') }
     : user?.role === 'teacher'
-      ? { to: '/teacher/dashboard', label: 'Teaching Dashboard' }
+      ? { to: '/teacher/dashboard', label: t('nav.teachingDashboard') }
       : user?.role === 'parent'
-        ? { to: '/parent/dashboard', label: 'Family Desk' }
-        : { to: '/dashboard', label: 'Learner Dashboard' }
+        ? { to: '/parent/dashboard', label: t('nav.familyDesk') }
+        : { to: '/dashboard', label: t('nav.learnerDashboard') }
 
   useEffect(() => {
     if (isAuthenticated) setNotifPermission(getNotificationPermission())
@@ -122,9 +125,9 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
     const enabled = await enablePushNotifications()
     setNotifPermission(getNotificationPermission())
     if (enabled) {
-      toast.success('Notifications enabled for chat and updates')
+      toast.success(t('nav.notificationsSuccess'))
     } else {
-      toast.error('Notifications were not enabled')
+      toast.error(t('nav.notificationsFailed'))
     }
   }
 
@@ -142,16 +145,16 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
         {/* Center Navigation */}
         <div className="hidden flex-1 items-center justify-center gap-2 lg:flex xl:gap-4">
           <Link to="/" className={topNavClasses('/')} title="Go to home">
-            Home
+            {t('nav.home')}
           </Link>
-          <Link to="/courses" className={topNavClasses('/courses')} title="Browse courses">
-            Courses
+          <Link to="/courses" className={topNavClasses('/courses')} title={t('nav.browseCourses')}>
+            {t('nav.courses')}
           </Link>
-          <Link to="/forum" className={topNavClasses('/forum')} title="Open forum">
-            Forum
+          <Link to="/forum" className={topNavClasses('/forum')} title={t('nav.openForum')}>
+            {t('nav.forum')}
           </Link>
-          <Link to="/pricing" className={topNavClasses('/pricing')} title="View pricing">
-            Pricing
+          <Link to="/pricing" className={topNavClasses('/pricing')} title={t('nav.viewPricing')}>
+            {t('nav.pricing')}
           </Link>
         </div>
 
@@ -161,8 +164,8 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
             <Link
               to="/chat"
               className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-700 transition hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700 dark:focus-visible:ring-offset-neutral-800"
-              aria-label="Open chat"
-              title="Open chat"
+              aria-label={t('nav.openChat')}
+              title={t('nav.openChat')}
             >
               <FiMessageCircle size={18} />
               {totalUnread > 0 ? <span className="absolute -right-1 -top-1 min-w-5 rounded-full bg-coral px-1.5 py-0.5 text-center text-[10px] font-bold text-white">{totalUnread > 99 ? '99+' : totalUnread}</span> : null}
@@ -172,27 +175,28 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
             <button
               onClick={handleEnableNotifications}
               className="rounded-full p-2 text-neutral-500 transition hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:hover:bg-neutral-700 dark:focus-visible:ring-offset-neutral-800"
-              aria-label="Enable notifications"
-              title="Enable notifications for chat and updates"
+              aria-label={t('nav.enableNotifications')}
+              title={t('nav.enableNotificationsTitle')}
             >
               <FiBellOff size={20} />
             </button>
           ) : null}
           {isAuthenticated && notifPermission === 'granted' ? (
-            <span className="rounded-full p-2 text-primary-500" title="Notifications enabled">
+            <span className="rounded-full p-2 text-primary-500" title={t('nav.notificationsEnabled')}>
               <FiBell size={20} />
             </span>
           ) : null}
+          <LanguageToggle />
           <ThemeToggle />
           {isAuthenticated ? (
             <button
               onClick={onMenuClick}
               className="inline-flex shrink-0 items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700 dark:focus-visible:ring-offset-neutral-800"
-              aria-label="Open workspace menu"
-              title="Open workspace navigation"
+              aria-label={t('nav.workspaceMenu')}
+              title={t('nav.workspaceNavigation')}
             >
               <FiGrid size={18} />
-              <span className="hidden xl:inline">Workspace</span>
+              <span className="hidden xl:inline">{t('nav.workspace')}</span>
             </button>
           ) : null}
           {isAuthenticated ? (
@@ -202,7 +206,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
                 className="flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-2 py-1.5 text-neutral-900 transition-colors hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700 dark:focus-visible:ring-offset-neutral-800"
                 aria-expanded={dropdownOpen}
                 aria-haspopup="menu"
-                title="Open account menu"
+                title={t('nav.accountMenu')}
               >
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white font-bold">
                   {user?.firstName?.charAt(0)}
@@ -240,7 +244,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
                     onClick={() => setDropdownOpen(false)}
                     className="flex items-center gap-2 px-4 py-3 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
                   >
-                    <FiUser size={16} /> Profile
+                    <FiUser size={16} /> {t('nav.profile')}
                   </Link>
                   {user?.role === 'teacher' || user?.role === 'admin' ? (
                     <Link
@@ -248,7 +252,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
                       onClick={() => setDropdownOpen(false)}
                       className="flex items-center gap-2 px-4 py-3 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
                     >
-                      <FiSettings size={16} /> Teaching
+                      <FiSettings size={16} /> {t('nav.teaching')}
                     </Link>
                   ) : null}
                   {user?.role === 'moderator' ? (
@@ -257,7 +261,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
                       onClick={() => setDropdownOpen(false)}
                       className="flex items-center gap-2 px-4 py-3 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
                     >
-                      <FiSettings size={16} /> Moderation
+                      <FiSettings size={16} /> {t('nav.moderation')}
                     </Link>
                   ) : null}
                   {user?.role === 'admin' ? (
@@ -266,14 +270,14 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
                       onClick={() => setDropdownOpen(false)}
                       className="flex items-center gap-2 px-4 py-3 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
                     >
-                      <FiSettings size={16} /> Admin
+                      <FiSettings size={16} /> {t('nav.admin')}
                     </Link>
                   ) : null}
                   <button
                     onClick={handleLogout}
                     className="w-full text-left flex items-center gap-2 px-4 py-3 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors border-t border-neutral-200 dark:border-neutral-700"
                   >
-                    <FiLogOut size={16} /> Logout
+                    <FiLogOut size={16} /> {t('nav.logout')}
                   </button>
                 </div>
               )}
@@ -284,10 +288,10 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
                 to="/login"
                 className="btn btn-outline text-sm px-3 py-1.5"
               >
-                Login
+                {t('nav.login')}
               </Link>
               <Link to="/register" className="btn btn-primary text-sm px-3 py-1.5">
-                Sign Up
+                {t('nav.signUp')}
               </Link>
             </div>
           )}

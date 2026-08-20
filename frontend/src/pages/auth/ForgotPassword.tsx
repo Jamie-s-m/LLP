@@ -3,12 +3,54 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
 import api from '../../services/api'
+import { useLanguageStore } from '../../store/languageStore'
+
+const copy = {
+  en: {
+    kicker: 'Account recovery',
+    title: 'Forgot password',
+    text: 'Enter your email address and we\'ll send you a link to reset your password.',
+    sent: 'Reset link sent to your email!',
+    success: 'If an account exists for {email}, a password reset link has been dispatched.',
+    smtp: 'SMTP is not configured in this environment yet. For development only, you can open the reset link directly:',
+    back: 'Back to Sign In',
+    send: 'Send Reset Link',
+    sending: 'Sending link...',
+    failed: 'Failed to send reset link',
+  },
+  ru: {
+    kicker: 'Восстановление аккаунта',
+    title: 'Забыли пароль',
+    text: 'Введите email адрес, и мы отправим ссылку для сброса пароля.',
+    sent: 'Ссылка для сброса отправлена на ваш email!',
+    success: 'Если аккаунт для {email} существует, ссылка для сброса была отправлена.',
+    smtp: 'SMTP пока не настроен в этой среде. Только для разработки вы можете открыть ссылку напрямую:',
+    back: 'Вернуться ко входу',
+    send: 'Отправить ссылку',
+    sending: 'Отправка...',
+    failed: 'Не удалось отправить ссылку для сброса',
+  },
+  uz: {
+    kicker: 'Akkountni tiklash',
+    title: 'Parolni unutdingizmi',
+    text: 'Email manzilingizni kiriting, biz sizga parolni qayta tiklash havolasini yuboramiz.',
+    sent: 'Tiklash havolasi emailingizga yuborildi!',
+    success: '{email} uchun akkount mavjud bo‘lsa, parolni tiklash havolasi yuborildi.',
+    smtp: 'Bu muhitda SMTP hali sozlanmagan. Faqat development uchun havolani to‘g‘ridan-to‘g‘ri ochishingiz mumkin:',
+    back: 'Kirishga qaytish',
+    send: 'Tiklash havolasini yuborish',
+    sending: 'Yuborilmoqda...',
+    failed: 'Tiklash havolasini yuborib bo‘lmadi',
+  },
+} as const
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [previewUrl, setPreviewUrl] = useState('')
+  const language = useLanguageStore((state) => state.language)
+  const ui = copy[language]
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -17,14 +59,14 @@ export default function ForgotPassword() {
     try {
       const normalizedEmail = email.trim().toLowerCase()
       const response = await api.post('/auth/forgot-password', { email: normalizedEmail })
-      toast.success('Reset link sent to your email!')
+      toast.success(ui.sent)
       setPreviewUrl(response.data.data?.previewUrl || '')
       setSubmitted(true)
     } catch (error: any) {
       const message =
         error.response?.data?.message ||
         error.message ||
-        'Failed to send reset link'
+        ui.failed
       toast.error(message)
     } finally {
       setLoading(false)
@@ -39,25 +81,23 @@ export default function ForgotPassword() {
         transition={{ duration: 0.35, ease: 'easeOut' }}
         className="atlas-panel w-full max-w-md p-8 text-center"
       >
-        <p className="atlas-kicker">Account recovery</p>
-        <h1 className="text-3xl font-semibold text-ink mb-2">Forgot password</h1>
-        <p className="text-muted mb-8">
-          Enter your email address and we'll send you a link to reset your password.
-        </p>
+        <p className="atlas-kicker">{ui.kicker}</p>
+        <h1 className="text-3xl font-semibold text-ink mb-2">{ui.title}</h1>
+        <p className="text-muted mb-8">{ui.text}</p>
 
         {submitted ? (
           <div className="space-y-6">
             <div className="p-4 bg-emerald-50 text-emerald-700 rounded-lg text-sm">
-              If an account exists for <strong>{email}</strong>, a password reset link has been dispatched.
+              {ui.success.replace('{email}', email)}
             </div>
             {previewUrl ? (
               <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-left text-sm text-amber-900">
-                SMTP is not configured in this environment yet. For development only, you can open the reset link directly:{' '}
+                {ui.smtp}{' '}
                 <a href={previewUrl} className="break-all font-semibold underline">{previewUrl}</a>
               </div>
             ) : null}
             <Link to="/login" className="btn btn-primary w-full inline-block">
-              Back to Sign In
+              {ui.back}
             </Link>
           </div>
         ) : (
@@ -79,7 +119,7 @@ export default function ForgotPassword() {
               disabled={loading}
               className="btn btn-primary w-full"
             >
-              {loading ? 'Sending link...' : 'Send Reset Link'}
+              {loading ? ui.sending : ui.send}
             </button>
           </form>
         )}
@@ -89,7 +129,7 @@ export default function ForgotPassword() {
             to="/login"
             className="text-sm text-muted"
           >
-            ← Back to Sign In
+            ← {ui.back}
           </Link>
         </div>
       </motion.div>
