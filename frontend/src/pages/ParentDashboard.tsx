@@ -39,10 +39,10 @@ export default function ParentDashboard() {
       <div className="atlas-hero mb-8">
         <div>
           <p className="atlas-kicker">Family learning desk</p>
-          <h1>See the whole learning picture.</h1>
-          <p>Follow progress, encourage consistency, and stay close to your learner&apos;s next step.</p>
+          <h1>See every signal behind progress.</h1>
+          <p>Follow progress, encourage consistency, and stay close to your learner&apos;s next milestone.</p>
         </div>
-        <img src={`${import.meta.env.BASE_URL}atlas-study.svg`} alt="Language atlas study illustration" />
+        <img src={`${import.meta.env.BASE_URL}auralex-orbit.svg`} alt="Auralex family learning illustration" />
       </div>
       <div className="atlas-stat-grid mb-8">
         <div className="atlas-stat"><FiUsers /><strong>{links.filter((link) => link.status === 'approved').length}</strong><span>Linked learners</span></div>

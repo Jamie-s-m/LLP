@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import { FiLifeBuoy, FiMessageCircle, FiSearch, FiSend, FiUsers } from 'react-icons/fi'
-import { io, Socket } from 'socket.io-client'
 import api from '../services/api'
 import { useAuthStore } from '../store/authStore'
 import { useChatStore } from '../store/chatStore'
+import { onChatMessage, onConversationRefresh, type LiveChatMessage } from '../utils/chatEvents'
 
 interface Conversation {
   _id: string
@@ -24,32 +24,37 @@ interface Message {
 
 export default function Chat() {
   const { user } = useAuthStore()
-  const { byConversation, fetchUnreadSummary, clearConversationUnread } = useChatStore()
+  const {
+    byConversation,
+    fetchUnreadSummary,
+    clearConversationUnread,
+    socketConnected,
+    setActiveConversationId,
+  } = useChatStore()
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [messages, setMessages] = useState<Message[]>([])
   const [activeId, setActiveId] = useState('')
   const [draft, setDraft] = useState('')
   const [loading, setLoading] = useState(true)
-  const [socket, setSocket] = useState<Socket | null>(null)
-  const [socketConnected, setSocketConnected] = useState(false)
   const [search, setSearch] = useState('')
   const [searchResults, setSearchResults] = useState<Array<{ _id: string; firstName: string; lastName: string; role: string }>>([])
   const [creatingConversation, setCreatingConversation] = useState(false)
   const [conversationLoadError, setConversationLoadError] = useState('')
   const activeConversationRef = useRef(activeId)
+  const messageListRef = useRef<HTMLDivElement | null>(null)
   const isDocumentVisible = () => document.visibilityState === 'visible'
 
   useEffect(() => {
     activeConversationRef.current = activeId
   }, [activeId])
 
-  const loadConversations = async () => {
+  const loadConversations = useCallback(async () => {
     try {
       const response = await api.get('/chat/conversations')
       const data = response.data.data || []
       setConversations(data)
       setConversationLoadError('')
-      if (!activeId && data[0]) setActiveId(data[0]._id)
+      if (!activeConversationRef.current && data[0]) setActiveId(data[0]._id)
       fetchUnreadSummary()
     } catch (error: any) {
       const message = error.response?.data?.message || 'Unable to load conversations'
@@ -58,33 +63,27 @@ export default function Chat() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [fetchUnreadSummary])
+
+  const loadMessages = useCallback(async (conversationId: string, syncUnread = false) => {
+    if (!conversationId || !isDocumentVisible()) return
+
+    try {
+      const response = await api.get(`/chat/conversations/${conversationId}/messages`)
+      setMessages(response.data.data || [])
+      clearConversationUnread(conversationId)
+      setConversations((current) => current.map((conversation) => conversation._id === conversationId ? { ...conversation, unreadCount: 0 } : conversation))
+      if (syncUnread) {
+        fetchUnreadSummary()
+      }
+    } catch {
+      return
+    }
+  }, [clearConversationUnread, fetchUnreadSummary])
 
   useEffect(() => {
     loadConversations()
-    const token = localStorage.getItem('token')
-    if (!token) return
-    const connection = io(import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, '') || 'http://localhost:5000', { auth: { token } })
-    connection.on('connect', () => setSocketConnected(true))
-    connection.on('disconnect', () => setSocketConnected(false))
-    connection.on('message:new', (message: Message) => {
-      const incomingConversationId = message.conversation
-
-      if (incomingConversationId && incomingConversationId === activeConversationRef.current && isDocumentVisible()) {
-        setMessages((current) => current.some((item) => item._id === message._id) ? current : [...current, message])
-        clearConversationUnread(incomingConversationId)
-        setConversations((current) => current.map((conversation) => conversation._id === incomingConversationId ? { ...conversation, unreadCount: 0 } : conversation))
-        return
-      }
-
-      loadConversations()
-    })
-    setSocket(connection)
-    return () => {
-      setSocketConnected(false)
-      connection.disconnect()
-    }
-  }, [clearConversationUnread, fetchUnreadSummary])
+  }, [loadConversations])
 
   useEffect(() => {
     if (search.trim().length < 2) {
@@ -102,30 +101,19 @@ export default function Chat() {
   }, [search])
 
   useEffect(() => {
-    if (!activeId) return
-
-    const loadMessages = (syncUnread = false) => {
-      if (!isDocumentVisible()) return Promise.resolve()
-
-      return api.get(`/chat/conversations/${activeId}/messages`).then((response) => {
-        setMessages(response.data.data || [])
-        clearConversationUnread(activeId)
-        setConversations((current) => current.map((conversation) => conversation._id === activeId ? { ...conversation, unreadCount: 0 } : conversation))
-        if (syncUnread) {
-          fetchUnreadSummary()
-        }
-      }).catch(() => undefined)
+    setActiveConversationId(activeId)
+    if (!activeId) {
+      return () => setActiveConversationId('')
     }
 
     const handleVisibilityRefresh = () => {
       if (document.visibilityState === 'visible') {
-        loadMessages(true)
+        loadMessages(activeId, true)
       }
     }
 
-    loadMessages(true)
-    socket?.emit('conversation:join', activeId)
-    const timer = socketConnected ? undefined : window.setInterval(() => { loadMessages(false) }, 60000)
+    loadMessages(activeId, true)
+    const timer = socketConnected ? undefined : window.setInterval(() => { loadMessages(activeId, false) }, 60000)
     document.addEventListener('visibilitychange', handleVisibilityRefresh)
     window.addEventListener('focus', handleVisibilityRefresh)
 
@@ -133,8 +121,43 @@ export default function Chat() {
       if (timer) window.clearInterval(timer)
       document.removeEventListener('visibilitychange', handleVisibilityRefresh)
       window.removeEventListener('focus', handleVisibilityRefresh)
+      setActiveConversationId('')
     }
-  }, [activeId, clearConversationUnread, fetchUnreadSummary, socket, socketConnected])
+  }, [activeId, loadMessages, setActiveConversationId, socketConnected])
+
+  useEffect(() => {
+    const unsubscribeMessage = onChatMessage((message: LiveChatMessage) => {
+      const incomingConversationId = message.conversation
+      if (!incomingConversationId) return
+
+      if (incomingConversationId === activeConversationRef.current && isDocumentVisible()) {
+        setMessages((current) => current.some((item) => item._id === message._id) ? current : [...current, message as Message])
+        clearConversationUnread(incomingConversationId)
+        setConversations((current) => current.map((conversation) => conversation._id === incomingConversationId ? { ...conversation, unreadCount: 0 } : conversation))
+        return
+      }
+
+      loadConversations()
+    })
+
+    const unsubscribeRefresh = onConversationRefresh(({ conversationId }) => {
+      loadConversations()
+      if (conversationId && conversationId === activeConversationRef.current && isDocumentVisible()) {
+        loadMessages(conversationId, false)
+      }
+    })
+
+    return () => {
+      unsubscribeMessage()
+      unsubscribeRefresh()
+    }
+  }, [clearConversationUnread, loadConversations, loadMessages])
+
+  useEffect(() => {
+    const node = messageListRef.current
+    if (!node) return
+    node.scrollTop = node.scrollHeight
+  }, [messages])
 
   const sendMessage = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -197,10 +220,10 @@ export default function Chat() {
       </div>
       <div className="chat-layout">
         <aside className="atlas-panel chat-list">
-          <div className="flex items-center justify-between mb-5">
+          <div className="mb-5 flex items-center justify-between">
             <h2>Inbox</h2><FiMessageCircle className="text-coral" />
           </div>
-          <div className="mb-4 space-y-3">
+          <div className="space-y-4">
             <div className="relative">
               <FiSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
@@ -244,8 +267,8 @@ export default function Chat() {
         </aside>
         <section className="atlas-panel chat-window">
           {active ? <>
-            <header className="chat-header"><div><p className="atlas-kicker">{active.type} room</p><h2>{getConversationName(active)}</h2></div><span className="status-dot">Live</span></header>
-            <div className="message-list">
+            <header className="chat-header"><div><p className="atlas-kicker">{active.type} room</p><h2>{getConversationName(active)}</h2></div><span className="status-dot">{socketConnected ? 'Live' : 'Syncing'}</span></header>
+            <div ref={messageListRef} className="message-list">
               {messages.length === 0 ? <div className="empty-state"><FiMessageCircle /><p>Start the conversation.</p></div> : messages.map((message) => {
                 const isOwn = message.sender.firstName === user?.firstName && message.sender.lastName === user?.lastName
                 return <article key={message._id} className={`message-bubble ${isOwn ? 'ml-auto bg-[#102a43] text-white rounded-bl-2xl rounded-br-sm' : ''}`}><strong>{message.sender.firstName} {message.sender.lastName}</strong><p>{message.body}</p><time className={isOwn ? '!text-white/70' : ''}>{new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</time></article>

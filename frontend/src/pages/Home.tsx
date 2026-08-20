@@ -18,12 +18,12 @@ export default function Home() {
       {/* Hero Section */}
       <div className="atlas-hero mb-12">
         <div>
-          <p className="atlas-kicker">A living atlas for language learners</p>
+          <p className="atlas-kicker">Auralex fluency system</p>
         <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4">
-          Find your next fluent sentence.
+          Move from practice to presence.
         </h1>
         <p className="text-lg text-slate-300 max-w-2xl mx-auto mb-8">
-          Build vocabulary, complete lessons, and track your progress in real-time.
+          Build fluency with premium lessons, live conversation tools, and progress intelligence that stays beautifully in sync.
         </p>
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <Link
@@ -40,15 +40,15 @@ export default function Home() {
           </Link>
         </div>
         </div>
-        <img src={`${import.meta.env.BASE_URL}atlas-study.svg`} alt="Illustration of language learning cards and conversation" />
+        <img src={`${import.meta.env.BASE_URL}auralex-orbit.svg`} alt="Auralex premium language learning illustration" />
       </div>
 
       <div className="atlas-panel mb-12 p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="atlas-kicker">Commercial readiness</p>
-            <h2 className="text-2xl text-ink dark:text-white">Student, family, and teaching plans</h2>
-            <p className="mt-2 max-w-2xl text-slate-600 dark:text-slate-300">Choose a plan structure for individual learners, parent-managed study, or teacher-led programs. Billing surfaces are now wired for future payment integration.</p>
+            <h2 className="text-2xl text-ink dark:text-white">Premium learner, family, and teaching plans</h2>
+            <p className="mt-2 max-w-2xl text-slate-600 dark:text-slate-300">Position Auralex for individual learners, parent-guided study, or teacher-led programs with polished billing-ready surfaces.</p>
           </div>
           <Link to="/pricing" className="btn btn-primary w-full sm:w-auto">Compare plans</Link>
         </div>

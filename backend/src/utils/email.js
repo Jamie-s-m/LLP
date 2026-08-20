@@ -31,12 +31,12 @@ export const sendVerificationEmail = async ({ user, token }) => {
   }
 
   await transporter.sendMail({
-    from: process.env.EMAIL_FROM || 'LinguaNest <no-reply@linguanest.app>',
+    from: process.env.EMAIL_FROM || 'Auralex <no-reply@auralex.app>',
     to: user.email,
-    subject: 'Verify your LinguaNest email',
+    subject: 'Verify your Auralex email',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto; color: #102a43;">
-        <h1 style="margin-bottom: 12px;">Welcome to LinguaNest</h1>
+        <h1 style="margin-bottom: 12px;">Welcome to Auralex</h1>
         <p style="font-size: 16px; line-height: 1.5;">Hi ${user.firstName}, please verify your email address to activate your account and start learning.</p>
         <p style="margin: 24px 0;">
           <a href="${verificationUrl}" style="display: inline-block; background: #f26b5b; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 10px; font-weight: 700;">Verify email</a>
@@ -59,13 +59,13 @@ export const sendPasswordResetEmail = async ({ user, token }) => {
   }
 
   await transporter.sendMail({
-    from: process.env.EMAIL_FROM || 'LinguaNest <no-reply@linguanest.app>',
+    from: process.env.EMAIL_FROM || 'Auralex <no-reply@auralex.app>',
     to: user.email,
-    subject: 'Reset your LinguaNest password',
+    subject: 'Reset your Auralex password',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto; color: #102a43;">
         <h1 style="margin-bottom: 12px;">Reset your password</h1>
-        <p style="font-size: 16px; line-height: 1.5;">Hi ${user.firstName}, use the link below to create a new password for your LinguaNest account.</p>
+        <p style="font-size: 16px; line-height: 1.5;">Hi ${user.firstName}, use the link below to create a new password for your Auralex account.</p>
         <p style="margin: 24px 0;">
           <a href="${resetUrl}" style="display: inline-block; background: #102a43; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 10px; font-weight: 700;">Reset password</a>
         </p>

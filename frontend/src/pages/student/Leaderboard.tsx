@@ -29,7 +29,7 @@ export default function Leaderboard() {
       <div className="container mx-auto max-w-4xl">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">Global Leaderboard</h1>
-          <p className="text-neutral-600 dark:text-neutral-400">Top language learners on LinguaNest</p>
+          <p className="text-neutral-600 dark:text-neutral-400">Top language learners on Auralex</p>
         </div>
 
         {/* Your Rank Card */}

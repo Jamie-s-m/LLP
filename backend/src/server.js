@@ -28,8 +28,12 @@ const startServer = async () => {
 
     const server = createServer(app);
     const io = new Server(server, {
-      cors: { origin: process.env.FRONTEND_URL || 'http://localhost:5173', credentials: true },
+      cors: {
+        origin: [process.env.FRONTEND_URL, 'http://localhost:5173', 'http://localhost:3000', 'https://jamie-s-m.github.io'].filter(Boolean),
+        credentials: true,
+      },
     });
+    app.set('io', io);
 
     io.use((socket, next) => {
       try {
@@ -43,6 +47,8 @@ const startServer = async () => {
     });
 
     io.on('connection', (socket) => {
+      socket.join(`user:${socket.user.id}`);
+
       socket.on('conversation:join', async (conversationId, acknowledge) => {
         const conversation = await ChatConversation.findOne({ _id: conversationId, participants: socket.user.id });
         if (!conversation) return acknowledge?.({ success: false, message: 'Conversation not found' });
@@ -54,11 +60,19 @@ const startServer = async () => {
         try {
           const conversation = await ChatConversation.findOne({ _id: conversationId, participants: socket.user.id });
           if (!conversation || !String(body || '').trim()) return acknowledge?.({ success: false, message: 'Invalid message' });
-          const message = await ChatMessage.create({ conversation: conversationId, sender: socket.user.id, body: String(body).trim() });
+          const message = await ChatMessage.create({
+            conversation: conversationId,
+            sender: socket.user.id,
+            body: String(body).trim(),
+            readBy: [socket.user.id],
+          });
           conversation.lastMessageAt = new Date();
           await conversation.save();
           const populated = await message.populate('sender', 'firstName lastName role avatar');
           io.to(conversationId).emit('message:new', populated);
+          conversation.participants.forEach((participantId) => {
+            io.to(`user:${participantId.toString()}`).emit('conversation:refresh', { conversationId: conversationId.toString() });
+          });
 
           const recipients = conversation.participants.filter((participantId) => participantId.toString() !== socket.user.id.toString());
           sendPushToUsers(recipients, {

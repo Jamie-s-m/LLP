@@ -10,13 +10,19 @@ let unreadSummaryRequest: Promise<void> | null = null
 interface ChatUnreadState {
   totalUnread: number
   byConversation: Record<string, number>
+  socketConnected: boolean
+  activeConversationId: string
   fetchUnreadSummary: () => Promise<void>
   clearConversationUnread: (conversationId: string) => void
+  setSocketConnected: (connected: boolean) => void
+  setActiveConversationId: (conversationId: string) => void
 }
 
 export const useChatStore = create<ChatUnreadState>((set) => ({
   totalUnread: 0,
   byConversation: {},
+  socketConnected: false,
+  activeConversationId: '',
 
   fetchUnreadSummary: async () => {
     if (!useAuthStore.getState().isAuthenticated) {
@@ -59,4 +65,7 @@ export const useChatStore = create<ChatUnreadState>((set) => ({
         byConversation: nextByConversation,
       }
     }),
+
+  setSocketConnected: (connected) => set({ socketConnected: connected }),
+  setActiveConversationId: (conversationId) => set({ activeConversationId: conversationId }),
 }))

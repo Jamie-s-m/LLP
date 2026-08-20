@@ -57,7 +57,7 @@ export default function Dashboard() {
         {user?.teacherApplicationStatus === 'pending' && (
           <div className="mb-8 flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
             <FiClock size={20} />
-            <p>Your application to teach on LinguaNest is pending admin review.</p>
+            <p>Your application to teach on Auralex is pending admin review.</p>
           </div>
         )}
         {loading ? (

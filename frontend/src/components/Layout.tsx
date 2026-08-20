@@ -7,6 +7,7 @@ import { useChatStore } from '../store/chatStore'
 import Footer from './Footer'
 import Navbar from './Navbar'
 import Sidebar from './Sidebar'
+import ChatRealtimeBridge from './ChatRealtimeBridge'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -24,6 +25,7 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
+      {isAuthenticated ? <ChatRealtimeBridge /> : null}
       <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
       <div className="flex">
@@ -33,10 +35,11 @@ export default function Layout({ children }: LayoutProps) {
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.22, ease: 'easeOut' }}
+              initial={{ opacity: 0, y: 18, rotateX: 8, scale: 0.985 }}
+              animate={{ opacity: 1, y: 0, rotateX: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -16, rotateX: -6, scale: 0.99 }}
+              transition={{ duration: 0.28, ease: 'easeOut' }}
+              style={{ transformPerspective: 1200 }}
             >
               {children}
             </motion.div>

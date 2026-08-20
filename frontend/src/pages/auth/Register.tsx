@@ -108,9 +108,9 @@ export default function Register() {
         transition={{ duration: 0.35, ease: 'easeOut' }}
         className="atlas-panel w-full max-w-lg p-8"
       >
-        <p className="atlas-kicker">Join the atlas</p>
+        <p className="atlas-kicker">Join Auralex</p>
         <h1 className="text-3xl font-semibold text-ink mb-2">Create your account</h1>
-        <p className="text-muted mb-6">Choose how you'll use LinguaNest. You can apply for mentor access as a student.</p>
+        <p className="text-muted mb-6">Choose how you&apos;ll use Auralex. You can apply for mentor access as a student.</p>
         {planIntent ? (
           <div className="mb-6 rounded-lg border border-primary-200 bg-primary-50 px-4 py-3 text-sm text-primary-700 dark:border-primary-500/20 dark:bg-primary-500/10 dark:text-primary-200">
             {planIntent}
@@ -246,7 +246,7 @@ export default function Register() {
                 checked={requestTeacherRole}
                 onChange={(e) => setRequestTeacherRole(e.target.checked)}
               />
-              <span>I'd also like to apply to teach on LinguaNest. An admin will review this request after signup.</span>
+              <span>I&apos;d also like to apply to teach on Auralex. An admin will review this request after signup.</span>
             </label>
           )}
 

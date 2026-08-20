@@ -1,0 +1,47 @@
+<svg width="900" height="560" viewBox="0 0 900 560" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Auralex orbit illustration</title>
+  <desc id="desc">Premium language learning interface concept with floating cards, glowing orbits, and conversation signals</desc>
+  <rect width="900" height="560" rx="36" fill="url(#bg)"/>
+  <circle cx="174" cy="134" r="92" fill="url(#glowA)" opacity="0.75"/>
+  <circle cx="731" cy="116" r="120" fill="url(#glowB)" opacity="0.62"/>
+  <path d="M86 432C170 289 286 200 470 192c121-5 210 49 317 11" stroke="#5EEAD4" stroke-width="40" stroke-linecap="round" opacity="0.5"/>
+  <path d="M94 446c112-118 236-191 374-192 126-.9 193 41 330 0" stroke="#F4FBFF" stroke-opacity="0.24" stroke-width="8" stroke-linecap="round" stroke-dasharray="2 20"/>
+  <rect x="130" y="126" width="236" height="166" rx="24" transform="rotate(-7 130 126)" fill="url(#glassA)" stroke="rgba(244,251,255,.2)" stroke-width="2"/>
+  <rect x="540" y="301" width="233" height="154" rx="24" transform="rotate(8 540 301)" fill="url(#glassB)" stroke="rgba(244,251,255,.16)" stroke-width="2"/>
+  <path d="M196 207h102M196 239h78M196 271h128" stroke="#F4FBFF" stroke-width="12" stroke-linecap="round" opacity="0.92"/>
+  <path d="M604 354h106M604 388h62M604 422h121" stroke="#E0F2FE" stroke-width="11" stroke-linecap="round" opacity="0.95"/>
+  <path d="M444 122c61 0 110 49 110 110s-49 110-110 110c-22 0-43-6-61-18l-54 28 22-55c-13-19-20-41-20-65 0-61 49-110 110-110Z" fill="url(#core)"/>
+  <circle cx="406" cy="231" r="10" fill="#F8FDFF"/>
+  <circle cx="444" cy="231" r="10" fill="#F8FDFF"/>
+  <circle cx="482" cy="231" r="10" fill="#F8FDFF"/>
+  <path d="M421 177h47l18 58h-16l-4.6-13.8h-24.2L436.6 235h-16l18.4-58Z" fill="#F8FDFF"/>
+  <defs>
+    <linearGradient id="bg" x1="61" y1="34" x2="824" y2="534" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#061523"/>
+      <stop offset="0.4" stop-color="#0D2740"/>
+      <stop offset="0.72" stop-color="#153E65"/>
+      <stop offset="1" stop-color="#3730A3"/>
+    </linearGradient>
+    <radialGradient id="glowA" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(174 134) rotate(90) scale(92)">
+      <stop stop-color="#5EEAD4"/>
+      <stop offset="1" stop-color="#5EEAD4" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowB" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(731 116) rotate(90) scale(120)">
+      <stop stop-color="#818CF8"/>
+      <stop offset="1" stop-color="#818CF8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="glassA" x1="147" y1="134" x2="317" y2="321" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8FDFF" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#F8FDFF" stop-opacity="0.08"/>
+    </linearGradient>
+    <linearGradient id="glassB" x1="563" y1="314" x2="746" y2="453" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#67E8F9" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#818CF8" stop-opacity="0.16"/>
+    </linearGradient>
+    <linearGradient id="core" x1="334" y1="148" x2="544" y2="335" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#14B8A6"/>
+      <stop offset="0.52" stop-color="#22D3EE"/>
+      <stop offset="1" stop-color="#6366F1"/>
+    </linearGradient>
+  </defs>
+</svg>

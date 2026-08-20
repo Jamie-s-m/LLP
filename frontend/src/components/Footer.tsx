@@ -6,14 +6,14 @@ export default function Footer() {
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:px-6 md:grid-cols-[1.3fr_1fr_1fr]">
         <div className="text-center md:text-left">
           <div className="flex items-center justify-center gap-3 md:justify-start">
-            <img src={`${import.meta.env.BASE_URL}linguanest-mark.svg`} alt="LinguaNest" className="h-9 w-9 rounded-lg" />
+            <img src={`${import.meta.env.BASE_URL}auralex-mark.svg`} alt="Auralex" className="h-9 w-9 rounded-xl shadow-[0_12px_30px_rgba(20,184,166,0.28)]" />
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-coral">LinguaNest</p>
-              <h2 className="text-lg font-semibold text-ink dark:text-white">Language learning, ready to grow.</h2>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-coral">Auralex</p>
+              <h2 className="text-lg font-semibold text-ink dark:text-white">Language mastery, shaped with clarity.</h2>
             </div>
           </div>
           <p className="mt-3 max-w-md text-sm text-slate-600 dark:text-slate-300">
-            Build learner progress, teacher workflows, family visibility, and admin control from one calm platform.
+            Bring learning progress, teacher operations, family visibility, and community support into one premium workspace.
           </p>
         </div>
         <div className="border-t border-neutral-200 pt-6 text-center dark:border-neutral-700 md:border-0 md:pt-0 md:text-left">

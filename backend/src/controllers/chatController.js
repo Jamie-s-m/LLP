@@ -9,6 +9,21 @@ import { hasModeratorPermission } from '../middleware/auth.js';
 const isParticipant = (conversation, userId) =>
   conversation.participants.some((participant) => participant.toString() === userId.toString());
 
+const emitConversationRefresh = (req, participantIds = [], conversationId) => {
+  const io = req.app.get('io');
+  if (!io) return;
+
+  [...new Set(participantIds.map((participantId) => participantId.toString()))].forEach((participantId) => {
+    io.to(`user:${participantId}`).emit('conversation:refresh', { conversationId: conversationId?.toString() });
+  });
+};
+
+const emitMessageToConversation = (req, conversationId, message) => {
+  const io = req.app.get('io');
+  if (!io) return;
+  io.to(conversationId.toString()).emit('message:new', message);
+};
+
 export const listConversations = async (req, res, next) => {
   try {
     const conversations = await ChatConversation.find({ participants: req.user.id })
@@ -121,6 +136,8 @@ export const createConversation = async (req, res, next) => {
       .populate('participants', 'firstName lastName role avatar')
       .populate('group', 'name');
 
+    emitConversationRefresh(req, participants, conversation._id);
+
     res.status(201).json({ success: true, data: populatedConversation });
   } catch (error) {
     next(error);
@@ -151,6 +168,8 @@ export const listMessages = async (req, res, next) => {
       },
       { $addToSet: { readBy: req.user.id } }
     );
+
+    emitConversationRefresh(req, [req.user.id], conversation._id);
 
     res.status(200).json({ success: true, data: messages });
   } catch (error) {
@@ -187,7 +206,11 @@ export const sendMessage = async (req, res, next) => {
       url: '/chat',
     }).catch(() => {});
 
-    res.status(201).json({ success: true, data: await message.populate('sender', 'firstName lastName role avatar') });
+    const populatedMessage = await message.populate('sender', 'firstName lastName role avatar');
+    emitMessageToConversation(req, conversation._id, populatedMessage);
+    emitConversationRefresh(req, conversation.participants, conversation._id);
+
+    res.status(201).json({ success: true, data: populatedMessage });
   } catch (error) {
     next(error);
   }

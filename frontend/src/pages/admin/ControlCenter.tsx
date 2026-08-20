@@ -444,7 +444,7 @@ export default function ControlCenter() {
     <div className="atlas-page mx-auto max-w-7xl px-4 py-8">
       <div className="atlas-heading mb-8">
         <p className="atlas-kicker">Operations desk</p>
-        <h1>Run the learning atlas.</h1>
+        <h1>Command the learning operation.</h1>
         <p>Manage people, curriculum, and community from one focused control center.</p>
       </div>
 
