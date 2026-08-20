@@ -148,6 +148,9 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
           <Link to="/forum" className={topNavClasses('/forum')} title="Open forum">
             Forum
           </Link>
+          <Link to="/pricing" className={topNavClasses('/pricing')} title="View pricing">
+            Pricing
+          </Link>
         </div>
 
         {/* Right Section */}

@@ -30,6 +30,10 @@ const Chat = lazy(() => import('./pages/Chat'))
 const ParentDashboard = lazy(() => import('./pages/ParentDashboard'))
 const ChildProgress = lazy(() => import('./pages/ChildProgress'))
 const ControlCenter = lazy(() => import('./pages/admin/ControlCenter'))
+const Pricing = lazy(() => import('./pages/Pricing'))
+const Terms = lazy(() => import('./pages/Terms'))
+const Privacy = lazy(() => import('./pages/Privacy'))
+const Cookies = lazy(() => import('./pages/Cookies'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 
 function App() {
@@ -52,6 +56,10 @@ function App() {
         <Route path="/" element={<Layout><Home /></Layout>} />
         <Route path="/courses" element={<Layout><Courses /></Layout>} />
         <Route path="/courses/:id" element={<Layout><CourseDetail /></Layout>} />
+        <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
+        <Route path="/terms" element={<Layout><Terms /></Layout>} />
+        <Route path="/privacy" element={<Layout><Privacy /></Layout>} />
+        <Route path="/cookies" element={<Layout><Cookies /></Layout>} />
         <Route path="/login" element={isAuthenticated ? <Navigate to={authenticatedLandingPath} replace /> : <Layout><Login /></Layout>} />
         <Route path="/register" element={isAuthenticated ? <Navigate to={authenticatedLandingPath} replace /> : <Layout><Register /></Layout>} />
         <Route path="/verify-email" element={<Layout><VerifyEmail /></Layout>} />

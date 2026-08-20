@@ -31,8 +31,25 @@ export default function Home() {
         >
           Explore All Courses
         </Link>
+        <Link
+          to="/pricing"
+          className="ml-3 inline-block rounded-lg border border-white/40 px-8 py-3 font-semibold text-white transition hover:bg-white/10"
+        >
+          View Pricing
+        </Link>
         </div>
         <img src={`${import.meta.env.BASE_URL}atlas-study.svg`} alt="Illustration of language learning cards and conversation" />
+      </div>
+
+      <div className="atlas-panel mb-12 p-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="atlas-kicker">Commercial readiness</p>
+            <h2 className="text-2xl text-ink dark:text-white">Student, family, and teaching plans</h2>
+            <p className="mt-2 max-w-2xl text-slate-600 dark:text-slate-300">Choose a plan structure for individual learners, parent-managed study, or teacher-led programs. Billing surfaces are now wired for future payment integration.</p>
+          </div>
+          <Link to="/pricing" className="btn btn-primary">Compare plans</Link>
+        </div>
       </div>
 
       {/* Featured Courses Section */}

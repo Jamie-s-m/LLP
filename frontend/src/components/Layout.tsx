@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { FiMessageCircle } from 'react-icons/fi'
 import { useAuthStore } from '../store/authStore'
 import { useChatStore } from '../store/chatStore'
+import Footer from './Footer'
 import Navbar from './Navbar'
 import Sidebar from './Sidebar'
 
@@ -42,6 +43,8 @@ export default function Layout({ children }: LayoutProps) {
           </AnimatePresence>
         </main>
       </div>
+
+      <Footer />
 
       {/* Mobile menu backdrop */}
       {sidebarOpen && (
