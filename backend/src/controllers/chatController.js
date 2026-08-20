@@ -170,7 +170,7 @@ export const listMessages = async (req, res, next) => {
     );
 
     if (readUpdate.modifiedCount > 0) {
-      emitConversationRefresh(req, [req.user.id], conversation._id);
+      emitConversationRefresh(req, conversation.participants, conversation._id);
     }
 
     res.status(200).json({ success: true, data: messages });

@@ -3,12 +3,14 @@ export interface LiveChatMessage {
   body: string
   createdAt: string
   sender: {
+    _id?: string
     firstName: string
     lastName: string
     role?: string
     avatar?: string
   }
   conversation?: string
+  readBy?: string[]
 }
 
 type ConversationRefreshDetail = {

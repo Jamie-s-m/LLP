@@ -18,8 +18,9 @@ interface Message {
   _id: string
   body: string
   createdAt: string
-  sender: { firstName: string; lastName: string }
+  sender: { _id?: string; firstName: string; lastName: string }
   conversation?: string
+  readBy?: string[]
 }
 
 export default function Chat() {
@@ -212,6 +213,26 @@ export default function Chat() {
   }
 
   const active = conversations.find((conversation) => conversation._id === activeId)
+  const activeParticipantIds = active?.participants.map((participant) => participant._id) || []
+
+  const getOwnMessageReceipt = (message: Message) => {
+    const otherParticipantIds = activeParticipantIds.filter((participantId) => participantId !== user?.id)
+    const readByOthers = otherParticipantIds.filter((participantId) => message.readBy?.includes(participantId)).length
+
+    if (readByOthers > 0) {
+      return {
+        label: readByOthers === otherParticipantIds.length ? 'Read by everyone' : `Read by ${readByOthers}`,
+        ticks: '✓✓',
+        className: 'read',
+      }
+    }
+
+    return {
+      label: 'Sent',
+      ticks: '✓',
+      className: 'sent',
+    }
+  }
 
   return (
     <div className="atlas-page max-w-7xl mx-auto px-4 py-8">
@@ -272,8 +293,10 @@ export default function Chat() {
             <header className="chat-header"><div><p className="atlas-kicker">{active.type} room</p><h2>{getConversationName(active)}</h2></div><span className="status-dot">{socketConnected ? 'Live' : 'Syncing'}</span></header>
             <div ref={messageListRef} className="message-list">
               {messages.length === 0 ? <div className="empty-state"><FiMessageCircle /><p>Start the conversation.</p></div> : messages.map((message) => {
-                const isOwn = message.sender.firstName === user?.firstName && message.sender.lastName === user?.lastName
-                return <article key={message._id} className={`message-bubble ${isOwn ? 'own ml-auto' : ''}`}><strong>{message.sender.firstName} {message.sender.lastName}</strong><p>{message.body}</p><time>{new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</time></article>
+                const isOwn = message.sender._id ? message.sender._id === user?.id : message.sender.firstName === user?.firstName && message.sender.lastName === user?.lastName
+                const receipt = isOwn ? getOwnMessageReceipt(message) : null
+
+                return <article key={message._id} className={`message-bubble ${isOwn ? 'own ml-auto' : ''}`}><strong>{message.sender.firstName} {message.sender.lastName}</strong><p>{message.body}</p><div className="message-meta"><time>{new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</time>{receipt ? <span className={`message-receipt ${receipt.className}`} title={receipt.label} aria-label={receipt.label}>{receipt.ticks}</span> : null}</div></article>
               })}
             </div>
             <form onSubmit={sendMessage} className="chat-compose"><input value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Write a message..." maxLength={4000} /><button className="btn btn-primary" aria-label="Send message"><FiSend /></button></form>
