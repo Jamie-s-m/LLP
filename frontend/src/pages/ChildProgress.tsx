@@ -37,7 +37,7 @@ export default function ChildProgress() {
         <div className="atlas-stat"><FiBookOpen /><strong>{child.streak}</strong><span>Day streak</span></div>
         <div className="atlas-stat"><FiBarChart2 /><strong>{courses.length}</strong><span>Active courses</span></div>
       </div>
-      <section className="atlas-panel p-6"><h2 className="mb-6">Course progress</h2><div className="space-y-5">{courses.length === 0 ? <p className="text-muted">No course progress yet.</p> : courses.map((course) => <div key={course.courseId}><div className="flex justify-between mb-2"><strong>{course.title}</strong><span>{course.progressPercentage}%</span></div><div className="w-full bg-slate-100 rounded-full h-2"><div className="bg-[#f26b5b] h-2 rounded-full" style={{ width: `${course.progressPercentage}%` }} /></div><p className="text-sm text-muted mt-2">{course.isCompleted ? 'Completed' : 'In progress'}</p></div>)}</div></section>
+      <section className="atlas-panel p-6"><h2 className="mb-6 text-2xl text-ink dark:text-white">Course progress</h2><div className="space-y-5">{courses.length === 0 ? <p className="text-muted">No course progress yet.</p> : courses.map((course) => <div key={course.courseId}><div className="flex justify-between mb-2"><strong className="text-ink dark:text-white">{course.title}</strong><span className="text-muted">{course.progressPercentage}%</span></div><div className="w-full bg-slate-100 rounded-full h-2 dark:bg-white/10"><div className="bg-[#f26b5b] h-2 rounded-full" style={{ width: `${course.progressPercentage}%` }} /></div><p className="text-sm text-muted mt-2">{course.isCompleted ? 'Completed' : 'In progress'}</p></div>)}</div></section>
     </div>
   )
 }

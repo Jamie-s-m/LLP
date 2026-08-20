@@ -1,61 +1,45 @@
-# LinguaNest Development Guide
+# Auralex Development Guide
 
-## Requirements
+This document explains how to work on Auralex after the current product pass, what to focus on next, and how to use the app effectively during development and QA.
 
+## Product state
+
+The current app already includes:
+
+- public marketing pages
+- authentication and email verification flows
+- student, teacher, parent, moderator, and admin role handling
+- teacher application workflow
+- admin control center
+- moderator permission scopes
+- forum and groups
+- live chat with unread indicators, notifications, and read receipts
+- premium Auralex branding and updated UI system
+
+## How to run the platform locally
+
+### Requirements
 - Node.js 20+
 - npm
-- MongoDB locally or MongoDB Atlas
+- MongoDB or MongoDB Atlas
 - Git
-- Docker is optional
+- Docker optional
 
-## Setup scripts
+### Setup
 
-From the repository root on Windows:
+Windows:
 
 ```powershell
 .\setup.bat --no-pause
 ```
 
-The script uses `npm ci`, creates `backend/.env` and `frontend/.env.local` from templates, and exits non-zero when setup fails. Without `--no-pause`, it waits at the end for a key press.
-
-On macOS/Linux:
+macOS/Linux:
 
 ```bash
 bash ./setup.sh
 ```
 
-The scripts do not start MongoDB or dev servers.
-
-## Local configuration
-
-Create `backend/.env` from `backend/.env.example` and set:
-
-```env
-PORT=5000
-NODE_ENV=development
-MONGODB_URI=mongodb://127.0.0.1:27017/language-learn-platform
-JWT_SECRET=replace_with_a_long_random_secret
-JWT_EXPIRE=7d
-FRONTEND_URL=http://localhost:5173
-FRONTEND_APP_URL=http://localhost:5173
-RATE_LIMIT_WINDOW_MS=900000
-RATE_LIMIT_MAX_REQUESTS=100
-VAPID_PUBLIC_KEY=<public-key>
-VAPID_PRIVATE_KEY=<private-key>
-VAPID_SUBJECT=mailto:support@linguanest.app
-SMTP_HOST=
-SMTP_PORT=587
-SMTP_SECURE=false
-SMTP_USER=
-SMTP_PASS=
-EMAIL_FROM="LinguaNest <no-reply@linguanest.app>"
-```
-
-Only the VAPID public key belongs in frontend configuration as `VITE_VAPID_PUBLIC_KEY`. Never commit `.env` files or a VAPID private key. Email verification and password reset both use `FRONTEND_APP_URL` to build secure links and SMTP variables to deliver them.
-
-## Run locally
-
-Backend terminal:
+### Backend
 
 ```bash
 cd backend
@@ -63,7 +47,7 @@ npm ci
 npm run dev
 ```
 
-Frontend terminal:
+### Frontend
 
 ```bash
 cd frontend
@@ -71,55 +55,171 @@ npm ci
 npm run dev
 ```
 
-URLs:
+### Local endpoints
+- frontend: `http://localhost:5173`
+- api: `http://localhost:5000`
+- health: `http://localhost:5000/api/health`
 
-- Frontend: `http://localhost:5173`
-- API: `http://localhost:5000`
-- Health: `http://localhost:5000/api/health`
+## Core architecture to understand first
 
-## Current role model
+### Frontend
+- React + TypeScript + Vite
+- route-based product surfaces
+- Zustand stores for auth, learning, and chat state
+- shared Auralex UI tokens in [frontend/src/index.css](C:/Users/morea/language-learn-platform/frontend/src/index.css)
 
-- Student: learning, progress, flashcards, exercises, groups, chat, optional teacher application.
-- Teacher: approved instructor, own courses, lessons, learner progress, chat.
-- Parent: approved family links, child progress, chat.
-- Admin: users, teacher applications, courses, lessons, flashcards, groups, posts, moderation, chat.
+### Backend
+- Express REST API
+- MongoDB/Mongoose models
+- JWT authentication
+- Socket.io for live chat
+- web-push for browser notification support
 
-Admin and teacher accounts must not be created by selecting privileged roles in the public signup form. Student signup can include a teacher application; admin approval promotes it to teacher.
+### High-signal areas
+- [frontend/src/components/ChatRealtimeBridge.tsx](C:/Users/morea/language-learn-platform/frontend/src/components/ChatRealtimeBridge.tsx)
+- [frontend/src/store/chatStore.ts](C:/Users/morea/language-learn-platform/frontend/src/store/chatStore.ts)
+- [frontend/src/pages/admin/ControlCenter.tsx](C:/Users/morea/language-learn-platform/frontend/src/pages/admin/ControlCenter.tsx)
+- [backend/src/controllers/chatController.js](C:/Users/morea/language-learn-platform/backend/src/controllers/chatController.js)
+- [backend/src/server.js](C:/Users/morea/language-learn-platform/backend/src/server.js)
+- [backend/src/middleware/auth.js](C:/Users/morea/language-learn-platform/backend/src/middleware/auth.js)
 
-## Important API areas
+## Best way to use the app during QA
 
-- `/api/auth` — register/login
-- `/api/users` — profile, dashboard summary, leaderboard, achievements
-- `/api/courses` — catalog and teacher/admin CRUD
-- `/api/lessons` — lesson CRUD with ownership checks
-- `/api/exercises` — exercises and submissions
-- `/api/flashcards` — flashcards and review
-- `/api/progress` — enrollment, completion, teacher progress
-- `/api/groups` and `/api/forum` — community
-- `/api/family` — parent requests and child progress aggregation
-- `/api/chat` — REST conversation/message fallback
-- Socket.io — authenticated realtime chat
-- `/api/push` — browser push subscriptions
-- `/api/admin` — protected admin operations
+Use this order for realistic end-to-end verification:
 
-## Verification
+1. **Admin first**
+   - open control center
+   - verify users, courses, moderation, and support
+   - approve teacher applications if needed
+   - assign moderator scopes if needed
+
+2. **Teacher second**
+   - create a course
+   - add lessons
+   - confirm course appears in catalog and teacher workspace
+
+3. **Student third**
+   - enroll in a course
+   - verify dashboard, my learning, flashcards, groups, leaderboard, and chat
+
+4. **Parent fourth**
+   - request learner link
+   - verify child progress view
+
+5. **Support/community last**
+   - create forum content
+   - create/join groups
+   - test support chat and read receipts
+
+## What to focus on next
+
+These are the most valuable next steps.
+
+### 1. Commercial launch systems
+Focus:
+- Stripe or Lemon Squeezy integration
+- subscriptions and billing webhooks
+- invoices and refund workflows
+- entitlements mapped to plans
+
+Why:
+- the UI is billing-ready, but commercial transactions are not yet implemented
+
+### 2. Observability and ops
+Focus:
+- structured logs
+- error reporting
+- uptime checks
+- chat/socket monitoring
+- admin audit history
+
+Why:
+- commercial reliability depends on visibility into failures and regressions
+
+### 3. Automated test coverage
+Focus:
+- database-backed integration tests
+- auth flow tests
+- admin role permission tests
+- chat multi-user tests
+- browser-level regression tests
+
+Why:
+- current validation is strong for builds and smoke checks, but deeper end-to-end protection is still needed
+
+### 4. Content authoring quality
+Focus:
+- richer lesson editor
+- file/media uploads
+- ordering workflows
+- course publishing states
+- flashcard curation tools
+
+Why:
+- teacher and admin workflows work, but authoring can still become much more efficient
+
+### 5. Community and moderation maturity
+Focus:
+- report workflows
+- moderation queues
+- support SLA surfaces
+- moderator audit trails
+
+Why:
+- the hierarchy exists, but operational tooling can still be more complete
+
+### 6. Payment and legal go-live
+Focus:
+- payment processor configuration
+- invoice and cancellation policy
+- privacy/terms/cookies legal review
+- support ownership and escalation rules
+
+Why:
+- these are required before taking live customer payments
+
+## Development priorities by area
+
+### Chat
+- keep investigating websocket stability versus polling fallback
+- reduce noisy refresh paths further if needed
+- add direct tests for read receipts and multi-tab sync
+
+### Admin
+- consider bulk actions for users/content
+- add clearer audit visibility for privileged actions
+
+### Learner product
+- add richer study history and achievement logic
+- improve streak explanations and progress timelines
+
+### Teacher product
+- improve lesson editing depth
+- add clearer publishing and draft lifecycle tools
+
+### Parent product
+- strengthen family approval workflow clarity
+- add parent-specific notifications and summaries
+
+## Verification commands
+
+### Backend
 
 ```bash
 cd backend
 npm test
-npx eslint src
-npm audit --omit=dev
-
-cd ../frontend
-npm run build
-npm audit --omit=dev
 ```
 
-`npm test` currently runs the Express smoke suite without MongoDB. Full registration, database, Socket.io, and push click-through testing requires a configured test MongoDB URI in the local, ignored `backend/.env`.
+### Frontend
 
-## Deployment
+```bash
+cd frontend
+npm run build
+```
 
-Frontend:
+## Deployment workflow
+
+### Frontend
 
 ```bash
 cd frontend
@@ -127,39 +227,58 @@ npm run build
 npm run deploy
 ```
 
-Production frontend: `https://jamie-s-m.github.io/LLP/`.
+### Backend
 
-Backend is deployed on Render. Configure these Render variables before deploy:
+Deploy through Render with production environment variables configured.
+
+Required production variables:
 
 ```env
 NODE_ENV=production
-MONGODB_URI=<rotated-atlas-uri>
+MONGODB_URI=<atlas-uri>
 JWT_SECRET=<long-random-secret>
 FRONTEND_URL=https://jamie-s-m.github.io
 FRONTEND_APP_URL=https://jamie-s-m.github.io/LLP
 VAPID_PUBLIC_KEY=<public-key>
 VAPID_PRIVATE_KEY=<private-key>
-VAPID_SUBJECT=mailto:support@linguanest.app
+VAPID_SUBJECT=mailto:support@auralex.app
 SMTP_HOST=<smtp-host>
 SMTP_PORT=587
 SMTP_SECURE=false
 SMTP_USER=<smtp-user>
 SMTP_PASS=<smtp-password>
-EMAIL_FROM="LinguaNest <no-reply@linguanest.app>"
+EMAIL_FROM="Auralex <no-reply@auralex.app>"
 ```
 
-After deployment:
+## Release checklist
 
-```text
-GET /api/health       -> 200
-GET /api/courses/seed -> 404
-```
+Before each release:
 
-## Security checklist
+1. run backend tests
+2. run frontend build
+3. verify public home, pricing, login, and legal pages
+4. verify student, teacher, parent, chat, and admin authenticated surfaces
+5. verify chat unread/read behavior
+6. verify role restrictions still hold
+7. deploy frontend
+8. confirm production health endpoint and critical routes
 
-- Rotate credentials that were ever committed or shared.
-- Keep MongoDB, JWT, and VAPID private values only in local ignored files or Render secrets.
-- Do not expose a seed endpoint.
-- Keep CORS limited to the deployed frontend and local development origins.
-- Run npm audits before release.
-- Use `NODE_ENV=production` on Render.
+## Security and hygiene
+
+- never commit `.env` files
+- never commit private VAPID keys or SMTP credentials
+- rotate any exposed credentials immediately
+- keep admin/moderator scope changes intentional and reviewed
+- verify CORS settings whenever deployment origins change
+
+## Recommended next implementation order
+
+If continuing from this point, the best engineering order is:
+
+1. payment integration
+2. observability and alerting
+3. deeper automated E2E and chat coverage
+4. teacher content authoring improvements
+5. moderation/reporting workflow depth
+
+That sequence gives the best path from polished product demo to true commercial launch readiness.

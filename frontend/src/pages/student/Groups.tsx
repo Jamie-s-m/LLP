@@ -54,12 +54,13 @@ export default function Groups() {
   }
 
   return (
-    <div className="min-h-screen py-12 px-4">
-      <div className="container mx-auto max-w-6xl">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-4xl font-bold">Study Groups</h1>
-            <p className="text-neutral-600 dark:text-neutral-400">Join or create study groups</p>
+    <div className="atlas-page px-4 py-10">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="atlas-heading">
+            <p className="atlas-kicker">Community circles</p>
+            <h1>Study Groups</h1>
+            <p>Join language-focused groups or create a new space for collaborative practice.</p>
           </div>
           <button onClick={() => setShowForm(!showForm)} className="btn btn-primary flex items-center gap-2">
             <FiPlus size={20} /> Create Group
@@ -67,7 +68,7 @@ export default function Groups() {
         </div>
 
         {showForm && (
-          <form onSubmit={handleCreate} className="card mb-8 space-y-4">
+          <form onSubmit={handleCreate} className="atlas-panel mb-8 space-y-4 p-6">
             <input className="input" placeholder="Group name" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
             <textarea className="input" placeholder="Description" required value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
             <div className="grid grid-cols-2 gap-4">
@@ -88,17 +89,17 @@ export default function Groups() {
         )}
 
         {loading ? (
-          <p>Loading groups...</p>
+          <div className="atlas-panel p-6 text-muted">Loading groups...</div>
         ) : groups.length === 0 ? (
-          <p className="text-neutral-500">No study groups yet. Start one!</p>
+          <div className="atlas-panel p-6 text-muted">No study groups yet. Start one!</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {groups.map((group) => {
               const isMember = user ? group.members?.some((member) => member._id === user.id) : false
               return (
-                <div key={group._id} className="card">
-                  <h3 className="text-xl font-bold mb-2">{group.name}</h3>
-                  <p className="text-neutral-600 dark:text-neutral-400 mb-4">{group.description}</p>
+                <div key={group._id} className="atlas-panel p-6">
+                  <h3 className="text-xl font-bold mb-2 text-ink dark:text-white">{group.name}</h3>
+                  <p className="text-muted mb-4">{group.description}</p>
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex gap-2">
                       {group.language && (
@@ -114,7 +115,7 @@ export default function Groups() {
                     </div>
                   </div>
                   <div className="flex items-center justify-between pt-4 border-t border-neutral-200 dark:border-neutral-700">
-                    <div className="flex items-center gap-2 text-neutral-600 dark:text-neutral-400">
+                    <div className="flex items-center gap-2 text-muted">
                       <FiUsers size={16} />
                       <span>{group.members?.length || 0} members</span>
                     </div>

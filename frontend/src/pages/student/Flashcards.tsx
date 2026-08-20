@@ -22,13 +22,13 @@ export default function Flashcards() {
   }, [])
 
   if (loading) {
-    return <div className="min-h-screen py-12 px-4 text-center">Loading flashcards...</div>
+    return <div className="atlas-page px-4 py-12 text-center"><div className="mx-auto max-w-2xl atlas-panel p-6 text-muted">Loading flashcards...</div></div>
   }
 
   if (cards.length === 0) {
     return (
-      <div className="min-h-screen py-12 px-4 text-center">
-        <p className="text-neutral-500">No flashcards available yet. Check back soon!</p>
+      <div className="atlas-page px-4 py-12 text-center">
+        <div className="mx-auto max-w-2xl atlas-panel p-6 text-muted">No flashcards available yet. Check back soon!</div>
       </div>
     )
   }
@@ -60,15 +60,15 @@ export default function Flashcards() {
   }
 
   return (
-    <div className="min-h-screen py-12 px-4 bg-gradient-to-br from-primary-50 to-secondary-50 dark:from-neutral-900 dark:to-neutral-800">
-      <div className="container mx-auto max-w-2xl">
-        <h1 className="text-4xl font-bold mb-2 text-center">Vocabulary Flashcards</h1>
-        <p className="text-center text-neutral-600 dark:text-neutral-400 mb-8">
-          Master vocabulary with spaced repetition
-        </p>
+    <div className="atlas-page px-4 py-10">
+      <div className="mx-auto max-w-3xl">
+        <div className="atlas-heading mb-8 text-center">
+          <p className="atlas-kicker">Recall practice</p>
+          <h1>Vocabulary Flashcards</h1>
+          <p className="mx-auto">Master vocabulary with spaced repetition and a focused card-by-card review flow.</p>
+        </div>
 
-        {/* Progress */}
-        <div className="mb-8">
+        <div className="atlas-panel mb-8 p-5">
           <div className="flex justify-between mb-2 text-sm font-medium">
             <span>Card {currentCard + 1} of {cards.length}</span>
             <span>{mastered.length} mastered</span>
@@ -81,7 +81,6 @@ export default function Flashcards() {
           </div>
         </div>
 
-        {/* Flashcard */}
         <div
           onClick={() => setIsFlipped(!isFlipped)}
           className="h-64 mb-8 cursor-pointer perspective"
@@ -112,8 +111,7 @@ export default function Flashcards() {
           </div>
         </div>
 
-        {/* Controls */}
-        <div className="space-y-4">
+        <div className="atlas-panel space-y-4 p-5">
           <div className="flex justify-center gap-4">
             <button className="p-2 hover:bg-white dark:hover:bg-neutral-800 rounded-lg transition-colors">
               <FiVolume2 size={24} className="text-primary-500" />

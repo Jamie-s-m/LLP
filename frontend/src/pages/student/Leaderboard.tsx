@@ -25,15 +25,15 @@ export default function Leaderboard() {
   }, [])
 
   return (
-    <div className="min-h-screen py-12 px-4">
-      <div className="container mx-auto max-w-4xl">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Global Leaderboard</h1>
-          <p className="text-neutral-600 dark:text-neutral-400">Top language learners on Auralex</p>
+    <div className="atlas-page px-4 py-10">
+      <div className="mx-auto max-w-5xl">
+        <div className="atlas-heading mb-8">
+          <p className="atlas-kicker">Learner ranking</p>
+          <h1>Global Leaderboard</h1>
+          <p>See top learners, compare momentum, and use your rank as a daily motivation signal.</p>
         </div>
 
-        {/* Your Rank Card */}
-        <div className="card mb-8 bg-gradient-to-r from-primary-50 to-secondary-50 dark:from-primary-900/20 dark:to-secondary-900/20 border-2 border-primary-200 dark:border-primary-700">
+        <div className="atlas-panel mb-8 border-2 border-primary-200 bg-gradient-to-r from-primary-50 to-secondary-50 p-6 dark:border-primary-700 dark:from-primary-900/20 dark:to-secondary-900/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white text-2xl font-bold">
@@ -41,19 +41,18 @@ export default function Leaderboard() {
               </div>
               <div>
                 <p className="text-xl font-bold">Your Rank</p>
-                <p className="text-neutral-600 dark:text-neutral-400">Keep learning to climb higher</p>
+                <p className="text-muted">Keep learning to climb higher</p>
               </div>
             </div>
             <FiTrendingUp className="w-8 h-8 text-primary-500" />
           </div>
         </div>
 
-        {/* Leaderboard Table */}
-        <div className="card">
+        <div className="atlas-panel p-2 sm:p-4">
           {loading ? (
             <p className="text-center py-12">Loading leaderboard...</p>
           ) : leaderboard.length === 0 ? (
-            <p className="text-center py-12 text-neutral-500">No ranked learners yet.</p>
+            <p className="text-center py-12 text-muted">No ranked learners yet.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">

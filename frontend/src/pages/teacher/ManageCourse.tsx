@@ -69,45 +69,48 @@ export default function ManageCourse() {
   }
 
   if (loading) {
-    return <div className="p-8 text-center">Loading course...</div>
+    return <div className="atlas-page px-4 py-12"><div className="mx-auto max-w-4xl atlas-panel p-6 text-center text-muted">Loading course...</div></div>
   }
 
   if (!course) {
-    return <div className="p-8 text-center">Course not found.</div>
+    return <div className="atlas-page px-4 py-12"><div className="mx-auto max-w-4xl atlas-panel p-6 text-center text-muted">Course not found.</div></div>
   }
 
   return (
-    <div className="p-8">
-      <div className="max-w-4xl">
-        <h1 className="text-4xl font-bold mb-8">Manage Course</h1>
+    <div className="atlas-page px-4 py-10">
+      <div className="mx-auto max-w-5xl">
+        <div className="atlas-heading mb-8">
+          <p className="atlas-kicker">Course operations</p>
+          <h1>Manage Course</h1>
+          <p>Update lesson structure, monitor course inventory, and keep the learning path organized.</p>
+        </div>
 
-        <div className="card mb-8">
+        <div className="atlas-panel mb-8 p-6">
           <div className="mb-6">
-            <h2 className="text-2xl font-bold mb-2">{course.title}</h2>
-            <p className="text-neutral-600 dark:text-neutral-400">{course.language} • {course.level} • {course.category}</p>
+            <h2 className="text-2xl font-bold mb-2 text-ink dark:text-white">{course.title}</h2>
+            <p className="text-muted">{course.language} • {course.level} • {course.category}</p>
           </div>
 
           <div className="grid grid-cols-2 gap-4 py-6 border-t border-b border-neutral-200 dark:border-neutral-700">
             <div className="text-center">
               <p className="text-2xl font-bold text-primary-500">{lessons.length}</p>
-              <p className="text-sm text-neutral-600 dark:text-neutral-400">Lessons</p>
+              <p className="text-sm text-muted">Lessons</p>
             </div>
             <div className="text-center">
               <p className="text-2xl font-bold text-success">{course.rating || 0}</p>
-              <p className="text-sm text-neutral-600 dark:text-neutral-400">Rating</p>
+              <p className="text-sm text-muted">Rating</p>
             </div>
           </div>
         </div>
 
-        {/* Lessons */}
-        <h3 className="text-2xl font-bold mb-4">Lessons</h3>
+        <h3 className="mb-4 text-2xl font-bold text-ink dark:text-white">Lessons</h3>
         <div className="space-y-3 mb-6">
           {lessons.length === 0 ? (
-            <p className="text-neutral-500">No lessons yet. Add the first one below.</p>
+            <div className="atlas-panel p-5 text-muted">No lessons yet. Add the first one below.</div>
           ) : lessons.map((lesson) => (
-            <div key={lesson._id} className="card flex items-center justify-between">
+            <div key={lesson._id} className="atlas-panel flex items-center justify-between p-5">
               <div>
-                <p className="font-bold">{lesson.order}. {lesson.title}</p>
+                <p className="font-bold text-ink dark:text-white">{lesson.order}. {lesson.title}</p>
               </div>
               <button onClick={() => handleDeleteLesson(lesson._id)} className="p-2 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg text-red-600">
                 <FiTrash2 size={20} />
@@ -116,7 +119,7 @@ export default function ManageCourse() {
           ))}
         </div>
 
-        <form onSubmit={handleAddLesson} className="flex gap-2">
+        <form onSubmit={handleAddLesson} className="atlas-panel flex gap-2 p-4">
           <input
             className="input"
             placeholder="New lesson title"
