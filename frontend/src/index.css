@@ -175,12 +175,13 @@
   }
 
   .atlas-hero .atlas-kicker {
-    color: #99f6e4;
-    text-shadow: 0 10px 25px rgba(10, 29, 47, 0.28);
+    color: #bdfef2;
+    text-shadow: 0 10px 25px rgba(10, 29, 47, 0.34);
   }
 
   .atlas-hero p {
-    color: rgba(240, 249, 255, 0.88);
+    color: #ecf8ff;
+    text-shadow: 0 8px 22px rgba(6, 21, 35, 0.24);
   }
 
   .atlas-hero img {
