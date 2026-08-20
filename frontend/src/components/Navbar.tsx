@@ -22,7 +22,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
   const isTopNavActive = (path: string) => (path === '/' ? location.pathname === '/' : location.pathname.startsWith(path))
 
   const topNavClasses = (path: string) =>
-    `rounded-full px-3 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-800 ${
+    `rounded-full px-2.5 py-2 text-sm font-medium transition xl:px-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-800 ${
       isTopNavActive(path)
         ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/40 dark:text-primary-300'
         : 'text-neutral-700 hover:bg-neutral-100 hover:text-primary-500 dark:text-neutral-300 dark:hover:bg-neutral-700/80 dark:hover:text-white'
@@ -128,9 +128,9 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 
   return (
     <nav className="relative z-[120] border-b border-neutral-200 bg-white/90 shadow-sm backdrop-blur dark:border-neutral-700 dark:bg-neutral-800/90">
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+      <div className="container mx-auto flex items-center justify-between gap-3 px-4 py-3 xl:gap-6">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2">
+        <Link to="/" className="flex shrink-0 items-center gap-2">
             <img src={`${import.meta.env.BASE_URL}linguanest-mark.svg`} alt="LinguaNest" className="w-8 h-8 rounded-lg" />
           <span className="hidden sm:inline font-bold text-xl text-neutral-900 dark:text-white">
             LinguaNest
@@ -138,7 +138,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
         </Link>
 
         {/* Center Navigation */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden flex-1 items-center justify-center gap-2 lg:flex xl:gap-4">
           <Link to="/" className={topNavClasses('/')} title="Go to home">
             Home
           </Link>
@@ -154,11 +154,11 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
         </div>
 
         {/* Right Section */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           {isAuthenticated ? (
             <Link
               to="/chat"
-              className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-700 transition hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700 dark:focus-visible:ring-offset-neutral-800"
+              className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-700 transition hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700 dark:focus-visible:ring-offset-neutral-800"
               aria-label="Open chat"
               title="Open chat"
             >
@@ -185,12 +185,12 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
           {isAuthenticated ? (
             <button
               onClick={onMenuClick}
-              className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700 dark:focus-visible:ring-offset-neutral-800"
+              className="inline-flex shrink-0 items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700 dark:focus-visible:ring-offset-neutral-800"
               aria-label="Open workspace menu"
               title="Open workspace navigation"
             >
               <FiGrid size={18} />
-              <span className="hidden sm:inline">Workspace</span>
+              <span className="hidden xl:inline">Workspace</span>
             </button>
           ) : null}
           {isAuthenticated ? (
@@ -205,7 +205,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white font-bold">
                   {user?.firstName?.charAt(0)}
                 </div>
-                <div className="hidden min-w-0 sm:block">
+                <div className="hidden min-w-0 xl:block">
                   <span className="block max-w-24 truncate text-sm font-medium text-neutral-900 dark:text-white">
                     {user?.firstName}
                   </span>
@@ -213,7 +213,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
                     {roleLabel}
                   </span>
                 </div>
-                <FiChevronDown className={`hidden sm:block transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} size={16} />
+                <FiChevronDown className={`hidden xl:block transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} size={16} />
               </button>
 
               {/* Dropdown Menu */}
