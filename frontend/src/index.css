@@ -14,6 +14,7 @@
     @apply text-neutral-900 dark:text-neutral-50 transition-colors duration-300;
     background: #edf6fb;
     font-family: 'Manrope', sans-serif;
+    color: #10253c;
   }
 
   html.dark {
@@ -61,11 +62,21 @@
   .dark .card {
     border-color: rgba(255, 255, 255, 0.1);
     background: linear-gradient(180deg, rgba(10, 29, 47, 0.94) 0%, rgba(8, 20, 35, 0.88) 100%);
+    color: #e5eef7;
   }
 
   .input {
     @apply w-full rounded-xl border border-neutral-300 bg-white px-4 py-2 text-neutral-900 transition-all focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-white/10 dark:bg-[#11263b] dark:text-white;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  }
+
+  .input::placeholder {
+    color: #64748b;
+    opacity: 1;
+  }
+
+  .dark .input::placeholder {
+    color: #cbd5e1;
   }
 
   .label {
@@ -129,7 +140,7 @@
 
   .atlas-heading > p:last-child,
   .atlas-hero p {
-    @apply max-w-xl text-base text-slate-600 dark:text-slate-300;
+    @apply max-w-xl text-base text-slate-700 dark:text-slate-200;
   }
 
   .atlas-kicker {
@@ -176,12 +187,14 @@
     border-color: rgba(255, 255, 255, 0.72);
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.86) 0%, rgba(255, 255, 255, 0.76) 100%);
     box-shadow: 0 20px 50px rgba(15, 35, 54, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.64);
+    color: #10253c;
   }
 
   .dark .atlas-panel {
     border-color: rgba(255, 255, 255, 0.09);
     background: linear-gradient(180deg, rgba(10, 29, 47, 0.92) 0%, rgba(8, 20, 35, 0.88) 100%);
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    color: #e5eef7;
   }
 
   .atlas-stat-grid {
@@ -207,7 +220,7 @@
 
   .atlas-stat span,
   .text-muted {
-    @apply text-slate-500 dark:text-slate-400;
+    @apply text-slate-600 dark:text-slate-300;
   }
 
   .text-ink {
@@ -240,7 +253,7 @@
   }
 
   .chat-thread small {
-    @apply mt-1 block text-xs capitalize text-slate-500 dark:text-slate-400;
+    @apply mt-1 block text-xs capitalize text-slate-600 dark:text-slate-300;
   }
 
   .chat-avatar {
@@ -313,7 +326,7 @@
   }
 
   .message-bubble time {
-    @apply text-xs text-slate-400 dark:text-slate-300;
+    @apply text-xs text-slate-500 dark:text-slate-200;
   }
 
   .message-meta {
@@ -355,7 +368,7 @@
   }
 
   .empty-state {
-    @apply flex flex-col items-center justify-center gap-2 py-10 text-center text-slate-400 dark:text-slate-500;
+    @apply flex flex-col items-center justify-center gap-2 py-10 text-center text-slate-600 dark:text-slate-300;
   }
 
   .empty-state.full {
@@ -406,7 +419,7 @@
   }
 
   .admin-row small {
-    @apply mt-1 block text-sm text-slate-500 dark:text-slate-400;
+    @apply mt-1 block text-sm text-slate-600 dark:text-slate-300;
   }
 
   .status-pill {
@@ -421,11 +434,11 @@
   }
 
   .status-pill.muted {
-    @apply bg-slate-100 text-slate-500 dark:bg-white/10 dark:text-slate-300;
+    @apply bg-slate-100 text-slate-700 dark:bg-white/10 dark:text-slate-200;
   }
 
   .icon-button {
-    @apply rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/10;
+    @apply rounded-lg p-2 text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-white/10;
   }
 
   .icon-button.danger {
@@ -447,6 +460,14 @@
     background: linear-gradient(180deg, rgba(11, 26, 43, 0.96) 0%, rgba(8, 20, 35, 0.94) 100%);
   }
 
+  .modal-panel {
+    color: #10253c;
+  }
+
+  .dark .modal-panel {
+    color: #e5eef7;
+  }
+
   .role-card-grid {
     @apply grid grid-cols-2 gap-3;
   }
@@ -466,10 +487,48 @@
   }
 
   .role-card span {
-    @apply text-xs text-slate-500 dark:text-slate-400;
+    @apply text-xs text-slate-600 dark:text-slate-300;
   }
 
   .theme-toggle {
     @apply inline-flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-700 transition hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700 dark:focus-visible:ring-offset-neutral-800;
   }
+}
+
+.text-neutral-400,
+.text-slate-400 {
+  color: #64748b;
+}
+
+.text-neutral-500,
+.text-slate-500 {
+  color: #516175;
+}
+
+.text-neutral-600,
+.text-slate-600 {
+  color: #334155;
+}
+
+.dark .text-neutral-300,
+.dark .text-slate-300 {
+  color: #e2e8f0;
+}
+
+.dark .text-neutral-400,
+.dark .text-slate-400 {
+  color: #cbd5e1;
+}
+
+.dark .text-neutral-500,
+.dark .text-slate-500 {
+  color: #94a3b8;
+}
+
+.text-white\/70 {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.text-white\/85 {
+  color: rgba(255, 255, 255, 0.94);
 }
