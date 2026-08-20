@@ -8,10 +8,12 @@ export default function VerifyEmail() {
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token') || ''
   const initialEmail = searchParams.get('email') || ''
-  const previewUrl = searchParams.get('previewUrl') || ''
+  const initialPreviewUrl = searchParams.get('previewUrl') || ''
+  const registered = searchParams.get('registered') === '1'
   const [email, setEmail] = useState(initialEmail)
+  const [previewUrl, setPreviewUrl] = useState(initialPreviewUrl)
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
-  const [message, setMessage] = useState('Check your inbox for a verification link to finish creating your account.')
+  const [message, setMessage] = useState(registered ? 'Account created. Check your inbox for a verification link to finish creating your account.' : 'Check your inbox for a verification link to finish creating your account.')
   const isTokenMode = useMemo(() => !!token, [token])
 
   useEffect(() => {
@@ -34,6 +36,7 @@ export default function VerifyEmail() {
     try {
       setStatus('loading')
       const response = await api.post('/auth/resend-verification', { email })
+      setPreviewUrl(response.data.data?.previewUrl || '')
       setStatus('idle')
       toast.success(response.data.message || 'Verification email sent')
       setMessage('We sent a fresh verification link. Please check your inbox and spam folder.')
@@ -63,7 +66,7 @@ export default function VerifyEmail() {
               <FiCheckCircle size={22} />
               <strong>Email verified</strong>
             </div>
-            <Link to="/login" className="btn btn-primary mt-2 inline-flex items-center gap-2">
+            <Link to={`/login?${new URLSearchParams({ email, verified: '1' }).toString()}`} className="btn btn-primary mt-2 inline-flex items-center gap-2">
               Continue to sign in
             </Link>
           </div>

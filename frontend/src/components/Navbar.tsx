@@ -269,7 +269,6 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <ThemeToggle />
               <Link
                 to="/login"
                 className="btn btn-outline text-sm px-3 py-1.5"

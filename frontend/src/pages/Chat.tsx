@@ -35,6 +35,7 @@ export default function Chat() {
   const [search, setSearch] = useState('')
   const [searchResults, setSearchResults] = useState<Array<{ _id: string; firstName: string; lastName: string; role: string }>>([])
   const [creatingConversation, setCreatingConversation] = useState(false)
+  const [conversationLoadError, setConversationLoadError] = useState('')
   const activeConversationRef = useRef(activeId)
   const isDocumentVisible = () => document.visibilityState === 'visible'
 
@@ -47,10 +48,13 @@ export default function Chat() {
       const response = await api.get('/chat/conversations')
       const data = response.data.data || []
       setConversations(data)
+      setConversationLoadError('')
       if (!activeId && data[0]) setActiveId(data[0]._id)
       fetchUnreadSummary()
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Unable to load conversations')
+      const message = error.response?.data?.message || 'Unable to load conversations'
+      setConversationLoadError(message)
+      toast.error(message)
     } finally {
       setLoading(false)
     }
@@ -221,7 +225,14 @@ export default function Chat() {
               Message support
             </button>
           </div>
-          {loading ? <p className="text-muted">Loading conversations...</p> : conversations.length === 0 ? (
+          {conversationLoadError ? (
+            <div className="space-y-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100">
+              <p>{conversationLoadError}</p>
+              <button type="button" className="btn btn-outline w-full" onClick={() => { setLoading(true); loadConversations() }}>
+                Retry chat inbox
+              </button>
+            </div>
+          ) : loading ? <p className="text-muted">Loading conversations...</p> : conversations.length === 0 ? (
             <div className="empty-state"><FiUsers /><p>No conversations yet.</p></div>
           ) : conversations.map((conversation) => (
             <button key={conversation._id} onClick={() => setActiveId(conversation._id)} className={`chat-thread ${activeId === conversation._id ? 'active' : ''}`}>

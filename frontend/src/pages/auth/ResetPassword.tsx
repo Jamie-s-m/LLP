@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { FiEye, FiEyeOff } from 'react-icons/fi'
 import toast from 'react-hot-toast'
 import api from '../../services/api'
 
@@ -8,9 +9,12 @@ export default function ResetPassword() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const token = useMemo(() => searchParams.get('token') || '', [searchParams])
+  const email = useMemo(() => searchParams.get('email') || '', [searchParams])
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -24,7 +28,10 @@ export default function ResetPassword() {
     try {
       await api.post('/auth/reset-password', { token, password })
       toast.success('Password updated successfully')
-      navigate('/login')
+      const next = new URLSearchParams()
+      if (email) next.set('email', email)
+      next.set('reset', '1')
+      navigate(`/login?${next.toString()}`)
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Unable to reset password')
     } finally {
@@ -55,12 +62,33 @@ export default function ResetPassword() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="label">New password</label>
-              <input className="input" type="password" value={password} onChange={(event) => setPassword(event.target.value)} minLength={8} required />
+              <div className="relative">
+                <input className="input pr-11" type={showPassword ? 'text' : 'password'} value={password} onChange={(event) => setPassword(event.target.value)} minLength={8} autoComplete="new-password" required />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((current) => !current)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-slate-700 dark:hover:text-slate-200"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                </button>
+              </div>
             </div>
             <div>
               <label className="label">Confirm new password</label>
-              <input className="input" type="password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} minLength={8} required />
+              <div className="relative">
+                <input className="input pr-11" type={showConfirmPassword ? 'text' : 'password'} value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} minLength={8} autoComplete="new-password" required />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((current) => !current)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-slate-700 dark:hover:text-slate-200"
+                  aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                </button>
+              </div>
             </div>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Use at least 8 characters and avoid reusing old passwords.</p>
             <button className="btn btn-primary w-full" disabled={loading}>{loading ? 'Saving...' : 'Reset password'}</button>
           </form>
         )}

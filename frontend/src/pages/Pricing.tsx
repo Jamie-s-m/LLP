@@ -8,7 +8,7 @@ const plans = [
     cadence: '/month',
     description: 'For individual students building daily momentum.',
     cta: 'Start learning',
-    href: '/register',
+    href: '/register?role=student',
     features: ['Unlimited active courses', 'Flashcards and exercises', 'Progress tracking and streaks', 'Community chat access'],
   },
   {
@@ -17,7 +17,7 @@ const plans = [
     cadence: '/month',
     description: 'For parents supporting one or more learners together.',
     cta: 'Create family account',
-    href: '/register',
+    href: '/register?role=parent',
     features: ['Parent dashboard', 'Linked learner progress', 'Family learning insights', 'Priority support chat'],
   },
   {
@@ -26,7 +26,7 @@ const plans = [
     cadence: '/month',
     description: 'For teachers or small academies running guided programs.',
     cta: 'Open teaching workspace',
-    href: '/register',
+    href: '/register?role=student&teacherInterest=1',
     features: ['Course authoring workspace', 'Progress monitoring', 'Teacher applications and moderation', 'Admin-ready operations center'],
   },
 ]
@@ -101,6 +101,18 @@ export default function Pricing() {
               'Configure support, refunds, and billing contact workflows',
             ].map((item) => (
               <div key={item} className="rounded-2xl bg-[#f6efe7] p-4 text-sm text-slate-700 dark:bg-white/5 dark:text-slate-200">{item}</div>
+            ))}
+          </div>
+          <div className="mt-6 grid gap-4 lg:grid-cols-3">
+            {[
+              ['Identity and email', 'Configure SMTP, sender domains, and inbox monitoring so verification and reset flows work reliably.'],
+              ['Support and billing ops', 'Assign support ownership, refund handling, subscription incident playbooks, and billing contacts before launch.'],
+              ['Risk and compliance', 'Review legal text, retention policy, analytics consent, and payment-provider compliance requirements.'],
+            ].map(([title, copy]) => (
+              <div key={title} className="rounded-2xl border border-slate-200 bg-white/80 p-5 dark:border-white/10 dark:bg-white/5">
+                <h3 className="text-base font-semibold text-ink dark:text-white">{title}</h3>
+                <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{copy}</p>
+              </div>
             ))}
           </div>
         </section>

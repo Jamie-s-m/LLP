@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { FiBookOpen, FiUsers } from 'react-icons/fi'
+import { FiBookOpen, FiEye, FiEyeOff, FiUsers } from 'react-icons/fi'
 import { useAuthStore } from '../../store/authStore'
 import api from '../../services/api'
 import toast from 'react-hot-toast'
@@ -9,6 +9,7 @@ import toast from 'react-hot-toast'
 type SignupRole = 'student' | 'parent'
 
 export default function Register() {
+  const [searchParams] = useSearchParams()
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -16,14 +17,21 @@ export default function Register() {
     password: '',
     confirmPassword: '',
   })
-  const [role, setRole] = useState<SignupRole>('student')
-  const [requestTeacherRole, setRequestTeacherRole] = useState(false)
+  const [role, setRole] = useState<SignupRole>(searchParams.get('role') === 'parent' ? 'parent' : 'student')
+  const [requestTeacherRole, setRequestTeacherRole] = useState(searchParams.get('teacherInterest') === '1')
   const [localError, setLocalError] = useState('')
   const [emailStatus, setEmailStatus] = useState<'idle' | 'checking' | 'available' | 'exists'>('idle')
   const [emailStatusMessage, setEmailStatusMessage] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const { register, isLoading, error } = useAuthStore()
   const navigate = useNavigate()
+  const planIntent = role === 'parent'
+    ? 'Family account setup selected.'
+    : requestTeacherRole
+      ? 'Teaching workspace interest selected. Your teaching request will go to admin review after signup.'
+      : ''
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -57,9 +65,15 @@ export default function Register() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLocalError('')
+    const normalizedEmail = formData.email.trim().toLowerCase()
 
     if (formData.password !== formData.confirmPassword) {
       setLocalError('Passwords do not match')
+      return
+    }
+
+    if (emailStatus === 'exists') {
+      setLocalError('This email is already in use. Sign in instead, or continue to email verification if the account is still pending.')
       return
     }
 
@@ -67,13 +81,14 @@ export default function Register() {
       const payload = await register({
         firstName: formData.firstName,
         lastName: formData.lastName,
-        email: formData.email,
+        email: normalizedEmail,
         password: formData.password,
         role,
         requestTeacherRole: role === 'student' && requestTeacherRole,
       })
       toast.success('Account created. Please verify your email to sign in.')
       const query = new URLSearchParams({ email: formData.email.trim() })
+      query.set('registered', '1')
       if (payload?.previewUrl) {
         query.set('previewUrl', payload.previewUrl)
       }
@@ -96,6 +111,11 @@ export default function Register() {
         <p className="atlas-kicker">Join the atlas</p>
         <h1 className="text-3xl font-semibold text-ink mb-2">Create your account</h1>
         <p className="text-muted mb-6">Choose how you'll use LinguaNest. You can apply for mentor access as a student.</p>
+        {planIntent ? (
+          <div className="mb-6 rounded-lg border border-primary-200 bg-primary-50 px-4 py-3 text-sm text-primary-700 dark:border-primary-500/20 dark:bg-primary-500/10 dark:text-primary-200">
+            {planIntent}
+          </div>
+        ) : null}
 
         {(localError || error) && (
           <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm mb-6">
@@ -152,36 +172,70 @@ export default function Register() {
               value={formData.email}
               onChange={handleChange}
               onBlur={handleEmailBlur}
+              autoComplete="email"
             />
             {emailStatusMessage ? (
               <p className={`mt-2 text-sm ${emailStatus === 'available' ? 'text-emerald-600' : emailStatus === 'exists' ? 'text-amber-700' : 'text-slate-500'}`}>
                 {emailStatus === 'checking' ? 'Checking email...' : emailStatusMessage}
               </p>
             ) : null}
+            {emailStatus === 'exists' ? (
+              <div className="mt-2 flex flex-wrap gap-3 text-sm">
+                <Link to="/login" className="text-coral font-semibold">Sign in instead</Link>
+                <Link to={`/verify-email?email=${encodeURIComponent(formData.email.trim().toLowerCase())}`} className="text-primary-600 font-semibold dark:text-primary-300">
+                  Continue to verification
+                </Link>
+              </div>
+            ) : null}
           </div>
 
           <div>
             <label className="label">Password</label>
-            <input
-              name="password"
-              type="password"
-              required
-              className="input"
-              value={formData.password}
-              onChange={handleChange}
-            />
+            <div className="relative">
+              <input
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                required
+                minLength={8}
+                className="input pr-11"
+                value={formData.password}
+                onChange={handleChange}
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((current) => !current)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-slate-700 dark:hover:text-slate-200"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+              </button>
+            </div>
+            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Use at least 8 characters.</p>
           </div>
 
           <div>
             <label className="label">Confirm Password</label>
-            <input
-              name="confirmPassword"
-              type="password"
-              required
-              className="input"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-            />
+            <div className="relative">
+              <input
+                name="confirmPassword"
+                type={showConfirmPassword ? 'text' : 'password'}
+                required
+                minLength={8}
+                className="input pr-11"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword((current) => !current)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-slate-700 dark:hover:text-slate-200"
+                aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+              >
+                {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+              </button>
+            </div>
           </div>
 
           {role === 'student' && (

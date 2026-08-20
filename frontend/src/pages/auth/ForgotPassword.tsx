@@ -8,14 +8,17 @@ export default function ForgotPassword() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [previewUrl, setPreviewUrl] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
     try {
-      await api.post('/auth/forgot-password', { email })
+      const normalizedEmail = email.trim().toLowerCase()
+      const response = await api.post('/auth/forgot-password', { email: normalizedEmail })
       toast.success('Reset link sent to your email!')
+      setPreviewUrl(response.data.data?.previewUrl || '')
       setSubmitted(true)
     } catch (error: any) {
       const message =
@@ -47,6 +50,12 @@ export default function ForgotPassword() {
             <div className="p-4 bg-emerald-50 text-emerald-700 rounded-lg text-sm">
               If an account exists for <strong>{email}</strong>, a password reset link has been dispatched.
             </div>
+            {previewUrl ? (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-left text-sm text-amber-900">
+                SMTP is not configured in this environment yet. For development only, you can open the reset link directly:{' '}
+                <a href={previewUrl} className="break-all font-semibold underline">{previewUrl}</a>
+              </div>
+            ) : null}
             <Link to="/login" className="btn btn-primary w-full inline-block">
               Back to Sign In
             </Link>
@@ -60,6 +69,7 @@ export default function ForgotPassword() {
                 placeholder="your@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
                 required
               />
             </div>

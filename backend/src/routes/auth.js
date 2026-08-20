@@ -234,18 +234,21 @@ router.post('/forgot-password', async (req, res) => {
     }
 
     const user = await User.findOne({ email });
+    let previewUrl = '';
     if (user) {
       const resetToken = generatePasswordResetToken();
       user.passwordResetToken = resetToken.tokenHash;
       user.passwordResetExpiresAt = resetToken.expiresAt;
       user.passwordResetSentAt = new Date();
       await user.save();
-      await sendPasswordResetEmail({ user, token: resetToken.token });
+      const delivery = await sendPasswordResetEmail({ user, token: resetToken.token });
+      previewUrl = delivery.previewUrl || '';
     }
 
     res.status(200).json({
       success: true,
       message: 'If an account exists for this email, a password reset link has been sent.',
+      data: { previewUrl },
     });
   } catch (error) {
     console.error('Forgot Password Error:', error);

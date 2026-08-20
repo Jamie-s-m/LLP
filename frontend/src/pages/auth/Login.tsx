@@ -1,22 +1,33 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { FiEye, FiEyeOff } from 'react-icons/fi'
 import { useAuthStore } from '../../store/authStore'
 import toast from 'react-hot-toast'
 
 export default function Login() {
-  const [email, setEmail] = useState('')
+  const [searchParams] = useSearchParams()
+  const [email, setEmail] = useState(searchParams.get('email') || '')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const navigate = useNavigate()
   const { login } = useAuthStore()
+  const notice = searchParams.get('verified') === '1'
+    ? 'Email verified. You can sign in now.'
+    : searchParams.get('reset') === '1'
+      ? 'Password updated. Sign in with your new password.'
+      : searchParams.get('registered') === '1'
+        ? 'Account created. Check your email for a verification link before signing in.'
+        : ''
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    const normalizedEmail = email.trim().toLowerCase()
 
     try {
-      await login(email, password)
+      await login(normalizedEmail, password)
       toast.success('Logged in successfully!')
       const role = useAuthStore.getState().user?.role
       const destination = role === 'admin'
@@ -54,6 +65,11 @@ export default function Login() {
         <p className="text-muted mb-8">
           Continue your streak and pick up where you left off.
         </p>
+        {notice ? (
+          <div className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+            {notice}
+          </div>
+        ) : null}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
@@ -64,20 +80,32 @@ export default function Login() {
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
               required
             />
           </div>
 
           <div>
             <label className="label">Password</label>
-            <input
-              type="password"
-              className="input"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                className="input pr-11"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((current) => !current)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-slate-700 dark:hover:text-slate-200"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+              </button>
+            </div>
           </div>
 
           <button

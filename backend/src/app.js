@@ -62,6 +62,14 @@ const apiLimiter = rateLimit({
   message: { success: false, message: 'Too many requests. Please try again later.' },
 });
 
+const chatLimiter = rateLimit({
+  windowMs: Number(process.env.CHAT_RATE_LIMIT_WINDOW_MS || 15 * 60 * 1000),
+  limit: Number(process.env.CHAT_RATE_LIMIT_MAX_REQUESTS || 240),
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { success: false, message: 'Chat is busy right now. Please retry in a moment.' },
+});
+
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 10,
@@ -75,6 +83,7 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ success: true, message: 'API is running successfully' });
 });
 
+app.use('/api/chat', chatLimiter, chatRoutes);
 app.use('/api', apiLimiter);
 app.use('/api/auth', authLimiter);
 
@@ -88,7 +97,6 @@ app.use('/api/progress', progressRoutes);
 app.use('/api/flashcards', flashcardRoutes);
 app.use('/api/groups', groupRoutes);
 app.use('/api/forum', forumRoutes);
-app.use('/api/chat', chatRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/family', familyRoutes);
 app.use('/api/push', pushRoutes);
