@@ -154,7 +154,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
         </div>
 
         {/* Right Section */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {isAuthenticated ? (
             <Link
               to="/chat"
@@ -218,7 +218,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 
               {/* Dropdown Menu */}
               {dropdownOpen && (
-                <div className="absolute right-0 z-[140] mt-2 w-56 overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-800" role="menu">
+                <div className="absolute right-0 z-[140] mt-2 w-[min(20rem,calc(100vw-1rem))] overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-800 sm:w-64" role="menu">
                   <div className="border-b border-neutral-200 px-4 py-3 dark:border-neutral-700">
                     <p className="text-sm font-semibold text-neutral-900 dark:text-white">{user?.firstName} {user?.lastName}</p>
                     <p className="text-xs text-neutral-500 dark:text-neutral-400">{user?.email}</p>

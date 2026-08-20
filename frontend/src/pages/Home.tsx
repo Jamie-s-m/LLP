@@ -25,18 +25,20 @@ export default function Home() {
         <p className="text-lg text-slate-300 max-w-2xl mx-auto mb-8">
           Build vocabulary, complete lessons, and track your progress in real-time.
         </p>
-        <Link
-          to="/courses"
-          className="inline-block px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg shadow-lg transition"
-        >
-          Explore All Courses
-        </Link>
-        <Link
-          to="/pricing"
-          className="ml-3 inline-block rounded-lg border border-white/40 px-8 py-3 font-semibold text-white transition hover:bg-white/10"
-        >
-          View Pricing
-        </Link>
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <Link
+            to="/courses"
+            className="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-8 py-3 text-center font-semibold text-white shadow-lg transition hover:bg-indigo-500"
+          >
+            Explore All Courses
+          </Link>
+          <Link
+            to="/pricing"
+            className="inline-flex items-center justify-center rounded-lg border border-white/40 px-8 py-3 text-center font-semibold text-white transition hover:bg-white/10"
+          >
+            View Pricing
+          </Link>
+        </div>
         </div>
         <img src={`${import.meta.env.BASE_URL}atlas-study.svg`} alt="Illustration of language learning cards and conversation" />
       </div>
@@ -48,7 +50,7 @@ export default function Home() {
             <h2 className="text-2xl text-ink dark:text-white">Student, family, and teaching plans</h2>
             <p className="mt-2 max-w-2xl text-slate-600 dark:text-slate-300">Choose a plan structure for individual learners, parent-managed study, or teacher-led programs. Billing surfaces are now wired for future payment integration.</p>
           </div>
-          <Link to="/pricing" className="btn btn-primary">Compare plans</Link>
+          <Link to="/pricing" className="btn btn-primary w-full sm:w-auto">Compare plans</Link>
         </div>
       </div>
 

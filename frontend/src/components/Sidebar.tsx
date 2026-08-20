@@ -68,12 +68,12 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-[150] w-72 max-w-[85vw] overflow-y-auto border-r border-neutral-200 bg-white shadow-2xl transition-transform dark:border-neutral-700 dark:bg-neutral-800 ${
+      className={`fixed inset-y-0 left-0 z-[150] w-[min(20rem,90vw)] overflow-y-auto border-r border-neutral-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.28)] transition-transform dark:border-neutral-700 dark:bg-neutral-800 ${
         open ? 'translate-x-0' : '-translate-x-full'
       }`}
       aria-hidden={!open}
     >
-        <div className="p-6">
+        <div className="p-5 sm:p-6">
           <div className="mb-6 flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-coral">Workspace</p>

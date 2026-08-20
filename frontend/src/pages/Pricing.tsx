@@ -40,9 +40,9 @@ export default function Pricing() {
             <p className="atlas-kicker">Commercial launchpad</p>
             <h1>Choose a plan that matches your learning model.</h1>
             <p>Start with a learner seat, grow into a family workspace, or run structured teaching programs with admin visibility.</p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link to="/register" className="btn btn-primary">Create account</Link>
-              <Link to="/courses" className="btn btn-outline border-white/70 text-white hover:bg-white/10 dark:border-white/30 dark:text-white dark:hover:bg-white/10">Explore courses</Link>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <Link to="/register" className="btn btn-primary w-full sm:w-auto">Create account</Link>
+              <Link to="/courses" className="btn btn-outline w-full border-white/70 text-white hover:bg-white/10 dark:border-white/30 dark:text-white dark:hover:bg-white/10 sm:w-auto">Explore courses</Link>
             </div>
           </div>
           <div className="atlas-panel p-6 dark:bg-white/10">
@@ -82,7 +82,7 @@ export default function Pricing() {
                   </li>
                 ))}
               </ul>
-              <Link to={plan.href} className="btn btn-primary mt-6 inline-flex w-full items-center justify-center gap-2">
+              <Link to={plan.href} className="btn btn-primary mt-6 inline-flex min-h-11 w-full items-center justify-center gap-2 text-center">
                 <FiUsers />
                 {plan.cta}
               </Link>

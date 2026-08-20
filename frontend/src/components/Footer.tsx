@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom'
 export default function Footer() {
   return (
     <footer className="border-t border-neutral-200 bg-white/80 backdrop-blur dark:border-neutral-700 dark:bg-neutral-900/80">
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-8 md:grid-cols-[1.3fr_1fr_1fr]">
-        <div>
-          <div className="flex items-center gap-3">
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:px-6 md:grid-cols-[1.3fr_1fr_1fr]">
+        <div className="text-center md:text-left">
+          <div className="flex items-center justify-center gap-3 md:justify-start">
             <img src={`${import.meta.env.BASE_URL}linguanest-mark.svg`} alt="LinguaNest" className="h-9 w-9 rounded-lg" />
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-coral">LinguaNest</p>
@@ -16,7 +16,7 @@ export default function Footer() {
             Build learner progress, teacher workflows, family visibility, and admin control from one calm platform.
           </p>
         </div>
-        <div>
+        <div className="border-t border-neutral-200 pt-6 text-center dark:border-neutral-700 md:border-0 md:pt-0 md:text-left">
           <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Product</h3>
           <div className="mt-3 flex flex-col gap-2 text-sm">
             <Link to="/courses" className="text-slate-600 transition hover:text-primary-500 dark:text-slate-300 dark:hover:text-white">Courses</Link>
@@ -24,7 +24,7 @@ export default function Footer() {
             <Link to="/forum" className="text-slate-600 transition hover:text-primary-500 dark:text-slate-300 dark:hover:text-white">Community forum</Link>
           </div>
         </div>
-        <div>
+        <div className="border-t border-neutral-200 pt-6 text-center dark:border-neutral-700 md:border-0 md:pt-0 md:text-left">
           <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Legal</h3>
           <div className="mt-3 flex flex-col gap-2 text-sm">
             <Link to="/terms" className="text-slate-600 transition hover:text-primary-500 dark:text-slate-300 dark:hover:text-white">Terms of service</Link>
