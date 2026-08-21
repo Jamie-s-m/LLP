@@ -4,7 +4,6 @@ import ChatMessage from '../models/ChatMessage.js';
 import Group from '../models/Group.js';
 import User from '../models/User.js';
 import { sendPushToUsers } from '../utils/push.js';
-import { hasModeratorPermission } from '../middleware/auth.js';
 
 const isParticipant = (conversation, userId) =>
   conversation.participants.some((participant) => participant.toString() === userId.toString());
