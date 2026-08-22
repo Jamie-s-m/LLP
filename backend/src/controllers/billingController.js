@@ -1,213 +1,126 @@
 import User from '../models/User.js';
-import { findBillingPlan, findPlanByPriceId, getBillingPlans, getFrontendAppUrl, getStripeClient, serializeBilling } from '../utils/billing.js';
 
-const activeStatuses = new Set(['trialing', 'active', 'past_due', 'unpaid', 'incomplete']);
-
-const applySubscriptionToUser = async ({ customerId, subscriptionId, priceId, status, currentPeriodEnd, cancelAtPeriodEnd, metadata = {} }) => {
-  const plan = findPlanByPriceId(priceId)?.key || metadata.plan || 'none';
-  const user = customerId
-    ? await User.findOne({ 'billing.stripeCustomerId': customerId })
-    : null;
-
-  const targetUser = user || (metadata.userId ? await User.findById(metadata.userId) : null);
-  if (!targetUser) {
-    return null;
-  }
-
-  if (!targetUser.billing) {
-    targetUser.billing = {};
-  }
-
-  targetUser.billing.plan = status === 'canceled' ? 'none' : plan;
-  targetUser.billing.status = status || 'inactive';
-  targetUser.billing.stripeCustomerId = customerId || targetUser.billing.stripeCustomerId || '';
-  targetUser.billing.stripeSubscriptionId = status === 'canceled' ? '' : (subscriptionId || '');
-  targetUser.billing.stripePriceId = status === 'canceled' ? '' : (priceId || '');
-  targetUser.billing.currentPeriodEnd = currentPeriodEnd || null;
-  targetUser.billing.cancelAtPeriodEnd = Boolean(cancelAtPeriodEnd);
-  await targetUser.save();
-  return targetUser;
+// Ошибки по спецификации Payme JSON-RPC 2.0
+const PAYME_ERRORS = {
+  TRANSPORT_ERROR: { code: -32300, message: { ru: 'Ошибка транспорта', uz: 'Transport xatoligi', en: 'Transport error' } },
+  AUTH_ERROR: { code: -32504, message: { ru: 'Недостаточно прав для выполнения операции', uz: 'Ruxsat yetarli emas', en: 'Insufficient privileges' } },
+  INVALID_AMOUNT: { code: -31001, message: { ru: 'Неверная сумма', uz: 'Noto'g'ri summa', en: 'Invalid amount' } },
+  USER_NOT_FOUND: { code: -31050, message: { ru: 'Пользователь не найден', uz: 'Foydalanuvchi topilmadi', en: 'User not found' } },
+  TRANSACTION_NOT_FOUND: { code: -31003, message: { ru: 'Транзакция не найдена', uz: 'Tranzaksiya topilmadi', en: 'Transaction not found' } },
+  CANT_CANCEL: { code: -31007, message: { ru: 'Невозможно отменить транзакцию', uz: 'Tranzaksiyani bekor qilib bo'lmaydi', en: 'Cannot cancel transaction' } },
 };
 
-export const getBillingPlansController = async (req, res) => {
-  res.status(200).json({
-    success: true,
-    data: {
-      provider: 'stripe',
-      configured: Boolean(process.env.STRIPE_SECRET_KEY),
-      plans: getBillingPlans(),
-    },
-  });
+// Функция проверки HTTP Basic Auth заголовка
+const checkAuth = (req) => {
+  const authHeader = req.headers.authorization || '';
+  if (!authHeader.startsWith('Basic ')) return false;
+
+  const credentials = Buffer.from(authHeader.split(' ')[1], 'base64').toString('utf-8');
+  const [username, password] = credentials.split(':');
+
+  const paymeKey = process.env.PAYME_KEY;
+  return username === 'Paycom' && password === paymeKey;
 };
 
-export const getMyBillingState = async (req, res) => {
-  const user = await User.findById(req.user.id).select('billing email firstName lastName role');
-  if (!user) {
-    return res.status(404).json({ success: false, message: 'User not found' });
-  }
-
-  return res.status(200).json({
-    success: true,
-    data: {
-      billing: serializeBilling(user.billing),
-      hasCustomerPortal: Boolean(user.billing?.stripeCustomerId),
-      canStartCheckout: !activeStatuses.has(user.billing?.status || 'inactive'),
-    },
-  });
-};
-
-export const createCheckoutSession = async (req, res) => {
-  try {
-    const selectedPlan = findBillingPlan(String(req.body.plan || ''));
-    if (!selectedPlan) {
-      return res.status(400).json({ success: false, message: 'A valid billing plan is required' });
-    }
-
-    if (!selectedPlan.priceId) {
-      return res.status(503).json({ success: false, message: `${selectedPlan.name} is not configured for checkout yet` });
-    }
-
-    const user = await User.findById(req.user.id);
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-
-    if (activeStatuses.has(user.billing?.status || 'inactive')) {
-      return res.status(409).json({
-        success: false,
-        message: 'This account already has an active or pending subscription. Open the billing portal to manage it.',
-      });
-    }
-
-    const stripe = getStripeClient();
-    let customerId = user.billing?.stripeCustomerId || '';
-    if (!customerId) {
-      const customer = await stripe.customers.create({
-        email: user.email,
-        name: `${user.firstName} ${user.lastName}`.trim(),
-        metadata: { userId: user.id.toString() },
-      });
-      customerId = customer.id;
-      user.billing = {
-        ...user.billing,
-        stripeCustomerId: customerId,
-      };
-      await user.save();
-    }
-
-    const session = await stripe.checkout.sessions.create({
-      mode: 'subscription',
-      customer: customerId,
-      allow_promotion_codes: true,
-      billing_address_collection: 'auto',
-      customer_update: {
-        address: 'auto',
-        name: 'auto',
-      },
-      line_items: [
-        {
-          price: selectedPlan.priceId,
-          quantity: 1,
-        },
-      ],
-      metadata: {
-        userId: user.id.toString(),
-        plan: selectedPlan.key,
-      },
-      subscription_data: {
-        metadata: {
-          userId: user.id.toString(),
-          plan: selectedPlan.key,
-        },
-      },
-      success_url: `${getFrontendAppUrl()}/pricing?checkout=success`,
-      cancel_url: `${getFrontendAppUrl()}/pricing?checkout=canceled`,
+export const handlePaymeRequest = async (req, res) => {
+  // 1. Проверка авторизации
+  if (!checkAuth(req)) {
+    return res.json({
+      error: PAYME_ERRORS.AUTH_ERROR,
+      id: req.body?.id || null,
     });
-
-    return res.status(200).json({
-      success: true,
-      data: {
-        url: session.url,
-      },
-    });
-  } catch (error) {
-    console.error('Create Checkout Session Error:', error);
-    return res.status(500).json({ success: false, message: error.message || 'Checkout could not be started' });
   }
-};
 
-export const createPortalSession = async (req, res) => {
+  const { method, params, id } = req.body;
+
   try {
-    const user = await User.findById(req.user.id).select('billing');
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
+    switch (method) {
+      case 'CheckPerformTransaction': {
+        const userId = params?.account?.userId || params?.account?.user_id;
+        const user = await User.findById(userId);
 
-    if (!user.billing?.stripeCustomerId) {
-      return res.status(400).json({ success: false, message: 'No Stripe customer exists for this account yet' });
-    }
+        if (!user) {
+          return res.json({ error: PAYME_ERRORS.USER_NOT_FOUND, id });
+        }
 
-    const stripe = getStripeClient();
-    const session = await stripe.billingPortal.sessions.create({
-      customer: user.billing.stripeCustomerId,
-      return_url: `${getFrontendAppUrl()}/pricing`,
-    });
+        // Сумма в Payme передается в тийинах (1 сум = 100 тийинов)
+        if (!params.amount || params.amount <= 0) {
+          return res.json({ error: PAYME_ERRORS.INVALID_AMOUNT, id });
+        }
 
-    return res.status(200).json({ success: true, data: { url: session.url } });
-  } catch (error) {
-    console.error('Create Billing Portal Session Error:', error);
-    return res.status(500).json({ success: false, message: error.message || 'Billing portal could not be opened' });
-  }
-};
-
-export const handleStripeWebhook = async (req, res) => {
-  try {
-    const stripe = getStripeClient();
-    const signature = req.headers['stripe-signature'];
-    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
-    if (!signature || !webhookSecret) {
-      return res.status(400).json({ success: false, message: 'Stripe webhook signature configuration is missing' });
-    }
-
-    const event = stripe.webhooks.constructEvent(req.body, signature, webhookSecret);
-
-    if (event.type === 'checkout.session.completed') {
-      const session = event.data.object;
-      if (session.mode === 'subscription') {
-        await applySubscriptionToUser({
-          customerId: typeof session.customer === 'string' ? session.customer : '',
-          subscriptionId: typeof session.subscription === 'string' ? session.subscription : '',
-          priceId: '',
-          status: 'incomplete',
-          currentPeriodEnd: null,
-          cancelAtPeriodEnd: false,
-          metadata: session.metadata || {},
+        return res.json({
+          result: { allow: true },
+          id,
         });
       }
-    }
 
-    if (
-      event.type === 'customer.subscription.created' ||
-      event.type === 'customer.subscription.updated' ||
-      event.type === 'customer.subscription.deleted'
-    ) {
-      const subscription = event.data.object;
-      const priceId = subscription.items?.data?.[0]?.price?.id || '';
-      await applySubscriptionToUser({
-        customerId: typeof subscription.customer === 'string' ? subscription.customer : '',
-        subscriptionId: subscription.id,
-        priceId,
-        status: event.type === 'customer.subscription.deleted' ? 'canceled' : subscription.status,
-        currentPeriodEnd: subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null,
-        cancelAtPeriodEnd: Boolean(subscription.cancel_at_period_end),
-        metadata: subscription.metadata || {},
-      });
-    }
+      case 'CreateTransaction': {
+        // Здесь обрабатывается создание транзакции в вашей базе данных
+        return res.json({
+          result: {
+            create_time: Date.now(),
+            transaction: params.id,
+            state: 1,
+          },
+          id,
+        });
+      }
 
-    return res.status(200).json({ received: true });
+      case 'PerformTransaction': {
+        // Здесь транзакция отмечается как оплаченная и пользователю начисляется подписка/баланс
+        return res.json({
+          result: {
+            transaction: params.id,
+            perform_time: Date.now(),
+            state: 2,
+          },
+          id,
+        });
+      }
+
+      case 'CheckTransaction': {
+        return res.json({
+          result: {
+            create_time: Date.now(),
+            perform_time: Date.now(),
+            cancel_time: 0,
+            transaction: params.id,
+            state: 2,
+            reason: null,
+          },
+          id,
+        });
+      }
+
+      case 'CancelTransaction': {
+        return res.json({
+          result: {
+            transaction: params.id,
+            cancel_time: Date.now(),
+            state: -1,
+          },
+          id,
+        });
+      }
+
+      case 'GetStatement': {
+        return res.json({
+          result: { transactions: [] },
+          id,
+        });
+      }
+
+      default:
+        return res.json({
+          error: { code: -32601, message: 'Method not found' },
+          id,
+        });
+    }
   } catch (error) {
-    console.error('Stripe Webhook Error:', error);
-    return res.status(400).json({ success: false, message: error.message || 'Stripe webhook handling failed' });
+    console.error('Payme Handling Error:', error);
+    return res.json({
+      error: PAYME_ERRORS.TRANSPORT_ERROR,
+      id,
+    });
   }
 };
