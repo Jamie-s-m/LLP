@@ -153,11 +153,14 @@ router.post('/register', async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: 'Account created. Please verify your email before signing in.',
+      message: delivery.delivered
+        ? 'Account created. Please verify your email before signing in.'
+        : 'We couldn\'t send your verification email right now. Your account was created, but verification is still required before sign-in.',
       data: {
         email: user.email,
         requiresVerification: true,
         previewUrl: delivery.previewUrl,
+        emailDelivered: delivery.delivered,
       },
     });
   } catch (error) {
@@ -221,8 +224,10 @@ router.post('/resend-verification', async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Verification email sent',
-      data: { previewUrl: delivery.previewUrl },
+      message: delivery.delivered
+        ? 'Verification email sent'
+        : 'We couldn\'t send your verification email right now. Please retry or contact support.',
+      data: { previewUrl: delivery.previewUrl, emailDelivered: delivery.delivered },
     });
   } catch (error) {
     console.error('Resend Verification Error:', error);
@@ -239,20 +244,32 @@ router.post('/forgot-password', async (req, res) => {
 
     const user = await User.findOne({ email });
     let previewUrl = '';
+    let emailDelivered = false;
+
     if (user) {
       const resetToken = generatePasswordResetToken();
       user.passwordResetToken = resetToken.tokenHash;
       user.passwordResetExpiresAt = resetToken.expiresAt;
       user.passwordResetSentAt = new Date();
       await user.save();
+
       const delivery = await sendPasswordResetEmail({ user, token: resetToken.token });
       previewUrl = delivery.previewUrl || '';
+      emailDelivered = delivery.delivered;
+
+      if (!delivery.delivered) {
+        return res.status(200).json({
+          success: true,
+          message: 'We couldn\'t send a password reset email right now. Please retry or contact support.',
+          data: { previewUrl, emailDelivered: false },
+        });
+      }
     }
 
     res.status(200).json({
       success: true,
       message: 'If an account exists for this email, a password reset link has been sent.',
-      data: { previewUrl },
+      data: { previewUrl, emailDelivered },
     });
   } catch (error) {
     console.error('Forgot Password Error:', error);

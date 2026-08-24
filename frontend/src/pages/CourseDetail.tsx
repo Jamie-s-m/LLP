@@ -4,7 +4,11 @@ import toast from 'react-hot-toast'
 import { useLearningStore } from '../store/learningStore'
 import { useAuthStore } from '../store/authStore'
 import api from '../services/api'
+import { demoCourseMap } from '../data/demoCourses'
 import { useI18n } from '../utils/i18n'
+import { isDemoFallbackAllowed } from '../utils/runtimeMode'
+
+const demoFallbackEnabled = () => isDemoFallbackAllowed()
 
 interface CourseDetails {
   _id: string
@@ -36,17 +40,34 @@ export default function CourseDetail() {
   useEffect(() => {
     if (!id) return
 
+    const fallbackCourse = demoFallbackEnabled()
+      ? (demoCourseMap[id] || Object.values(demoCourseMap).find((course) => course.title.toLowerCase().replace(/\s+/g, '-') === id))
+      : undefined
+
     const loadCourse = async () => {
       try {
         const response = await api.get(`/courses/${id}`)
         const payload = response.data.data || response.data
-        setCourse(payload.course)
-        setLessons(payload.lessons || [])
+        const resolvedCourse = payload?.course || fallbackCourse
+        setCourse(resolvedCourse || null)
+        setLessons(payload?.lessons || fallbackCourse?.lessons || [])
       } catch (error: any) {
-        toast.error(error.response?.data?.message || t('courseDetail.loadFailed'))
+        if (fallbackCourse) {
+          console.warn('PRODUCTION_FALLBACK_ATTEMPTED: course detail is using demo/staging fallback for a public course view')
+          setCourse(fallbackCourse)
+          setLessons(fallbackCourse.lessons || [])
+        } else {
+          toast.error('We\'re having trouble loading this course right now. Please retry or contact support.')
+        }
       } finally {
         setLoading(false)
       }
+    }
+
+    if (fallbackCourse) {
+      setCourse(fallbackCourse)
+      setLessons(fallbackCourse.lessons || [])
+      setLoading(false)
     }
 
     loadCourse()

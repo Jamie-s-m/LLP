@@ -2,6 +2,12 @@ import mongoose from 'mongoose';
 
 const exerciseSchema = new mongoose.Schema(
   {
+    contentKey: {
+      type: String,
+      trim: true,
+      index: true,
+      sparse: true,
+    },
     lesson: {
       type: mongoose.Schema.ObjectId,
       ref: 'Lesson',

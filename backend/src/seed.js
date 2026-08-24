@@ -1,243 +1,367 @@
-import mongoose from 'mongoose';
+﻿import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import { pathToFileURL } from 'node:url';
 import User from './models/User.js';
 import Course from './models/Course.js';
 import Lesson from './models/Lesson.js';
+import Exercise from './models/Exercise.js';
 import Flashcard from './models/Flashcard.js';
+import { LINGUANEST_CONTENT_LIBRARY } from './contentLibrary.js';
 
 dotenv.config();
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/language-learn-platform';
 
-const courseCatalog = [
+const demoUsers = [
   {
-    title: 'English Explorer',
-    description: 'Build everyday conversation confidence with practical vocabulary, speaking routines, and fast win lessons.',
-    language: 'English',
-    level: 'Beginner',
-    category: 'Conversation',
-    estimatedHours: 8,
-    lessons: [
-      {
-        title: 'Greetings and first impressions',
-        description: 'Learn how to introduce yourself naturally and greet people with confidence.',
-        content: 'This lesson focuses on greetings, polite phrases, and small talk that helps students feel calm in real conversations.',
-        order: 1,
-        difficulty: 'Easy',
-        vocabulary: [
-          { word: 'hello', translation: 'salom', pronunciation: 'hə-LOU', examples: ['Hello! Nice to meet you.'] },
-          { word: 'How are you?', translation: 'Qalaysiz?', pronunciation: 'haʊ ɑːr juː?', examples: ['How are you today?'] },
-        ],
-        grammar: [{ rule: 'Use the verb to be in introductions', explanation: 'Use I am / I am from ... in first introductions.', examples: ['I am Alex. I am from Tashkent.'] }],
-        tags: ['greetings', 'speaking', 'confidence'],
-      },
-      {
-        title: 'Daily routine basics',
-        description: 'Talk about mornings, habits, and daily actions using simple present tense.',
-        content: 'Students learn how to describe their daily habits and check common routine phrases used in daily conversation.',
-        order: 2,
-        difficulty: 'Easy',
-        vocabulary: [
-          { word: 'wake up', translation: 'o’ygan', pronunciation: 'weɪk ʌp', examples: ['I wake up at 7 a.m.'] },
-          { word: 'breakfast', translation: 'nonushta', pronunciation: 'brekfəst', examples: ['I eat breakfast with my family.'] },
-        ],
-        grammar: [{ rule: 'Present simple for routines', explanation: 'Use the present simple to describe regular actions.', examples: ['She works from 9 to 5.'] }],
-        tags: ['routine', 'present simple'],
-      },
-      {
-        title: 'Ordering food and asking for help',
-        description: 'Practice essential phrases for cafes, restaurants, and everyday support.',
-        content: 'This lesson adds common transactional phrases in English for shopping, eating, and asking simple questions.',
-        order: 3,
-        difficulty: 'Medium',
-        vocabulary: [
-          { word: 'menu', translation: 'menyu', pronunciation: 'ˈmɛn.juː', examples: ['Can I see the menu?'] },
-          { word: 'help', translation: 'yordam', pronunciation: 'hɛlp', examples: ['I need help, please.'] },
-        ],
-        grammar: [{ rule: 'Polite requests', explanation: 'Use can/could to ask politely.', examples: ['Could you help me, please?'] }],
-        tags: ['restaurant', 'support'],
-      },
-    ],
-    flashcards: [
-      { front: 'How are you?', back: 'Qalaysiz?', category: 'Greetings', difficulty: 'Easy', language: 'English' },
-      { front: 'I wake up at 7', back: 'Men soat yettada uyg’onaman', category: 'Routine', difficulty: 'Easy', language: 'English' },
-      { front: 'Can I see the menu?', back: 'Menyuni ko‘rishim mumkinmi?', category: 'Food', difficulty: 'Medium', language: 'English' },
-    ],
+    email: 'student@demo.linguanest.local',
+    password: 'DemoStudent123!',
+    firstName: 'Demo',
+    lastName: 'Student',
+    role: 'student',
+    nativeLanguage: 'Russian',
+    targetLanguages: ['English'],
   },
   {
-    title: 'Turkish Talk & Travel',
-    description: 'Master useful Turkish for travel, daily life, and smoother conversations with locals.',
-    language: 'Turkish',
-    level: 'Intermediate',
-    category: 'Conversation',
-    estimatedHours: 10,
-    lessons: [
-      {
-        title: 'Travel essentials',
-        description: 'Learn phrases for airports, hotels, tickets, and simple directions.',
-        content: 'Students practice how to ask for directions and answer travel-related questions in Turkish.',
-        order: 1,
-        difficulty: 'Medium',
-        vocabulary: [
-          { word: 'günaydın', translation: 'good morning', pronunciation: 'goo-nah-DOON', examples: ['Günaydın, otel nerede?'] },
-          { word: 'bilet', translation: 'ticket', pronunciation: 'bi-LET', examples: ['Bir bilet istiyorum.'] },
-        ],
-        grammar: [{ rule: 'Use -iyorum for present action', explanation: 'Add -iyorum to express what you are doing now.', examples: ['Şimdi bekliyorum.'] }],
-        tags: ['travel', 'hotel'],
-      },
-      {
-        title: 'Ordering coffee and snacks',
-        description: 'Talk naturally in cafés and street food settings.',
-        content: 'This lesson teaches highly useful Turkish expressions for ordering food and understanding quick responses.',
-        order: 2,
-        difficulty: 'Easy',
-        vocabulary: [
-          { word: 'kahve', translation: 'coffee', pronunciation: 'kah-VE', examples: ['Bir kahve istiyorum.'] },
-          { word: 'lütfen', translation: 'please', pronunciation: 'luh-TEH-en', examples: ['Lütfen, menüyü gösterir misiniz?'] },
-        ],
-        grammar: [{ rule: 'Polite request pattern', explanation: 'Use istiyorum and lütfen to sound natural.', examples: ['Bir çay lütfen.'] }],
-        tags: ['food', 'polite'],
-      },
-      {
-        title: 'Making plans with friends',
-        description: 'Use Turkish phrases to suggest, accept, and arrange weekend plans.',
-        content: 'Great for social life, friendships, and casual planning in Turkish.',
-        order: 3,
-        difficulty: 'Medium',
-        vocabulary: [
-          { word: 'bugün', translation: 'today', pronunciation: 'boo-GOON', examples: ['Bugün ne yapıyorsun?'] },
-          { word: 'hafta sonu', translation: 'weekend', pronunciation: 'hahf-ta so-NOO', examples: ['Hafta sonu sinemaya gidelim.'] },
-        ],
-        grammar: [{ rule: 'Use gidelim for invitations', explanation: 'Use gidelim to invite someone to do something together.', examples: ['Akşam yemeğe gidelim.'] }],
-        tags: ['friends', 'plans'],
-      },
-    ],
-    flashcards: [
-      { front: 'Günaydın', back: 'Good morning', category: 'Travel', difficulty: 'Easy', language: 'Turkish' },
-      { front: 'Bir kahve lütfen', back: 'One coffee, please', category: 'Food', difficulty: 'Easy', language: 'Turkish' },
-      { front: 'Hafta sonu ne yapıyorsun?', back: 'What are you doing this weekend?', category: 'Social', difficulty: 'Medium', language: 'Turkish' },
-    ],
+    email: 'parent@demo.linguanest.local',
+    password: 'DemoParent123!',
+    firstName: 'Demo',
+    lastName: 'Parent',
+    role: 'parent',
+    nativeLanguage: 'Uzbek',
+    targetLanguages: ['English'],
   },
   {
-    title: 'Uzbek Speaking Sprint',
-    description: 'Fast, friendly Uzbek lessons for everyday life, study, and speaking with confidence.',
-    language: 'Uzbek',
-    level: 'Beginner',
-    category: 'Listening',
-    estimatedHours: 7,
-    lessons: [
-      {
-        title: 'School and study',
-        description: 'Talk about class, classmates, and your learning routine in Uzbek.',
-        content: 'This lesson helps students talk about their school schedule and study habits using everyday Uzbek.',
-        order: 1,
-        difficulty: 'Easy',
-        vocabulary: [
-          { word: 'dars', translation: 'lesson', pronunciation: 'dars', examples: ['Dars boshlanadi.'] },
-          { word: 'o‘qituvchi', translation: 'teacher', pronunciation: 'o-kit-u-chi', examples: ['O‘qituvchi darsni tushuntirdi.'] },
-        ],
-        grammar: [{ rule: 'Use bor/yo‘q for existence', explanation: 'Use bor to say there is and yo‘q to say there is not.', examples: ['Maktabda kitoblar bor.'] }],
-        tags: ['school', 'study'],
-      },
-      {
-        title: 'Family and home',
-        description: 'Learn phrases for discussing family members, routines, and home life.',
-        content: 'Students gain useful speech patterns for talking about family, home, and chores.',
-        order: 2,
-        difficulty: 'Easy',
-        vocabulary: [
-          { word: 'uy', translation: 'home', pronunciation: 'ooi', examples: ['Uyim ko‘p.'] },
-          { word: 'ota', translation: 'father', pronunciation: 'o-ta', examples: ['Otam ishga ketdi.'] },
-        ],
-        grammar: [{ rule: 'Use -da/-da to say at home', explanation: 'Add -da to show the place where something happens.', examples: ['Uyda ishlayman.'] }],
-        tags: ['family', 'home'],
-      },
-      {
-        title: 'Small talk in public',
-        description: 'Practice light, friendly conversation in everyday public places.',
-        content: 'Teaches students how to start and continue conversations while shopping or travelling around town.',
-        order: 3,
-        difficulty: 'Medium',
-        vocabulary: [
-          { word: 'salom', translation: 'hello', pronunciation: 'sa-lom', examples: ['Salom, yaxshimisiz?'] },
-          { word: 'yo‘l', translation: 'road', pronunciation: 'yol', examples: ['Bu yo‘l qayerga boradi?'] },
-        ],
-        grammar: [{ rule: 'Polite questions', explanation: 'Use nima, qayer, and qachon to ask simple questions naturally.', examples: ['Bu qayerda joylashgan?'] }],
-        tags: ['public', 'small talk'],
-      },
-    ],
-    flashcards: [
-      { front: 'Salom', back: 'Hello', category: 'Greeting', difficulty: 'Easy', language: 'Uzbek' },
-      { front: 'Uyda ishlayman', back: 'I work at home', category: 'Home', difficulty: 'Easy', language: 'Uzbek' },
-      { front: 'Bu yo‘l qayerga boradi?', back: 'Where does this road go?', category: 'Travel', difficulty: 'Medium', language: 'Uzbek' },
-    ],
+    email: 'teacher@demo.linguanest.local',
+    password: 'DemoTeacher123!',
+    firstName: 'Demo',
+    lastName: 'Teacher',
+    role: 'teacher',
+    nativeLanguage: 'English',
+    targetLanguages: ['English'],
+  },
+  {
+    email: 'admin@demo.linguanest.local',
+    password: 'DemoAdmin123!',
+    firstName: 'Demo',
+    lastName: 'Admin',
+    role: 'admin',
+    nativeLanguage: 'English',
+    targetLanguages: ['English'],
   },
 ];
 
-const buildLessonPayload = (courseId, lesson) => ({
-  course: courseId,
-  ...lesson,
-  contentType: 'interactive',
+const normalizeLessonContent = (lesson) => ({
+  title: lesson.title,
+  description: lesson.description,
+  content: lesson.content,
+  duration: lesson.duration || 15,
+  difficulty: lesson.difficulty || 'Easy',
+  vocabulary: (lesson.vocabulary || []).map((item) => ({
+    word: item.word || 'language',
+    translation: item.translation || 'translation',
+    pronunciation: item.pronunciation || item.word || 'pronunciation',
+    examples: Array.isArray(item.examples) ? item.examples : [item.example || `${item.word} is useful.`],
+  })),
+  grammar: (lesson.grammar || []).map((item) => ({
+    rule: item.rule || 'Key grammar pattern',
+    explanation: item.explanation || 'Use the target structure clearly and consistently.',
+    examples: Array.isArray(item.examples) ? item.examples : [item.example || 'Example sentence'],
+  })),
 });
 
-try {
-  await mongoose.connect(MONGODB_URI);
+const ensureDemoUsers = async () => {
+  const createdEntries = [];
 
-  const adminUser = await User.findOneAndUpdate(
-    { email: 'admin@linguanest.uz' },
-    {
-      $setOnInsert: {
-        firstName: 'LinguaNest',
-        lastName: 'Admin',
-        email: 'admin@linguanest.uz',
-        password: 'Password123!',
-        role: 'admin',
-        isEmailVerified: true,
-      },
-    },
-    { upsert: true, new: true, setDefaultsOnInsert: true }
-  );
+  for (const userData of demoUsers) {
+    const existing = await User.findOne({ email: userData.email });
+    if (existing) {
+      createdEntries.push(existing);
+      continue;
+    }
 
-  await Lesson.deleteMany({});
-  await Flashcard.deleteMany({});
-  await Course.deleteMany({});
-
-  for (const courseDef of courseCatalog) {
-    const course = await Course.create({
-      title: courseDef.title,
-      description: courseDef.description,
-      language: courseDef.language,
-      level: courseDef.level,
-      category: courseDef.category,
-      instructor: adminUser._id,
-      estimatedHours: courseDef.estimatedHours,
-      isPublished: true,
-    });
-
-    const lessons = await Lesson.insertMany(courseDef.lessons.map((lesson) => buildLessonPayload(course._id, lesson)));
-
-    course.lessons = lessons.map((lesson) => lesson._id);
-    course.totalLessons = lessons.length;
-    await course.save();
-
-    const flashcards = courseDef.flashcards.map((card, index) => ({
-      course: course._id,
-      lesson: lessons[index % lessons.length]._id,
-      language: card.language,
-      front: { text: card.front },
-      back: { text: card.back },
-      category: card.category,
-      difficulty: card.difficulty,
-      tags: [course.language.toLowerCase(), card.category.toLowerCase()],
-    }));
-
-    await Flashcard.insertMany(flashcards);
+    const user = await User.create(userData);
+    createdEntries.push(user);
   }
 
-  console.log('LinguaNest sample catalog successfully seeded with courses, lessons, and flashcards.');
-} catch (error) {
-  console.error('Seeding failed:', error.message);
-  process.exitCode = 1;
-} finally {
-  await mongoose.connection.close();
+  return createdEntries;
+};
+
+const parseSeedCliArgs = () => {
+  const args = new Set(process.argv.slice(2));
+  const parsed = {
+    mode: 'development',
+    status: false,
+    dryRun: false,
+    confirm: false,
+    force: false,
+  };
+
+  for (const arg of args) {
+    if (arg === '--status') parsed.status = true;
+    if (arg === '--dry-run') parsed.dryRun = true;
+    if (arg === '--confirm') parsed.confirm = true;
+    if (arg === '--force') parsed.force = true;
+    if (arg.startsWith('--mode=')) {
+      parsed.mode = String(arg.split('=')[1] || 'development').toLowerCase();
+    }
+  }
+
+  return parsed;
+};
+
+const getContentCounts = async () => {
+  if (mongoose.connection.readyState !== 1) {
+    await mongoose.connect(MONGODB_URI, { serverSelectionTimeoutMS: 5000 });
+  }
+
+  const [courses, publishedCourses, lessons, flashcards, vocabularyCount] = await Promise.all([
+    Course.countDocuments(),
+    Course.countDocuments({ isPublished: true }),
+    Lesson.countDocuments(),
+    Flashcard.countDocuments(),
+    Flashcard.countDocuments(),
+  ]);
+
+  const libraryMetrics = LINGUANEST_CONTENT_LIBRARY.metadata;
+
+  return {
+    courses,
+    publishedCourses,
+    lessons,
+    flashcards,
+    vocabularyCount,
+    modules: libraryMetrics.totalModules,
+    units: libraryMetrics.totalUnits,
+    exercises: libraryMetrics.totalExercises,
+    assessmentQuestions: libraryMetrics.totalAssessmentQuestions,
+  };
+};
+
+export const contentStatus = async ({ mode = 'development' } = {}) => {
+  try {
+    const counts = await getContentCounts();
+    const output = [
+      'LinguaNest Content Health',
+      `Mode: ${mode}`,
+      `Content Version: ${process.env.CONTENT_LIBRARY_VERSION || 'development'}`,
+      `Courses: ${counts.courses}`,
+      `Modules: ${counts.modules}`,
+      `Units: ${counts.units}`,
+      `Lessons: ${counts.lessons}`,
+      `Exercises: ${counts.exercises}`,
+      `Vocabulary: ${counts.vocabularyCount}`,
+      `Assessment Questions: ${counts.assessmentQuestions}`,
+      `Published Courses: ${counts.publishedCourses}`,
+    ].join('\n');
+
+    console.log(output);
+    return counts;
+  } finally {
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.disconnect();
+    }
+  }
+};
+
+export const seedContent = async ({
+  mode = 'development',
+  confirm = false,
+  dryRun = false,
+  force = false,
+  silent = false,
+} = {}) => {
+  const safeMode = String(mode || 'development').toLowerCase();
+
+  if (!['development', 'staging', 'production'].includes(safeMode)) {
+    throw new Error('Unsupported content mode. Use development, staging, or production.');
+  }
+
+  if (safeMode === 'production' && !confirm) {
+    throw new Error('Production content seeding requires --confirm and a verified target database.');
+  }
+
+  if (mongoose.connection.readyState !== 1) {
+    await mongoose.connect(MONGODB_URI, { serverSelectionTimeoutMS: 5000 });
+  }
+
+  const library = LINGUANEST_CONTENT_LIBRARY;
+  const minimumRequirements = {
+    courses: library.courses.length,
+    publishedCourses: library.courses.length,
+    lessons: library.lessons.length,
+    vocabulary: library.vocabulary.length,
+    exercises: library.metadata.totalExercises,
+    assessmentQuestions: library.metadata.totalAssessmentQuestions,
+  };
+
+  const currentCounts = await getContentCounts();
+  const catalogAlreadySatisfiesRequirements = currentCounts.courses >= minimumRequirements.courses
+    && currentCounts.publishedCourses >= minimumRequirements.publishedCourses
+    && currentCounts.lessons >= minimumRequirements.lessons
+    && currentCounts.vocabularyCount >= minimumRequirements.vocabulary
+    && currentCounts.exercises >= minimumRequirements.exercises;
+
+  if (!force && catalogAlreadySatisfiesRequirements) {
+    if (!silent) {
+      console.log('Content already seeded; no update required.');
+    }
+    return { seeded: false, ...currentCounts };
+  }
+
+  if (dryRun) {
+    if (!silent) {
+      console.log('Dry run: content sync would seed the required library.');
+    }
+    return { seeded: false, dryRun: true, ...currentCounts };
+  }
+
+  const users = await ensureDemoUsers();
+  const teacher = users.find((user) => user.role === 'teacher') || (await User.findOne({ role: 'teacher' }));
+
+  if (!teacher) {
+    throw new Error('Teacher demo user was not created.');
+  }
+
+  for (const courseData of library.courses) {
+    const course = await Course.findOneAndUpdate(
+      { contentKey: courseData.id },
+      {
+        contentKey: courseData.id,
+        title: courseData.title,
+        description: courseData.description,
+        language: courseData.language,
+        level: courseData.level,
+        instructor: teacher._id,
+        category: courseData.category,
+        estimatedHours: courseData.estimatedHours,
+        isPublished: true,
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+
+    const lessonIds = [];
+
+    for (const lessonData of courseData.lessons) {
+      const lessonDoc = await Lesson.findOneAndUpdate(
+        { course: course._id, contentKey: lessonData.id },
+        {
+          contentKey: lessonData.id,
+          course: course._id,
+          title: lessonData.title,
+          description: lessonData.description,
+          content: lessonData.content,
+          order: lessonData.order,
+          duration: lessonData.duration || 15,
+          difficulty: lessonData.difficulty || 'Easy',
+          vocabulary: normalizeLessonContent(lessonData).vocabulary,
+          grammar: normalizeLessonContent(lessonData).grammar,
+          tags: [courseData.category, courseData.level.toLowerCase()],
+          completionTime: lessonData.duration || 15,
+        },
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+      );
+
+      const exerciseIds = [];
+      for (const exerciseData of lessonData.exercises || []) {
+        const exerciseDoc = await Exercise.findOneAndUpdate(
+          { lesson: lessonDoc._id, contentKey: exerciseData.id },
+          {
+            contentKey: exerciseData.id,
+            lesson: lessonDoc._id,
+            title: exerciseData.title,
+            description: exerciseData.description || '',
+            type: exerciseData.type,
+            question: exerciseData.question,
+            instructions: exerciseData.instructions || '',
+            options: Array.isArray(exerciseData.options) ? exerciseData.options : [],
+            correctAnswer: exerciseData.correctAnswer,
+            sentenceTemplate: exerciseData.sentenceTemplate || '',
+            correctAnswers: Array.isArray(exerciseData.correctAnswers) ? exerciseData.correctAnswers : [],
+            leftItems: Array.isArray(exerciseData.leftItems) ? exerciseData.leftItems : [],
+            rightItems: Array.isArray(exerciseData.rightItems) ? exerciseData.rightItems : [],
+            correctPairs: Array.isArray(exerciseData.correctPairs) ? exerciseData.correctPairs : [],
+            audioReference: exerciseData.audioReference || '',
+            acceptablePronunciations: Array.isArray(exerciseData.acceptablePronunciations) ? exerciseData.acceptablePronunciations : [],
+            maxWords: exerciseData.maxWords || undefined,
+            minWords: exerciseData.minWords || undefined,
+            audioFile: exerciseData.audioFile || '',
+            transcript: exerciseData.transcript || '',
+            difficulty: exerciseData.difficulty || 'Medium',
+            points: exerciseData.points || 10,
+            hints: Array.isArray(exerciseData.hints) ? exerciseData.hints : [],
+            explanation: exerciseData.explanation || '',
+            tags: Array.isArray(exerciseData.tags) ? exerciseData.tags : [courseData.category],
+          },
+          { upsert: true, new: true, setDefaultsOnInsert: true }
+        );
+        exerciseIds.push(exerciseDoc._id);
+      }
+
+      await Lesson.findByIdAndUpdate(lessonDoc._id, {
+        exercises: exerciseIds,
+      });
+
+      lessonIds.push(lessonDoc._id);
+    }
+
+    await Course.findByIdAndUpdate(course._id, {
+      lessons: lessonIds,
+      totalLessons: lessonIds.length,
+      isPublished: true,
+      contentKey: courseData.id,
+    });
+  }
+
+  const flashcards = LINGUANEST_CONTENT_LIBRARY.vocabulary;
+  for (const card of flashcards) {
+    await Flashcard.findOneAndUpdate(
+      { contentKey: card.id },
+      {
+        contentKey: card.id,
+        language: 'English',
+        front: { text: card.word, audio: '', image: '' },
+        back: { text: card.uz || card.ru || card.word, audio: '', image: '' },
+        category: card.topic || 'general',
+        difficulty: card.difficulty || 'Medium',
+        tags: [card.topic || 'general', 'seeded'],
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+  }
+
+  const finalCounts = await getContentCounts();
+
+  if (!silent) {
+    console.log(`Content sync complete for ${safeMode}. Courses: ${finalCounts.courses}, Published: ${finalCounts.publishedCourses}, Lessons: ${finalCounts.lessons}.`);
+  }
+
+  return {
+    seeded: true,
+    mode: safeMode,
+    ...finalCounts,
+  };
+};
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const cli = parseSeedCliArgs();
+
+  const run = cli.status
+    ? contentStatus({ mode: cli.mode })
+    : seedContent({
+        mode: cli.mode,
+        confirm: cli.confirm,
+        dryRun: cli.dryRun,
+        force: cli.force,
+        silent: false,
+      });
+
+  run.then(async () => {
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.disconnect();
+    }
+  }).catch((error) => {
+    console.error('Content seed failed:', error);
+    process.exit(1);
+  });
 }

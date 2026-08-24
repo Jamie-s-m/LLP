@@ -8,6 +8,7 @@ import FamilyLink from '../models/FamilyLink.js';
 import ChatConversation from '../models/ChatConversation.js';
 import ChatMessage from '../models/ChatMessage.js';
 import Progress from '../models/Progress.js';
+import { LINGUANEST_CONTENT_LIBRARY } from '../contentLibrary.js';
 import { defaultModeratorPermissions, hasModeratorPermission, normalizeModeratorPermissions } from '../middleware/auth.js';
 
 const contentModels = { courses: Course, lessons: Lesson, flashcards: Flashcard, posts: ForumPost, groups: Group };
@@ -132,6 +133,35 @@ export const getOverview = async (req, res, next) => {
       success: true,
       data: {
         totals: { users, students, teachers, parents, moderators, admins, courses, publishedCourses, lessons, flashcards, posts, pinnedPosts, groups, pendingTeacherApplications, approvedFamilyLinks, chatConversations, chatMessages, enrollments, completedEnrollments },
+      },
+    });
+  } catch (error) { next(error); }
+};
+
+export const getContentHealth = async (req, res, next) => {
+  try {
+    const [courseCount, publishedCount, lessonCount, vocabularyCount, lastContentUpdate] = await Promise.all([
+      Course.countDocuments(),
+      Course.countDocuments({ isPublished: true }),
+      Lesson.countDocuments(),
+      Flashcard.countDocuments(),
+      Course.findOne().sort({ updatedAt: -1 }).select('updatedAt').lean(),
+    ]);
+
+    const starterIds = LINGUANEST_CONTENT_LIBRARY.courses.map((course) => course.contentKey || course.id);
+    const validStarterCatalog = starterIds.length === 7 && new Set(starterIds).size === 7;
+
+    res.status(200).json({
+      success: true,
+      data: {
+        courseCount,
+        publishedCourseCount: publishedCount,
+        lessonCount,
+        vocabularyCount,
+        assessmentCount: LINGUANEST_CONTENT_LIBRARY.metadata.totalAssessmentQuestions,
+        lastContentUpdate: lastContentUpdate?.updatedAt || null,
+        contentValidationStatus: validStarterCatalog ? 'valid' : 'invalid',
+        starterCourseIds: starterIds,
       },
     });
   } catch (error) { next(error); }

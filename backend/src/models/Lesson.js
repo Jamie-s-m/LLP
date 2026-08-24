@@ -2,6 +2,12 @@ import mongoose from 'mongoose';
 
 const lessonSchema = new mongoose.Schema(
   {
+    contentKey: {
+      type: String,
+      trim: true,
+      index: true,
+      sparse: true,
+    },
     title: {
       type: String,
       required: [true, 'Please provide a lesson title'],

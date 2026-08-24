@@ -1,5 +1,9 @@
 import { create } from 'zustand'
 import api from '../services/api'
+import { demoCourses } from '../data/demoCourses'
+import { isDemoFallbackAllowed } from '../utils/runtimeMode'
+
+const isDemoFallbackEnabled = () => isDemoFallbackAllowed()
 
 export interface Course {
   _id: string
@@ -46,14 +50,29 @@ fetchCourses: async (params) => {
   try {
     const response = await api.get('/courses', { params })
     const fetchedData = response.data?.data || response.data || []
+    const nextCourses = Array.isArray(fetchedData) && fetchedData.length > 0 ? fetchedData : []
     set({
-      courses: Array.isArray(fetchedData) ? fetchedData : [],
+      courses: nextCourses,
       isLoading: false,
     })
+    if (Array.isArray(fetchedData) && fetchedData.length === 0 && isDemoFallbackEnabled()) {
+      console.warn('PRODUCTION_FALLBACK_ATTEMPTED: public course discovery is using the demo catalog in demo/staging mode')
+      set({ courses: demoCourses })
+    }
   } catch (err: any) {
+    if (isDemoFallbackEnabled()) {
+      console.warn('PRODUCTION_FALLBACK_ATTEMPTED: API failed; demo/staging fallback is enabled for public course discovery')
+      set({
+        courses: demoCourses,
+        error: err.response?.data?.message || 'Demo mode active: using the local course catalog',
+        isLoading: false,
+      })
+      return
+    }
+
     set({
-      courses: [], // Fallback to empty array to prevent slice() errors
-      error: err.response?.data?.message || 'Failed to fetch courses',
+      courses: [],
+      error: 'We\'re having trouble loading courses. Please retry or contact support.',
       isLoading: false,
     })
   }
