@@ -27,9 +27,21 @@ const startServer = async () => {
     console.log(`MongoDB connected: ${mongoose.connection.host}`);
 
     const server = createServer(app);
+    const socketOrigins = [...new Set([
+      process.env.FRONTEND_URL,
+      process.env.FRONTEND_APP_URL,
+      'http://localhost:5173',
+      'http://localhost:3000',
+      'https://jamie-s-m.github.io',
+      'https://linguanest.uz',
+      'https://www.linguanest.uz',
+      'https://api.linguanest.uz',
+      ...(process.env.CORS_ORIGINS || '').split(',').map((origin) => origin.trim()).filter(Boolean),
+    ].filter(Boolean))];
+
     const io = new Server(server, {
       cors: {
-        origin: [process.env.FRONTEND_URL, 'http://localhost:5173', 'http://localhost:3000', 'https://jamie-s-m.github.io'].filter(Boolean),
+        origin: socketOrigins,
         credentials: true,
       },
     });

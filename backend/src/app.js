@@ -31,12 +31,26 @@ app.use(
   })
 );
 
-const allowedOrigins = [
+const defaultOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
   'https://jamie-s-m.github.io',
+  'https://linguanest.uz',
+  'https://www.linguanest.uz',
+  'https://api.linguanest.uz',
+  'https://www.api.linguanest.uz',
   process.env.FRONTEND_URL,
-].filter(Boolean);
+  process.env.FRONTEND_APP_URL,
+];
+
+const allowedOrigins = [...new Set(
+  (process.env.CORS_ORIGINS || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+    .concat(defaultOrigins)
+    .filter(Boolean)
+)];
 
 app.use(
   cors({

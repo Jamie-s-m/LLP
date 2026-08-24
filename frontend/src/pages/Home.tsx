@@ -36,21 +36,22 @@ export default function Home() {
           <div>
             <p className="atlas-kicker">{t('home.heroKicker')}</p>
             <h1 className="mb-4 text-4xl font-extrabold text-white md:text-5xl">
-              {t('home.heroTitle')}
+              Learn faster. Speak brighter. Grow with confidence.
             </h1>
-            <p className="mb-8 max-w-2xl text-lg text-slate-300">
-              {t('home.heroCopy')}
+            <p className="mb-8 max-w-2xl text-lg text-amber-50/90">
+              Follow guided lessons, real course progress, and tutor support in one friendly learning space built for daily momentum.
             </p>
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Link
                 to="/courses"
-                className="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-8 py-3 text-center font-semibold text-white shadow-lg transition hover:bg-indigo-500"
+                className="inline-flex items-center justify-center rounded-xl px-8 py-3 text-center font-semibold text-white shadow-xl transition hover:-translate-y-0.5"
+                style={{ background: 'linear-gradient(135deg, #fb923c 0%, #facc15 38%, #22c55e 100%)' }}
               >
                 {t('home.exploreLearningPaths')}
               </Link>
               <Link
                 to="/pricing"
-                className="inline-flex items-center justify-center rounded-lg border border-white/40 px-8 py-3 text-center font-semibold text-white transition hover:bg-white/10"
+                className="inline-flex items-center justify-center rounded-xl border border-white/40 bg-white/8 px-8 py-3 text-center font-semibold text-white transition hover:bg-white/12"
               >
                 {t('home.comparePlans')}
               </Link>
