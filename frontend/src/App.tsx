@@ -56,6 +56,7 @@ const Chat = lazyWithChunkRetry(() => import('./pages/Chat'), 'chat')
 const ParentDashboard = lazyWithChunkRetry(() => import('./pages/ParentDashboard'), 'parent-dashboard')
 const ChildProgress = lazyWithChunkRetry(() => import('./pages/ChildProgress'), 'child-progress')
 const ControlCenter = lazyWithChunkRetry(() => import('./pages/admin/ControlCenter'), 'control-center')
+const Tutors = lazyWithChunkRetry(() => import('./pages/Tutors'), 'tutors')
 const Pricing = lazyWithChunkRetry(() => import('./pages/Pricing'), 'pricing')
 const Terms = lazyWithChunkRetry(() => import('./pages/Terms'), 'terms')
 const Privacy = lazyWithChunkRetry(() => import('./pages/Privacy'), 'privacy')
@@ -87,6 +88,7 @@ function App() {
         <Route path="/" element={<Layout><Home /></Layout>} />
         <Route path="/courses" element={<Layout><Courses /></Layout>} />
         <Route path="/courses/:id" element={<Layout><CourseDetail /></Layout>} />
+        <Route path="/tutors" element={<Layout><Tutors /></Layout>} />
         <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
         <Route path="/terms" element={<Layout><Terms /></Layout>} />
         <Route path="/privacy" element={<Layout><Privacy /></Layout>} />
