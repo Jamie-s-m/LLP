@@ -1,13 +1,13 @@
 {
-  "name": "Auralex",
-  "short_name": "Auralex",
-  "start_url": "/LLP/",
+  "name": "LinguaNest",
+  "short_name": "LinguaNest",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#061523",
   "theme_color": "#0b2238",
   "icons": [
     {
-      "src": "/LLP/auralex-mark.svg",
+      "src": "/linguanest-mark.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"

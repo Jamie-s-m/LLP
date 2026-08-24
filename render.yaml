@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: linguanest-api
+    env: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: FRONTEND_URL
+        value: https://linguanest.uz
+      - key: FRONTEND_APP_URL
+        value: https://linguanest.uz
+      - key: CORS_ORIGINS
+        value: https://linguanest.uz,https://api.linguanest.uz
+
+  - type: static
+    name: linguanest-web
+    env: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    plan: free
+    envVars:
+      - key: VITE_API_URL
+        value: https://api.linguanest.uz/api
+      - key: VITE_APP_NAME
+        value: LinguaNest
