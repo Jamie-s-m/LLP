@@ -1,7 +1,7 @@
 {
-  "name": "language-learn-platform-backend",
+  "name": "linguanest-backend",
   "version": "1.0.0",
-  "description": "Backend API for Language Learning Platform",
+  "description": "LinguaNest - Language Learning & Tutor Marketplace Platform (LinguaNest.uz)",
   "main": "src/server.js",
   "type": "module",
   "engines": {
