@@ -4,17 +4,35 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --brand-primary: #5B5CE2;
+  --brand-primary-dark: #4546B8;
+  --brand-primary-soft: #ECECFF;
+  --brand-mint: #36C9A5;
+  --brand-mint-dark: #168E73;
+  --brand-gold: #F4B64A;
+  --brand-coral: #EF6A62;
+  --brand-sky: #4F9CF9;
+  --brand-background: #F7F9F8;
+  --brand-surface: #FFFFFF;
+  --brand-surface-secondary: #F1F4F2;
+  --brand-border: #E1E7E4;
+  --brand-text-primary: #17211E;
+  --brand-text-secondary: #53605B;
+  --brand-text-muted: #7C8983;
+}
+
 @layer base {
   html {
     @apply scroll-smooth;
-    background: #f7f9f7;
+    background: var(--brand-background);
   }
 
   body {
     @apply text-neutral-900 dark:text-neutral-50 transition-colors duration-300;
-    background: linear-gradient(180deg, #f7f9f7 0%, #eef3ff 20%, #f4fff9 62%, #fffaf3 100%);
+    background: linear-gradient(180deg, var(--brand-background) 0%, #eef3ff 20%, #f4fff9 62%, #fffaf3 100%);
     font-family: 'Manrope', sans-serif;
-    color: #15211d;
+    color: var(--brand-text-primary);
   }
 
   html.dark {

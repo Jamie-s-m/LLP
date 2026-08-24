@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { BRAND } from '../config/brand'
 import { useI18n } from '../utils/i18n'
 
 export default function Footer() {
@@ -9,10 +10,10 @@ export default function Footer() {
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:px-6 md:grid-cols-[1.3fr_1fr_1fr]">
         <div className="text-center md:text-left">
           <div className="flex items-center justify-center gap-3 md:justify-start">
-            <img src={`${import.meta.env.BASE_URL}linguanest-mark.svg`} alt="LinguaNest" className="h-9 w-9 rounded-xl shadow-[0_12px_30px_rgba(20,184,166,0.28)]" />
+            <img src={`${import.meta.env.BASE_URL}linguanest-mark.svg`} alt={BRAND.name} className="h-9 w-9 rounded-xl shadow-[0_12px_30px_rgba(20,184,166,0.28)]" />
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-coral">LinguaNest</p>
-              <h2 className="text-lg font-semibold text-ink dark:text-white">{t('footer.tagline')}</h2>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-coral">{BRAND.name}</p>
+              <h2 className="text-lg font-semibold text-ink dark:text-white">{BRAND.tagline}</h2>
             </div>
           </div>
           <p className="mt-3 max-w-md text-sm text-slate-600 dark:text-slate-300">

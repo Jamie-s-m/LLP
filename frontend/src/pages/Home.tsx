@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { FiArrowRight, FiBookOpen, FiCheckCircle, FiMessageCircle, FiShield, FiTrendingUp, FiUsers } from 'react-icons/fi'
+import { BRAND } from '../config/brand'
 import { useLearningStore } from '../store/learningStore'
 import { useI18n } from '../utils/i18n'
 
@@ -36,7 +37,7 @@ export default function Home() {
           <div>
             <p className="atlas-kicker">{t('home.heroKicker')}</p>
             <h1 className="mb-4 text-4xl font-extrabold text-white md:text-5xl">
-               Learn a language. Then live it.
+               {BRAND.tagline}
             </h1>
              <p className="mb-8 max-w-2xl text-lg text-indigo-50/95">
                Structured lessons, AI practice and real conversations with expert tutors — all in one place.
