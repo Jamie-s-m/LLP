@@ -1,4 +1,4 @@
-# Auralex
+# LinguaNest
 
 Auralex is a full-stack language learning platform for learners, teachers, parents, moderators, and administrators. It combines structured course delivery, learner progress tracking, family visibility, moderation, and live chat inside one premium workspace.
 
