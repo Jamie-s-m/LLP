@@ -7,22 +7,22 @@
 @layer base {
   html {
     @apply scroll-smooth;
-    background: #fffaf2;
+    background: #f7f9f7;
   }
 
   body {
     @apply text-neutral-900 dark:text-neutral-50 transition-colors duration-300;
-    background: linear-gradient(180deg, #fffaf2 0%, #fff6d5 26%, #f3ffe8 62%, #edfef7 100%);
+    background: linear-gradient(180deg, #f7f9f7 0%, #eef3ff 20%, #f4fff9 62%, #fffaf3 100%);
     font-family: 'Manrope', sans-serif;
-    color: #1d2b1d;
+    color: #15211d;
   }
 
   html.dark {
-    background: #120d0a;
+    background: #0c1218;
   }
 
   html.dark body {
-    background: linear-gradient(180deg, #120d0a 0%, #1f190e 38%, #0f2219 100%);
+    background: linear-gradient(180deg, #0c1218 0%, #111827 36%, #0d1d1a 100%);
   }
 
   h1, h2, h3 {
@@ -39,14 +39,14 @@
 
   .btn-primary {
     @apply text-white hover:brightness-110 active:brightness-95;
-    background: linear-gradient(135deg, #f97316 0%, #fbbf24 35%, #22c55e 100%);
-    box-shadow: 0 18px 40px rgba(249, 115, 22, 0.28);
+    background: linear-gradient(135deg, #5B5CE2 0%, #4546B8 35%, #36C9A5 100%);
+    box-shadow: 0 18px 40px rgba(91, 92, 226, 0.28);
   }
 
   .btn-secondary {
     @apply text-white hover:brightness-110 active:brightness-95;
-    background: linear-gradient(135deg, #14b8a6 0%, #22c55e 48%, #facc15 100%);
-    box-shadow: 0 18px 38px rgba(34, 197, 94, 0.24);
+    background: linear-gradient(135deg, #36C9A5 0%, #5BA7FF 52%, #FFB547 100%);
+    box-shadow: 0 18px 38px rgba(54, 201, 165, 0.24);
   }
 
   .btn-outline {
@@ -59,14 +59,14 @@
 
   .card {
     @apply rounded-3xl border p-6 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl;
-    border-color: rgba(16, 185, 129, 0.14);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(244, 255, 249, 0.86) 100%);
+    border-color: rgba(91, 92, 226, 0.12);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(242, 247, 255, 0.88) 100%);
   }
 
   .dark .card {
     border-color: rgba(255, 255, 255, 0.08);
-    background: linear-gradient(180deg, rgba(12, 33, 28, 0.95) 0%, rgba(8, 20, 18, 0.9) 100%);
-    color: #e5f7ef;
+    background: linear-gradient(180deg, rgba(14, 32, 40, 0.95) 0%, rgba(9, 19, 20, 0.9) 100%);
+    color: #edf4ff;
   }
 
   .input {
@@ -125,17 +125,17 @@
   .atlas-page {
     min-height: calc(100vh - 72px);
     background:
-      radial-gradient(circle at 12% 0%, rgba(251, 146, 60, 0.18), transparent 20%),
-      radial-gradient(circle at 85% 10%, rgba(34, 197, 94, 0.17), transparent 22%),
-      linear-gradient(180deg, #fffaf2 0%, #fff9d6 25%, #f3ffe8 65%, #edfef7 100%);
+      radial-gradient(circle at 12% 0%, rgba(91, 92, 226, 0.13), transparent 20%),
+      radial-gradient(circle at 85% 10%, rgba(54, 201, 165, 0.14), transparent 22%),
+      linear-gradient(180deg, #f7f9f7 0%, #edf3ff 25%, #f3fff9 65%, #fffaf3 100%);
     @apply transition-colors duration-300;
   }
 
   .dark .atlas-page {
     background:
-      radial-gradient(circle at 12% 0%, rgba(249, 115, 22, 0.12), transparent 20%),
-      radial-gradient(circle at 85% 0%, rgba(34, 197, 94, 0.14), transparent 20%),
-      linear-gradient(180deg, #130d09 0%, #1a2314 46%, #0a1a14 100%);
+      radial-gradient(circle at 12% 0%, rgba(91, 92, 226, 0.12), transparent 20%),
+      radial-gradient(circle at 85% 0%, rgba(54, 201, 165, 0.12), transparent 20%),
+      linear-gradient(180deg, #0c1218 0%, #101c26 46%, #0b1c1b 100%);
   }
 
   .atlas-heading h1 {
@@ -154,9 +154,9 @@
   .atlas-hero {
     @apply grid grid-cols-1 items-center gap-8 overflow-hidden rounded-[2rem] p-8 shadow-xl md:p-12 lg:grid-cols-2;
     animation: slideInUp 0.55s ease-out both;
-    background: linear-gradient(135deg, rgba(120, 53, 15, 0.96) 0%, rgba(234, 88, 12, 0.92) 22%, rgba(245, 158, 11, 0.88) 48%, rgba(34, 197, 94, 0.88) 72%, rgba(6, 95, 70, 0.92) 100%);
+    background: linear-gradient(135deg, rgba(31, 36, 93, 0.96) 0%, rgba(91, 92, 226, 0.94) 26%, rgba(54, 201, 165, 0.82) 58%, rgba(255, 181, 71, 0.8) 100%);
     border: 1px solid rgba(255, 255, 255, 0.14);
-    box-shadow: 0 30px 90px rgba(146, 64, 14, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    box-shadow: 0 30px 90px rgba(49, 56, 158, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.18);
     color: #fffaf5;
     position: relative;
     transform-style: preserve-3d;
@@ -190,9 +190,9 @@
 
   .atlas-hero-card {
     @apply rounded-[1.75rem] p-6 text-white;
-    background: linear-gradient(145deg, rgba(11, 31, 27, 0.94), rgba(17, 89, 71, 0.9));
+    background: linear-gradient(145deg, rgba(8, 15, 40, 0.95), rgba(26, 38, 102, 0.9));
     border: 1px solid rgba(255, 255, 255, 0.14);
-    box-shadow: 0 24px 60px rgba(8, 24, 39, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    box-shadow: 0 24px 60px rgba(15, 27, 76, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
   .atlas-hero img {
@@ -252,7 +252,7 @@
   }
 
   .text-coral {
-    color: #f97316;
+    color: #FF6B5E;
   }
 
   .chat-layout {
@@ -268,8 +268,8 @@
   }
 
   .chat-thread.active {
-    background: linear-gradient(135deg, rgba(249, 115, 22, 0.14), rgba(34, 197, 94, 0.12));
-    box-shadow: inset 0 0 0 1px rgba(249, 115, 22, 0.2);
+    background: linear-gradient(135deg, rgba(91, 92, 226, 0.15), rgba(54, 201, 165, 0.12));
+    box-shadow: inset 0 0 0 1px rgba(91, 92, 226, 0.2);
   }
 
   .chat-thread small {
@@ -278,8 +278,8 @@
 
   .chat-avatar {
     @apply flex h-10 w-10 items-center justify-center rounded-2xl text-white;
-    background: linear-gradient(135deg, #f97316, #fbbf24 45%, #22c55e);
-    box-shadow: 0 12px 24px rgba(249, 115, 22, 0.22);
+    background: linear-gradient(135deg, #5B5CE2, #36C9A5 42%, #FFB547 100%);
+    box-shadow: 0 12px 24px rgba(91, 92, 226, 0.22);
   }
 
   .chat-window {
@@ -296,14 +296,14 @@
 
   .status-dot {
     @apply rounded-full px-3 py-1 text-xs;
-    background: rgba(249, 115, 22, 0.12);
-    box-shadow: inset 0 0 0 1px rgba(249, 115, 22, 0.18);
-    color: #b45309;
+    background: rgba(91, 92, 226, 0.12);
+    box-shadow: inset 0 0 0 1px rgba(91, 92, 226, 0.18);
+    color: #3b3e9e;
   }
 
   .dark .status-dot {
-    background: rgba(251, 191, 36, 0.12);
-    color: #fef3c7;
+    background: rgba(91, 92, 226, 0.12);
+    color: #dfe4ff;
   }
 
   .message-list {
@@ -397,8 +397,8 @@
 
   .floating-chat-launcher {
     @apply fixed bottom-6 left-6 z-30 inline-flex h-14 w-14 items-center justify-center rounded-full text-white shadow-xl transition hover:-translate-y-1;
-    background: linear-gradient(135deg, #14b8a6, #4f46e5);
-    box-shadow: 0 18px 38px rgba(20, 184, 166, 0.32);
+    background: linear-gradient(135deg, #36C9A5, #5B5CE2);
+    box-shadow: 0 18px 38px rgba(91, 92, 226, 0.32);
   }
 
   .admin-tabs {
@@ -411,7 +411,7 @@
 
   .admin-tabs button.active {
     @apply text-white;
-    background: linear-gradient(135deg, #0f766e, #4f46e5);
+    background: linear-gradient(135deg, #36C9A5, #5B5CE2);
   }
 
   .inline-form {

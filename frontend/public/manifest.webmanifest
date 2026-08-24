@@ -3,8 +3,8 @@
   "short_name": "LinguaNest",
   "start_url": "/LLP/",
   "display": "standalone",
-  "background_color": "#fff7ed",
-  "theme_color": "#f97316",
+  "background_color": "#f7f9f7",
+  "theme_color": "#5B5CE2",
   "icons": [
     {
       "src": "/linguanest-mark.svg",

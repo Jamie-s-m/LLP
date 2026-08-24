@@ -36,24 +36,24 @@ export default function Home() {
           <div>
             <p className="atlas-kicker">{t('home.heroKicker')}</p>
             <h1 className="mb-4 text-4xl font-extrabold text-white md:text-5xl">
-              Learn faster. Speak brighter. Grow with confidence.
+               Learn a language. Then live it.
             </h1>
-            <p className="mb-8 max-w-2xl text-lg text-amber-50/90">
-              Follow guided lessons, real course progress, and tutor support in one friendly learning space built for daily momentum.
+             <p className="mb-8 max-w-2xl text-lg text-indigo-50/95">
+               Structured lessons, AI practice and real conversations with expert tutors — all in one place.
             </p>
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Link
                 to="/courses"
                 className="inline-flex items-center justify-center rounded-xl px-8 py-3 text-center font-semibold text-white shadow-xl transition hover:-translate-y-0.5"
-                style={{ background: 'linear-gradient(135deg, #fb923c 0%, #facc15 38%, #22c55e 100%)' }}
+                 style={{ background: 'linear-gradient(135deg, #5B5CE2 0%, #36C9A5 55%, #FFB547 100%)' }}
               >
-                {t('home.exploreLearningPaths')}
+                 Start Learning Free
               </Link>
               <Link
-                to="/pricing"
+                 to="/tutors"
                 className="inline-flex items-center justify-center rounded-xl border border-white/40 bg-white/8 px-8 py-3 text-center font-semibold text-white transition hover:bg-white/12"
               >
-                {t('home.comparePlans')}
+                 Find Your Tutor
               </Link>
             </div>
           </div>
