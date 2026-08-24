@@ -2,7 +2,7 @@ import { create } from 'zustand'
 
 export type LanguageCode = 'en' | 'ru' | 'uz'
 
-const LANGUAGE_STORAGE_KEY = 'auralex-language'
+const LANGUAGE_STORAGE_KEY = 'linguanest-language'
 
 const resolveInitialLanguage = (): LanguageCode => {
   if (typeof window === 'undefined') return 'en'

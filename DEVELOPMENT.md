@@ -1,6 +1,6 @@
-# Auralex Development Guide
+# LinguaNest Development Guide
 
-This document explains how to work on Auralex after the current product pass, what to focus on next, and how to use the app effectively during development and QA.
+This document explains how to work on LinguaNest after the current product pass, what to focus on next, and how to use the app effectively during development and QA.
 
 ## Product state
 
@@ -16,7 +16,7 @@ The current app already includes:
 - forum and groups
 - live chat with unread indicators, notifications, and read receipts
 - Stripe checkout session, billing portal, and webhook-based subscription syncing
-- premium Auralex branding and updated UI system
+- premium LinguaNest branding and updated UI system
 
 ## How to run the platform locally
 
@@ -68,7 +68,7 @@ npm run dev
 - React + TypeScript + Vite
 - route-based product surfaces
 - Zustand stores for auth, learning, and chat state
-- shared Auralex UI tokens in [frontend/src/index.css](C:/Users/morea/language-learn-platform/frontend/src/index.css)
+- shared LinguaNest UI tokens in [frontend/src/index.css](C:/Users/morea/language-learn-platform/frontend/src/index.css)
 
 ### Backend
 - Express REST API
@@ -246,13 +246,13 @@ FRONTEND_URL=https://jamie-s-m.github.io
 FRONTEND_APP_URL=https://jamie-s-m.github.io/LLP
 VAPID_PUBLIC_KEY=<public-key>
 VAPID_PRIVATE_KEY=<private-key>
-VAPID_SUBJECT=mailto:support@auralex.app
+VAPID_SUBJECT=mailto:support@linguanest.app
 SMTP_HOST=<smtp-host>
 SMTP_PORT=587
 SMTP_SECURE=false
 SMTP_USER=<smtp-user>
 SMTP_PASS=<smtp-password>
-EMAIL_FROM="Auralex <no-reply@auralex.app>"
+EMAIL_FROM="LinguaNest <no-reply@linguanest.app>"
 STRIPE_SECRET_KEY=<stripe-secret-key>
 STRIPE_WEBHOOK_SECRET=<stripe-webhook-secret>
 STRIPE_PRICE_LEARNER_MONTHLY=<price_id>

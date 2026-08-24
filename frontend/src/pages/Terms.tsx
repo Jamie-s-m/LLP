@@ -6,7 +6,7 @@ export default function Terms() {
           <p className="atlas-kicker">Legal</p>
           <h1 className="text-4xl text-ink dark:text-white">Terms of service</h1>
           <div className="mt-6 space-y-6 text-sm leading-7 text-slate-700 dark:text-slate-200">
-            <p>Auralex provides language learning tools, course delivery, messaging, and account-based dashboards for students, teachers, parents, and administrators.</p>
+            <p>LinguaNest provides language learning tools, course delivery, messaging, and account-based dashboards for students, teachers, parents, and administrators.</p>
             <p>By using the platform, users agree to provide accurate account information, use the service lawfully, and avoid abusing communication, content, or moderation systems.</p>
             <p>Admins are responsible for reviewing content, managing user access, and ensuring any commercial offering, refunds, and billing terms are clearly communicated to customers.</p>
             <p>Before public sale, these terms should be reviewed and customized to match the operator&apos;s jurisdiction, pricing model, refund policy, and business entity.</p>

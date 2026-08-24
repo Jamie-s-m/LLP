@@ -6,7 +6,7 @@ let configured = false;
 const ensureConfigured = () => {
   const { VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT } = process.env;
   if (configured || !VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) return configured;
-  webpush.setVapidDetails(VAPID_SUBJECT || 'mailto:support@auralex.app', VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+  webpush.setVapidDetails(VAPID_SUBJECT || 'mailto:support@linguanest.uz', VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
   configured = true;
   return configured;
 };

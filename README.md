@@ -4,7 +4,7 @@ LinguaNest is a full-stack language learning platform for learners, teachers, pa
 
 ## What the app does
 
-Auralex is built around five connected product surfaces:
+LinguaNest is built around five connected product surfaces:
 
 1. **Learning**
    - public course catalog
@@ -78,7 +78,7 @@ Auralex is built around five connected product surfaces:
 
 ## Live product highlights
 
-- Auralex premium branding and glassmorphism UI
+- LinguaNest premium branding and polished learning UX
 - responsive public and authenticated layouts
 - real-time chat bridge mounted globally for authenticated users
 - unread badges and browser notification support
@@ -91,7 +91,7 @@ Auralex is built around five connected product surfaces:
 ## How the app works in practice
 
 ### Public flow
-1. visitor lands on the Auralex home page
+1. visitor lands on the LinguaNest home page
 2. visitor browses courses and pricing
 3. visitor creates an account
 4. email verification completes
@@ -201,13 +201,13 @@ RATE_LIMIT_WINDOW_MS=900000
 RATE_LIMIT_MAX_REQUESTS=100
 VAPID_PUBLIC_KEY=replace_with_vapid_public_key
 VAPID_PRIVATE_KEY=replace_with_vapid_private_key
-VAPID_SUBJECT=mailto:support@auralex.app
+VAPID_SUBJECT=mailto:support@linguanest.uz
 SMTP_HOST=
 SMTP_PORT=587
 SMTP_SECURE=false
 SMTP_USER=
 SMTP_PASS=
-EMAIL_FROM="Auralex <no-reply@auralex.app>"
+EMAIL_FROM="LinguaNest <no-reply@linguanest.uz>"
 STRIPE_SECRET_KEY=<stripe-secret-key>
 STRIPE_WEBHOOK_SECRET=<stripe-webhook-secret>
 STRIPE_PRICE_LEARNER_MONTHLY=<price_id>
@@ -300,19 +300,19 @@ FRONTEND_URL=https://jamie-s-m.github.io
 FRONTEND_APP_URL=https://jamie-s-m.github.io/LLP
 VAPID_PUBLIC_KEY=<public-key>
 VAPID_PRIVATE_KEY=<private-key>
-VAPID_SUBJECT=mailto:support@auralex.app
+VAPID_SUBJECT=mailto:support@linguanest.app
 SMTP_HOST=<smtp-host>
 SMTP_PORT=587
 SMTP_SECURE=false
 SMTP_USER=<smtp-user>
 SMTP_PASS=<smtp-password>
-EMAIL_FROM="Auralex <no-reply@auralex.app>"
+EMAIL_FROM="LinguaNest <no-reply@linguanest.app>"
 ```
 
 ### Post-deploy checks
 
 - `GET /api/health` returns `200`
-- public pages load with current Auralex branding
+- public pages load with current LinguaNest branding
 - authenticated dashboards render correctly
 - chat opens and unread/read indicators behave correctly
 

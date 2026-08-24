@@ -44,7 +44,7 @@ export default function ParentDashboard() {
           <h1>{t('parentDashboard.heroTitle')}</h1>
           <p>{t('parentDashboard.heroCopy')}</p>
         </div>
-        <img src={`${import.meta.env.BASE_URL}auralex-orbit.svg`} alt="Auralex family learning illustration" />
+        <img src={`${import.meta.env.BASE_URL}linguanest-orbit.svg`} alt="LinguaNest family learning illustration" />
       </div>
       <div className="atlas-stat-grid mb-8">
         <div className="atlas-stat"><FiUsers /><strong>{links.filter((link) => link.status === 'approved').length}</strong><span>{t('parentDashboard.linkedLearners')}</span></div>

@@ -136,9 +136,9 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
       <div className="container mx-auto flex items-center justify-between gap-3 px-4 py-3 xl:gap-6">
         {/* Logo */}
         <Link to="/" className="flex shrink-0 items-center gap-2">
-            <img src={`${import.meta.env.BASE_URL}auralex-mark.svg`} alt="Auralex" className="w-8 h-8 rounded-xl shadow-[0_10px_28px_rgba(20,184,166,0.28)]" />
+            <img src={`${import.meta.env.BASE_URL}linguanest-mark.svg`} alt="LinguaNest" className="w-8 h-8 rounded-xl shadow-[0_10px_28px_rgba(20,184,166,0.28)]" />
           <span className="hidden sm:inline font-bold text-xl text-neutral-900 dark:text-white">
-            Auralex
+            LinguaNest
           </span>
         </Link>
 

@@ -51,7 +51,7 @@ export default function ChatRealtimeBridge() {
       if ('Notification' in window && Notification.permission === 'granted' && document.visibilityState !== 'visible') {
         new Notification(title, {
           body,
-          icon: `${import.meta.env.BASE_URL}auralex-mark.svg`,
+          icon: `${import.meta.env.BASE_URL}linguanest-mark.svg`,
         })
         return
       }

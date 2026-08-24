@@ -2,11 +2,11 @@ self.addEventListener('push', (event) => {
   let data = {}
   try { data = event.data ? event.data.json() : {} } catch { data = {} }
 
-  const title = data.title || 'Auralex'
+  const title = data.title || 'LinguaNest'
   const options = {
     body: data.body || '',
-    icon: `${self.registration.scope}auralex-mark.svg`,
-    badge: `${self.registration.scope}auralex-mark.svg`,
+    icon: `${self.registration.scope}linguanest-mark.svg`,
+    badge: `${self.registration.scope}linguanest-mark.svg`,
     data: { url: data.url || '/' },
   }
 

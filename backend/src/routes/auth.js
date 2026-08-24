@@ -145,7 +145,7 @@ router.post('/register', async (req, res) => {
       User.find({ role: 'admin' }).select('_id').then((admins) => {
         sendPushToUsers(admins.map((admin) => admin._id), {
           title: 'New teacher application',
-          body: `${user.firstName} ${user.lastName} applied to teach on Auralex.`,
+          body: `${user.firstName} ${user.lastName} applied to teach on LinguaNest.`,
           url: '/admin/control-center',
         }).catch(() => {});
       }).catch(() => {});

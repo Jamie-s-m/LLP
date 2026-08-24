@@ -31,15 +31,15 @@ export const sendVerificationEmail = async ({ user, token }) => {
   }
 
   await transporter.sendMail({
-    from: process.env.EMAIL_FROM || 'Auralex <no-reply@auralex.app>',
+    from: process.env.EMAIL_FROM || 'LinguaNest <no-reply@linguanest.uz>',
     to: user.email,
-    subject: 'Verify your Auralex email',
+    subject: 'Verify your LinguaNest email',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto; color: #102a43;">
-        <h1 style="margin-bottom: 12px;">Welcome to Auralex</h1>
+        <h1 style="margin-bottom: 12px;">Welcome to LinguaNest</h1>
         <p style="font-size: 16px; line-height: 1.5;">Hi ${user.firstName}, please verify your email address to activate your account and start learning.</p>
         <p style="margin: 24px 0;">
-          <a href="${verificationUrl}" style="display: inline-block; background: #f26b5b; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 10px; font-weight: 700;">Verify email</a>
+          <a href="${verificationUrl}" style="display: inline-block; background: #10b981; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 10px; font-weight: 700;">Verify email</a>
         </p>
         <p style="font-size: 14px; color: #486581;">This link expires in 24 hours. If you did not create this account, you can ignore this email.</p>
       </div>
@@ -59,15 +59,15 @@ export const sendPasswordResetEmail = async ({ user, token }) => {
   }
 
   await transporter.sendMail({
-    from: process.env.EMAIL_FROM || 'Auralex <no-reply@auralex.app>',
+    from: process.env.EMAIL_FROM || 'LinguaNest <no-reply@linguanest.uz>',
     to: user.email,
-    subject: 'Reset your Auralex password',
+    subject: 'Reset your LinguaNest password',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto; color: #102a43;">
         <h1 style="margin-bottom: 12px;">Reset your password</h1>
-        <p style="font-size: 16px; line-height: 1.5;">Hi ${user.firstName}, use the link below to create a new password for your Auralex account.</p>
+        <p style="font-size: 16px; line-height: 1.5;">Hi ${user.firstName}, use the link below to create a new password for your LinguaNest account.</p>
         <p style="margin: 24px 0;">
-          <a href="${resetUrl}" style="display: inline-block; background: #102a43; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 10px; font-weight: 700;">Reset password</a>
+          <a href="${resetUrl}" style="display: inline-block; background: #0f172a; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 10px; font-weight: 700;">Reset password</a>
         </p>
         <p style="font-size: 14px; color: #486581;">This link expires in 30 minutes. If you did not request it, you can ignore this email.</p>
       </div>

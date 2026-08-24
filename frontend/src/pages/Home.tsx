@@ -56,7 +56,7 @@ export default function Home() {
               </Link>
             </div>
           </div>
-          <img src={`${import.meta.env.BASE_URL}auralex-orbit.svg`} alt="Auralex premium language learning illustration" />
+          <img src={`${import.meta.env.BASE_URL}linguanest-orbit.svg`} alt="LinguaNest premium language learning illustration" />
         </div>
 
         <div className="mb-12 grid gap-4 lg:grid-cols-3">
