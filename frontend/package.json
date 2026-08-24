@@ -1,7 +1,7 @@
 {
-  "name": "language-learn-platform-frontend",
+  "name": "linguanest-frontend",
   "version": "1.0.0",
-  "description": "Frontend for Language Learning Platform",
+  "description": "LinguaNest - Language Learning & Tutor Marketplace Platform (LinguaNest.uz)",
   "type": "module",
   "engines": {
     "node": ">=20.19.0"
