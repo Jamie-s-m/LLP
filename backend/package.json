@@ -11,7 +11,7 @@
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "build": "echo 'Backend is JavaScript, no build needed'",
-    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand --detectOpenHandles",
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand --detectOpenHandles --testTimeout=20000 --setupFilesAfterEnv=./tests/jest.setup.js",
     "content:validate": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand tests/contentValidation.test.js",
     "content:status": "node src/seed.js --status",
     "content:seed": "node src/seed.js --mode=development --confirm",
@@ -56,6 +56,7 @@
     "jest": "^30.4.2",
     "multer": "^2.2.0",
     "nodemon": "^3.1.14",
-    "supertest": "^7.2.2"
+    "supertest": "^7.2.2",
+    "mongodb-memory-server": "^8.11.0"
   }
 }
