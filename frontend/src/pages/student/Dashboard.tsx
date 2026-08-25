@@ -5,6 +5,9 @@ import api from '../../services/api'
 import { useAuthStore } from '../../store/authStore'
 import { useI18n } from '../../utils/i18n'
 import DailyReward from '../../components/DailyReward'
+import InstallPrompt from '../../components/InstallPrompt'
+import NotificationOptIn from '../../components/NotificationOptIn'
+import CoinStore from '../../components/CoinStore'
 
 interface Summary {
   totalCourses: number
@@ -162,6 +165,14 @@ export default function Dashboard() {
                 <DailyReward />
               </div>
             </div>
+
+            <div className="grid gap-6 lg:grid-cols-2 mt-6">
+              <NotificationOptIn />
+              <CoinStore />
+            </div>
+
+            <InstallPrompt />
+
             <div className="atlas-panel mt-6 p-6">
               <p className="atlas-kicker">{t('studentDashboard.structuredKicker')}</p>
               <h2 className="text-2xl text-ink dark:text-white">{t('studentDashboard.structuredHeading')}</h2>
