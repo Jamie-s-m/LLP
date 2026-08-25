@@ -6,6 +6,7 @@ import { sendPasswordResetEmail, sendVerificationEmail } from '../utils/email.js
 import { generateEmailVerificationToken, generatePasswordResetToken, hashEmailVerificationToken, hashToken } from '../utils/emailVerification.js';
 import { normalizeModeratorPermissions } from '../middleware/auth.js';
 import { serializeBilling } from '../utils/billing.js';
+import logger from '../utils/logger.js';
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'local-development-only-secret';
@@ -44,7 +45,7 @@ router.get('/check-email', async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Email Check Error:', error);
+    logger.error('Email Check Error:', error);
     res.status(500).json({ success: false, message: 'Unable to validate email right now' });
   }
 });
@@ -93,7 +94,7 @@ router.post('/login', async (req, res) => {
       user: serializeUser(user),
     });
   } catch (error) {
-    console.error('Login Error:', error);
+    logger.error('Login Error:', error);
     res.status(500).json({ message: error.message || 'Server error during authentication' });
   }
 });
@@ -164,7 +165,7 @@ router.post('/register', async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Register Error:', error);
+    logger.error('Register Error:', error);
     res.status(500).json({ message: error.message || 'Server error during registration' });
   }
 });
@@ -193,7 +194,7 @@ router.get('/verify-email', async (req, res) => {
 
     res.status(200).json({ success: true, message: 'Email verified successfully. You can now sign in.' });
   } catch (error) {
-    console.error('Email Verification Error:', error);
+    logger.error('Email Verification Error:', error);
     res.status(500).json({ success: false, message: 'Email verification failed' });
   }
 });
@@ -230,7 +231,7 @@ router.post('/resend-verification', async (req, res) => {
       data: { previewUrl: delivery.previewUrl, emailDelivered: delivery.delivered },
     });
   } catch (error) {
-    console.error('Resend Verification Error:', error);
+    logger.error('Resend Verification Error:', error);
     res.status(500).json({ success: false, message: 'Unable to resend verification email' });
   }
 });
@@ -272,7 +273,7 @@ router.post('/forgot-password', async (req, res) => {
       data: { previewUrl, emailDelivered },
     });
   } catch (error) {
-    console.error('Forgot Password Error:', error);
+    logger.error('Forgot Password Error:', error);
     res.status(500).json({ success: false, message: 'Unable to start password reset right now' });
   }
 });
@@ -305,7 +306,7 @@ router.post('/reset-password', async (req, res) => {
 
     res.status(200).json({ success: true, message: 'Password updated successfully. You can now sign in.' });
   } catch (error) {
-    console.error('Reset Password Error:', error);
+    logger.error('Reset Password Error:', error);
     res.status(500).json({ success: false, message: 'Password reset failed' });
   }
 });

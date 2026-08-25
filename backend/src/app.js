@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import mongoSanitize from 'express-mongo-sanitize';
 import dotenv from 'dotenv';
 import { errorHandler } from './middleware/errorHandler.js';
 
@@ -55,7 +56,11 @@ const allowedOrigins = [...new Set(
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (process.env.NODE_ENV === 'development' && !origin) {
+        return callback(null, true);
+      }
+
+      if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
         callback(new Error('Origin is not allowed by CORS'));
@@ -71,6 +76,8 @@ app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), hand
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
+
+app.use(mongoSanitize());
 
 const apiLimiter = rateLimit({
   windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 15 * 60 * 1000),
@@ -102,8 +109,8 @@ app.get('/api/health', (req, res) => {
 });
 
 app.use('/api/chat', chatLimiter, chatRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api', apiLimiter);
-app.use('/api/auth', authLimiter);
 
 // API Routes
 app.use('/api/auth', authRoutes);

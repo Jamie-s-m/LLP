@@ -1,36 +1,30 @@
-# Build stage
-FROM node:18-alpine as builder
+# Frontend Production Dockerfile
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
-
-# Install dependencies
 RUN npm ci
 
-# Copy source code
 COPY . .
-
-# Build
 RUN npm run build
 
-# Runtime stage
-FROM node:18-alpine
+# Production stage with nginx
+FROM nginx:alpine
 
-WORKDIR /app
+# Copy custom nginx config
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Install serve to run the app
-RUN npm install -g serve
-
-# Copy built app from builder
-COPY --from=builder /app/dist ./dist
+# Copy built files
+COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Create non-root user
-RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
+RUN addgroup -g 1001 -S nginx && \
+    adduser -S nginx -u 1001 -G nginx
 
-USER nodejs
+EXPOSE 80
 
-EXPOSE 5173
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget --quiet --tries=1 --spider http://localhost/ || exit 1
 
-CMD ["serve", "-s", "dist", "-l", "5173"]
+CMD ["nginx", "-g", "daemon off;"]

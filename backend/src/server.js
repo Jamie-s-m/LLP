@@ -7,6 +7,9 @@ import app from './app.js';
 import ChatConversation from './models/ChatConversation.js';
 import ChatMessage from './models/ChatMessage.js';
 import { sendPushToUsers } from './utils/push.js';
+import logger from './utils/logger.js';
+import { createIndexes } from './utils/indexes.js';
+import { connectRedis, disconnectRedis } from './utils/redis.js';
 
 dotenv.config();
 
@@ -24,7 +27,10 @@ if (!MONGODB_URI) {
 const startServer = async () => {
   try {
     await mongoose.connect(MONGODB_URI);
-    console.log(`MongoDB connected: ${mongoose.connection.host}`);
+    logger.info(`MongoDB connected: ${mongoose.connection.host}`);
+
+    await createIndexes();
+    await connectRedis();
 
     const server = createServer(app);
     const socketOrigins = [...new Set([
@@ -101,13 +107,14 @@ const startServer = async () => {
     });
 
     server.listen(PORT, () => {
-      console.log(`API listening on port ${PORT}`);
+      logger.info(`API listening on port ${PORT}`);
     });
 
     const shutdown = async (signal) => {
-      console.log(`${signal} received. Shutting down gracefully...`);
+      logger.info(`${signal} received. Shutting down gracefully...`);
       server.close(async () => {
         await mongoose.connection.close();
+        logger.info('Server shutdown complete');
         process.exit(0);
       });
     };
@@ -115,7 +122,7 @@ const startServer = async () => {
     process.once('SIGINT', () => shutdown('SIGINT'));
     process.once('SIGTERM', () => shutdown('SIGTERM'));
   } catch (error) {
-    console.error('Unable to start API:', error.message);
+    logger.error('Unable to start API:', error);
     process.exit(1);
   }
 };

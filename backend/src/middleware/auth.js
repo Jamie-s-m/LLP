@@ -1,6 +1,10 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
+if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
+  throw new Error('JWT_SECRET must be set in production environment');
+}
+
 const JWT_SECRET = process.env.JWT_SECRET || 'local-development-only-secret';
 export const MODERATOR_PERMISSION_KEYS = ['communityModeration', 'supportChat', 'catalogContentQa', 'limitedUserManagement'];
 export const defaultModeratorPermissions = () => ({

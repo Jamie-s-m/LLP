@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 
 const userSchema = new mongoose.Schema(
   {
@@ -57,6 +58,18 @@ userSchema.pre('save', async function (next) {
 
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return bcrypt.compare(enteredPassword, this.password);
+};
+
+userSchema.methods.generatePasswordResetToken = function () {
+  const resetToken = crypto.randomBytes(32).toString('hex');
+  this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+  this.passwordResetExpiresAt = Date.now() + 30 * 60 * 1000;
+  return resetToken;
+};
+
+userSchema.methods.verifyPasswordResetToken = function (token) {
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+  return this.passwordResetToken === hashedToken && this.passwordResetExpiresAt > Date.now();
 };
 
 export default mongoose.model('User', userSchema);
