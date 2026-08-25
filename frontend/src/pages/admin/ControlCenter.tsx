@@ -1181,6 +1181,29 @@ export default function ControlCenter() {
               <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">{ui.operationalAction}</p>
               <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{ui.operationalActionText}</p>
               <Link to="/chat" className="btn btn-primary mt-4 inline-flex">{ui.openSupportChat}</Link>
+
+              <div className="mt-6">
+                <h4 className="text-sm font-semibold">Send test push</h4>
+                <p className="text-xs text-muted">Send a best-effort test push to specific user IDs (comma-separated)</p>
+                <div className="mt-3 flex flex-col gap-2">
+                  <input placeholder="comma-separated user ids" id="push-userids" className="input" />
+                  <input placeholder="Title" id="push-title" className="input" />
+                  <input placeholder="Body" id="push-body" className="input" />
+                  <div className="flex gap-2">
+                    <button onClick={async () => {
+                      const u = (document.getElementById('push-userids') as HTMLInputElement).value.trim();
+                      const title = (document.getElementById('push-title') as HTMLInputElement).value.trim();
+                      const body = (document.getElementById('push-body') as HTMLInputElement).value.trim();
+                      const userIds = u.split(',').map(s => s.trim()).filter(Boolean);
+                      if (userIds.length === 0) { alert('No user ids'); return }
+                      try {
+                        await api.post('/admin/push/send', { userIds, payload: { title, body } })
+                        alert('Push dispatched (best-effort)')
+                      } catch (err: any) { alert(err?.response?.data?.message || 'Failed to send push') }
+                    }} className="btn btn-primary">Send</button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
