@@ -4,6 +4,7 @@ import { FiBookOpen, FiCheck, FiClock, FiTarget, FiUsers, FiX, FiZap } from 'rea
 import api from '../../services/api'
 import { useAuthStore } from '../../store/authStore'
 import { useI18n } from '../../utils/i18n'
+import DailyReward from '../../components/DailyReward'
 
 interface Summary {
   totalCourses: number
@@ -144,15 +145,21 @@ export default function Dashboard() {
                   <strong className="text-ink dark:text-white">{progressPercent}%</strong>
                 </div>
               </div>
-              <div className="atlas-panel p-6">
-                <p className="atlas-kicker">{t('studentDashboard.nextStepKicker')}</p>
-                <h2 className="text-2xl text-ink dark:text-white">{t('studentDashboard.nextStepHeading')}</h2>
-                <p className="mt-2 text-muted">{summary?.totalCourses ? t('studentDashboard.nextStepContinue') : t('studentDashboard.nextStepStart')}</p>
-                <div className="mt-5">
-                  <Link to={summary?.totalCourses ? '/my-learning' : '/courses'} className="btn btn-primary">
-                    {summary?.totalCourses ? t('studentDashboard.resumeLearning') : t('studentDashboard.browseCourses')}
-                  </Link>
+
+              {/* Right column: next step + daily reward */}
+              <div className="space-y-4">
+                <div className="atlas-panel p-6">
+                  <p className="atlas-kicker">{t('studentDashboard.nextStepKicker')}</p>
+                  <h2 className="text-2xl text-ink dark:text-white">{t('studentDashboard.nextStepHeading')}</h2>
+                  <p className="mt-2 text-muted">{summary?.totalCourses ? t('studentDashboard.nextStepContinue') : t('studentDashboard.nextStepStart')}</p>
+                  <div className="mt-5">
+                    <Link to={summary?.totalCourses ? '/my-learning' : '/courses'} className="btn btn-primary">
+                      {summary?.totalCourses ? t('studentDashboard.resumeLearning') : t('studentDashboard.browseCourses')}
+                    </Link>
+                  </div>
                 </div>
+
+                <DailyReward />
               </div>
             </div>
             <div className="atlas-panel mt-6 p-6">

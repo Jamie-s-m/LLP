@@ -19,6 +19,7 @@ import adminRoutes from './routes/admin.js';
 import familyRoutes from './routes/family.js';
 import billingRoutes from './routes/billing.js';
 import pushRoutes from './routes/push.js';
+import dailyRewardRoutes from './routes/dailyReward.js';
 import { handleStripeWebhook } from './controllers/billingController.js';
 
 dotenv.config();
@@ -153,6 +154,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/family', familyRoutes);
 app.use('/api/billing', billingRoutes);
 app.use('/api/push', pushRoutes);
+app.use('/api/daily-reward', dailyRewardRoutes);
 
 // Catch-all API 404 handler
 app.use('/api', (req, res) => {
