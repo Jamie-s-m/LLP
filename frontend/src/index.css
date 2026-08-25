@@ -21,16 +21,16 @@
   --brand-text-secondary: #53605B;
   --brand-text-muted: #7C8983;
 
-  --dark-bg: #0f172a;
-  --dark-bg-2: #111d2e;
-  --dark-bg-3: #14273a;
-  --dark-surface: #172a3d;
-  --dark-surface-strong: #1d3552;
-  --dark-surface-soft: #1c2b42;
-  --dark-border: rgba(148, 163, 184, 0.2);
-  --dark-text-primary: #eaf3ff;
-  --dark-text-secondary: #d2ddea;
-  --dark-text-muted: #9eb3c8;
+  --dark-bg: #0b2230;
+  --dark-bg-2: #0f2b3f;
+  --dark-bg-3: #113049;
+  --dark-surface: #122b40;
+  --dark-surface-strong: #15354a;
+  --dark-surface-soft: #18374f;
+  --dark-border: rgba(148, 163, 184, 0.12);
+  --dark-text-primary: #e6f0f8;
+  --dark-text-secondary: #c9d9e6;
+  --dark-text-muted: #9fb6c9;
 }
 
 @layer base {
