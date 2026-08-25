@@ -141,7 +141,6 @@ app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api', apiLimiter);
 
 // API Routes
-app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/lessons', lessonRoutes);
