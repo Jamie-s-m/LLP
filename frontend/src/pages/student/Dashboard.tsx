@@ -44,12 +44,8 @@ export default function Dashboard() {
   const pendingFamilyRequests = familyLinks.filter((link) => link.status === 'pending')
 
   const reviewFamilyRequest = async (id: string, status: 'approved' | 'rejected') => {
-    try {
-      await api.patch(`/family/${id}/review`, { status })
-      setFamilyLinks((current) => current.map((link) => link._id === id ? { ...link, status } : link))
-    } catch (error: any) {
-      throw error
-    }
+    await api.patch(`/family/${id}/review`, { status })
+    setFamilyLinks((current) => current.map((link) => link._id === id ? { ...link, status } : link))
   }
 
   return (

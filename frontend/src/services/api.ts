@@ -5,6 +5,7 @@ const getSanitizedApiUrl = (): string => {
   let rawUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
   // Remove brackets [], quotes '', "", parentheses (), and whitespace
+  // eslint-disable-next-line no-useless-escape
   rawUrl = rawUrl.replace(/[\[\]"'()\s]+/g, '').trim()
 
   if (!/^https?:\/\//i.test(rawUrl)) {

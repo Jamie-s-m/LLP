@@ -51,7 +51,7 @@ export default function CourseDetail() {
         const resolvedCourse = payload?.course || fallbackCourse
         setCourse(resolvedCourse || null)
         setLessons(payload?.lessons || fallbackCourse?.lessons || [])
-      } catch (error: any) {
+      } catch {
         if (fallbackCourse) {
           console.warn('PRODUCTION_FALLBACK_ATTEMPTED: course detail is using demo/staging fallback for a public course view')
           setCourse(fallbackCourse)
