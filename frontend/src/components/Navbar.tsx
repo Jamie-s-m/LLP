@@ -136,13 +136,16 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
     <nav className="relative z-[120] border-b border-neutral-200 bg-white/90 shadow-sm backdrop-blur max-md:fixed max-md:left-0 max-md:right-0 max-md:top-0 dark:border-neutral-700 dark:bg-neutral-800/90">
       <div className="container mx-auto flex items-center justify-between gap-3 px-4 py-3 xl:gap-6">
         {/* Logo */}
-        <Link to="/" className="flex shrink-0 items-center gap-2.5">
-          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-2xl border border-white/40 bg-gradient-to-br from-indigo-500 via-violet-500 to-emerald-400 shadow-[0_14px_30px_rgba(91,92,226,0.25)] ring-2 ring-white/60 dark:ring-slate-900/60">
+        <Link to="/" className="flex shrink-0 items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl border border-white/60 bg-gradient-to-br from-[#1A1B62] via-[#5B5CE2] to-[#1CC9A5] shadow-[0_16px_30px_rgba(91,92,226,0.26)] ring-2 ring-white/70 dark:ring-slate-900/70">
             <img src={`${import.meta.env.BASE_URL}linguanest-mark.svg`} alt={BRAND.name} className="h-8 w-8 object-contain" />
           </div>
           <div className="hidden items-center gap-2 sm:flex">
-            <span className="text-lg font-black tracking-[-0.04em] text-neutral-900 dark:text-white">{BRAND.name}</span>
-            <span className="rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-indigo-700 dark:border-indigo-400/30 dark:bg-indigo-500/10 dark:text-indigo-200">.uz</span>
+            <span className="text-[1.05rem] font-black tracking-[-0.06em] text-neutral-900 dark:text-white">
+              <span className="text-neutral-900 dark:text-white">Lingua</span>
+              <span className="bg-gradient-to-r from-[#5B5CE2] via-[#1CC9A5] to-[#FFBF59] bg-clip-text text-transparent">Nest</span>
+            </span>
+            <span className="rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] text-indigo-700 dark:border-indigo-300/30 dark:bg-indigo-500/10 dark:text-indigo-200">.uz</span>
           </div>
         </Link>
 

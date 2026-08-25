@@ -4,6 +4,7 @@ export const BRAND = {
   shortName: 'LinguaNest',
   domain: 'linguanest.uz',
   tagline: 'Learn. Speak. Belong.',
+  concept: 'A safe nest where language grows, confidence blooms, and global connection takes flight.',
   supportEmail: 'support@linguanest.uz',
   socialLinks: {
     instagram: 'https://instagram.com/linguanest',

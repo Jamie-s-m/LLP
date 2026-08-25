@@ -141,10 +141,19 @@
 
 @keyframes floatingCard {
   0%, 100% {
-    transform: translateY(0px) rotate(-1deg);
+    transform: translateY(0px) rotate(-1deg) perspective(1200px) rotateX(8deg) rotateY(-8deg);
   }
   50% {
-    transform: translateY(-10px) rotate(1deg);
+    transform: translateY(-10px) rotate(1deg) perspective(1200px) rotateX(10deg) rotateY(4deg);
+  }
+}
+
+@keyframes floatDrift {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(0, -10px, 0) scale(1.08);
   }
 }
 
@@ -230,11 +239,80 @@
     box-shadow: 0 24px 60px rgba(15, 27, 76, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
-  .atlas-hero img {
+  .hero-orbit-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 22rem;
+    perspective: 1200px;
+  }
+
+  .hero-orbit-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 14% 8% 12% 8%;
+    border-radius: 9999px;
+    border: 2px dashed rgba(255, 255, 255, 0.45);
+    transform: rotate(-14deg);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08), 0 0 40px rgba(255,255,255,0.08);
+  }
+
+  .hero-orbit-image {
     @apply max-h-80 w-full rounded-3xl object-contain;
     animation: floatingCard 7s ease-in-out infinite;
     filter: drop-shadow(0 26px 50px rgba(8, 24, 39, 0.35));
-    transform: translateZ(24px);
+    transform: translateZ(24px) perspective(1200px) rotateX(8deg) rotateY(-8deg);
+    transition: transform 0.5s ease, filter 0.5s ease;
+  }
+
+  .hero-orbit-wrap:hover .hero-orbit-image {
+    transform: translateY(-6px) scale(1.02) perspective(1200px) rotateX(0deg) rotateY(0deg);
+    filter: drop-shadow(0 34px 60px rgba(8, 24, 39, 0.4));
+  }
+
+  .hero-float {
+    position: absolute;
+    display: block;
+    border-radius: 9999px;
+    box-shadow: 0 14px 26px rgba(16, 32, 42, 0.15);
+    opacity: 0.96;
+    animation: floatDrift 7s ease-in-out infinite;
+  }
+
+  .hero-float-one {
+    width: 16px;
+    height: 16px;
+    right: 18%;
+    top: 18%;
+    background: linear-gradient(135deg, #f7d68a, #f7a94a);
+  }
+
+  .hero-float-two {
+    width: 18px;
+    height: 18px;
+    left: 18%;
+    bottom: 16%;
+    background: linear-gradient(135deg, #67d6ce, #2cc2a7);
+    animation-delay: 0.7s;
+  }
+
+  .hero-float-three {
+    width: 12px;
+    height: 12px;
+    right: 28%;
+    bottom: 18%;
+    background: linear-gradient(135deg, #b8c8ff, #6b83ff);
+    animation-delay: 1.4s;
+  }
+
+  .hero-float-four {
+    width: 14px;
+    height: 14px;
+    left: 25%;
+    top: 24%;
+    background: linear-gradient(135deg, #ff9ab4, #ff7a6a);
+    animation-delay: 2s;
   }
 
   .atlas-panel {

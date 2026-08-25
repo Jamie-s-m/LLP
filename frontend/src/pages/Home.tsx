@@ -43,8 +43,11 @@ export default function Home() {
             <h1 className="mb-4 text-4xl font-extrabold tracking-[-0.06em] text-white md:text-5xl lg:text-6xl">
                {BRAND.tagline}
             </h1>
+            <p className="mb-2 max-w-2xl text-sm font-medium uppercase tracking-[0.18em] text-indigo-100/80">
+              The language nest concept
+            </p>
              <p className="mb-8 max-w-2xl text-lg leading-8 text-indigo-50/95">
-               Learn with guided lessons, live tutor sessions, AI-powered practice, and a vibrant community built for real fluency.
+               {BRAND.concept}
             </p>
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Link
@@ -67,7 +70,13 @@ export default function Home() {
               <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5">Progress tracking</span>
             </div>
           </div>
-          <img src={`${import.meta.env.BASE_URL}linguanest-orbit.svg`} alt="LinguaNest premium language learning illustration" className="drop-shadow-[0_18px_40px_rgba(15,23,42,0.28)]" />
+          <div className="hero-orbit-wrap relative flex items-center justify-center">
+            <span className="hero-float hero-float-one" />
+            <span className="hero-float hero-float-two" />
+            <span className="hero-float hero-float-three" />
+            <span className="hero-float hero-float-four" />
+            <img src={`${import.meta.env.BASE_URL}linguanest-orbit.svg`} alt="LinguaNest premium language learning illustration" className="hero-orbit-image drop-shadow-[0_18px_40px_rgba(15,23,42,0.28)]" />
+          </div>
         </div>
 
         <div className="mb-12 grid gap-4 lg:grid-cols-3">
