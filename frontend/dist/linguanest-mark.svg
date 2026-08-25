@@ -1,36 +1,39 @@
 <svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
   <title id="title">LinguaNest icon</title>
-  <desc id="desc">A premium 3D LinguaNest brand mark with a nest and speech bubble.</desc>
+  <desc id="desc">A premium LinguaNest brand icon combining a nest-inspired monogram and a modern orbit.</desc>
   <defs>
-    <linearGradient id="bg" x1="18" y1="12" x2="110" y2="110" gradientUnits="userSpaceOnUse">
+    <linearGradient id="bg" x1="16" y1="10" x2="110" y2="118" gradientUnits="userSpaceOnUse">
       <stop stop-color="#5B5CE2"/>
-      <stop offset="0.38" stop-color="#4546B8"/>
-      <stop offset="0.7" stop-color="#36C9A5"/>
-      <stop offset="1" stop-color="#FFB547"/>
+      <stop offset="0.35" stop-color="#4546B8"/>
+      <stop offset="0.62" stop-color="#1CC9A5"/>
+      <stop offset="1" stop-color="#FFBF59"/>
     </linearGradient>
-    <linearGradient id="glass" x1="34" y1="20" x2="91" y2="97" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#F8FCFF"/>
-      <stop offset="1" stop-color="#EEFDF9"/>
+    <linearGradient id="glass" x1="28" y1="24" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#EAF8FF"/>
     </linearGradient>
-    <radialGradient id="nestGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(66 50) rotate(57) scale(52 44)">
-      <stop stop-color="#C3D5FF"/>
-      <stop offset="0.28" stop-color="#7E82F3"/>
-      <stop offset="0.64" stop-color="#36C9A5"/>
-      <stop offset="1" stop-color="#FFB547"/>
+    <radialGradient id="orb" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(84 36) rotate(52) scale(58 52)">
+      <stop stop-color="#DFF4FF"/>
+      <stop offset="0.38" stop-color="#8AA8FF"/>
+      <stop offset="0.7" stop-color="#2CC2A7"/>
+      <stop offset="1" stop-color="#FFD86A"/>
     </radialGradient>
-    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="12" stdDeviation="10" flood-color="#1E2A7A" flood-opacity="0.28"/>
+    <filter id="shadow" x="-20%" y="-20%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#101B3D" flood-opacity="0.26"/>
     </filter>
   </defs>
 
   <rect x="8" y="8" width="112" height="112" rx="28" fill="url(#bg)"/>
-  <rect x="15" y="15" width="98" height="98" rx="24" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.2)"/>
+  <circle cx="64" cy="64" r="40" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.26)" stroke-width="1.6"/>
+  <circle cx="64" cy="64" r="25" fill="rgba(255,255,255,0.10)"/>
 
   <g filter="url(#shadow)">
-    <path d="M34 53C34 42.507 42.507 34 53 34H75C85.493 34 94 42.507 94 53V64C94 74.493 85.493 83 75 83H59L46 94V83C42.134 83 39 79.866 39 76V53C39 49.134 42.134 46 46 46H53C49.686 46 47 48.686 47 52V56C47 59.314 49.686 62 53 62H75C78.314 62 81 59.314 81 56V52C81 48.686 78.314 46 75 46H74C69.582 46 66 42.418 66 38V35C66 39.418 62.418 43 58 43H53C42.507 43 34 51.507 34 62V53Z" fill="url(#glass)"/>
-    <path d="M50 50C50 44.477 54.477 40 60 40C65.523 40 70 44.477 70 50V52C70 57.523 65.523 62 60 62C54.477 62 50 57.523 50 52V50Z" fill="url(#nestGlow)"/>
-    <path d="M52 56C57.333 62.667 66 66 76 66" stroke="#F7F9FF" stroke-width="4" stroke-linecap="round" opacity="0.9"/>
-    <path d="M64 38C72.5 42 79 49 81 58" stroke="#FFEEB6" stroke-width="4" stroke-linecap="round" opacity="0.9"/>
-    <path d="M48 75C56 81 65 84 74 84" stroke="#B9F0E4" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
+    <path d="M36 82V42C36 38.686 38.686 36 42 36H48C51.314 36 54 38.686 54 42V62H74C77.314 62 80 64.686 80 68V82H72V71H54V82H36Z" fill="url(#glass)"/>
+    <path d="M62 82V42L84 82V42" stroke="url(#orb)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="90" cy="34" r="8" fill="#FFDA7B"/>
+    <path d="M92 34L95 37L101 29" stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
+
+  <path d="M28 88C38 84 47 83 57 86" stroke="rgba(255,255,255,0.68)" stroke-width="3.2" stroke-linecap="round"/>
+  <path d="M79 95C88 91 94 85 99 78" stroke="rgba(255,255,255,0.5)" stroke-width="3.2" stroke-linecap="round"/>
 </svg>

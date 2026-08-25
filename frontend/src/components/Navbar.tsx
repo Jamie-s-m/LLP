@@ -136,11 +136,14 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
     <nav className="relative z-[120] border-b border-neutral-200 bg-white/90 shadow-sm backdrop-blur max-md:fixed max-md:left-0 max-md:right-0 max-md:top-0 dark:border-neutral-700 dark:bg-neutral-800/90">
       <div className="container mx-auto flex items-center justify-between gap-3 px-4 py-3 xl:gap-6">
         {/* Logo */}
-        <Link to="/" className="flex shrink-0 items-center gap-2">
-            <img src={`${import.meta.env.BASE_URL}linguanest-mark.svg`} alt={BRAND.name} className="w-8 h-8 rounded-xl shadow-[0_10px_28px_rgba(20,184,166,0.28)]" />
-          <span className="hidden sm:inline font-bold text-xl text-neutral-900 dark:text-white">
-            {BRAND.name}
-          </span>
+        <Link to="/" className="flex shrink-0 items-center gap-2.5">
+          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-2xl border border-white/40 bg-gradient-to-br from-indigo-500 via-violet-500 to-emerald-400 shadow-[0_14px_30px_rgba(91,92,226,0.25)] ring-2 ring-white/60 dark:ring-slate-900/60">
+            <img src={`${import.meta.env.BASE_URL}linguanest-mark.svg`} alt={BRAND.name} className="h-8 w-8 object-contain" />
+          </div>
+          <div className="hidden items-center gap-2 sm:flex">
+            <span className="text-lg font-black tracking-[-0.04em] text-neutral-900 dark:text-white">{BRAND.name}</span>
+            <span className="rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-indigo-700 dark:border-indigo-400/30 dark:bg-indigo-500/10 dark:text-indigo-200">.uz</span>
+          </div>
         </Link>
 
         {/* Center Navigation */}

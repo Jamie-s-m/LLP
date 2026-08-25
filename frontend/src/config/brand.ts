@@ -1,5 +1,6 @@
 export const BRAND = {
   name: 'LinguaNest',
+  displayName: 'LinguaNest.uz',
   shortName: 'LinguaNest',
   domain: 'linguanest.uz',
   tagline: 'Learn. Speak. Belong.',

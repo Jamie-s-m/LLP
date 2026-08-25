@@ -6,20 +6,21 @@
 
 :root {
   --brand-primary: #5B5CE2;
-  --brand-primary-dark: #4546B8;
-  --brand-primary-soft: #ECECFF;
-  --brand-mint: #36C9A5;
-  --brand-mint-dark: #168E73;
-  --brand-gold: #F4B64A;
-  --brand-coral: #EF6A62;
-  --brand-sky: #4F9CF9;
-  --brand-background: #F7F9F8;
-  --brand-surface: #FFFFFF;
-  --brand-surface-secondary: #F1F4F2;
-  --brand-border: #E1E7E4;
-  --brand-text-primary: #17211E;
-  --brand-text-secondary: #53605B;
-  --brand-text-muted: #7C8983;
+  --brand-primary-dark: #3638b4;
+  --brand-primary-soft: #eef0ff;
+  --brand-mint: #1cc9a5;
+  --brand-mint-dark: #0f9a7d;
+  --brand-mint-soft: #eafcf7;
+  --brand-gold: #ffbf59;
+  --brand-coral: #ff7a6a;
+  --brand-sky: #4f9cf9;
+  --brand-background: #f6f8ff;
+  --brand-surface: #ffffff;
+  --brand-surface-secondary: #f2f5fb;
+  --brand-border: rgba(91, 92, 226, 0.12);
+  --brand-text-primary: #101b3d;
+  --brand-text-secondary: #4e5d7b;
+  --brand-text-muted: #73809a;
 
   --dark-bg: #0b2230;
   --dark-bg-2: #0f2b3f;
@@ -41,7 +42,10 @@
 
   body {
     @apply text-neutral-900 dark:text-neutral-50 transition-colors duration-300;
-    background: linear-gradient(180deg, var(--brand-background) 0%, #eef3ff 20%, #f4fff9 62%, #fffaf3 100%);
+    background:
+      radial-gradient(circle at top left, rgba(91, 92, 226, 0.12), transparent 24%),
+      radial-gradient(circle at top right, rgba(28, 201, 165, 0.15), transparent 26%),
+      linear-gradient(180deg, #f6f8ff 0%, #eef5ff 20%, #f4fff9 62%, #fffaf5 100%);
     font-family: 'Manrope', sans-serif;
     color: var(--brand-text-primary);
   }
@@ -69,14 +73,14 @@
 
   .btn-primary {
     @apply text-white hover:brightness-110 active:brightness-95;
-    background: linear-gradient(135deg, #5B5CE2 0%, #4546B8 35%, #36C9A5 100%);
+    background: linear-gradient(135deg, #5B5CE2 0%, #5049d8 28%, #1cc9a5 72%, #ffbf59 100%);
     box-shadow: 0 18px 40px rgba(91, 92, 226, 0.28);
   }
 
   .btn-secondary {
     @apply text-white hover:brightness-110 active:brightness-95;
-    background: linear-gradient(135deg, #36C9A5 0%, #5BA7FF 52%, #FFB547 100%);
-    box-shadow: 0 18px 38px rgba(54, 201, 165, 0.24);
+    background: linear-gradient(135deg, #19b99f 0%, #4f9cf9 52%, #ffbf59 100%);
+    box-shadow: 0 18px 38px rgba(27, 190, 165, 0.24);
   }
 
   .btn-outline {

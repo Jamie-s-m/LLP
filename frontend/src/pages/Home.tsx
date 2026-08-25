@@ -35,30 +35,39 @@ export default function Home() {
       <div className="mx-auto max-w-7xl px-4 py-8">
         <div className="atlas-hero mb-12">
           <div>
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.22em] text-indigo-50 backdrop-blur-sm">
+              <span className="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_16px_rgba(110,231,183,0.9)]" />
+              {BRAND.displayName}
+            </div>
             <p className="atlas-kicker">{t('home.heroKicker')}</p>
-            <h1 className="mb-4 text-4xl font-extrabold text-white md:text-5xl">
+            <h1 className="mb-4 text-4xl font-extrabold tracking-[-0.06em] text-white md:text-5xl lg:text-6xl">
                {BRAND.tagline}
             </h1>
-             <p className="mb-8 max-w-2xl text-lg text-indigo-50/95">
-               Structured lessons, AI practice and real conversations with expert tutors — all in one place.
+             <p className="mb-8 max-w-2xl text-lg leading-8 text-indigo-50/95">
+               Learn with guided lessons, live tutor sessions, AI-powered practice, and a vibrant community built for real fluency.
             </p>
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Link
                 to="/courses"
-                className="inline-flex items-center justify-center rounded-xl px-8 py-3 text-center font-semibold text-white shadow-xl transition hover:-translate-y-0.5"
-                 style={{ background: 'linear-gradient(135deg, #5B5CE2 0%, #36C9A5 55%, #FFB547 100%)' }}
+                className="inline-flex items-center justify-center rounded-2xl px-8 py-3.5 text-center text-base font-semibold text-white shadow-[0_18px_38px_rgba(27,34,82,0.28)] transition hover:-translate-y-0.5"
+                 style={{ background: 'linear-gradient(135deg, #5B5CE2 0%, #28B5A3 52%, #FFB547 100%)' }}
               >
-                 Start Learning Free
+                 Start learning free
               </Link>
               <Link
                  to="/tutors"
-                className="inline-flex items-center justify-center rounded-xl border border-white/40 bg-white/8 px-8 py-3 text-center font-semibold text-white transition hover:bg-white/12"
+                className="inline-flex items-center justify-center rounded-2xl border border-white/35 bg-white/10 px-8 py-3.5 text-center text-base font-semibold text-white backdrop-blur-sm transition hover:bg-white/15"
               >
-                 Find Your Tutor
+                 Find your tutor
               </Link>
             </div>
+            <div className="mt-6 flex flex-wrap gap-2 text-sm text-indigo-100/90">
+              <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5">Live tutoring</span>
+              <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5">AI practice</span>
+              <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5">Progress tracking</span>
+            </div>
           </div>
-          <img src={`${import.meta.env.BASE_URL}linguanest-orbit.svg`} alt="LinguaNest premium language learning illustration" />
+          <img src={`${import.meta.env.BASE_URL}linguanest-orbit.svg`} alt="LinguaNest premium language learning illustration" className="drop-shadow-[0_18px_40px_rgba(15,23,42,0.28)]" />
         </div>
 
         <div className="mb-12 grid gap-4 lg:grid-cols-3">
