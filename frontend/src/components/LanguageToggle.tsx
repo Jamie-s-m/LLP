@@ -7,22 +7,18 @@ type LanguageCode = 'en' | 'ru' | 'uz'
 function FlagIcon({ code }: { code: LanguageCode }) {
   const commonProps = {
     viewBox: '0 0 32 32',
-    className: 'h-5 w-5 shrink-0 overflow-hidden rounded-full ring-1 ring-white/20',
+    className: 'h-5 w-5 shrink-0 overflow-hidden rounded-full border border-white/20 bg-slate-900 shadow-inner',
     'aria-hidden': true,
   }
 
   if (code === 'en') {
     return (
       <svg {...commonProps}>
-        <rect width="32" height="32" rx="16" fill="#1F4E9D" />
-        <rect x="0" y="0" width="32" height="32" fill="#FFFFFF" opacity="0.12" />
-        <rect x="0" y="0" width="32" height="32" fill="#FFFFFF" opacity="0.08" />
-        <rect x="0" y="0" width="13" height="32" fill="#FFFFFF" />
-        <rect x="0" y="0" width="32" height="13" fill="#FFFFFF" />
-        <rect x="0" y="0" width="6" height="32" fill="#C8102E" />
-        <rect x="0" y="0" width="32" height="6" fill="#C8102E" />
-        <rect x="0" y="13" width="32" height="6" fill="#C8102E" />
-        <rect x="13" y="0" width="6" height="32" fill="#C8102E" />
+        <rect width="32" height="32" rx="16" fill="#012169" />
+        <path d="M0 0L32 32M32 0L0 32" stroke="#fff" strokeWidth="6" />
+        <path d="M0 0L32 32M32 0L0 32" stroke="#C8102E" strokeWidth="3" />
+        <path d="M16 0V32M0 16H32" stroke="#fff" strokeWidth="10" />
+        <path d="M16 0V32M0 16H32" stroke="#C8102E" strokeWidth="5" />
       </svg>
     )
   }
@@ -30,23 +26,30 @@ function FlagIcon({ code }: { code: LanguageCode }) {
   if (code === 'ru') {
     return (
       <svg {...commonProps}>
-        <rect width="32" height="32" rx="16" fill="#FFFFFF" />
-        <rect x="0" y="0" width="32" height="10.7" fill="#FFFFFF" />
-        <rect x="0" y="10.7" width="32" height="10.7" fill="#2C5DFF" />
-        <rect x="0" y="21.4" width="32" height="10.6" fill="#E52B50" />
+        <rect width="32" height="32" rx="16" fill="#fff" />
+        <rect y="0" width="32" height="10.7" fill="#fff" />
+        <rect y="10.7" width="32" height="10.7" fill="#0039A6" />
+        <rect y="21.4" width="32" height="10.6" fill="#D52B1E" />
       </svg>
     )
   }
 
   return (
     <svg {...commonProps}>
-      <rect width="32" height="32" rx="16" fill="#1E3A8A" />
-      <rect x="0" y="0" width="32" height="32" fill="#FFFFFF" opacity="0.08" />
-      <rect x="0" y="0" width="32" height="10.7" fill="#1E3A8A" />
-      <rect x="0" y="10.7" width="32" height="10.7" fill="#00AEEF" />
-      <rect x="0" y="21.4" width="32" height="10.6" fill="#1FBF73" />
-      <circle cx="16" cy="16" r="6.4" fill="#F5D742" />
-      <path d="M11.5 16H20.5M16 11.5V20.5" stroke="#1E3A8A" strokeWidth="1.4" strokeLinecap="round" />
+      <rect width="32" height="32" rx="16" fill="#1E40AF" />
+      <rect y="18" width="32" height="14" fill="#14B86A" />
+      <path d="M20.5 10.5c-2.5 0-4.5 2-4.5 4.5 0 2.6 2 4.7 4.5 4.7 1.9 0 3.5-1.2 4.2-2.8h-2.4c-.4.9-1.3 1.5-2.3 1.5-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5c.9 0 1.7.5 2.2 1.3h2.4c-.7-1.8-2.4-3-4.3-3Z" fill="#fff" />
+      <circle cx="21" cy="15" r="2.2" fill="#fff" />
+      <g fill="#fff">
+        <circle cx="8.5" cy="9.5" r="1.1" />
+        <circle cx="11.5" cy="8.2" r="1.1" />
+        <circle cx="14.5" cy="9.5" r="1.1" />
+        <circle cx="17.2" cy="8.2" r="1.1" />
+        <circle cx="18.8" cy="10.8" r="1.1" />
+        <circle cx="9.4" cy="12.6" r="1.1" />
+        <circle cx="12.6" cy="13.7" r="1.1" />
+        <circle cx="16.2" cy="13.7" r="1.1" />
+      </g>
     </svg>
   )
 }

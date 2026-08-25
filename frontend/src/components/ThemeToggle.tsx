@@ -15,7 +15,8 @@ export default function ThemeToggle() {
       aria-label={label}
       title={label}
     >
-      {theme === 'dark' ? <FiSun size={18} /> : <FiMoon size={18} />}
+      <span className="sr-only">{label}</span>
+      {theme === 'dark' ? <FiSun size={17} /> : <FiMoon size={17} />}
     </button>
   )
 }
