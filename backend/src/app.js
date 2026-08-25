@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import mongoSanitize from 'express-mongo-sanitize';
 import dotenv from 'dotenv';
 import { errorHandler } from './middleware/errorHandler.js';
 
@@ -44,27 +43,27 @@ const defaultOrigins = [
   process.env.FRONTEND_APP_URL,
 ];
 
-const allowedOrigins = [...new Set(
+const normalizeOrigin = (value) => (typeof value === 'string' ? value.replace(/\/+$/, '').toLowerCase() : '');
+const allowedOrigins = new Set(
   (process.env.CORS_ORIGINS || '')
     .split(',')
-    .map((origin) => origin.trim())
+    .map((origin) => normalizeOrigin(origin))
     .filter(Boolean)
-    .concat(defaultOrigins)
-    .filter(Boolean)
-)];
+    .concat(defaultOrigins.filter(Boolean).map(normalizeOrigin))
+);
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (process.env.NODE_ENV === 'development' && !origin) {
+      if (!origin || process.env.NODE_ENV !== 'production') {
         return callback(null, true);
       }
 
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Origin is not allowed by CORS'));
+      if (allowedOrigins.has(normalizeOrigin(origin))) {
+        return callback(null, true);
       }
+
+      return callback(new Error('Origin is not allowed by CORS'));
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
@@ -77,7 +76,35 @@ app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), hand
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-app.use(mongoSanitize());
+const sanitizeObject = (value) => {
+  if (Array.isArray(value)) {
+    return value.map((item) => sanitizeObject(item));
+  }
+
+  if (value && typeof value === 'object') {
+    const sanitized = {};
+
+    for (const [key, nestedValue] of Object.entries(value)) {
+      if (key.startsWith('$') || key.includes('.')) {
+        continue;
+      }
+
+      sanitized[key] = sanitizeObject(nestedValue);
+    }
+
+    return sanitized;
+  }
+
+  return value;
+};
+
+app.use((req, _res, next) => {
+  if (req.body && typeof req.body === 'object') {
+    req.body = sanitizeObject(req.body);
+  }
+
+  next();
+});
 
 const apiLimiter = rateLimit({
   windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 15 * 60 * 1000),
@@ -128,7 +155,7 @@ app.use('/api/billing', billingRoutes);
 app.use('/api/push', pushRoutes);
 
 // Catch-all API 404 handler
-app.use('/api/*', (req, res) => {
+app.use('/api', (req, res) => {
   res.status(404).json({ success: false, message: 'API endpoint not found' });
 });
 
