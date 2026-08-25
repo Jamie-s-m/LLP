@@ -29,6 +29,12 @@ export default function Home() {
     { title: t('home.signal2Title'), copy: t('home.signal2Copy'), icon: FiMessageCircle },
     { title: t('home.signal3Title'), copy: t('home.signal3Copy'), icon: FiShield },
   ]
+  const quickAccessCards = [
+    { label: 'Courses', href: '/courses', accent: 'from-indigo-500 to-violet-500' },
+    { label: 'Tutors', href: '/tutors', accent: 'from-emerald-500 to-teal-500' },
+    { label: 'Practice', href: '/flashcards', accent: 'from-amber-500 to-orange-500' },
+    { label: 'Chat', href: '/chat', accent: 'from-sky-500 to-cyan-500' },
+  ]
 
   return (
     <div className="atlas-page">
@@ -77,6 +83,23 @@ export default function Home() {
             <span className="hero-float hero-float-four" />
             <img src={`${import.meta.env.BASE_URL}linguanest-orbit.svg`} alt="LinguaNest premium language learning illustration" className="hero-orbit-image drop-shadow-[0_18px_40px_rgba(15,23,42,0.28)]" />
           </div>
+        </div>
+
+        <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {quickAccessCards.map((card) => (
+            <Link
+              key={card.label}
+              to={card.href}
+              className="group rounded-2xl border border-white/30 bg-white/65 p-3 shadow-sm backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-neutral-700 dark:bg-neutral-800/70"
+            >
+              <div className={`mb-3 h-10 w-10 rounded-xl bg-gradient-to-br ${card.accent} shadow-lg`} />
+              <p className="text-sm font-semibold text-neutral-900 dark:text-white">{card.label}</p>
+              <span className="mt-1 inline-flex items-center gap-1 text-[11px] font-medium text-primary-600 dark:text-primary-300">
+                Open
+                <FiArrowRight className="transition-transform group-hover:translate-x-0.5" size={12} />
+              </span>
+            </Link>
+          ))}
         </div>
 
         <div className="mb-12 grid gap-4 lg:grid-cols-3">

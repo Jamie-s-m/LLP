@@ -38,6 +38,7 @@
   html {
     @apply scroll-smooth;
     background: var(--brand-background);
+    scroll-padding-top: 88px;
   }
 
   body {
@@ -120,6 +121,32 @@
 
   .label {
     @apply mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300;
+  }
+
+  @media (max-width: 767px) {
+    .atlas-page {
+      min-height: auto;
+    }
+
+    .atlas-hero {
+      @apply rounded-[1.5rem] p-4 sm:p-5;
+      gap: 1.25rem;
+    }
+
+    .atlas-hero h1 {
+      font-size: clamp(2.2rem, 9vw, 3.4rem);
+      line-height: 0.98;
+    }
+
+    .atlas-hero p {
+      font-size: 0.98rem;
+      line-height: 1.65;
+    }
+
+    .atlas-panel,
+    .card {
+      border-radius: 1.2rem;
+    }
   }
 }
 

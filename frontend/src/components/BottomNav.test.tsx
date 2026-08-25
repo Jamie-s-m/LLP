@@ -9,7 +9,19 @@ describe('BottomNav', () => {
     localStorage.clear()
   })
 
-  it('renders the primary mobile navigation items without duplicate keys', () => {
+  it('renders the primary mobile navigation items without duplicate keys for authenticated users', () => {
+    useAuthStore.setState({
+      user: {
+        id: 'user-1',
+        firstName: 'Maria',
+        lastName: 'Tester',
+        email: 'maria@test.com',
+        role: 'student',
+      },
+      token: 'demo-token',
+      isAuthenticated: true,
+    })
+
     render(
       <MemoryRouter initialEntries={['/']}>
         <BottomNav />

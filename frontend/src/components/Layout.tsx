@@ -34,7 +34,7 @@ export default function Layout({ children }: LayoutProps) {
       <div className="flex">
         {isAuthenticated ? <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} /> : null}
 
-        <main className="flex-1 transition-all duration-300 pb-[92px] pt-[72px] md:pb-0 md:pt-0">
+        <main className="flex-1 transition-all duration-300 pb-[112px] pt-[68px] md:pb-0 md:pt-0 lg:pt-0">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
