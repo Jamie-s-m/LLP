@@ -223,3 +223,14 @@ export const deleteContent = async (req, res, next) => {
     res.status(200).json({ success: true, message: 'Content item deleted' });
   } catch (error) { next(error); }
 };
+
+// Admin: send test push to a set of users (best-effort). Body: { userIds: [id], payload: { title, body, url } }
+export const sendTestPush = async (req, res, next) => {
+  try {
+    const { userIds, payload } = req.body;
+    if (!Array.isArray(userIds) || userIds.length === 0) return res.status(400).json({ success: false, message: 'userIds required' });
+    const { sendPushToUsers } = await import('../utils/push.js');
+    await sendPushToUsers(userIds, payload || { title: 'Test', body: 'This is a test push from LinguaNest' });
+    res.status(200).json({ success: true, message: 'Push dispatched (best-effort)' });
+  } catch (error) { next(error); }
+};
