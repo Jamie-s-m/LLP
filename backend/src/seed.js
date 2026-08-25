@@ -1,16 +1,28 @@
 ﻿import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import { pathToFileURL } from 'node:url';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import User from './models/User.js';
 import Course from './models/Course.js';
 import Lesson from './models/Lesson.js';
 import Exercise from './models/Exercise.js';
 import Flashcard from './models/Flashcard.js';
 import { LINGUANEST_CONTENT_LIBRARY } from './contentLibrary.js';
+import logger from './utils/logger.js';
 
-dotenv.config();
+// Load .env from project root
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.join(__dirname, '../../.env') });
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/language-learn-platform';
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+  console.error('❌ ERROR: MONGODB_URI not found in environment variables');
+  console.error('Please ensure .env file exists with MONGODB_URI set');
+  process.exit(1);
+}
 
 const demoUsers = [
   {
@@ -112,7 +124,11 @@ const parseSeedCliArgs = () => {
 
 const getContentCounts = async () => {
   if (mongoose.connection.readyState !== 1) {
-    await mongoose.connect(MONGODB_URI, { serverSelectionTimeoutMS: 5000 });
+    console.log(`🔌 Connecting to MongoDB for status check...`);
+    await mongoose.connect(MONGODB_URI, {
+      serverSelectionTimeoutMS: 10000,
+      connectTimeoutMS: 10000,
+    });
   }
 
   const [courses, publishedCourses, lessons, flashcards, vocabularyCount] = await Promise.all([
