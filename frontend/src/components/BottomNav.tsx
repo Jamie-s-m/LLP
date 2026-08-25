@@ -77,7 +77,7 @@ export default function BottomNav() {
   ]
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[130] block md:hidden border-t border-neutral-200/80 bg-white/95 px-1.5 py-2 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] backdrop-blur-lg dark:border-neutral-800 dark:bg-[rgba(16,24,36,0.75)]">
+    <div style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)'}} className="fixed bottom-0 left-0 right-0 z-[130] block md:hidden border-t border-neutral-200/80 bg-white/95 px-1.5 py-2 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] backdrop-blur-lg dark:border-neutral-800 dark:bg-[rgba(16,24,36,0.75)]">
       <nav className="flex items-center justify-around">
         {navItems.map((item) => {
           const Icon = item.icon
