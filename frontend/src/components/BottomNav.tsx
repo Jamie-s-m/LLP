@@ -24,9 +24,10 @@ export default function BottomNav() {
 
   const publicAuthPaths = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email']
 
-  // Hide bottom nav on public/auth screens and fullscreen lesson/exercise pages to avoid duplicate navigation
+  // Hide bottom nav on auth screens and fullscreen lesson/exercise pages.
+  // For guest users we keep a slim mobile nav so the app still feels like a native app shell.
   const isFullscreenPage = location.pathname.startsWith('/lesson/') || location.pathname.startsWith('/exercise/')
-  if (!isAuthenticated || publicAuthPaths.includes(location.pathname) || isFullscreenPage) return null
+  if (publicAuthPaths.includes(location.pathname) || isFullscreenPage) return null
 
   // Determine home landing page based on role
   const homePath = isAuthenticated
@@ -39,44 +40,77 @@ export default function BottomNav() {
           : '/dashboard'
     : '/'
 
-  const navItems = [
-    {
-      label: t('nav.home'),
-      path: homePath,
-      icon: FiHome,
-      badge: 0,
-    },
-    {
-      label: t('sidebar.myLearning'),
-      path: isAuthenticated && user?.role === 'student' ? '/my-learning' : '/courses',
-      icon: FiBook,
-      badge: 0,
-    },
-    {
-      label: t('mobileNav.timetable') || 'Schedule',
-      path: '/schedule',
-      icon: FiCalendar,
-      badge: 0,
-    },
-    {
-      label: t('mobileNav.practice') || 'Practice',
-      path: '/flashcards',
-      icon: FiZap,
-      badge: 0,
-    },
-    {
-      label: t('sidebar.chat'),
-      path: isAuthenticated ? '/chat' : '/login',
-      icon: FiMessageCircle,
-      badge: totalUnread,
-    },
-    {
-      label: t('nav.profile'),
-      path: isAuthenticated ? '/profile' : '/login',
-      icon: FiUser,
-      badge: 0,
-    },
-  ]
+  const navItems = isAuthenticated
+    ? [
+        {
+          label: t('nav.home'),
+          path: homePath,
+          icon: FiHome,
+          badge: 0,
+        },
+        {
+          label: t('sidebar.myLearning'),
+          path: user?.role === 'student' ? '/my-learning' : '/courses',
+          icon: FiBook,
+          badge: 0,
+        },
+        {
+          label: t('mobileNav.timetable') || 'Schedule',
+          path: '/schedule',
+          icon: FiCalendar,
+          badge: 0,
+        },
+        {
+          label: t('mobileNav.practice') || 'Practice',
+          path: '/flashcards',
+          icon: FiZap,
+          badge: 0,
+        },
+        {
+          label: t('sidebar.chat'),
+          path: '/chat',
+          icon: FiMessageCircle,
+          badge: totalUnread,
+        },
+        {
+          label: t('nav.profile'),
+          path: '/profile',
+          icon: FiUser,
+          badge: 0,
+        },
+      ]
+    : [
+        {
+          label: t('nav.home'),
+          path: '/',
+          icon: FiHome,
+          badge: 0,
+        },
+        {
+          label: t('nav.courses'),
+          path: '/courses',
+          icon: FiBook,
+          badge: 0,
+        },
+        {
+          label: 'Tutors',
+          path: '/tutors',
+          icon: FiUser,
+          badge: 0,
+        },
+        {
+          label: t('nav.forum'),
+          path: '/forum',
+          icon: FiMessageCircle,
+          badge: 0,
+        },
+        {
+          label: 'Login',
+          path: '/login',
+          icon: FiUser,
+          badge: 0,
+        },
+      ]
 
   const navByKey = (item: { path: string; label: string }) => `${item.path}-${item.label}`
 

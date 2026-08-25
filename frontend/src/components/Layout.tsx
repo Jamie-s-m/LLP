@@ -71,7 +71,7 @@ export default function Layout({ children }: LayoutProps) {
           {totalUnread > 0 ? <span className="absolute -right-1 -top-1 min-w-5 rounded-full bg-coral px-1.5 py-0.5 text-center text-[10px] font-bold text-white">{totalUnread > 99 ? '99+' : totalUnread}</span> : null}
         </Link>
       ) : null}
-      {isAuthenticated && !['/login', '/register', '/forgot-password', '/reset-password', '/verify-email'].includes(location.pathname) ? <BottomNav /> : null}
+      {!['/login', '/register', '/forgot-password', '/reset-password', '/verify-email'].includes(location.pathname) ? <BottomNav /> : null}
     </div>
   )
 }
