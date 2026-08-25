@@ -133,7 +133,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
   }
 
   return (
-    <nav className="relative z-[120] border-b border-neutral-200 bg-white/90 shadow-sm backdrop-blur dark:border-neutral-700 dark:bg-neutral-800/90">
+    <nav className="relative z-[120] border-b border-neutral-200 bg-white/90 shadow-sm backdrop-blur max-md:fixed max-md:left-0 max-md:right-0 max-md:top-0 dark:border-neutral-700 dark:bg-neutral-800/90">
       <div className="container mx-auto flex items-center justify-between gap-3 px-4 py-3 xl:gap-6">
         {/* Logo */}
         <Link to="/" className="flex shrink-0 items-center gap-2">
