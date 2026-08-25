@@ -28,6 +28,11 @@ const userSchema = new mongoose.Schema(
     xp: { type: Number, default: 0 },
     streak: { type: Number, default: 0 },
     lastActiveDate: { type: Date, default: Date.now },
+    // Daily Reward & Gamification fields
+    lastDailyRewardDate: { type: Date, default: null },
+    dailyRewardStreak: { type: Number, default: 0 },
+    linguaCoins: { type: Number, default: 0 },
+    totalLinguaCoinsEarned: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
     children: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     parents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],

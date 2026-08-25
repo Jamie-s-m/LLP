@@ -80,6 +80,10 @@ const translations: Record<LanguageCode, TranslationTree> = {
       openForum: 'Open forum',
       viewPricing: 'View pricing',
     },
+    mobileNav: {
+      timetable: 'Schedule',
+      practice: 'Practice',
+    },
     footer: {
       tagline: 'Language mastery, shaped with clarity.',
       description: 'Bring learning progress, teacher operations, family visibility, and community support into one premium workspace.',
@@ -341,6 +345,10 @@ const translations: Record<LanguageCode, TranslationTree> = {
       learnerDashboard: 'Кабинет ученика', notificationsSuccess: 'Уведомления включены для чата и обновлений', notificationsFailed: 'Не удалось включить уведомления',
       goHome: 'Перейти на главную', browseCourses: 'Открыть курсы', openForum: 'Открыть форум', viewPricing: 'Посмотреть тарифы',
     },
+    mobileNav: {
+      timetable: 'Расписание',
+      practice: 'Практика',
+    },
     footer: {
       tagline: 'Освоение языка, оформленное с ясностью.',
       description: 'Объедините прогресс обучения, работу преподавателей, семейную видимость и поддержку сообщества в одном премиальном пространстве.',
@@ -398,6 +406,10 @@ const translations: Record<LanguageCode, TranslationTree> = {
       controlCenter: 'Boshqaruv markazi', moderationDesk: 'Moderatsiya paneli', teachingDashboard: 'Ustoz paneli', familyDesk: 'Oila kabineti',
       learnerDashboard: 'Talaba paneli', notificationsSuccess: 'Chat va yangilanishlar uchun bildirishnomalar yoqildi', notificationsFailed: 'Bildirishnomalarni yoqib bo‘lmadi',
       goHome: 'Bosh sahifaga o‘tish', browseCourses: 'Kurslarni ko‘rish', openForum: 'Forumni ochish', viewPricing: 'Tariflarni ko‘rish',
+    },
+    mobileNav: {
+      timetable: 'Jadval',
+      practice: 'Mashq',
     },
     footer: {
       tagline: 'Til mahorati, aniqlik bilan shakllangan.',

@@ -376,6 +376,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     if (mongoose.connection.readyState !== 0) {
       await mongoose.disconnect();
     }
+    process.exit(0);
   }).catch((error) => {
     console.error('Content seed failed:', error);
     process.exit(1);

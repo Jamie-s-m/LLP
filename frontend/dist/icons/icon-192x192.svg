@@ -1,0 +1,24 @@
+<svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#5B5CE2;stop-opacity:1" />
+      <stop offset="35%" style="stop-color:#4546B8;stop-opacity:1" />
+      <stop offset="55%" style="stop-color:#36C9A5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFB547;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="bookGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#E0E7FF;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="38.400000000000006" fill="url(#bgGradient)"/>
+  <path d="M57.599999999999994 67.19999999999999 L57.599999999999994 124.80000000000001 L134.39999999999998 124.80000000000001 L134.39999999999998 67.19999999999999 Z"
+        fill="url(#bookGradient)" stroke="#FFFFFF" stroke-width="3.84"/>
+  <path d="M96 67.19999999999999 L96 124.80000000000001" stroke="#5B5CE2" stroke-width="2.3040000000000003" opacity="0.45"/>
+  <path d="M65.28 86.4 L88.32000000000001 86.4" stroke="#5B5CE2" stroke-width="2.3040000000000003" stroke-linecap="round"/>
+  <path d="M65.28 101.76 L88.32000000000001 101.76" stroke="#5B5CE2" stroke-width="2.3040000000000003" stroke-linecap="round"/>
+  <path d="M103.68 86.4 L126.72 86.4" stroke="#36C9A5" stroke-width="2.3040000000000003" stroke-linecap="round"/>
+  <path d="M103.68 101.76 L122.88 101.76" stroke="#36C9A5" stroke-width="2.3040000000000003" stroke-linecap="round"/>
+  <circle cx="144" cy="48" r="20.16" fill="#FFB547" opacity="0.95"/>
+  <text x="144" y="54.72" text-anchor="middle" font-family="Arial, sans-serif" font-size="26.880000000000003" font-weight="800" fill="#1F245D">L</text>
+</svg>
