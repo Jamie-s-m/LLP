@@ -138,7 +138,7 @@ export default function BottomNav() {
                   </span>
                 )}
               </div>
-              <span className="mt-1 text-[10px] leading-tight tracking-tight">
+              <span className="mt-1 text-[10px] leading-tight tracking-tight truncate max-w-[72px]">
                 {item.label}
               </span>
               {active && (
