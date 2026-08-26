@@ -129,7 +129,7 @@ export default function MyLearning() {
                 </div>
                 <Link
                   to={courseId ? `/courses/${courseId}` : '/courses'}
-                  className="btn btn-primary whitespace-nowrap"
+                  className="btn btn-primary whitespace-nowrap min-w-[140px] text-center"
                 >
                   {ui.continue}
                 </Link>

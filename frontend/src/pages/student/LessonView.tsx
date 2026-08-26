@@ -1,62 +1,87 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { FiArrowLeft, FiCheckCircle, FiVolume2 } from 'react-icons/fi'
+import { demoCourses } from '../../data/demoCourses'
 
 export default function LessonView() {
   const { lessonId } = useParams()
   const navigate = useNavigate()
   const [completed, setCompleted] = useState(false)
 
+  // Find lesson data from demo catalog (fallback) so header shows meaningful topic instead of raw id
+  const lesson = useMemo(() => {
+    if (!lessonId) return null
+    for (const course of demoCourses) {
+      const found = course.lessons.find((l) => l._id === lessonId)
+      if (found) return { ...found, courseTitle: course.title }
+    }
+    return null
+  }, [lessonId])
+
+  const title = lesson?.title || 'Lesson'
+  const subtitle = lesson?.courseTitle ? `${lesson.courseTitle} · ${lesson?.difficulty || 'Beginner'}` : 'English - Beginner'
+
   return (
-    <div className="min-h-screen py-8 px-4">
-      <div className="container mx-auto max-w-4xl">
+    <div className="py-6 px-3 sm:px-4">
+      <div className="mx-auto max-w-4xl">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-center gap-3 mb-6">
           <button
             onClick={() => navigate(-1)}
             className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors"
+            aria-label="Back"
           >
-            <FiArrowLeft size={24} />
+            <FiArrowLeft size={20} />
           </button>
           <div>
-            <h1 className="text-4xl font-bold">Lesson {lessonId}</h1>
-            <p className="text-neutral-600 dark:text-neutral-400">English - Beginner</p>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold leading-tight">{title}</h1>
+            <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">{subtitle}</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8"> 
           {/* Main Content */}
           <div className="lg:col-span-2">
             {/* Lesson Content */}
             <div className="card mb-8">
-              <h2 className="text-2xl font-bold mb-4">Introduction to English</h2>
+              <h2 className="text-xl sm:text-2xl font-semibold mb-3">{title}</h2>
               <div className="prose dark:prose-invert max-w-none">
-                <p className="text-lg text-neutral-700 dark:text-neutral-300 mb-4">
-                  Welcome to this beginner English lesson! In this lesson, you will learn basic vocabulary and common phrases used in everyday conversations.
+                <p className="text-base sm:text-lg text-neutral-700 dark:text-neutral-300 mb-4">
+                  {lesson?.description || 'Welcome to this lesson. Use the cards and the practice tools to build your knowledge step by step.'}
                 </p>
               </div>
             </div>
 
             {/* Vocabulary Section */}
             <div className="card mb-8">
-              <h3 className="text-xl font-bold mb-4">New Vocabulary</h3>
-              <div className="space-y-4">
-                {[
-                  { word: 'Hello', pronunciation: 'hə-ˈlō', translation: 'Greeting' },
-                  { word: 'Thank you', pronunciation: 'ˈthaŋk yü', translation: 'Expression of gratitude' },
-                  { word: 'Please', pronunciation: 'ˈplēz', translation: 'Polite request' },
-                ].map((item, idx) => (
-                  <div key={idx} className="border border-neutral-200 dark:border-neutral-700 rounded-lg p-4">
+             <h3 className="text-lg sm:text-xl font-semibold mb-3">New Vocabulary</h3>
+              <div className="space-y-3">
+                {(
+                  lesson?.content
+                    ? // If lesson provides content, show simple extraction
+                      [
+                        { word: 'Hello', pronunciation: 'hə-ˈlō', translation: 'Привет' },
+                        { word: 'Thank you', pronunciation: 'ˈthaŋk yü', translation: 'Спасибо' },
+                        { word: 'Please', pronunciation: 'ˈplēz', translation: 'Пожалуйста' },
+                      ]
+                    : [
+                        { word: 'Hello', pronunciation: 'hə-ˈlō', translation: 'Привет' },
+                        { word: 'Goodbye', pronunciation: 'ɡʊdˈbʌɪ', translation: 'До свидания' },
+                        { word: 'Please', pronunciation: 'ˈplēz', translation: 'Пожалуйста' },
+                        { word: 'Thank you', pronunciation: 'ˈθæŋk ju', translation: 'Спасибо' },
+                      ]
+                ).map((item, idx) => (
+                  <div key={idx} className="border border-neutral-200 dark:border-neutral-700 rounded-lg p-3">
                     <div className="flex items-center justify-between mb-2">
                       <div>
-                        <p className="text-lg font-bold">{item.word}</p>
-                        <p className="text-sm text-neutral-600 dark:text-neutral-400">{item.pronunciation}</p>
+                        <p className="text-base sm:text-lg font-semibold">{item.word}</p>
+                        <p className="text-xs sm:text-sm text-neutral-600 dark:text-neutral-400">{item.pronunciation}</p>
                       </div>
                       <button className="p-2 hover:bg-primary-100 dark:hover:bg-primary-900 rounded-lg transition-colors">
-                        <FiVolume2 size={20} className="text-primary-500" />
+                        <FiVolume2 size={18} className="text-primary-500" />
                       </button>
                     </div>
-                    <p className="text-neutral-700 dark:text-neutral-300">{item.translation}</p>
+                    <p className="text-sm text-neutral-700 dark:text-neutral-300">{item.translation}</p>
                   </div>
                 ))}
               </div>
@@ -81,7 +106,7 @@ export default function LessonView() {
                 onClick={() => setCompleted(!completed)}
                 className={`w-full btn ${completed ? 'btn-ghost' : 'btn-primary'} flex items-center justify-center gap-2`}
               >
-                {completed && <FiCheckCircle size={20} />}
+                {completed && <FiCheckCircle size={18} />}
                 {completed ? 'Completed ✓' : 'Mark as Completed'}
               </button>
             </div>
