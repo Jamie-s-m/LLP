@@ -49,7 +49,7 @@ export default function BottomNav() {
           badge: 0,
         },
         {
-          label: t('sidebar.myLearning'),
+          label: t('sidebar.progress') || t('sidebar.myLearning'),
           path: user?.role === 'student' ? '/my-learning' : '/courses',
           icon: FiBook,
           badge: 0,
