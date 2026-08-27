@@ -5,7 +5,7 @@ import { visualizer } from 'rollup-plugin-visualizer'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig(({ mode }) => ({
-  base: mode === 'production' ? '/LLP/' : '/',
+  base: '/',
   plugins: [
     react(),
     viteCompression({
@@ -30,13 +30,13 @@ export default defineConfig(({ mode }) => ({
         name: 'LinguaNest',
         short_name: 'LinguaNest',
         description: 'Language mastery, shaped with clarity. Learn. Speak. Belong.',
-        id: './',
-        start_url: './',
+        id: '/',
+        start_url: '/',
         display: 'standalone',
         background_color: '#F7F9F8',
         theme_color: '#5B5CE2',
         orientation: 'portrait-primary',
-        scope: './',
+        scope: '/',
         icons: [
           {
             src: './icons/icon-72x72.png',
