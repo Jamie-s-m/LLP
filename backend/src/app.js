@@ -34,10 +34,14 @@ app.use(
   })
 );
 
-const defaultOrigins = [
+const developmentOrigins = process.env.NODE_ENV === 'production' ? [] : [
   'http://localhost:5173',
   'http://localhost:3000',
-  'https://jamie-s-m.github.io',
+];
+
+const defaultOrigins = [
+  ...developmentOrigins,
+  'https://lingua-nest.onrender.com',
   'https://linguanest.uz',
   'https://www.linguanest.uz',
   'https://api.linguanest.uz',

@@ -80,7 +80,7 @@ function App() {
         : '/dashboard'
 
   return (
-    // import.meta.env.BASE_URL dynamically reads '/LLP/' in production and '/' in dev
+    // Render serves the application from the root path.
     <Router basename={import.meta.env.BASE_URL}>
       <Toaster position="top-right" />
       <Suspense fallback={<Layout><div className="atlas-page flex items-center justify-center px-4 py-16"><div className="atlas-panel p-6 text-center text-slate-600">{t('app.loadingPage')}</div></div></Layout>}>

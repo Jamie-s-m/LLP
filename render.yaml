@@ -6,17 +6,18 @@ services:
     buildCommand: npm install
     startCommand: npm start
     plan: free
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 10000
       - key: FRONTEND_URL
-        value: https://linguanest.uz
+        value: https://lingua-nest.onrender.com
       - key: FRONTEND_APP_URL
-        value: https://linguanest.uz
+        value: https://lingua-nest.onrender.com
       - key: CORS_ORIGINS
-        value: https://linguanest.uz,https://api.linguanest.uz
+        value: https://lingua-nest.onrender.com,https://linguanest.uz,https://www.linguanest.uz,https://api.linguanest.uz
 
   - type: static
     name: linguanest-web
@@ -27,6 +28,14 @@ services:
     plan: free
     envVars:
       - key: VITE_API_URL
-        value: https://api.linguanest.uz/api
+        value: https://api.linguanest.uz
+      - key: VITE_DEMO_MODE
+        value: "false"
+      - key: VITE_APP_MODE
+        value: production
       - key: VITE_APP_NAME
         value: LinguaNest
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

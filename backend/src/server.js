@@ -33,12 +33,14 @@ const startServer = async () => {
     await connectRedis();
 
     const server = createServer(app);
+    const developmentSocketOrigins = process.env.NODE_ENV === 'production' ? [] : [
+      'http://localhost:5173',
+      'http://localhost:3000',
+    ];
     const socketOrigins = [...new Set([
       process.env.FRONTEND_URL,
       process.env.FRONTEND_APP_URL,
-      'http://localhost:5173',
-      'http://localhost:3000',
-      'https://jamie-s-m.github.io',
+      ...developmentSocketOrigins,
       'https://linguanest.uz',
       'https://www.linguanest.uz',
       'https://api.linguanest.uz',

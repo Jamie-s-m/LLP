@@ -13,8 +13,7 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "prebuild": "node -e \"if (process.env.NODE_ENV === 'production' && !process.env.VITE_API_URL) process.exit(1)\""
   },
   "dependencies": {
     "@reduxjs/toolkit": "^1.9.5",
@@ -37,6 +36,7 @@
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.6",
+    "@types/node": "^20.19.1",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^8.68.0",
@@ -48,7 +48,6 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
-    "gh-pages": "^6.3.0",
     "jsdom": "^30.0.1",
     "postcss": "^8.4.24",
     "prettier": "^3.0.0",
@@ -58,7 +57,7 @@
     "typescript": "^5.1.6",
     "vite": "^7.3.6",
     "vite-plugin-compression": "^0.5.1",
-    "vitest": "^4.1.11",
-    "@types/node": "^20.19.1"
+    "vite-plugin-pwa": "^1.0.0",
+    "vitest": "^4.1.11"
   }
 }
