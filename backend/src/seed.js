@@ -18,11 +18,11 @@ dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
-if (!MONGODB_URI) {
-  console.error('❌ ERROR: MONGODB_URI not found in environment variables');
-  console.error('Please ensure .env file exists with MONGODB_URI set');
-  process.exit(1);
-}
+const assertDatabaseConfigured = () => {
+  if (!MONGODB_URI) {
+    throw new Error('MONGODB_URI must be configured for content operations');
+  }
+};
 
 const demoUsers = [
   {
@@ -156,6 +156,7 @@ const getContentCounts = async () => {
 
 export const contentStatus = async ({ mode = 'development' } = {}) => {
   try {
+    assertDatabaseConfigured();
     const counts = await getContentCounts();
     const output = [
       'LinguaNest Content Health',
@@ -196,6 +197,8 @@ export const seedContent = async ({
   if (safeMode === 'production' && !confirm) {
     throw new Error('Production content seeding requires --confirm and a verified target database.');
   }
+
+  assertDatabaseConfigured();
 
   if (mongoose.connection.readyState !== 1) {
     await mongoose.connect(MONGODB_URI, { serverSelectionTimeoutMS: 5000 });
