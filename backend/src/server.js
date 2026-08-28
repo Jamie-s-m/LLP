@@ -115,6 +115,7 @@ const startServer = async () => {
     const shutdown = async (signal) => {
       logger.info(`${signal} received. Shutting down gracefully...`);
       server.close(async () => {
+        await disconnectRedis();
         await mongoose.connection.close();
         logger.info('Server shutdown complete');
         process.exit(0);

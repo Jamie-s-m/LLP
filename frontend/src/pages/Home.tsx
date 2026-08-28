@@ -6,7 +6,7 @@ import { useLearningStore } from '../store/learningStore'
 import { useI18n } from '../utils/i18n'
 
 export default function Home() {
-  const { courses, fetchCourses, isLoading } = useLearningStore()
+  const { courses, fetchCourses, isLoading, error } = useLearningStore()
   const { t } = useI18n()
 
   useEffect(() => {
@@ -30,52 +30,52 @@ export default function Home() {
     { title: t('home.signal3Title'), copy: t('home.signal3Copy'), icon: FiShield },
   ]
   const quickAccessCards = [
-    { label: 'Courses', href: '/courses', accent: 'from-indigo-500 to-violet-500' },
-    { label: 'Tutors', href: '/tutors', accent: 'from-emerald-500 to-teal-500' },
-    { label: 'Practice', href: '/flashcards', accent: 'from-amber-500 to-orange-500' },
-    { label: 'Chat', href: '/chat', accent: 'from-sky-500 to-cyan-500' },
+    { label: 'Courses', href: '/courses', accent: 'bg-[#b8d8f5]' },
+    { label: 'Tutors', href: '/tutors', accent: 'bg-[#b8ded5]' },
+    { label: 'Practice', href: '/flashcards', accent: 'bg-[#f4d99b]' },
+    { label: 'Chat', href: '/chat', accent: 'bg-[#edaaa2]' },
   ]
 
   return (
     <div className="atlas-page">
       <div className="mx-auto max-w-7xl px-4 py-8">
         <div className="atlas-hero mb-12">
-          <div>
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.22em] text-indigo-50 backdrop-blur-sm">
-              <span className="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_16px_rgba(110,231,183,0.9)]" />
-              {BRAND.displayName}
-            </div>
-            <p className="atlas-kicker">{t('home.heroKicker')}</p>
-            <h1 className="mb-4 text-4xl font-extrabold tracking-[-0.06em] text-white md:text-5xl lg:text-6xl">
-               {BRAND.tagline}
-            </h1>
-            <p className="mb-2 max-w-2xl text-sm font-medium uppercase tracking-[0.18em] text-indigo-100/80">
-              The language nest concept
-            </p>
-             <p className="mb-8 max-w-2xl text-lg leading-8 text-indigo-50/95">
-               {BRAND.concept}
-            </p>
-            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <Link
-                to="/courses"
-                className="inline-flex items-center justify-center rounded-2xl px-8 py-3.5 text-center text-base font-semibold text-white shadow-[0_18px_38px_rgba(27,34,82,0.28)] transition hover:-translate-y-0.5"
-                 style={{ background: 'linear-gradient(135deg, #5B5CE2 0%, #28B5A3 52%, #FFB547 100%)' }}
-              >
-                 Start learning free
-              </Link>
-              <Link
-                 to="/tutors"
-                className="inline-flex items-center justify-center rounded-2xl border border-white/35 bg-white/10 px-8 py-3.5 text-center text-base font-semibold text-white backdrop-blur-sm transition hover:bg-white/15"
-              >
-                 Find your tutor
-              </Link>
-            </div>
-            <div className="mt-6 flex flex-wrap gap-2 text-sm text-indigo-100/90">
-              <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5">Live tutoring</span>
-              <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5">AI practice</span>
-              <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5">Progress tracking</span>
-            </div>
+        <div>
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.22em] text-indigo-50 backdrop-blur-sm">
+            <span className="h-2 w-2 rounded-full bg-emerald-300" />
+            {BRAND.displayName}
           </div>
+          <p className="atlas-kicker">{t('home.heroKicker')}</p>
+          <h1 className="mb-4 text-4xl font-extrabold tracking-[-0.06em] text-white md:text-5xl lg:text-6xl">
+            {BRAND.tagline}
+          </h1>
+          <p className="mb-2 max-w-2xl text-sm font-medium uppercase tracking-[0.18em] text-indigo-100/80">
+            The language nest concept
+          </p>
+          <p className="mb-8 max-w-2xl text-lg leading-8 text-indigo-50/95">
+            {BRAND.concept}
+          </p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <Link
+              to="/courses"
+              className="inline-flex items-center justify-center rounded-2xl px-8 py-3.5 text-center text-base font-semibold text-white shadow-[0_18px_38px_rgba(27,34,82,0.28)] transition hover:-translate-y-0.5"
+              style={{ background: '#171717' }}
+            >
+              {t('home.exploreLearningPaths')}
+            </Link>
+            <Link
+              to="/tutors"
+              className="inline-flex items-center justify-center rounded-2xl border border-white/35 bg-white/10 px-8 py-3.5 text-center text-base font-semibold text-white backdrop-blur-sm transition hover:bg-white/15"
+            >
+              Find your tutor
+            </Link>
+          </div>
+          <div className="mt-6 flex flex-wrap gap-2 text-sm text-indigo-100/90">
+            <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5">Live tutoring</span>
+            <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5">AI practice</span>
+            <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5">Progress tracking</span>
+          </div>
+        </div>
           <div className="hero-orbit-wrap relative flex items-center justify-center">
             <span className="hero-float hero-float-one" />
             <span className="hero-float hero-float-two" />
@@ -92,7 +92,7 @@ export default function Home() {
               to={card.href}
               className="group rounded-2xl border border-white/30 bg-white/65 p-3 shadow-sm backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-neutral-700 dark:bg-neutral-800/70"
             >
-              <div className={`mb-3 h-10 w-10 rounded-xl bg-gradient-to-br ${card.accent} shadow-lg`} />
+              <div className={`mb-3 h-10 w-10 rounded-xl ${card.accent} shadow-sm`} />
               <p className="text-sm font-semibold text-neutral-900 dark:text-white">{card.label}</p>
               <span className="mt-1 inline-flex items-center gap-1 text-[11px] font-medium text-primary-600 dark:text-primary-300">
                 Open
@@ -182,6 +182,13 @@ export default function Home() {
         {isLoading ? (
           <div className="flex justify-center py-12">
             <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-indigo-500"></div>
+          </div>
+        ) : error ? (
+          <div role="alert" className="atlas-panel flex flex-col items-start gap-4 p-6">
+            <p className="text-sm text-slate-600 dark:text-slate-300">{t('home.coursesLoadError')}</p>
+            <button type="button" className="btn btn-primary" onClick={() => fetchCourses({ limit: 6 })}>
+              {t('home.retryCourses')}
+            </button>
           </div>
         ) : safeCourses.length === 0 ? (
           <p className="text-slate-400">{t('home.noCourses')}</p>

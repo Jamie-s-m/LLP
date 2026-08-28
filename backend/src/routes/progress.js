@@ -4,7 +4,7 @@ import { enrollCourse, completeLesson, getMyLearning, getStudentProgressForTeach
 
 const router = express.Router();
 
-router.post('/enroll/:courseId', protect, enrollCourse);
+router.post('/enroll/:courseId', protect, authorize('student'), enrollCourse);
 router.post('/complete-lesson', protect, completeLesson);
 router.get('/my-learning', protect, getMyLearning);
 router.get('/student/:studentId', protect, authorize('teacher', 'admin'), getStudentProgressForTeacher);

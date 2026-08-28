@@ -32,7 +32,7 @@ export const getCourseById = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Course not found' });
     }
 
-    const course = await Course.findById(req.params.id).populate('instructor', 'firstName lastName email role');
+    const course = await Course.findOne({ _id: req.params.id, isPublished: true }).populate('instructor', 'firstName lastName email role');
     if (!course) {
       return res.status(404).json({ success: false, message: 'Course not found' });
     }
@@ -80,7 +80,10 @@ export const updateCourse = async (req, res, next) => {
       return res.status(403).json({ success: false, message: 'You do not manage this course' });
     }
 
-    Object.assign(course, req.body);
+    const allowedFields = ['title', 'description', 'language', 'level', 'category', 'thumbnail', 'estimatedHours', 'isPublished'];
+    allowedFields.forEach((field) => {
+      if (req.body[field] !== undefined) course[field] = req.body[field];
+    });
     await course.save();
 
     res.status(200).json({ success: true, data: course });

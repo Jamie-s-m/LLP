@@ -214,7 +214,7 @@ export default function Register() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: 'easeOut' }}
-        className="atlas-panel w-full max-w-lg p-8"
+        className="auth-card atlas-panel w-full max-w-lg p-8 sm:p-10"
       >
         <p className="atlas-kicker">{ui.kicker}</p>
         <h1 className="text-3xl font-semibold text-ink mb-2">{ui.title}</h1>

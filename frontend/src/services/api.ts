@@ -2,7 +2,10 @@
 
 // Clean and format API URL string safely
 const getSanitizedApiUrl = (): string => {
-  let rawUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+  const defaultApiUrl = import.meta.env.PROD
+    ? 'https://api.linguanest.uz/api'
+    : 'http://localhost:5000/api'
+  let rawUrl = import.meta.env.VITE_API_URL || defaultApiUrl
 
   // Remove brackets [], quotes '', "", parentheses (), and whitespace
   // eslint-disable-next-line no-useless-escape

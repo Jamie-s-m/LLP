@@ -5,7 +5,7 @@ export const getExercises = async (req, res, next) => {
   try {
     const { lessonId } = req.query;
     const filter = lessonId ? { lesson: lessonId } : {};
-    const exercises = await Exercise.find(filter).sort({ createdAt: 1 });
+    const exercises = await Exercise.find(filter).select('-correctAnswer').sort({ createdAt: 1 });
     res.status(200).json({ success: true, data: exercises });
   } catch (error) {
     next(error);
@@ -14,7 +14,7 @@ export const getExercises = async (req, res, next) => {
 
 export const getExerciseById = async (req, res, next) => {
   try {
-    const exercise = await Exercise.findById(req.params.id);
+    const exercise = await Exercise.findById(req.params.id).select('-correctAnswer');
     if (!exercise) {
       return res.status(404).json({ success: false, message: 'Exercise not found' });
     }

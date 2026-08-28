@@ -4,6 +4,7 @@ import {
   getBillingPlansController, 
   getMyBillingState, 
   createCheckoutSession, 
+  createPortalSession,
   handlePaymeRequest 
 } from '../controllers/billingController.js';
 
@@ -16,5 +17,6 @@ router.post('/payme', handlePaymeRequest);
 router.get('/plans', getBillingPlansController);
 router.get('/me', protect, getMyBillingState);
 router.post('/checkout-session', protect, createCheckoutSession);
+router.post('/portal-session', protect, createPortalSession);
 
 export default router;

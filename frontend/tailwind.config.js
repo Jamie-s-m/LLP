@@ -9,16 +9,16 @@ export default {
     extend: {
       colors: {
         primary: {
-          50: "#ECECFF",
-          100: "#E2E3FF",
-          200: "#C9CCFF",
-          300: "#A5A8FF",
-          400: "#7E82F3",
-          500: "#5B5CE2",
-          600: "#4546B8",
-          700: "#3B3E9E",
-          800: "#2D2F75",
-          900: "#1D214F",
+          50: "#F3F8FD",
+          100: "#E8F3FC",
+          200: "#D5E8F8",
+          300: "#B8D8F5",
+          400: "#96C5EA",
+          500: "#7DB8DF",
+          600: "#5C9CC9",
+          700: "#407EA9",
+          800: "#2F5F82",
+          900: "#203F56",
         },
         secondary: {
           50: "#E4FAF4",
@@ -77,8 +77,8 @@ export default {
         },
       },
       fontFamily: {
-        sans: ["Inter", "Manrope", "system-ui", "sans-serif"],
-        display: ["Sora", "Inter", "sans-serif"],
+        sans: ["Manrope", "system-ui", "sans-serif"],
+        display: ["Sora", "Manrope", "sans-serif"],
       },
       animation: {
         fadeIn: "fadeIn 0.3s ease-in-out",

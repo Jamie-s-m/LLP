@@ -1,14 +1,13 @@
 import Stripe from 'stripe';
-import { getBillingPlans, getStripeClient, serializeBilling } from '../utils/billing.js';
+import { findPlanByPriceId, getBillingPlans, getFrontendAppUrl, getStripeClient, serializeBilling } from '../utils/billing.js';
+import User from '../models/User.js';
 
 const PAYME_MERCHANT_KEY = process.env.PAYME_MERCHANT_KEY || '';
-const FRONTEND_URL = process.env.FRONTEND_URL || process.env.FRONTEND_APP_URL || 'http://localhost:5173';
-
 export const getBillingPlansController = (_req, res) => {
   try {
     return res.status(200).json({
       success: true,
-      plans: getBillingPlans(),
+      data: { plans: getBillingPlans() },
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message || 'Unable to load billing plans' });
@@ -22,9 +21,13 @@ export const getMyBillingState = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      billing: serializeBilling(billing),
-      plan: billing?.plan || 'none',
-      role: user?.role || 'student',
+      data: {
+        billing: serializeBilling(billing),
+        plan: billing?.plan || 'none',
+        role: user?.role || 'student',
+        canStartCheckout: Boolean(process.env.STRIPE_SECRET_KEY),
+        hasCustomerPortal: Boolean(process.env.STRIPE_SECRET_KEY && billing?.stripeCustomerId),
+      },
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message || 'Unable to load billing state' });
@@ -33,49 +36,36 @@ export const getMyBillingState = async (req, res) => {
 
 export const createCheckoutSession = async (req, res) => {
   try {
-    const { planKey, amountInUzS, planId } = req.body || {};
-    const plan = getBillingPlans().find((item) => item.key === planKey || item.key === planId);
+    const { plan, planKey, planId } = req.body || {};
+    const selectedPlan = getBillingPlans().find((item) => item.key === plan || item.key === planKey || item.key === planId);
 
     if (!req.user) {
       return res.status(401).json({ success: false, message: 'Authentication required' });
     }
 
-    if (!plan) {
+    if (!selectedPlan) {
       return res.status(400).json({ success: false, message: 'Billing plan not found' });
     }
 
     const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-    if (stripeSecretKey && plan.priceId) {
+    if (stripeSecretKey && selectedPlan.priceId) {
       const stripe = getStripeClient();
       const session = await stripe.checkout.sessions.create({
         mode: 'subscription',
-        line_items: [{ price: plan.priceId, quantity: 1 }],
-        success_url: `${FRONTEND_URL}/pricing?checkout=success`,
-        cancel_url: `${FRONTEND_URL}/pricing?checkout=cancelled`,
+        line_items: [{ price: selectedPlan.priceId, quantity: 1 }],
+        success_url: `${getFrontendAppUrl()}/pricing?checkout=success`,
+        cancel_url: `${getFrontendAppUrl()}/pricing?checkout=canceled`,
         customer_email: req.user.email,
         metadata: {
           userId: String(req.user._id),
-          planKey: plan.key,
+          planKey: selectedPlan.key,
         },
       });
 
-      return res.status(200).json({ success: true, url: session.url, provider: 'stripe' });
+      return res.status(200).json({ success: true, data: { url: session.url, provider: 'stripe', plan: selectedPlan.key } });
     }
 
-    const merchantId = process.env.PAYME_MERCHANT_ID;
-    const normalizedAmount = Number(amountInUzS || 0);
-    const amountInTiyin = Number.isFinite(normalizedAmount) ? normalizedAmount * 100 : 0;
-    const params = `m=${merchantId};ac.user_id=${req.user._id};ac.plan_id=${plan.key};a=${amountInTiyin}`;
-    const encodedParams = Buffer.from(params, 'utf8').toString('base64');
-    const checkoutUrl = `https://checkout.paycom.uz/${encodedParams}`;
-
-    return res.status(200).json({
-      success: true,
-      url: checkoutUrl,
-      provider: 'payme',
-      plan: plan.key,
-      amountInUzS: normalizedAmount,
-    });
+    return res.status(503).json({ success: false, message: 'Selected billing plan is not configured for checkout' });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message || 'Unable to create checkout session' });
   }
@@ -170,17 +160,72 @@ export const handleStripeWebhook = async (req, res) => {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
     const event = stripe.webhooks.constructEvent(req.body, signature, stripeSecret);
 
-    if (event.type === 'checkout.session.completed') {
-      const session = event.data.object;
-      console.log('Stripe checkout session completed', {
-        customerEmail: session.customer_email,
-        metadata: session.metadata,
-      });
+    const payload = event.data.object;
+    const customerId = payload.customer || payload.customer_details?.id;
+    const user = payload.metadata?.userId
+      ? await User.findById(payload.metadata.userId)
+      : customerId
+        ? await User.findOne({ 'billing.stripeCustomerId': customerId })
+        : payload.customer_email
+          ? await User.findOne({ email: payload.customer_email.toLowerCase() })
+          : null;
+
+    if (!user) {
+      return res.status(200).json({ success: true, received: true, type: event.type, ignored: true });
     }
 
+    if (user.billing?.lastStripeEventId === event.id) {
+      return res.status(200).json({ success: true, received: true, type: event.type, duplicate: true });
+    }
+
+    const billing = user.billing || {};
+    if (event.type === 'checkout.session.completed') {
+      billing.stripeCustomerId = String(payload.customer || billing.stripeCustomerId || '');
+      billing.stripeSubscriptionId = String(payload.subscription || billing.stripeSubscriptionId || '');
+      billing.plan = payload.metadata?.planKey || billing.plan || 'none';
+    }
+
+    if (event.type === 'customer.subscription.created' || event.type === 'customer.subscription.updated' || event.type === 'customer.subscription.deleted') {
+      const priceId = payload.items?.data?.[0]?.price?.id || '';
+      const plan = findPlanByPriceId(priceId);
+      billing.stripeCustomerId = String(payload.customer || billing.stripeCustomerId || '');
+      billing.stripeSubscriptionId = String(payload.id || billing.stripeSubscriptionId || '');
+      billing.stripePriceId = priceId;
+      billing.plan = plan?.key || billing.plan || 'none';
+      billing.status = event.type === 'customer.subscription.deleted' ? 'canceled' : payload.status || 'inactive';
+      billing.currentPeriodEnd = payload.current_period_end ? new Date(payload.current_period_end * 1000) : null;
+      billing.cancelAtPeriodEnd = Boolean(payload.cancel_at_period_end);
+    }
+
+    if (event.type === 'invoice.payment_failed') {
+      billing.status = 'past_due';
+    }
+
+    billing.lastStripeEventId = event.id;
+    user.billing = billing;
+    await user.save();
     return res.status(200).json({ success: true, received: true, type: event.type });
   } catch (error) {
     console.error('Stripe webhook error:', error.message);
     return res.status(400).json({ success: false, message: 'Invalid Stripe signature' });
+  }
+};
+
+export const createPortalSession = async (req, res) => {
+  try {
+    const customerId = req.user?.billing?.stripeCustomerId;
+    if (!process.env.STRIPE_SECRET_KEY || !customerId) {
+      return res.status(400).json({ success: false, message: 'Billing portal is not available for this account' });
+    }
+
+    const stripe = getStripeClient();
+    const session = await stripe.billingPortal.sessions.create({
+      customer: customerId,
+      return_url: `${getFrontendAppUrl()}/pricing`,
+    });
+
+    return res.status(200).json({ success: true, data: { url: session.url } });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message || 'Unable to open billing portal' });
   }
 };

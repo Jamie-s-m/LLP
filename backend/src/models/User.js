@@ -47,6 +47,7 @@ const userSchema = new mongoose.Schema(
       stripeCustomerId: { type: String, default: '' },
       stripeSubscriptionId: { type: String, default: '' },
       stripePriceId: { type: String, default: '' },
+      lastStripeEventId: { type: String, default: '' },
       currentPeriodEnd: { type: Date, default: null },
       cancelAtPeriodEnd: { type: Boolean, default: false },
     },

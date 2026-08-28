@@ -228,7 +228,7 @@ router.post('/resend-verification', async (req, res) => {
       message: delivery.delivered
         ? 'Verification email sent'
         : 'We couldn\'t send your verification email right now. Please retry or contact support.',
-      data: { previewUrl: delivery.previewUrl, emailDelivered: delivery.delivered },
+      data: { previewUrl: process.env.NODE_ENV === 'production' ? '' : delivery.previewUrl, emailDelivered: delivery.delivered },
     });
   } catch (error) {
     logger.error('Resend Verification Error:', error);
@@ -262,7 +262,7 @@ router.post('/forgot-password', async (req, res) => {
         return res.status(200).json({
           success: true,
           message: 'We couldn\'t send a password reset email right now. Please retry or contact support.',
-          data: { previewUrl, emailDelivered: false },
+          data: { previewUrl: process.env.NODE_ENV === 'production' ? '' : previewUrl, emailDelivered: false },
         });
       }
     }
@@ -270,7 +270,7 @@ router.post('/forgot-password', async (req, res) => {
     res.status(200).json({
       success: true,
       message: 'If an account exists for this email, a password reset link has been sent.',
-      data: { previewUrl, emailDelivered },
+      data: { previewUrl: process.env.NODE_ENV === 'production' ? '' : previewUrl, emailDelivered },
     });
   } catch (error) {
     logger.error('Forgot Password Error:', error);

@@ -13,9 +13,9 @@ services:
       - key: PORT
         value: 10000
       - key: FRONTEND_URL
-        value: https://lingua-nest.onrender.com
+        value: https://linguanest.uz
       - key: FRONTEND_APP_URL
-        value: https://lingua-nest.onrender.com
+        value: https://linguanest.uz
       - key: CORS_ORIGINS
         value: https://lingua-nest.onrender.com,https://linguanest.uz,https://www.linguanest.uz,https://api.linguanest.uz
 

@@ -1,5 +1,6 @@
 import Progress from '../models/Progress.js';
 import Course from '../models/Course.js';
+import Lesson from '../models/Lesson.js';
 import User from '../models/User.js';
 
 // @desc    Enroll student in a course
@@ -46,6 +47,11 @@ export const completeLesson = async (req, res, next) => {
     let progress = await Progress.findOne({ user: userId, course: courseId });
     if (!progress) {
       return res.status(404).json({ success: false, message: 'Enrollment record not found' });
+    }
+
+    const lesson = await Lesson.findOne({ _id: lessonId, course: courseId }).select('_id');
+    if (!lesson) {
+      return res.status(400).json({ success: false, message: 'Lesson does not belong to this course' });
     }
 
     // Add lesson if not already completed

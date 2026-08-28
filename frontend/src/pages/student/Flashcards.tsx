@@ -46,10 +46,11 @@ export default function Flashcards() {
 
   const activeCards = cards.length > 0 ? cards : fallbackCards
   const card = activeCards[currentCard]
+  const totalCards = activeCards.length
   const isMastered = mastered.includes(card._id)
 
   const handleNext = () => {
-    if (currentCard < cards.length - 1) {
+    if (currentCard < totalCards - 1) {
       setCurrentCard(currentCard + 1)
       setIsFlipped(false)
     }
@@ -82,13 +83,13 @@ export default function Flashcards() {
 
         <div className="atlas-panel mb-8 p-5">
           <div className="flex justify-between mb-2 text-sm font-medium">
-            <span>{ui.card.replace('{current}', String(currentCard + 1)).replace('{total}', String(cards.length))}</span>
+            <span>{ui.card.replace('{current}', String(currentCard + 1)).replace('{total}', String(totalCards))}</span>
             <span>{ui.masteredCount.replace('{count}', String(mastered.length))}</span>
           </div>
           <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2">
             <div
               className="bg-primary-500 h-2 rounded-full transition-all"
-              style={{ width: `${((currentCard + 1) / cards.length) * 100}%` }}
+              style={{ width: `${((currentCard + 1) / totalCards) * 100}%` }}
             />
           </div>
         </div>
@@ -107,14 +108,14 @@ export default function Flashcards() {
             }}
           >
             <div
-              className="w-full h-full bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl p-8 flex flex-col items-center justify-center text-white absolute"
+              className="w-full h-full rounded-[2rem] border border-neutral-200 bg-[#e8f3fc] p-8 flex flex-col items-center justify-center text-neutral-900 absolute shadow-sm"
               style={{ backfaceVisibility: 'hidden' }}
             >
               <p className="text-sm opacity-75 mb-4">{ui.front}</p>
               <p className="text-4xl font-bold text-center">{card.front.text}</p>
             </div>
             <div
-              className="w-full h-full bg-gradient-to-br from-secondary-500 to-primary-500 rounded-xl p-8 flex flex-col items-center justify-center text-white absolute"
+              className="w-full h-full rounded-[2rem] border border-neutral-200 bg-white p-8 flex flex-col items-center justify-center text-neutral-900 absolute shadow-sm"
               style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
             >
               <p className="text-sm opacity-75 mb-4">{ui.back}</p>
@@ -152,7 +153,7 @@ export default function Flashcards() {
             </button>
             <button
               onClick={handleNext}
-              disabled={currentCard === cards.length - 1}
+              disabled={currentCard === totalCards - 1}
               className="flex-1 btn btn-primary"
             >
               {ui.next}

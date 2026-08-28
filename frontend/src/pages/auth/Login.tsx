@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { FiEye, FiEyeOff } from 'react-icons/fi'
+import { FiEye, FiEyeOff, FiLock } from 'react-icons/fi'
 import { useAuthStore } from '../../store/authStore'
 import toast from 'react-hot-toast'
 import { useI18n } from '../../utils/i18n'
@@ -60,10 +60,13 @@ export default function Login() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: 'easeOut' }}
-        className="atlas-panel w-full max-w-md p-8"
+        className="auth-card atlas-panel w-full max-w-md p-8 sm:p-10"
       >
+        <div className="auth-icon" aria-hidden="true">
+          <FiLock size={46} strokeWidth={1.5} />
+        </div>
         <p className="atlas-kicker">{t('login.kicker')}</p>
-        <h1 className="text-3xl font-semibold text-ink mb-2">{t('login.title')}</h1>
+        <h1 className="mb-2 text-center text-4xl font-semibold text-ink">{t('login.title')}</h1>
         <p className="text-muted mb-8">
           {t('login.copy')}
         </p>
@@ -75,8 +78,9 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="label">{t('login.email')}</label>
+            <label className="label" htmlFor="login-email">{t('login.email')}</label>
             <input
+              id="login-email"
               type="email"
               className="input"
               placeholder={t('login.emailPlaceholder')}
@@ -88,10 +92,11 @@ export default function Login() {
           </div>
 
           <div>
-            <label className="label">{t('login.password')}</label>
+            <label className="label" htmlFor="login-password">{t('login.password')}</label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
+                id="login-password"
                 className="input pr-11"
                 placeholder="••••••••"
                 value={password}
@@ -113,7 +118,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="btn btn-primary w-full"
+            className="btn auth-submit w-full"
           >
             {loading ? t('login.signingIn') : t('login.signIn')}
           </button>

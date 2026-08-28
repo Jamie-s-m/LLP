@@ -5,7 +5,8 @@ import { useAuthStore } from '../store/authStore'
 import { useChatStore } from '../store/chatStore'
 import { emitChatMessage, emitConversationRefresh, type LiveChatMessage } from '../utils/chatEvents'
 
-const SOCKET_URL = (import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, '') || 'http://localhost:5000').replace(/\/+$/, '')
+const defaultSocketUrl = import.meta.env.PROD ? 'https://api.linguanest.uz' : 'http://localhost:5000'
+const SOCKET_URL = (import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, '') || defaultSocketUrl).replace(/\/+$/, '')
 
 export default function ChatRealtimeBridge() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)

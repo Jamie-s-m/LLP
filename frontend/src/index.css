@@ -5,22 +5,22 @@
 @tailwind utilities;
 
 :root {
-  --brand-primary: #5B5CE2;
-  --brand-primary-dark: #3638b4;
-  --brand-primary-soft: #eef0ff;
-  --brand-mint: #1cc9a5;
-  --brand-mint-dark: #0f9a7d;
-  --brand-mint-soft: #eafcf7;
-  --brand-gold: #ffbf59;
-  --brand-coral: #ff7a6a;
-  --brand-sky: #4f9cf9;
-  --brand-background: #f6f8ff;
+  --brand-primary: #b8d8f5;
+  --brand-primary-dark: #79b2df;
+  --brand-primary-soft: #e8f3fc;
+  --brand-mint: #b8ded5;
+  --brand-mint-dark: #73b6a7;
+  --brand-mint-soft: #edf8f5;
+  --brand-gold: #f4d99b;
+  --brand-coral: #edaaa2;
+  --brand-sky: #7db8df;
+  --brand-background: #f4f4f2;
   --brand-surface: #ffffff;
-  --brand-surface-secondary: #f2f5fb;
-  --brand-border: rgba(91, 92, 226, 0.12);
-  --brand-text-primary: #101b3d;
-  --brand-text-secondary: #4e5d7b;
-  --brand-text-muted: #73809a;
+  --brand-surface-secondary: #ededeb;
+  --brand-border: rgba(22, 22, 22, 0.1);
+  --brand-text-primary: #171717;
+  --brand-text-secondary: #666765;
+  --brand-text-muted: #92938f;
 
   --dark-bg: #0b2230;
   --dark-bg-2: #0f2b3f;
@@ -43,10 +43,7 @@
 
   body {
     @apply text-neutral-900 dark:text-neutral-50 transition-colors duration-300;
-    background:
-      radial-gradient(circle at top left, rgba(91, 92, 226, 0.12), transparent 24%),
-      radial-gradient(circle at top right, rgba(28, 201, 165, 0.15), transparent 26%),
-      linear-gradient(180deg, #f6f8ff 0%, #eef5ff 20%, #f4fff9 62%, #fffaf5 100%);
+    background: var(--brand-background);
     font-family: 'Manrope', sans-serif;
     color: var(--brand-text-primary);
   }
@@ -56,7 +53,7 @@
   }
 
   html.dark body {
-    background: linear-gradient(180deg, var(--dark-bg) 0%, var(--dark-bg-2) 38%, #102a28 100%);
+    background: var(--dark-bg);
     color: var(--dark-text-primary);
   }
 
@@ -74,14 +71,14 @@
 
   .btn-primary {
     @apply text-white hover:brightness-110 active:brightness-95;
-    background: linear-gradient(135deg, #5B5CE2 0%, #5049d8 28%, #1cc9a5 72%, #ffbf59 100%);
-    box-shadow: 0 18px 40px rgba(91, 92, 226, 0.28);
+    background: #171717;
+    box-shadow: 0 10px 24px rgba(23, 23, 23, 0.14);
   }
 
   .btn-secondary {
     @apply text-white hover:brightness-110 active:brightness-95;
-    background: linear-gradient(135deg, #19b99f 0%, #4f9cf9 52%, #ffbf59 100%);
-    box-shadow: 0 18px 38px rgba(27, 190, 165, 0.24);
+    background: var(--brand-primary-dark);
+    box-shadow: 0 10px 24px rgba(121, 178, 223, 0.24);
   }
 
   .btn-outline {
@@ -93,9 +90,9 @@
   }
 
   .card {
-    @apply rounded-3xl border p-6 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl;
-    border-color: rgba(91, 92, 226, 0.12);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(242, 247, 255, 0.88) 100%);
+    @apply rounded-[2rem] border p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md;
+    border-color: var(--brand-border);
+    background: var(--brand-surface);
   }
 
   .dark .card {
@@ -106,7 +103,7 @@
   }
 
   .input {
-    @apply w-full rounded-xl border border-neutral-300 bg-white px-4 py-2 text-neutral-900 transition-all focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-white/10 dark:bg-[#1a2d3d] dark:text-white;
+    @apply w-full rounded-2xl border border-neutral-200 bg-white px-5 py-3.5 text-neutral-900 transition-all focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-white/10 dark:bg-[#1a2d3d] dark:text-white;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
   }
 
@@ -121,6 +118,26 @@
 
   .label {
     @apply mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300;
+  }
+
+  .auth-card {
+    border-radius: 2.5rem;
+    box-shadow: 0 20px 60px rgba(23, 23, 23, 0.08);
+  }
+
+  .auth-card .atlas-kicker {
+    margin-top: 1.5rem;
+    text-align: center;
+  }
+
+  .auth-icon {
+    @apply mx-auto flex h-28 w-28 items-center justify-center rounded-full border-2 border-neutral-900 text-neutral-900;
+  }
+
+  .auth-submit {
+    @apply text-neutral-900 hover:brightness-105 active:brightness-95;
+    background: var(--brand-primary);
+    box-shadow: 0 12px 24px rgba(125, 184, 223, 0.24);
   }
 
   @media (max-width: 767px) {
@@ -198,10 +215,7 @@
     /* Ensure page content is not hidden behind fixed navbars on mobile */
     padding-bottom: calc(env(safe-area-inset-bottom, 16px) + 88px);
     scroll-padding-bottom: calc(env(safe-area-inset-bottom, 16px) + 88px);
-    background:
-      radial-gradient(circle at 12% 0%, rgba(91, 92, 226, 0.13), transparent 20%),
-      radial-gradient(circle at 85% 10%, rgba(54, 201, 165, 0.14), transparent 22%),
-      linear-gradient(180deg, #f7f9f7 0%, #edf3ff 25%, #f3fff9 65%, #fffaf3 100%);
+    background: var(--brand-background);
     @apply transition-colors duration-300;
   }
 
@@ -221,17 +235,17 @@
   }
 
   .atlas-kicker {
-    @apply mb-3 text-xs font-bold uppercase tracking-widest text-coral;
+    @apply mb-3 text-xs font-bold uppercase tracking-widest text-primary-600;
     letter-spacing: 0.22em;
   }
 
   .atlas-hero {
     @apply grid grid-cols-1 items-center gap-8 overflow-hidden rounded-[2rem] p-8 shadow-xl md:p-12 lg:grid-cols-2;
     animation: slideInUp 0.55s ease-out both;
-    background: linear-gradient(135deg, rgba(31, 36, 93, 0.96) 0%, rgba(91, 92, 226, 0.94) 26%, rgba(54, 201, 165, 0.82) 58%, rgba(255, 181, 71, 0.8) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    box-shadow: 0 30px 90px rgba(49, 56, 158, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.18);
-    color: #fffaf5;
+    background: #171717;
+    border: 1px solid rgba(23, 23, 23, 0.08);
+    box-shadow: 0 24px 60px rgba(23, 23, 23, 0.14);
+    color: #ffffff;
     position: relative;
     transform-style: preserve-3d;
   }
@@ -243,8 +257,9 @@
     width: 18rem;
     height: 18rem;
     border-radius: 9999px;
-    background: radial-gradient(circle, rgba(253, 224, 71, 0.42), transparent 72%);
-    filter: blur(18px);
+    background: var(--brand-primary);
+    filter: blur(36px);
+    opacity: 0.22;
     pointer-events: none;
   }
 
@@ -264,7 +279,7 @@
 
   .atlas-hero-card {
     @apply rounded-[1.75rem] p-6 text-white;
-    background: linear-gradient(145deg, rgba(8, 15, 40, 0.95), rgba(26, 38, 102, 0.9));
+    background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.14);
     box-shadow: 0 24px 60px rgba(15, 27, 76, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
@@ -346,16 +361,16 @@
   }
 
   .atlas-panel {
-    @apply rounded-3xl border shadow-sm backdrop-blur-xl;
-    border-color: rgba(16, 185, 129, 0.14);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(247, 255, 251, 0.84) 100%);
-    box-shadow: 0 20px 50px rgba(15, 35, 54, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.64);
-    color: #16322b;
+    @apply rounded-[2rem] border shadow-sm;
+    border-color: var(--brand-border);
+    background: var(--brand-surface);
+    box-shadow: 0 12px 32px rgba(23, 23, 23, 0.06);
+    color: var(--brand-text-primary);
   }
 
   .dark .atlas-panel {
     border-color: var(--dark-border);
-    background: linear-gradient(180deg, rgba(20, 32, 46, 0.96) 0%, rgba(11, 18, 24, 0.94) 100%);
+    background: var(--dark-surface);
     box-shadow: 0 24px 60px rgba(2, 8, 17, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.04);
     color: var(--dark-text-primary);
   }
@@ -387,7 +402,7 @@
   }
 
   .text-ink {
-    color: #0f2a22;
+    color: var(--brand-text-primary);
   }
 
   .dark .text-ink {
@@ -395,7 +410,7 @@
   }
 
   .text-coral {
-    color: #FF6B5E;
+    color: #bf756c;
   }
 
   .chat-layout {
@@ -411,8 +426,8 @@
   }
 
   .chat-thread.active {
-    background: linear-gradient(135deg, rgba(91, 92, 226, 0.15), rgba(54, 201, 165, 0.12));
-    box-shadow: inset 0 0 0 1px rgba(91, 92, 226, 0.2);
+    background: var(--brand-primary-soft);
+    box-shadow: inset 0 0 0 1px rgba(92, 156, 201, 0.2);
   }
 
   .chat-thread small {
@@ -421,8 +436,8 @@
 
   .chat-avatar {
     @apply flex h-10 w-10 items-center justify-center rounded-2xl text-white;
-    background: linear-gradient(135deg, #5B5CE2, #36C9A5 42%, #FFB547 100%);
-    box-shadow: 0 12px 24px rgba(91, 92, 226, 0.22);
+    background: var(--brand-primary-dark);
+    box-shadow: 0 12px 24px rgba(92, 156, 201, 0.22);
   }
 
   .chat-window {
@@ -636,13 +651,13 @@
   }
 
   .role-card {
-    @apply flex flex-col items-start gap-1 rounded-xl border-2 border-transparent bg-white p-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-md dark:bg-[#13283d];
+    @apply flex min-h-32 flex-col items-start gap-1 rounded-[1.5rem] border-2 border-neutral-200 bg-white p-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-neutral-700 dark:bg-[#13283d];
   }
 
   .role-card.selected {
     @apply bg-white dark:bg-sky-500/10;
-    border-color: rgba(20, 184, 166, 0.5);
-    box-shadow: 0 18px 32px rgba(20, 184, 166, 0.12);
+    border-color: var(--brand-primary-dark);
+    box-shadow: 0 14px 28px rgba(92, 156, 201, 0.16);
   }
 
   .role-card strong {
