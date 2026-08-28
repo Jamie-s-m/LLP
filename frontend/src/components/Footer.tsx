@@ -6,7 +6,7 @@ export default function Footer() {
   const { t } = useI18n()
 
   return (
-    <footer className="border-t border-neutral-200 bg-white/80 backdrop-blur dark:border-neutral-700 dark:bg-neutral-900/80">
+    <footer className="border-t border-primary-200/10 bg-[#102d43] dark:border-primary-200/10 dark:bg-[#102d43]">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:px-6 md:grid-cols-[1.3fr_1fr_1fr]">
         <div className="text-center md:text-left">
           <div className="flex items-center justify-center gap-3 md:justify-start">

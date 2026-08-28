@@ -42,7 +42,7 @@
   }
 
   body {
-    @apply text-neutral-900 dark:text-neutral-50 transition-colors duration-300;
+    @apply text-neutral-100 transition-colors duration-300;
     background: var(--brand-background);
     font-family: 'Manrope', sans-serif;
     color: var(--brand-text-primary);
@@ -57,6 +57,25 @@
     color: var(--dark-text-primary);
   }
 
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
   h1, h2, h3 {
     font-family: 'Sora', 'Manrope', sans-serif;
     letter-spacing: -0.03em;
@@ -67,6 +86,15 @@
   .btn {
     @apply rounded-2xl px-5 py-3 font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50;
     box-shadow: 0 10px 24px rgba(3, 17, 29, 0.2);
+    transform: translateY(0);
+  }
+
+  .btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+  }
+
+  .btn:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
   }
 
   .btn-primary {
@@ -363,7 +391,7 @@
   }
 
   .atlas-panel {
-    @apply rounded-[2rem] border shadow-sm;
+    @apply rounded-[2rem] border shadow-sm transition-colors duration-200;
     border-color: var(--brand-border);
     background: var(--brand-surface);
     box-shadow: 0 16px 36px rgba(3, 17, 29, 0.18);
