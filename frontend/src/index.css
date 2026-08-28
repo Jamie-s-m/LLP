@@ -14,13 +14,13 @@
   --brand-gold: #f4d99b;
   --brand-coral: #edaaa2;
   --brand-sky: #7db8df;
-  --brand-background: #f4f4f2;
-  --brand-surface: #ffffff;
-  --brand-surface-secondary: #ededeb;
-  --brand-border: rgba(22, 22, 22, 0.1);
-  --brand-text-primary: #171717;
-  --brand-text-secondary: #666765;
-  --brand-text-muted: #92938f;
+  --brand-background: #102d43;
+  --brand-surface: #163b55;
+  --brand-surface-secondary: #1c465f;
+  --brand-border: rgba(191, 222, 246, 0.2);
+  --brand-text-primary: #f7fbff;
+  --brand-text-secondary: #c1d5e5;
+  --brand-text-muted: #8da9bc;
 
   --dark-bg: #0b2230;
   --dark-bg-2: #0f2b3f;
@@ -65,24 +65,25 @@
 
 @layer components {
   .btn {
-    @apply rounded-xl px-4 py-2 font-medium transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50;
-    box-shadow: 0 12px 26px rgba(21, 100, 78, 0.12);
+    @apply rounded-2xl px-5 py-3 font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50;
+    box-shadow: 0 10px 24px rgba(3, 17, 29, 0.2);
   }
 
   .btn-primary {
     @apply text-white hover:brightness-110 active:brightness-95;
-    background: #171717;
-    box-shadow: 0 10px 24px rgba(23, 23, 23, 0.14);
+    background: var(--brand-primary);
+    color: #102d43;
+    box-shadow: 0 12px 28px rgba(125, 184, 223, 0.24);
   }
 
   .btn-secondary {
     @apply text-white hover:brightness-110 active:brightness-95;
-    background: var(--brand-primary-dark);
+    background: var(--brand-mint-dark);
     box-shadow: 0 10px 24px rgba(121, 178, 223, 0.24);
   }
 
   .btn-outline {
-    @apply border-2 border-primary-500 text-primary-600 hover:bg-primary-50 dark:text-primary-300 dark:hover:bg-primary-900/20;
+    @apply border border-primary-300 text-primary-200 hover:bg-primary-400/15 dark:text-primary-200 dark:hover:bg-primary-400/15;
   }
 
   .btn-ghost {
@@ -103,17 +104,17 @@
   }
 
   .input {
-    @apply w-full rounded-2xl border border-neutral-200 bg-white px-5 py-3.5 text-neutral-900 transition-all focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-white/10 dark:bg-[#1a2d3d] dark:text-white;
+    @apply w-full rounded-2xl border border-primary-200/30 bg-[#17384f] px-5 py-3.5 text-white transition-all placeholder:text-primary-100/70 focus:outline-none focus:ring-2 focus:ring-primary-300 dark:border-primary-200/30 dark:bg-[#17384f] dark:text-white;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
   }
 
   .input::placeholder {
-    color: #64748b;
+    color: #c1d5e5;
     opacity: 1;
   }
 
   .dark .input::placeholder {
-    color: #bfd7f4;
+    color: #c1d5e5;
   }
 
   .label {
@@ -224,10 +225,7 @@
   }
 
   .dark .atlas-page {
-    background:
-      radial-gradient(circle at 12% 0%, rgba(127, 156, 255, 0.14), transparent 20%),
-      radial-gradient(circle at 85% 0%, rgba(90, 204, 188, 0.12), transparent 20%),
-      linear-gradient(180deg, var(--dark-bg) 0%, var(--dark-bg-2) 36%, #102a28 100%);
+    background: var(--brand-background);
   }
 
   .atlas-heading h1 {
@@ -246,9 +244,9 @@
   .atlas-hero {
     @apply grid grid-cols-1 items-center gap-8 overflow-hidden rounded-[2rem] p-8 shadow-xl md:p-12 lg:grid-cols-2;
     animation: slideInUp 0.55s ease-out both;
-    background: #171717;
-    border: 1px solid rgba(23, 23, 23, 0.08);
-    box-shadow: 0 24px 60px rgba(23, 23, 23, 0.14);
+    background: #102d43;
+    border: 1px solid rgba(191, 222, 246, 0.18);
+    box-shadow: 0 24px 60px rgba(3, 17, 29, 0.3);
     color: #ffffff;
     position: relative;
     transform-style: preserve-3d;
@@ -368,13 +366,13 @@
     @apply rounded-[2rem] border shadow-sm;
     border-color: var(--brand-border);
     background: var(--brand-surface);
-    box-shadow: 0 12px 32px rgba(23, 23, 23, 0.06);
+    box-shadow: 0 16px 36px rgba(3, 17, 29, 0.18);
     color: var(--brand-text-primary);
   }
 
   .dark .atlas-panel {
     border-color: var(--dark-border);
-    background: var(--dark-surface);
+    background: var(--brand-surface);
     box-shadow: 0 24px 60px rgba(2, 8, 17, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.04);
     color: var(--dark-text-primary);
   }
