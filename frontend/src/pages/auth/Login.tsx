@@ -62,7 +62,7 @@ export default function Login() {
         transition={{ duration: 0.35, ease: 'easeOut' }}
         className="auth-card atlas-panel w-full max-w-md p-8 sm:p-10"
       >
-        <div className="auth-icon" aria-hidden="true">
+        <div className="auth-icon dark:border-white dark:text-white" aria-hidden="true">
           <FiLock size={46} strokeWidth={1.5} />
         </div>
         <p className="atlas-kicker">{t('login.kicker')}</p>

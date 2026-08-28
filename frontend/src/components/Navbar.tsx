@@ -84,7 +84,6 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
               <span className="text-neutral-900 dark:text-white">Lingua</span>
               <span className="text-[#5c9cc9]">Nest</span>
             </span>
-            <span className="rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] text-indigo-700 dark:border-indigo-300/30 dark:bg-indigo-500/10 dark:text-indigo-200">.uz</span>
           </div>
         </Link>
 

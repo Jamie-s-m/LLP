@@ -134,6 +134,10 @@
     @apply mx-auto flex h-28 w-28 items-center justify-center rounded-full border-2 border-neutral-900 text-neutral-900;
   }
 
+  .dark .auth-icon {
+    @apply border-white text-white;
+  }
+
   .auth-submit {
     @apply text-neutral-900 hover:brightness-105 active:brightness-95;
     background: var(--brand-primary);
