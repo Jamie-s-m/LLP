@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://linguanest.uz/sitemap.xml
