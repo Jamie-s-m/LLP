@@ -61,7 +61,7 @@ export default function Login() {
           <div className="auth-left-top">
             <div className="auth-logo mb-16 flex items-center gap-3 text-white">
               <div className="auth-logo-icon">
-                <span className="h-4 w-4 rounded-full border-[2.5px] border-white border-b-transparent" />
+                <img src="/linguanest-mark.svg" alt="" />
               </div>
               <span className="font-['Bricolage_Grotesque',sans-serif] text-[22px] font-bold tracking-[-0.02em]">LinguaNest</span>
             </div>

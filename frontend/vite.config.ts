@@ -33,8 +33,8 @@ export default defineConfig(({ mode }) => ({
         id: '/',
         start_url: '/',
         display: 'standalone',
-        background_color: '#F7F9F8',
-        theme_color: '#5B5CE2',
+        background_color: '#FDF8F3',
+        theme_color: '#C84B31',
         orientation: 'portrait-primary',
         scope: '/',
         icons: [
