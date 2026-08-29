@@ -1,6 +1,8 @@
 import User from '../models/User.js';
 import Badge from '../models/Badge.js';
 import UserAchievement from '../models/UserAchievement.js';
+import DailyRewardClaim from '../models/DailyRewardClaim.js';
+import { BADGE_CATALOG, iconFor, colorFor, rarityFor, isBadgeUnlocked } from '../data/badgeCatalog.js';
 
 // @desc    Claim daily reward
 // @route   POST /api/daily-reward/claim
@@ -78,10 +80,9 @@ export const claimDailyReward = async (req, res, next) => {
     // Check for badge unlocks
     const unlockedBadges = await checkAndUnlockBadges(userId, newDailyRewardStreak, user.totalLinguaCoinsEarned, user.xp);
 
-    // Log the claim for auditing
+    // Log the claim for auditing (and for the streak-calendar history endpoint below)
     try {
-      const DailyRewardClaim = await import('../models/DailyRewardClaim.js')
-      await DailyRewardClaim.default.create({
+      await DailyRewardClaim.create({
         user: userId,
         earnedCoins,
         earnedXP,
@@ -170,6 +171,24 @@ export const getDailyRewardStatus = async (req, res, next) => {
   }
 };
 
+// @desc    Read back the claim history log (previously write-only) for a streak calendar
+// @route   GET /api/daily-reward/history
+// @access  Private (Student)
+export const getDailyRewardHistory = async (req, res, next) => {
+  try {
+    const since = new Date();
+    since.setDate(since.getDate() - 90);
+
+    const claims = await DailyRewardClaim.find({ user: req.user.id, claimedAt: { $gte: since } })
+      .select('claimedAt earnedCoins earnedXP streak')
+      .sort({ claimedAt: 1 });
+
+    res.status(200).json({ success: true, data: claims });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Spend lingua coins
 // @route   POST /api/daily-reward/spend
 // @access  Private (Student)
@@ -204,48 +223,29 @@ export const spendLinguaCoins = async (req, res, next) => {
   }
 };
 
-// Helper: Check and unlock badges based on milestones
+// Helper: Check and unlock badges based on milestones (catalog lives in data/badgeCatalog.js
+// so the achievements-catalog endpoint can also list locked badges + progress from it).
 const checkAndUnlockBadges = async (userId, dailyStreak, totalCoins, totalXP) => {
   const unlockedBadges = [];
+  const stats = { dailyStreak, totalCoins, totalXP };
 
-  // Define badge criteria
-  const badgeCriteria = [
-    // Streak badges
-    { name: 'First Steps', requirement: 'Claim daily reward for 1 day', category: 'streak', points: 10, condition: dailyStreak >= 1 },
-    { name: 'Three Day Streak', requirement: 'Claim daily reward for 3 consecutive days', category: 'streak', points: 25, condition: dailyStreak >= 3 },
-    { name: 'Week Warrior', requirement: 'Claim daily reward for 7 consecutive days', category: 'streak', points: 100, condition: dailyStreak >= 7 },
-    { name: 'Month Master', requirement: 'Claim daily reward for 30 consecutive days', category: 'streak', points: 500, condition: dailyStreak >= 30 },
-    { name: 'Century Streak', requirement: 'Claim daily reward for 100 consecutive days', category: 'streak', points: 1000, condition: dailyStreak >= 100 },
-    // Coin badges
-    { name: 'Coin Collector', requirement: 'Earn 100 LinguaCoins total', category: 'achievement', points: 50, condition: totalCoins >= 100 },
-    { name: 'Wealth Builder', requirement: 'Earn 500 LinguaCoins total', category: 'achievement', points: 200, condition: totalCoins >= 500 },
-    { name: 'Coin Millionaire', requirement: 'Earn 10,000 LinguaCoins total', category: 'achievement', points: 1000, condition: totalCoins >= 10000 },
-    // XP badges
-    { name: 'Rising Star', requirement: 'Earn 500 XP total', category: 'milestone', points: 50, condition: totalXP >= 500 },
-    { name: 'Language Learner', requirement: 'Earn 2,000 XP total', category: 'milestone', points: 200, condition: totalXP >= 2000 },
-    { name: 'Polyglot Pro', requirement: 'Earn 10,000 XP total', category: 'milestone', points: 1000, condition: totalXP >= 10000 },
-  ];
+  for (const entry of BADGE_CATALOG) {
+    if (!isBadgeUnlocked(entry, stats)) continue;
 
-  for (const criteria of badgeCriteria) {
-    if (!criteria.condition) continue;
-
-    // Check if badge exists
-    let badge = await Badge.findOne({ name: criteria.name });
+    let badge = await Badge.findOne({ name: entry.name });
     if (!badge) {
-      // Create badge if it doesn't exist
       badge = await Badge.create({
-        name: criteria.name,
-        description: criteria.requirement,
-        icon: getBadgeIcon(criteria.name),
-        color: getBadgeColor(criteria.category),
-        requirement: criteria.requirement,
-        category: criteria.category,
-        points: criteria.points,
-        rarity: getRarity(criteria.points),
+        name: entry.name,
+        description: entry.description,
+        icon: iconFor(entry.name),
+        color: colorFor(entry.category),
+        requirement: entry.description,
+        category: entry.category,
+        points: entry.points,
+        rarity: rarityFor(entry.points),
       });
     }
 
-    // Check if user already has this badge
     const existing = await UserAchievement.findOne({ student: userId, badge: badge._id });
     if (!existing) {
       await UserAchievement.create({
@@ -264,39 +264,4 @@ const checkAndUnlockBadges = async (userId, dailyStreak, totalCoins, totalXP) =>
   }
 
   return unlockedBadges;
-};
-
-const getBadgeIcon = (name) => {
-  const icons = {
-    'First Steps': '🌱',
-    'Three Day Streak': '🔥',
-    'Week Warrior': '⚡',
-    'Month Master': '👑',
-    'Century Streak': '💎',
-    'Coin Collector': '🪙',
-    'Wealth Builder': '💰',
-    'Coin Millionaire': '💎',
-    'Rising Star': '⭐',
-    'Language Learner': '🌟',
-    'Polyglot Pro': '🏆',
-  };
-  return icons[name] || '🏅';
-};
-
-const getBadgeColor = (category) => {
-  const colors = {
-    streak: '#FF6B35',
-    achievement: '#FFD700',
-    milestone: '#5B5CE2',
-    special: '#36C9A5',
-  };
-  return colors[category] || '#5B5CE2';
-};
-
-const getRarity = (points) => {
-  if (points >= 1000) return 'legendary';
-  if (points >= 500) return 'epic';
-  if (points >= 200) return 'rare';
-  if (points >= 50) return 'uncommon';
-  return 'common';
 };

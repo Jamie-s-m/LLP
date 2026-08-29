@@ -2,6 +2,8 @@ import Progress from '../models/Progress.js';
 import Course from '../models/Course.js';
 import Lesson from '../models/Lesson.js';
 import User from '../models/User.js';
+import ExerciseAttempt from '../models/ExerciseAttempt.js';
+import { SKILLS } from '../utils/skills.js';
 
 // @desc    Enroll student in a course
 // @route   POST /api/progress/enroll/:courseId
@@ -147,6 +149,42 @@ export const getStudentProgressForTeacher = async (req, res, next) => {
         })),
       },
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Per-skill accuracy/volume breakdown for the Progress & Analytics page, aggregated
+//          from the ExerciseAttempt log (real data, not the mockup's invented skill scores).
+// @route   GET /api/progress/skills-breakdown
+// @access  Private
+export const getSkillsBreakdown = async (req, res, next) => {
+  try {
+    const rows = await ExerciseAttempt.aggregate([
+      { $match: { user: req.user._id } },
+      {
+        $group: {
+          _id: '$skill',
+          attempts: { $sum: 1 },
+          correct: { $sum: { $cond: ['$isCorrect', 1, 0] } },
+        },
+      },
+    ]);
+
+    const bySkill = new Map(rows.map((row) => [row._id, row]));
+    const breakdown = SKILLS.map((skill) => {
+      const row = bySkill.get(skill);
+      const attempts = row?.attempts || 0;
+      const correct = row?.correct || 0;
+      return {
+        skill,
+        attempts,
+        correct,
+        accuracy: attempts > 0 ? Math.round((correct / attempts) * 100) : 0,
+      };
+    });
+
+    res.status(200).json({ success: true, data: breakdown });
   } catch (error) {
     next(error);
   }
