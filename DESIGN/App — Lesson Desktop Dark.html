@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LinguaNest — Lesson Desktop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0D0C0B;--surface:#151311;--card:#1C1A17;--text:#F3EEEA;--text-secondary:#A8A09A;--muted:#6B6560;--accent:#E07A50;--accent-bg:rgba(224,122,80,0.12);--border:rgba(243,238,234,0.08);--font-display:"Bricolage Grotesque",sans-serif;--font-body:"IBM Plex Sans",sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.6;display:flex}
+.sidebar{width:256px;background:var(--surface);border-right:1px solid var(--border);padding:24px 16px;display:flex;flex-direction:column}
+.sidebar-brand{display:flex;align-items:center;gap:10px;padding:0 12px 24px;text-decoration:none;color:var(--text)}
+.sidebar-brand svg{width:32px;height:32px}
+.sidebar-brand span{font-family:var(--font-display);font-weight:700;font-size:18px}
+.nav{list-style:none;display:flex;flex-direction:column;gap:4px}
+.nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;text-decoration:none;color:var(--text-secondary);font-size:14px;font-weight:500}
+.nav a.active{background:var(--accent-bg);color:var(--accent);font-weight:700}
+.main{flex:1;padding:32px 48px;max-width:900px;margin:0 auto}
+.progress-wrapper{display:flex;align-items:center;gap:16px;margin-bottom:40px}
+.back{width:36px;height:36px;border-radius:50%;background:var(--card);border:1px solid var(--border);display:grid;place-items:center;color:var(--text);text-decoration:none}
+.bar-bg{flex:1;height:8px;background:var(--surface);border-radius:8px;overflow:hidden}
+.bar-fill{height:100%;width:30%;background:var(--accent);border-radius:8px}
+.hearts{color:var(--accent);font-family:var(--font-display);font-weight:800;font-size:16px;display:flex;align-items:center;gap:6px}
+.question{font-family:var(--font-display);font-size:28px;font-weight:800;margin-bottom:8px}
+.prompt{color:var(--text-secondary);font-size:16px;margin-bottom:32px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:24px;padding:40px;margin-bottom:32px}
+.sentence{font-size:22px;font-weight:600;text-align:center;line-height:1.5}
+.blank{display:inline-block;min-width:120px;height:36px;border-bottom:3px solid var(--accent);margin:0 6px;vertical-align:middle}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.opt{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px;font-size:16px;font-weight:600;cursor:default;display:flex;align-items:center;gap:12px}
+.opt-num{width:32px;height:32px;border-radius:50%;background:var(--card);display:grid;place-items:center;color:var(--text-secondary);font-size:14px;font-family:var(--font-display)}
+.bottom{display:flex;justify-content:flex-end}
+.btn{padding:14px 40px;border-radius:12px;font-family:var(--font-display);font-size:16px;font-weight:700;border:1px solid transparent;cursor:default}
+.btn-primary{background:var(--accent);color:#0D0C0B}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <a href="#" class="sidebar-brand">
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="10" fill="#E07A50"/><path d="M8 20c0-6 5.6-11 12-11s12 5 12 11c0 1.5-.5 3-1 4H9c-.5-1-1-2.5-1-4z" stroke="#0D0C0B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 24c2-2 5-3 8-3s6 1 8 3" stroke="#0D0C0B" stroke-width="2.5" stroke-linecap="round"/><circle cx="20" cy="17" r="3" fill="#0D0C0B"/></svg>
+    <span>LinguaNest</span>
+  </a>
+  <ul class="nav">
+    <li><a href="#"><span>🏠</span> Home</a></li>
+    <li><a href="#"><span>📚</span> My Courses</a></li>
+    <li><a href="#" class="active"><span>🔍</span> Explore</a></li>
+    <li><a href="#"><span>🏆</span> Achievements</a></li>
+    <li><a href="#"><span>👤</span> Profile</a></li>
+  </ul>
+</aside>
+<main class="main">
+  <div class="progress-wrapper">
+    <a href="#" class="back">←</a>
+    <div class="bar-bg"><div class="bar-fill"></div></div>
+    <div class="hearts">❤️ 5</div>
+  </div>
+  <div class="question">Translate this sentence</div>
+  <p class="prompt">Select the missing word to complete the meaning.</p>
+  <div class="card">
+    <p class="sentence">Men bugun do'kon<span class="blank"></span> bir kilo olma sotib oldim.</p>
+  </div>
+  <div class="options">
+    <div class="opt"><div class="opt-num">1</div>dan</div>
+    <div class="opt"><div class="opt-num">2</div>ga</div>
+    <div class="opt"><div class="opt-num">3</div>dan keyin</div>
+    <div class="opt"><div class="opt-num">4</div>uchun</div>
+  </div>
+  <div class="bottom" style="margin-top:32px"><button class="btn btn-primary">Check</button></div>
+</main>
+</body>
+</html>

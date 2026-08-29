@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LinguaNest — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0D0C0B;--surface:#151311;--card:#1C1A17;--text:#F3EEEA;--text-secondary:#A8A09A;--muted:#6B6560;--accent:#E07A50;--accent-light:#F2A88A;--accent-bg:rgba(224,122,80,0.12);--border:rgba(243,238,234,0.08);--font-display:"Bricolage Grotesque",sans-serif;--font-body:"IBM Plex Sans",sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.6;display:flex}
+.sidebar{width:256px;background:var(--surface);border-right:1px solid var(--border);padding:24px 16px;display:flex;flex-direction:column}
+.sidebar-brand{display:flex;align-items:center;gap:10px;padding:0 12px 24px;text-decoration:none;color:var(--text)}
+.sidebar-brand svg{width:32px;height:32px}
+.sidebar-brand span{font-family:var(--font-display);font-weight:700;font-size:18px}
+.nav{list-style:none;display:flex;flex-direction:column;gap:4px}
+.nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;text-decoration:none;color:var(--text-secondary);font-size:14px;font-weight:500}
+.nav a.active{background:var(--accent-bg);color:var(--accent);font-weight:700}
+.nav a svg{width:20px;height:20px;opacity:0.8}
+.main{flex:1;padding:32px;max-width:1100px}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px}
+.greeting h2{font-family:var(--font-display);font-size:24px;font-weight:800}
+.greeting p{color:var(--text-secondary);font-size:14px}
+.top-actions{display:flex;gap:12px;align-items:center}
+.avatar{width:40px;height:40px;border-radius:50%;background:var(--accent);color:#0D0C0B;display:grid;place-items:center;font-weight:700;font-family:var(--font-display)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px}
+.card h3{font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.streak{display:flex;align-items:center;gap:16px}
+.streak-num{font-family:var(--font-display);font-size:48px;font-weight:800;color:var(--accent)}
+.streak-info{flex:1}
+.streak-info p{font-size:14px;color:var(--text-secondary)}
+.streak-bar{height:6px;background:var(--surface);border-radius:4px;margin-top:8px;overflow:hidden}
+.streak-bar div{height:100%;width:78%;background:var(--accent);border-radius:4px}
+.course{display:flex;gap:16px;align-items:center}
+.course-cover{width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,#3A4A6B,#2A3A5B);display:grid;place-items:center;font-size:28px}
+.course-info h4{font-family:var(--font-display);font-size:18px;font-weight:700;margin-bottom:4px}
+.course-info p{font-size:13px;color:var(--text-secondary);margin-bottom:8px}
+.progress{height:6px;background:var(--surface);border-radius:4px;overflow:hidden;max-width:200px}
+.progress div{height:100%;width:45%;background:var(--accent);border-radius:4px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;text-align:center}
+.stat-card .value{font-family:var(--font-display);font-size:28px;font-weight:800;color:var(--accent)}
+.stat-card .label{font-size:13px;color:var(--text-secondary);margin-top:4px}
+.list{display:flex;flex-direction:column;gap:12px;margin-top:16px}
+.list-item{display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface);border-radius:12px;border:1px solid var(--border)}
+.list-icon{width:36px;height:36px;border-radius:10px;background:var(--card);display:grid;place-items:center;font-size:16px}
+.list-meta h5{font-size:14px;font-weight:700}
+.list-meta p{font-size:12px;color:var(--muted)}
+.badge{font-size:11px;background:var(--accent-bg);color:var(--accent);padding:4px 10px;border-radius:20px;font-weight:700;margin-left:auto}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <a href="#" class="sidebar-brand">
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="10" fill="#E07A50"/><path d="M8 20c0-6 5.6-11 12-11s12 5 12 11c0 1.5-.5 3-1 4H9c-.5-1-1-2.5-1-4z" stroke="#0D0C0B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 24c2-2 5-3 8-3s6 1 8 3" stroke="#0D0C0B" stroke-width="2.5" stroke-linecap="round"/><circle cx="20" cy="17" r="3" fill="#0D0C0B"/></svg>
+    <span>LinguaNest</span>
+  </a>
+  <ul class="nav">
+    <li><a href="#" class="active"><span>🏠</span> Home</a></li>
+    <li><a href="#"><span>📚</span> My Courses</a></li>
+    <li><a href="#"><span>🔍</span> Explore</a></li>
+    <li><a href="#"><span>🏆</span> Achievements</a></li>
+    <li><a href="#"><span>👤</span> Profile</a></li>
+  </ul>
+</aside>
+<main class="main">
+  <div class="topbar">
+    <div class="greeting">
+      <h2>Good evening, Nodira</h2>
+      <p>You're on a 12-day streak. Keep it up!</p>
+    </div>
+    <div class="top-actions">
+      <div class="avatar">NK</div>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="card">
+      <h3>🔥 Daily Streak</h3>
+      <div class="streak">
+        <div class="streak-num">12</div>
+        <div class="streak-info">
+          <p>Day personal best: 24 days</p>
+          <div class="streak-bar"><div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>📖 Continue Learning</h3>
+      <div class="course">
+        <div class="course-cover">🇬🇧</div>
+        <div class="course-info">
+          <h4>English Upper-Intermediate</h4>
+          <p>Lesson 14 of 30</p>
+          <div class="progress"><div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat-card"><div class="value">8.4k</div><div class="label">Total XP</div></div>
+    <div class="stat-card"><div class="value">142h</div><div class="label">Time spent</div></div>
+    <div class="stat-card"><div class="value">3.2k</div><div class="label">Words learned</div></div>
+  </div>
+  <div class="card" style="margin-top:24px">
+    <h3>📅 Today's Plan</h3>
+    <div class="list">
+      <div class="list-item"><div class="list-icon">🎯</div><div class="list-meta"><h5>Complete 2 lessons</h5><p>English • 20 min</p></div><span class="badge">Now</span></div>
+      <div class="list-item"><div class="list-icon">🎧</div><div class="list-meta"><h5>Listening practice</h5><p>Korean • 15 min</p></div><span class="badge">Later</span></div>
+      <div class="list-item"><div class="list-icon">💬</div><div class="list-meta"><h5>AI Conversation</h5><p>Any language • 10 min</p></div><span class="badge">Bonus</span></div>
+    </div>
+  </div>
+</main>
+</body>
+</html>

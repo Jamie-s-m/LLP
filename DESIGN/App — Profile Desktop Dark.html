@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LinguaNest — Profile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0D0C0B;--surface:#151311;--card:#1C1A17;--text:#F3EEEA;--text-secondary:#A8A09A;--muted:#6B6560;--accent:#E07A50;--accent-light:#F2A88A;--accent-bg:rgba(224,122,80,0.12);--border:rgba(243,238,234,0.08);--font-display:"Bricolage Grotesque",sans-serif;--font-body:"IBM Plex Sans",sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.6;display:flex}
+.sidebar{width:256px;background:var(--surface);border-right:1px solid var(--border);padding:24px 16px;display:flex;flex-direction:column}
+.sidebar-brand{display:flex;align-items:center;gap:10px;padding:0 12px 24px;text-decoration:none;color:var(--text)}
+.sidebar-brand svg{width:32px;height:32px}
+.sidebar-brand span{font-family:var(--font-display);font-weight:700;font-size:18px}
+.nav{list-style:none;display:flex;flex-direction:column;gap:4px}
+.nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;text-decoration:none;color:var(--text-secondary);font-size:14px;font-weight:500}
+.nav a.active{background:var(--accent-bg);color:var(--accent);font-weight:700}
+.main{flex:1;padding:32px;max-width:1100px}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.topbar h2{font-family:var(--font-display);font-size:24px;font-weight:800}
+.layout{display:grid;grid-template-columns:320px 1fr;gap:24px}
+.profile-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;text-align:center}
+.avatar-lg{width:96px;height:96px;border-radius:50%;background:var(--accent);color:#0D0C0B;display:grid;place-items:center;font-size:36px;font-weight:800;font-family:var(--font-display);margin:0 auto 16px}
+.name{font-family:var(--font-display);font-size:22px;font-weight:800;margin-bottom:4px}
+.handle{color:var(--muted);font-size:14px;margin-bottom:16px}
+.bio{color:var(--text-secondary);font-size:14px;line-height:1.6;margin-bottom:20px}
+.stats-row{display:flex;justify-content:center;gap:24px;margin-bottom:20px}
+.stat-num{font-family:var(--font-display);font-size:20px;font-weight:800;color:var(--accent)}
+.stat-label{font-size:12px;color:var(--muted)}
+.edit-btn{display:block;width:100%;padding:12px;border-radius:10px;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--font-display);font-weight:700;text-decoration:none;font-size:14px}
+.tabs{display:flex;gap:8px;margin-bottom:20px}
+.tab{padding:10px 18px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;color:var(--text-secondary);background:var(--card);border:1px solid var(--border)}
+.tab.active{background:var(--accent-bg);color:var(--accent);border-color:rgba(224,122,80,0.3)}
+.activity{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;margin-bottom:20px}
+.activity h3{font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:16px}
+.bars{display:flex;align-items:flex-end;gap:10px;height:120px}
+.bar{flex:1;background:var(--surface);border-radius:6px;height:100%;position:relative;overflow:hidden}
+.bar>div{position:absolute;bottom:0;left:0;width:100%;background:var(--accent);border-radius:6px}
+.bar span{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--muted)}
+.badges{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.badge-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;text-align:center}
+.badge-icon{font-size:32px;margin-bottom:8px}
+.badge-card h4{font-size:14px;font-weight:700;margin-bottom:4px}
+.badge-card p{font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <a href="#" class="sidebar-brand">
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="10" fill="#E07A50"/><path d="M8 20c0-6 5.6-11 12-11s12 5 12 11c0 1.5-.5 3-1 4H9c-.5-1-1-2.5-1-4z" stroke="#0D0C0B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 24c2-2 5-3 8-3s6 1 8 3" stroke="#0D0C0B" stroke-width="2.5" stroke-linecap="round"/><circle cx="20" cy="17" r="3" fill="#0D0C0B"/></svg>
+    <span>LinguaNest</span>
+  </a>
+  <ul class="nav">
+    <li><a href="#"><span>🏠</span> Home</a></li>
+    <li><a href="#"><span>📚</span> My Courses</a></li>
+    <li><a href="#"><span>🔍</span> Explore</a></li>
+    <li><a href="#"><span>🏆</span> Achievements</a></li>
+    <li><a href="#" class="active"><span>👤</span> Profile</a></li>
+  </ul>
+</aside>
+<main class="main">
+  <div class="topbar"><h2>Profile</h2><div style="width:40px"></div></div>
+  <div class="layout">
+    <div class="profile-card">
+      <div class="avatar-lg">NK</div>
+      <div class="name">Nodira Karimova</div>
+      <div class="handle">@nodira_k</div>
+      <div class="bio">Learning English & Korean. IELTS target 7.5. Tashkent based.</div>
+      <div class="stats-row">
+        <div><div class="stat-num">12</div><div class="stat-label">Streak</div></div>
+        <div><div class="stat-num">8.4k</div><div class="stat-label">XP</div></div>
+        <div><div class="stat-num">142h</div><div class="stat-label">Time</div></div>
+      </div>
+      <a href="#" class="edit-btn">Edit Profile</a>
+    </div>
+    <div>
+      <div class="tabs">
+        <a href="#" class="tab active">Achievements</a>
+        <a href="#" class="tab">Activity</a>
+        <a href="#" class="tab">Settings</a>
+      </div>
+      <div class="activity">
+        <h3>Weekly Activity</h3>
+        <div class="bars">
+          <div class="bar"><div style="height:40%"></div><span>Mon</span></div>
+          <div class="bar"><div style="height:70%"></div><span>Tue</span></div>
+          <div class="bar"><div style="height:55%"></div><span>Wed</span></div>
+          <div class="bar"><div style="height:90%"></div><span>Thu</span></div>
+          <div class="bar"><div style="height:60%"></div><span>Fri</span></div>
+          <div class="bar"><div style="height:30%"></div><span>Sat</span></div>
+          <div class="bar"><div style="height:80%"></div><span>Sun</span></div>
+        </div>
+      </div>
+      <div class="badges">
+        <div class="badge-card"><div class="badge-icon">🔥</div><h4>7-Day Streak</h4><p>7 days in a row</p></div>
+        <div class="badge-card"><div class="badge-icon">🎯</div><h4>Sharpshooter</h4><p>10 perfect lessons</p></div>
+        <div class="badge-card"><div class="badge-icon">🗣</div><h4>Chatterbox</h4><p>50 AI chats</p></div>
+        <div class="badge-card"><div class="badge-icon">📚</div><h4>Bookworm</h4><p>100 words learned</p></div>
+        <div class="badge-card"><div class="badge-icon">🏆</div><h4>Champion</h4><p>#1 on leaderboard</p></div>
+        <div class="badge-card"><div class="badge-icon">🌙</div><h4>Night Owl</h4><p>Study after 10pm</p></div>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>

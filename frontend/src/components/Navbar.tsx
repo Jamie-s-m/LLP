@@ -79,10 +79,9 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
           <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-[var(--border)] bg-[var(--accent-light)] shadow-sm ring-2 ring-white sm:h-11 sm:w-11 dark:ring-[var(--dark-bg)]">
             <img src={`${import.meta.env.BASE_URL}linguanest-mark.svg`} alt={BRAND.name} className="h-7 w-7 object-contain sm:h-8 sm:w-8" />
           </div>
-          <div className="hidden items-center gap-2 sm:flex">
-            <span className="text-[1.05rem] font-black tracking-[-0.06em] text-[var(--text-primary)] dark:text-white">
-              <span className="text-[var(--text-primary)] dark:text-white">Lingua</span>
-              <span className="text-[var(--accent)]">Nest</span>
+          <div className="hidden items-center sm:flex">
+            <span className="font-['Bricolage_Grotesque',sans-serif] text-[1.05rem] font-black tracking-[-0.06em] text-[var(--text-primary)] dark:text-white">
+              Lingua<span className="text-[var(--accent)]">Nest</span>
             </span>
           </div>
         </Link>

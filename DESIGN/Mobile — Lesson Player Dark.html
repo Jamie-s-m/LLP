@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LinguaNest — Mobile Lesson</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0D0C0B;--surface:#151311;--card:#1C1A17;--text:#F3EEEA;--text-secondary:#A8A09A;--muted:#6B6560;--accent:#E07A50;--accent-bg:rgba(224,122,80,0.12);--border:rgba(243,238,234,0.08);--font-display:"Bricolage Grotesque",sans-serif;--font-body:"IBM Plex Sans",sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-body);background:#181615;display:flex;justify-content:center;padding:40px 0;color:var(--text)}
+.phone{width:375px;height:812px;background:var(--bg);border-radius:40px;border:8px solid #2A2826;overflow:hidden;display:flex;flex-direction:column}
+.header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+.header a{color:var(--text);text-decoration:none;font-size:20px}
+.progress{flex:1;margin:0 16px;height:6px;background:var(--surface);border-radius:6px;overflow:hidden}
+.progress div{height:100%;width:30%;background:var(--accent)}
+.hearts{color:var(--accent);font-weight:800;font-family:var(--font-display);font-size:14px}
+.content{flex:1;padding:24px 20px;display:flex;flex-direction:column}
+.prompt{font-size:14px;color:var(--text-secondary);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.08em;font-weight:600}
+.question{font-family:var(--font-display);font-size:24px;font-weight:800;margin-bottom:24px;line-height:1.2}
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;margin-bottom:20px;text-align:center}
+.sentence{font-size:18px;font-weight:600;line-height:1.6}
+.blank{display:inline-block;min-width:80px;height:28px;border-bottom:3px solid var(--accent);margin:0 4px}
+.options{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.opt{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;font-weight:600;font-size:15px;display:flex;align-items:center;gap:12px}
+.opt-index{width:28px;height:28px;border-radius:50%;background:var(--card);display:grid;place-items:center;color:var(--text-secondary);font-size:12px;font-family:var(--font-display)}
+.btn{display:flex;align-items:center;justify-content:center;padding:16px;border-radius:14px;font-family:var(--font-display);font-size:16px;font-weight:700;border:1px solid transparent;margin-top:auto}
+.btn-primary{background:var(--accent);color:#0D0C0B}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="header">
+    <a href="#">✕</a>
+    <div class="progress"><div></div></div>
+    <div class="hearts">❤️ 5</div>
+  </div>
+  <div class="content">
+    <div class="prompt">Question 3 of 10</div>
+    <div class="question">Complete the sentence</div>
+    <div class="card">
+      <p class="sentence">Kechqurun biz kino<span class="blank"></span>bordik.</p>
+    </div>
+    <div class="options">
+      <div class="opt"><div class="opt-index">1</div>ga</div>
+      <div class="opt"><div class="opt-index">2</div>da</div>
+      <div class="opt"><div class="opt-index">3</div>dan</div>
+    </div>
+    <button class="btn btn-primary">Check Answer</button>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LinguaNest — Course Detail</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0D0C0B;--surface:#151311;--card:#1C1A17;--text:#F3EEEA;--text-secondary:#A8A09A;--muted:#6B6560;--accent:#E07A50;--accent-bg:rgba(224,122,80,0.12);--border:rgba(243,238,234,0.08);--font-display:"Bricolage Grotesque",sans-serif;--font-body:"IBM Plex Sans",sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-body);background:#181615;display:flex;justify-content:center;padding:40px 0;color:var(--text)}
+.phone{width:375px;height:812px;background:var(--bg);border-radius:40px;border:8px solid #2A2826;overflow:hidden;display:flex;flex-direction:column}
+.hero{position:relative;padding:28px 24px 24px;background:linear-gradient(180deg,#2A3A4A,#0D0C0B)}
+.back{position:absolute;top:20px;left:20px;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.3);display:grid;place-items:center;color:#fff;text-decoration:none;font-size:16px}
+.flag{font-size:56px;margin-bottom:8px}
+.hero h1{font-family:var(--font-display);font-size:28px;font-weight:800}
+.meta{display:flex;gap:10px;margin-top:6px;font-size:13px;color:var(--text-secondary)}
+.content{flex:1;overflow:auto;padding:20px 24px}
+.section{margin-bottom:24px}
+.section h2{font-family:var(--font-display);font-size:18px;font-weight:700;margin-bottom:10px}
+.section p{color:var(--text-secondary);font-size:14px;line-height:1.6}
+.list{display:flex;flex-direction:column;gap:8px}
+.lesson{display:flex;align-items:center;gap:12px;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:12px}
+.lesson-num{width:28px;height:28px;border-radius:50%;background:var(--surface);display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--text-secondary)}
+.lesson h4{font-size:14px;font-weight:700}
+.lesson p{font-size:12px;color:var(--muted)}
+.status{width:24px;height:24px;border-radius:50%;background:var(--accent);display:grid;place-items:center;color:#0D0C0B;font-size:12px;margin-left:auto}
+.status.lock{background:var(--surface);color:var(--muted)}
+.cta{margin-top:auto;padding:16px 24px 24px;border-top:1px solid var(--border);background:var(--card)}
+.btn{display:flex;align-items:center;justify-content:center;padding:16px;border-radius:14px;font-family:var(--font-display);font-size:16px;font-weight:700;text-decoration:none;border:1px solid transparent}
+.btn-primary{background:var(--accent);color:#0D0C0B}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="hero">
+    <a href="#" class="back">←</a>
+    <div class="flag">🇬🇧</div>
+    <h1>English Complete</h1>
+    <div class="meta"><span>30 lessons</span><span>•</span><span>A2-C1</span><span>•</span><span>4.9 ★</span></div>
+  </div>
+  <div class="content">
+    <div class="section">
+      <h2>About this course</h2>
+      <p>A comprehensive path from pre-intermediate to advanced. Covers grammar, real-life dialogues, business contexts, and exam prep.</p>
+    </div>
+    <div class="section">
+      <h2>Syllabus</h2>
+      <div class="list">
+        <div class="lesson"><div class="lesson-num">1</div><div><h4>Greetings & Introductions</h4><p>10 min</p></div><div class="status">✓</div></div>
+        <div class="lesson"><div class="lesson-num">2</div><div><h4>Present Simple</h4><p>12 min</p></div><div class="status">✓</div></div>
+        <div class="lesson"><div class="lesson-num">3</div><div><h4>Past Simple Stories</h4><p>15 min</p></div><div class="status" style="background:var(--accent-bg);color:var(--accent)">▶</div></div>
+        <div class="lesson"><div class="lesson-num">4</div><div><h4>Future Plans</h4><p>12 min</p></div><div class="status lock">🔒</div></div>
+        <div class="lesson"><div class="lesson-num">5</div><div><h4>Conditionals</h4><p>18 min</p></div><div class="status lock">🔒</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="cta">
+    <a href="#" class="btn btn-primary">Continue Lesson 3</a>
+  </div>
+</div>
+</body>
+</html>
