@@ -1,51 +1,58 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --brand-primary: #b8d8f5;
-  --brand-primary-dark: #79b2df;
-  --brand-primary-soft: #e8f3fc;
-  --brand-mint: #b8ded5;
-  --brand-mint-dark: #73b6a7;
-  --brand-mint-soft: #edf8f5;
-  --brand-gold: #f4d99b;
-  --brand-coral: #edaaa2;
-  --brand-sky: #7db8df;
-  --brand-background: #102d43;
-  --brand-surface: #163b55;
-  --brand-surface-secondary: #1c465f;
-  --brand-border: rgba(191, 222, 246, 0.2);
-  --brand-text-primary: #f7fbff;
-  --brand-text-secondary: #c1d5e5;
-  --brand-text-muted: #8da9bc;
+  --bg: #fdf8f3;
+  --surface: #ffffff;
+  --surface-strong: #fffaf5;
+  --text-primary: #1c1917;
+  --text-muted: #78716c;
+  --text-subtle: #a8a29e;
+  --accent: #c84b31;
+  --accent-hover: #a33d28;
+  --accent-light: #fdf2f0;
+  --border: #e7e5e4;
+  --border-light: #f5f5f4;
+  --success: #2d6a4f;
+  --success-light: #ecfdf5;
+  --warning: #d97706;
+  --warning-light: #fef3c7;
+  --info: #0369a1;
+  --info-light: #e0f2fe;
 
-  --dark-bg: #0b2230;
-  --dark-bg-2: #0f2b3f;
-  --dark-bg-3: #113049;
-  --dark-surface: #122b40;
-  --dark-surface-strong: #15354a;
-  --dark-surface-soft: #18374f;
-  --dark-border: rgba(148, 163, 184, 0.12);
-  --dark-text-primary: #e6f0f8;
-  --dark-text-secondary: #c9d9e6;
-  --dark-text-muted: #9fb6c9;
+  --brand-background: var(--bg);
+  --brand-surface: var(--surface);
+  --brand-border: var(--border);
+  --brand-text-primary: var(--text-primary);
+  --brand-text-secondary: var(--text-muted);
+  --brand-text-muted: var(--text-subtle);
+
+  --dark-bg: #111827;
+  --dark-surface: #1b2430;
+  --dark-surface-strong: #1a2c3d;
+  --dark-border: rgba(148, 163, 184, 0.18);
+  --dark-text-primary: #edf6ff;
+  --dark-text-secondary: #d1d9e4;
+  --dark-text-muted: #98a9ba;
 }
 
 @layer base {
   html {
     @apply scroll-smooth;
-    background: var(--brand-background);
+    background: var(--bg);
     scroll-padding-top: 88px;
   }
 
   body {
-    @apply text-neutral-100 transition-colors duration-300;
-    background: var(--brand-background);
-    font-family: 'Manrope', sans-serif;
-    color: var(--brand-text-primary);
+    @apply transition-colors duration-300;
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: 'Source Sans 3', sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
   }
 
   html.dark {
@@ -77,15 +84,15 @@
   }
 
   h1, h2, h3 {
-    font-family: 'Sora', 'Manrope', sans-serif;
+    font-family: 'Bricolage Grotesque', sans-serif;
     letter-spacing: -0.03em;
   }
 }
 
 @layer components {
   .btn {
-    @apply rounded-2xl px-5 py-3 font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50;
-    box-shadow: 0 10px 24px rgba(3, 17, 29, 0.2);
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
     transform: translateY(0);
   }
 
@@ -98,30 +105,31 @@
   }
 
   .btn-primary {
-    @apply text-white hover:brightness-110 active:brightness-95;
-    background: var(--brand-primary);
-    color: #102d43;
-    box-shadow: 0 12px 28px rgba(125, 184, 223, 0.24);
+    @apply text-white;
+    background: var(--accent);
+    box-shadow: 0 12px 28px rgba(200, 75, 49, 0.18);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: var(--accent-hover);
   }
 
   .btn-secondary {
-    @apply text-white hover:brightness-110 active:brightness-95;
-    background: var(--brand-mint-dark);
-    box-shadow: 0 10px 24px rgba(121, 178, 223, 0.24);
+    @apply border border-[var(--border)] bg-white text-[var(--text-primary)] hover:bg-[var(--border-light)];
   }
 
   .btn-outline {
-    @apply border border-primary-300 text-primary-200 hover:bg-primary-400/15 dark:text-primary-200 dark:hover:bg-primary-400/15;
+    @apply border border-[var(--border)] bg-transparent text-[var(--text-primary)] hover:bg-[var(--border-light)];
   }
 
   .btn-ghost {
-    @apply text-neutral-700 hover:bg-neutral-200 dark:text-neutral-300 dark:hover:bg-neutral-800;
+    @apply text-[var(--text-primary)] hover:bg-[var(--border-light)];
   }
 
   .card {
     @apply rounded-[2rem] border p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md;
-    border-color: var(--brand-border);
-    background: var(--brand-surface);
+    border-color: var(--border);
+    background: var(--surface);
   }
 
   .dark .card {
@@ -132,12 +140,12 @@
   }
 
   .input {
-    @apply w-full rounded-2xl border border-primary-200/30 bg-[#17384f] px-5 py-3.5 text-white transition-all placeholder:text-primary-100/70 focus:outline-none focus:ring-2 focus:ring-primary-300 dark:border-primary-200/30 dark:bg-[#17384f] dark:text-white;
+    @apply w-full rounded-2xl border border-[var(--border)] bg-white px-5 py-3.5 text-[var(--text-primary)] transition-all placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#f0bca8] dark:border-[var(--dark-border)] dark:bg-[#172838] dark:text-white;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
   }
 
   .input::placeholder {
-    color: #c1d5e5;
+    color: var(--text-muted);
     opacity: 1;
   }
 
@@ -146,7 +154,7 @@
   }
 
   .label {
-    @apply mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300;
+    @apply mb-2 block text-sm font-medium text-[var(--text-muted)] dark:text-[var(--dark-text-secondary)];
   }
 
   .auth-card {
@@ -169,8 +177,9 @@
 
   .auth-submit {
     @apply text-neutral-900 hover:brightness-105 active:brightness-95;
-    background: var(--brand-primary);
-    box-shadow: 0 12px 24px rgba(125, 184, 223, 0.24);
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 12px 24px rgba(200, 75, 49, 0.18);
   }
 
   @media (max-width: 767px) {
@@ -245,15 +254,14 @@
 @layer components {
   .atlas-page {
     min-height: calc(100vh - 72px);
-    /* Ensure page content is not hidden behind fixed navbars on mobile */
     padding-bottom: calc(env(safe-area-inset-bottom, 16px) + 88px);
     scroll-padding-bottom: calc(env(safe-area-inset-bottom, 16px) + 88px);
-    background: var(--brand-background);
+    background: var(--bg);
     @apply transition-colors duration-300;
   }
 
   .dark .atlas-page {
-    background: var(--brand-background);
+    background: var(--dark-bg);
   }
 
   .atlas-heading h1 {
@@ -265,19 +273,21 @@
   }
 
   .atlas-kicker {
-    @apply mb-3 text-xs font-bold uppercase tracking-widest text-primary-600;
+    @apply mb-3 text-xs font-bold uppercase tracking-widest text-[#c84b31];
     letter-spacing: 0.22em;
   }
 
   .atlas-hero {
-    @apply grid grid-cols-1 items-center gap-8 overflow-hidden rounded-[2rem] p-8 shadow-xl md:p-12 lg:grid-cols-2;
+    @apply grid grid-cols-1 items-center gap-8 overflow-hidden rounded-[2rem] border border-[var(--border)] bg-white/80 p-8 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur-md md:p-12 lg:grid-cols-2;
     animation: slideInUp 0.55s ease-out both;
-    background: #102d43;
-    border: 1px solid rgba(191, 222, 246, 0.18);
-    box-shadow: 0 24px 60px rgba(3, 17, 29, 0.3);
-    color: #ffffff;
     position: relative;
     transform-style: preserve-3d;
+  }
+
+  .dark .atlas-hero {
+    background: linear-gradient(180deg, rgba(25, 37, 48, 0.96) 0%, rgba(17, 24, 39, 0.96) 100%);
+    border-color: var(--dark-border);
+    box-shadow: 0 24px 60px rgba(2, 8, 17, 0.5);
   }
 
   .atlas-hero::before {
@@ -287,24 +297,25 @@
     width: 18rem;
     height: 18rem;
     border-radius: 9999px;
-    background: var(--brand-primary);
-    filter: blur(36px);
-    opacity: 0.22;
+    background: rgba(200, 75, 49, 0.14);
+    filter: blur(40px);
     pointer-events: none;
   }
 
   .atlas-hero h1 {
-    @apply text-5xl font-semibold text-white md:text-6xl;
+    @apply text-5xl font-semibold text-[var(--text-primary)] md:text-6xl dark:text-white;
   }
 
   .atlas-hero .atlas-kicker {
-    color: #d8ffee;
-    text-shadow: 0 10px 25px rgba(10, 29, 47, 0.34);
+    color: var(--accent);
   }
 
   .atlas-hero p {
-    color: #ecfff7;
-    text-shadow: 0 8px 22px rgba(6, 21, 35, 0.24);
+    color: var(--text-muted);
+  }
+
+  .dark .atlas-hero p {
+    color: var(--dark-text-secondary);
   }
 
   .atlas-hero-card {

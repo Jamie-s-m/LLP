@@ -210,170 +210,202 @@ export default function Register() {
 
   return (
     <div className="atlas-page flex items-center justify-center px-4 py-12">
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, ease: 'easeOut' }}
-        className="auth-card atlas-panel w-full max-w-lg p-8 sm:p-10"
-      >
-        <p className="atlas-kicker">{ui.kicker}</p>
-        <h1 className="text-3xl font-semibold text-ink mb-2">{ui.title}</h1>
-        <p className="text-muted mb-6">{ui.copy}</p>
-        {planIntent ? (
-          <div className="mb-6 rounded-lg border border-primary-200 bg-primary-50 px-4 py-3 text-sm text-primary-700 dark:border-primary-500/20 dark:bg-primary-500/10 dark:text-primary-200">
-            {planIntent}
+      <div className="auth-shell w-full max-w-6xl overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] shadow-[0_24px_80px_rgba(17,24,39,0.08)] dark:border-[var(--dark-border)] dark:bg-[var(--dark-surface)]">
+        <div className="auth-left hidden min-h-[880px] w-[42%] flex-col justify-between p-10 lg:flex">
+          <div className="auth-left-top">
+            <div className="auth-logo mb-16 flex items-center gap-3 text-white">
+              <div className="auth-logo-icon">
+                <span className="h-4 w-4 rounded-full border-[2.5px] border-white border-b-transparent" />
+              </div>
+              <span className="font-['Bricolage_Grotesque',sans-serif] text-[22px] font-bold tracking-[-0.02em]">LinguaNest</span>
+            </div>
+            <p className="auth-quote max-w-[360px] font-['Bricolage_Grotesque',sans-serif] text-[32px] font-bold leading-[1.25] tracking-[-0.02em] text-white">
+              Grow in <span>language</span> and belong anywhere.
+            </p>
           </div>
-        ) : null}
 
-        {(localError || error) && (
-          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm mb-6">
-            {localError || error}
+          <div className="auth-testimonial rounded-[1.5rem] border border-white/10 bg-white/5 p-7 backdrop-blur-sm">
+            <div className="testimonial-stars mb-4 text-[#fbbf24] tracking-[2px]">★★★★★</div>
+            <p className="testimonial-text text-[15px] leading-6 text-white/80">
+              “A thoughtful learning space for families, students, and teachers — the entire experience feels well designed and human.”
+            </p>
+            <div className="testimonial-author flex items-center gap-3">
+              <div className="testimonial-avatar">SD</div>
+              <div>
+                <div className="testimonial-name text-sm font-bold text-white">Sardor D.</div>
+                <div className="testimonial-role text-xs text-white/50">Parent & learner</div>
+              </div>
+            </div>
           </div>
-        )}
-
-        <div className="role-card-grid mb-6">
-          <button type="button" onClick={() => setRole('student')} className={`role-card ${role === 'student' ? 'selected' : ''}`}>
-            <FiBookOpen className="text-coral text-xl" />
-            <strong>{ui.student}</strong>
-            <span>{ui.studentCopy}</span>
-          </button>
-          <button type="button" onClick={() => { setRole('parent'); setRequestTeacherRole(false) }} className={`role-card ${role === 'parent' ? 'selected' : ''}`}>
-            <FiUsers className="text-coral text-xl" />
-            <strong>{ui.parent}</strong>
-            <span>{ui.parentCopy}</span>
-          </button>
         </div>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="label">{ui.firstName}</label>
-              <input
-                name="firstName"
-                type="text"
-                required
-                className="input"
-                value={formData.firstName}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label className="label">{ui.lastName}</label>
-              <input
-                name="lastName"
-                type="text"
-                required
-                className="input"
-                value={formData.lastName}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="label">{ui.email}</label>
-            <input
-              name="email"
-              type="email"
-              required
-              className="input"
-              value={formData.email}
-              onChange={handleChange}
-              onBlur={handleEmailBlur}
-              autoComplete="email"
-            />
-            {emailStatusMessage ? (
-              <p className={`mt-2 text-sm ${emailStatus === 'available' ? 'text-emerald-600' : emailStatus === 'exists' ? 'text-amber-700' : 'text-slate-500'}`}>
-                {emailStatus === 'checking' ? ui.checking : emailStatusMessage}
-              </p>
-            ) : null}
-            {emailStatus === 'exists' ? (
-              <div className="mt-2 flex flex-wrap gap-3 text-sm">
-                <Link to="/login" className="text-coral font-semibold">{ui.signInInstead}</Link>
-                <Link to={`/verify-email?email=${encodeURIComponent(formData.email.trim().toLowerCase())}`} className="text-primary-600 font-semibold dark:text-primary-300">
-                  {ui.continueVerification}
-                </Link>
+        <div className="auth-right flex flex-1 items-center justify-center p-6 sm:p-8 lg:p-12">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+            className="auth-card w-full max-w-lg rounded-[2rem] bg-[var(--surface)] p-8 sm:p-10 dark:bg-[var(--dark-surface)]"
+          >
+            <p className="atlas-kicker">{ui.kicker}</p>
+            <h1 className="mb-2 text-3xl font-semibold text-[var(--text-primary)] dark:text-white">{ui.title}</h1>
+            <p className="text-muted mb-6 text-[var(--text-muted)] dark:text-[var(--dark-text-secondary)]">{ui.copy}</p>
+            {planIntent ? (
+              <div className="mb-6 rounded-lg border border-[var(--border)] bg-[var(--accent-light)] px-4 py-3 text-sm text-[var(--accent)] dark:border-[var(--dark-border)] dark:bg-white/5 dark:text-[var(--dark-text-secondary)]">
+                {planIntent}
               </div>
             ) : null}
-          </div>
 
-          <div>
-            <label className="label">{ui.password}</label>
-            <div className="relative">
-              <input
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                required
-                minLength={8}
-                className="input pr-11"
-                value={formData.password}
-                onChange={handleChange}
-                autoComplete="new-password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((current) => !current)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-slate-700 dark:hover:text-slate-200"
-                aria-label={showPassword ? ui.hidePassword : ui.showPassword}
-              >
-                {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+            {(localError || error) && (
+              <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                {localError || error}
+              </div>
+            )}
+
+            <div className="role-card-grid mb-6">
+              <button type="button" onClick={() => setRole('student')} className={`role-card ${role === 'student' ? 'selected' : ''}`}>
+                <FiBookOpen className="text-[var(--accent)] text-xl" />
+                <strong>{ui.student}</strong>
+                <span>{ui.studentCopy}</span>
+              </button>
+              <button type="button" onClick={() => { setRole('parent'); setRequestTeacherRole(false) }} className={`role-card ${role === 'parent' ? 'selected' : ''}`}>
+                <FiUsers className="text-[var(--accent)] text-xl" />
+                <strong>{ui.parent}</strong>
+                <span>{ui.parentCopy}</span>
               </button>
             </div>
-            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{ui.passwordHint}</p>
-          </div>
 
-          <div>
-            <label className="label">{ui.confirmPassword}</label>
-            <div className="relative">
-              <input
-                name="confirmPassword"
-                type={showConfirmPassword ? 'text' : 'password'}
-                required
-                minLength={8}
-                className="input pr-11"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                autoComplete="new-password"
-              />
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="label">{ui.firstName}</label>
+                  <input
+                    name="firstName"
+                    type="text"
+                    required
+                    className="input"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div>
+                  <label className="label">{ui.lastName}</label>
+                  <input
+                    name="lastName"
+                    type="text"
+                    required
+                    className="input"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="label">{ui.email}</label>
+                <input
+                  name="email"
+                  type="email"
+                  required
+                  className="input"
+                  value={formData.email}
+                  onChange={handleChange}
+                  onBlur={handleEmailBlur}
+                  autoComplete="email"
+                />
+                {emailStatusMessage ? (
+                  <p className={`mt-2 text-sm ${emailStatus === 'available' ? 'text-emerald-600' : emailStatus === 'exists' ? 'text-amber-700' : 'text-slate-500'}`}>
+                    {emailStatus === 'checking' ? ui.checking : emailStatusMessage}
+                  </p>
+                ) : null}
+                {emailStatus === 'exists' ? (
+                  <div className="mt-2 flex flex-wrap gap-3 text-sm">
+                    <Link to="/login" className="font-semibold text-[var(--accent)]">{ui.signInInstead}</Link>
+                    <Link to={`/verify-email?email=${encodeURIComponent(formData.email.trim().toLowerCase())}`} className="font-semibold text-[var(--accent)]">
+                      {ui.continueVerification}
+                    </Link>
+                  </div>
+                ) : null}
+              </div>
+
+              <div>
+                <label className="label">{ui.password}</label>
+                <div className="relative">
+                  <input
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    minLength={8}
+                    className="input pr-11"
+                    value={formData.password}
+                    onChange={handleChange}
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((current) => !current)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-slate-700 dark:hover:text-slate-200"
+                    aria-label={showPassword ? ui.hidePassword : ui.showPassword}
+                  >
+                    {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                  </button>
+                </div>
+                <p className="mt-2 text-sm text-[var(--text-muted)] dark:text-[var(--dark-text-secondary)]">{ui.passwordHint}</p>
+              </div>
+
+              <div>
+                <label className="label">{ui.confirmPassword}</label>
+                <div className="relative">
+                  <input
+                    name="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    required
+                    minLength={8}
+                    className="input pr-11"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword((current) => !current)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-slate-700 dark:hover:text-slate-200"
+                    aria-label={showConfirmPassword ? ui.hidePassword : ui.showPassword}
+                  >
+                    {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                  </button>
+                </div>
+              </div>
+
+              {role === 'student' && (
+                <label className="flex items-start gap-3 rounded-lg bg-[var(--surface-strong)] p-3 text-sm text-[var(--text-muted)] dark:bg-white/5 dark:text-[var(--dark-text-secondary)]">
+                  <input
+                    type="checkbox"
+                    className="mt-1"
+                    checked={requestTeacherRole}
+                    onChange={(e) => setRequestTeacherRole(e.target.checked)}
+                  />
+                  <span>{ui.teacherInterest}</span>
+                </label>
+              )}
+
               <button
-                type="button"
-                onClick={() => setShowConfirmPassword((current) => !current)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-slate-700 dark:hover:text-slate-200"
-                aria-label={showConfirmPassword ? ui.hidePassword : ui.showPassword}
+                type="submit"
+                disabled={isLoading}
+                className="btn btn-primary w-full"
               >
-                {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                {isLoading ? ui.creating : ui.create}
               </button>
-            </div>
-          </div>
+            </form>
 
-          {role === 'student' && (
-            <label className="flex items-start gap-3 p-3 rounded-lg bg-[#f6efe7] text-sm text-slate-600">
-              <input
-                type="checkbox"
-                className="mt-1"
-                checked={requestTeacherRole}
-                onChange={(e) => setRequestTeacherRole(e.target.checked)}
-              />
-              <span>{ui.teacherInterest}</span>
-            </label>
-          )}
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="btn btn-primary w-full"
-          >
-            {isLoading ? ui.creating : ui.create}
-          </button>
-        </form>
-
-        <p className="text-center text-muted mt-6">
-          {ui.alreadyHaveAccount}{' '}
-          <Link to="/login" className="text-coral font-semibold">
-            {ui.signIn}
-          </Link>
-        </p>
-      </motion.div>
+            <p className="mt-6 text-center text-[var(--text-muted)] dark:text-[var(--dark-text-secondary)]">
+              {ui.alreadyHaveAccount}{' '}
+              <Link to="/login" className="font-semibold text-[var(--accent)]">
+                {ui.signIn}
+              </Link>
+            </p>
+          </motion.div>
+        </div>
+      </div>
     </div>
   )
 }

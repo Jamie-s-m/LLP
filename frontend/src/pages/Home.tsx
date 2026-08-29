@@ -40,48 +40,47 @@ export default function Home() {
     <div className="atlas-page">
       <div className="mx-auto max-w-7xl px-4 py-8">
         <div className="atlas-hero mb-12">
-        <div>
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.22em] text-indigo-50 backdrop-blur-sm">
-            <span className="h-2 w-2 rounded-full bg-emerald-300" />
-            {BRAND.displayName}
+          <div>
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface-strong)] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.22em] text-[var(--text-primary)] shadow-sm">
+              <span className="h-2 w-2 rounded-full bg-[var(--success)]" />
+              {BRAND.displayName}
+            </div>
+            <p className="atlas-kicker">{t('home.heroKicker')}</p>
+            <h1 className="mb-4 text-4xl font-extrabold tracking-[-0.06em] md:text-5xl lg:text-6xl">
+              {BRAND.tagline}
+            </h1>
+            <p className="mb-2 max-w-2xl text-sm font-medium uppercase tracking-[0.18em] text-[var(--text-muted)]">
+              The language nest concept
+            </p>
+            <p className="mb-8 max-w-2xl text-lg leading-8 text-[var(--text-muted)]">
+              {BRAND.concept}
+            </p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <Link
+                to="/courses"
+                className="btn btn-primary px-8 py-3.5 text-base"
+              >
+                {t('home.exploreLearningPaths')}
+              </Link>
+              <Link
+                to="/tutors"
+                className="btn btn-secondary px-8 py-3.5 text-base"
+              >
+                Find your tutor
+              </Link>
+            </div>
+            <div className="mt-6 flex flex-wrap gap-2 text-sm text-[var(--text-muted)]">
+              <span className="rounded-full border border-[var(--border)] bg-[var(--surface-strong)] px-3 py-1.5">Live tutoring</span>
+              <span className="rounded-full border border-[var(--border)] bg-[var(--surface-strong)] px-3 py-1.5">AI practice</span>
+              <span className="rounded-full border border-[var(--border)] bg-[var(--surface-strong)] px-3 py-1.5">Progress tracking</span>
+            </div>
           </div>
-          <p className="atlas-kicker">{t('home.heroKicker')}</p>
-          <h1 className="mb-4 text-4xl font-extrabold tracking-[-0.06em] text-white md:text-5xl lg:text-6xl">
-            {BRAND.tagline}
-          </h1>
-          <p className="mb-2 max-w-2xl text-sm font-medium uppercase tracking-[0.18em] text-indigo-100/80">
-            The language nest concept
-          </p>
-          <p className="mb-8 max-w-2xl text-lg leading-8 text-indigo-50/95">
-            {BRAND.concept}
-          </p>
-          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <Link
-              to="/courses"
-              className="inline-flex items-center justify-center rounded-2xl px-8 py-3.5 text-center text-base font-semibold text-white shadow-[0_18px_38px_rgba(27,34,82,0.28)] transition hover:-translate-y-0.5"
-              style={{ background: '#171717' }}
-            >
-              {t('home.exploreLearningPaths')}
-            </Link>
-            <Link
-              to="/tutors"
-              className="inline-flex items-center justify-center rounded-2xl border border-white/35 bg-white/10 px-8 py-3.5 text-center text-base font-semibold text-white backdrop-blur-sm transition hover:bg-white/15"
-            >
-              Find your tutor
-            </Link>
-          </div>
-          <div className="mt-6 flex flex-wrap gap-2 text-sm text-indigo-100/90">
-            <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5">Live tutoring</span>
-            <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5">AI practice</span>
-            <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5">Progress tracking</span>
-          </div>
-        </div>
           <div className="hero-orbit-wrap relative flex items-center justify-center">
             <span className="hero-float hero-float-one" />
             <span className="hero-float hero-float-two" />
             <span className="hero-float hero-float-three" />
             <span className="hero-float hero-float-four" />
-            <img src={`${import.meta.env.BASE_URL}linguanest-orbit.svg`} alt="LinguaNest premium language learning illustration" className="hero-orbit-image drop-shadow-[0_18px_40px_rgba(15,23,42,0.28)]" />
+            <img src={`${import.meta.env.BASE_URL}linguanest-orbit.svg`} alt="LinguaNest premium language learning illustration" className="hero-orbit-image drop-shadow-[0_18px_40px_rgba(15,23,42,0.14)]" />
           </div>
         </div>
 

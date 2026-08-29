@@ -56,89 +56,121 @@ export default function Login() {
 
   return (
     <div className="atlas-page flex items-center justify-center px-4 py-12">
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, ease: 'easeOut' }}
-        className="auth-card atlas-panel w-full max-w-md p-8 sm:p-10"
-      >
-        <div className="auth-icon dark:border-white dark:text-white" aria-hidden="true">
-          <FiLock size={46} strokeWidth={1.5} />
-        </div>
-        <p className="atlas-kicker">{t('login.kicker')}</p>
-        <h1 className="mb-2 text-center text-4xl font-semibold text-ink">{t('login.title')}</h1>
-        <p className="text-muted mb-8">
-          {t('login.copy')}
-        </p>
-        {notice ? (
-          <div className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-            {notice}
-          </div>
-        ) : null}
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="label" htmlFor="login-email">{t('login.email')}</label>
-            <input
-              id="login-email"
-              type="email"
-              className="input"
-              placeholder={t('login.emailPlaceholder')}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoComplete="email"
-              required
-            />
+      <div className="auth-shell w-full max-w-6xl overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] shadow-[0_24px_80px_rgba(17,24,39,0.08)] dark:border-[var(--dark-border)] dark:bg-[var(--dark-surface)]">
+        <div className="auth-left hidden min-h-[760px] w-[42%] flex-col justify-between p-10 lg:flex">
+          <div className="auth-left-top">
+            <div className="auth-logo mb-16 flex items-center gap-3 text-white">
+              <div className="auth-logo-icon">
+                <span className="h-4 w-4 rounded-full border-[2.5px] border-white border-b-transparent" />
+              </div>
+              <span className="font-['Bricolage_Grotesque',sans-serif] text-[22px] font-bold tracking-[-0.02em]">LinguaNest</span>
+            </div>
+            <p className="auth-quote max-w-[360px] font-['Bricolage_Grotesque',sans-serif] text-[32px] font-bold leading-[1.25] tracking-[-0.02em] text-white">
+              Learn <span>naturally</span> and speak with confidence.
+            </p>
           </div>
 
-          <div>
-            <label className="label" htmlFor="login-password">{t('login.password')}</label>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                id="login-password"
-                className="input pr-11"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="current-password"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((current) => !current)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-slate-700 dark:hover:text-slate-200"
-                aria-label={showPassword ? t('login.hidePassword') : t('login.showPassword')}
-              >
-                {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
-              </button>
+          <div className="auth-testimonial rounded-[1.5rem] border border-white/10 bg-white/5 p-7 backdrop-blur-sm">
+            <div className="testimonial-stars mb-4 text-[#fbbf24] tracking-[2px]">★★★★★</div>
+            <p className="testimonial-text text-[15px] leading-6 text-white/80">
+              “The flow feels calm and motivating — I can practice daily without pressure, and my speaking confidence is finally growing.”
+            </p>
+            <div className="testimonial-author flex items-center gap-3">
+              <div className="testimonial-avatar">AM</div>
+              <div>
+                <div className="testimonial-name text-sm font-bold text-white">Amina M.</div>
+                <div className="testimonial-role text-xs text-white/50">Advanced learner</div>
+              </div>
             </div>
           </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn auth-submit w-full"
-          >
-            {loading ? t('login.signingIn') : t('login.signIn')}
-          </button>
-        </form>
-
-        <div className="mt-6 text-center space-y-2">
-          <Link
-            to="/forgot-password"
-            className="block text-sm text-coral font-medium"
-          >
-            {t('login.forgotPassword')}
-          </Link>
-          <p className="text-muted">
-            {t('login.noAccount')}{' '}
-            <Link to="/register" className="text-coral font-semibold">
-              {t('login.signUp')}
-            </Link>
-          </p>
         </div>
-      </motion.div>
+
+        <div className="auth-right flex flex-1 items-center justify-center p-6 sm:p-8 lg:p-12">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+            className="auth-card w-full max-w-md rounded-[2rem] bg-[var(--surface)] p-8 sm:p-10 dark:bg-[var(--dark-surface)]"
+          >
+            <div className="auth-icon dark:border-white dark:text-white" aria-hidden="true">
+              <FiLock size={46} strokeWidth={1.5} />
+            </div>
+            <p className="atlas-kicker">{t('login.kicker')}</p>
+            <h1 className="mb-2 text-center text-4xl font-semibold text-[var(--text-primary)] dark:text-white">{t('login.title')}</h1>
+            <p className="text-muted mb-8 text-[var(--text-muted)] dark:text-[var(--dark-text-secondary)]">
+              {t('login.copy')}
+            </p>
+            {notice ? (
+              <div className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                {notice}
+              </div>
+            ) : null}
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label className="label" htmlFor="login-email">{t('login.email')}</label>
+                <input
+                  id="login-email"
+                  type="email"
+                  className="input"
+                  placeholder={t('login.emailPlaceholder')}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="label" htmlFor="login-password">{t('login.password')}</label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    id="login-password"
+                    className="input pr-11"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="current-password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((current) => !current)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-slate-700 dark:hover:text-slate-200"
+                    aria-label={showPassword ? t('login.hidePassword') : t('login.showPassword')}
+                  >
+                    {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn auth-submit w-full"
+              >
+                {loading ? t('login.signingIn') : t('login.signIn')}
+              </button>
+            </form>
+
+            <div className="mt-6 text-center space-y-2">
+              <Link
+                to="/forgot-password"
+                className="block text-sm font-medium text-[var(--accent)]"
+              >
+                {t('login.forgotPassword')}
+              </Link>
+              <p className="text-[var(--text-muted)] dark:text-[var(--dark-text-secondary)]">
+                {t('login.noAccount')}{' '}
+                <Link to="/register" className="font-semibold text-[var(--accent)]">
+                  {t('login.signUp')}
+                </Link>
+              </p>
+            </div>
+          </motion.div>
+        </div>
+      </div>
     </div>
   )
 }

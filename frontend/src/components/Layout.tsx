@@ -27,7 +27,7 @@ export default function Layout({ children }: LayoutProps) {
   }, [location.pathname])
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--text-primary)] dark:bg-[var(--dark-bg)] dark:text-[var(--dark-text-primary)]">
       {isAuthenticated ? <ChatRealtimeBridge /> : null}
       <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
