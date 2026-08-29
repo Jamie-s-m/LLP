@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { FiBook, FiClock, FiBarChart2 } from 'react-icons/fi'
+import { FiBook, FiCheckCircle, FiBarChart2 } from 'react-icons/fi'
 import { useLearningStore } from '../../store/learningStore'
 import { useLanguageStore } from '../../store/languageStore'
 
@@ -11,8 +11,7 @@ const copy = {
     text: 'Track your progress, review current momentum, and jump back into active courses.',
     activeCourses: 'Active Courses',
     averageProgress: 'Average Progress',
-    hoursStudied: 'Hours Studied',
-    records: '{count} records',
+    lessonsCompleted: 'Lessons Completed',
     desk: 'Course desk',
     enrolled: 'Enrolled Courses',
     loading: 'Loading your learning...',
@@ -26,8 +25,7 @@ const copy = {
     text: 'Отслеживайте прогресс, текущий темп и быстро возвращайтесь к активным курсам.',
     activeCourses: 'Активные курсы',
     averageProgress: 'Средний прогресс',
-    hoursStudied: 'Часов обучения',
-    records: '{count} записей',
+    lessonsCompleted: 'Уроков завершено',
     desk: 'Курсовой стол',
     enrolled: 'Записанные курсы',
     loading: 'Загрузка обучения...',
@@ -41,8 +39,7 @@ const copy = {
     text: 'Progressni kuzating, joriy sur’atni ko‘ring va faol kurslarga tez qayting.',
     activeCourses: 'Faol kurslar',
     averageProgress: 'O‘rtacha progress',
-    hoursStudied: 'O‘qilgan soatlar',
-    records: '{count} yozuv',
+    lessonsCompleted: 'Tugallangan darslar',
     desk: 'Kurs stoli',
     enrolled: 'Yozilgan kurslar',
     loading: 'O‘qishingiz yuklanmoqda...',
@@ -64,6 +61,7 @@ export default function MyLearning() {
   const averageProgress = myLearning.length > 0
     ? Math.round(myLearning.reduce((sum, item) => sum + item.progressPercentage, 0) / myLearning.length)
     : 0
+  const totalLessonsCompleted = myLearning.reduce((sum, item) => sum + (item.completedLessons?.length || 0), 0)
 
   return (
     <div className="atlas-page px-4 py-10">
@@ -88,11 +86,11 @@ export default function MyLearning() {
             <p className="text-muted">{ui.averageProgress}</p>
           </div>
           <div className="atlas-stat text-center">
-            <FiClock className="w-8 h-8 mx-auto mb-2 text-success" />
+            <FiCheckCircle className="w-8 h-8 mx-auto mb-2 text-success" />
             <p className="text-3xl font-bold text-success">
-              {ui.records.replace('{count}', String(myLearning.length))}
+              {totalLessonsCompleted}
             </p>
-            <p className="text-muted">{ui.hoursStudied}</p>
+            <p className="text-muted">{ui.lessonsCompleted}</p>
           </div>
         </div>
 

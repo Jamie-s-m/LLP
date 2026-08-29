@@ -29,7 +29,7 @@ describe('BottomNav', () => {
     )
 
     expect(screen.getByText('Home')).toBeInTheDocument()
-    expect(screen.getByText('Progress')).toBeInTheDocument()
+    expect(screen.getByText('My Learning')).toBeInTheDocument()
     expect(screen.getByText('Schedule')).toBeInTheDocument()
     expect(screen.getByText('Practice')).toBeInTheDocument()
     expect(screen.getByText('Chat')).toBeInTheDocument()

@@ -180,7 +180,7 @@ export default function Home() {
 
         {isLoading ? (
           <div className="flex justify-center py-12">
-            <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-indigo-500"></div>
+            <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-primary-500"></div>
           </div>
         ) : error ? (
           <div role="alert" className="atlas-panel flex flex-col items-start gap-4 p-6">

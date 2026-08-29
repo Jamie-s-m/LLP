@@ -144,7 +144,8 @@ export default function CourseDetail() {
         {isEnrolled ? (
           <button
             onClick={() => navigate('/my-learning')}
-            className="btn bg-emerald-600 px-6 py-3 font-semibold text-white hover:bg-emerald-500"
+            className="btn px-6 py-3 font-semibold text-white"
+            style={{ background: 'var(--success)' }}
           >
             {t('courseDetail.continueLearning')}
           </button>
@@ -152,7 +153,7 @@ export default function CourseDetail() {
           <button
             onClick={handleEnroll}
             disabled={enrolling}
-            className="btn bg-indigo-600 px-6 py-3 font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
+            className="btn btn-primary px-6 py-3 font-semibold disabled:opacity-50"
           >
             {enrolling ? t('courseDetail.enrolling') : t('courseDetail.enroll')}
           </button>

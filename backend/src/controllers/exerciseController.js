@@ -30,7 +30,7 @@ export const getExerciseById = async (req, res, next) => {
 
 export const createExercise = async (req, res, next) => {
   try {
-    const { lessonId, title, description, type, question, options, correctAnswer, points } = req.body;
+    const { lessonId, title, description, type, question, options, correctAnswer, points, skill } = req.body;
     const lesson = await Lesson.findById(lessonId);
     if (!lesson) {
       return res.status(404).json({ success: false, message: 'Lesson not found' });
@@ -41,6 +41,7 @@ export const createExercise = async (req, res, next) => {
       title,
       description,
       type,
+      skill: skill || inferSkillFromType(type),
       question,
       options,
       correctAnswer,

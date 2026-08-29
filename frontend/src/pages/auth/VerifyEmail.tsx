@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { FiCheckCircle, FiMail, FiRefreshCcw } from 'react-icons/fi'
 import toast from 'react-hot-toast'
@@ -75,9 +75,11 @@ export default function VerifyEmail() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [message, setMessage] = useState<string>(registered ? ui.created : ui.defaultMessage)
   const isTokenMode = useMemo(() => !!token, [token])
+  const verifyRequestedFor = useRef<string | null>(null)
 
   useEffect(() => {
-    if (!token) return
+    if (!token || verifyRequestedFor.current === token) return
+    verifyRequestedFor.current = token
 
     setStatus('loading')
     api.get(`/auth/verify-email?token=${encodeURIComponent(token)}`)

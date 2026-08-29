@@ -1,12 +1,17 @@
 import mongoose from 'mongoose';
-import { SKILLS, inferSkillFromType } from '../utils/skills.js';
+import { SKILLS } from '../utils/skills.js';
 
 const exerciseSchema = new mongoose.Schema(
   {
+    // No schema-level default here on purpose: a `this.type`-dependent default function is
+    // unreliable under findOneAndUpdate upsert (setDefaultsOnInsert.js does not guarantee `this`
+    // is bound to the full document, and crashes for it - confirmed via a live seed run). Callers
+    // (createExercise, seed.js) set this explicitly via utils/skills.js#inferSkillFromType, and
+    // readers (submitExercise, getSkillsBreakdown) already fall back to the same inference for any
+    // pre-existing exercise that predates this field.
     skill: {
       type: String,
       enum: SKILLS,
-      default: function defaultSkill() { return inferSkillFromType(this.type); },
     },
     contentKey: {
       type: String,

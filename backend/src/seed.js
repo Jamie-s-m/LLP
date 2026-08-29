@@ -9,6 +9,7 @@ import Lesson from './models/Lesson.js';
 import Exercise from './models/Exercise.js';
 import Flashcard from './models/Flashcard.js';
 import { LINGUANEST_CONTENT_LIBRARY } from './contentLibrary.js';
+import { inferSkillFromType } from './utils/skills.js';
 import logger from './utils/logger.js';
 
 // Load .env from project root
@@ -291,6 +292,7 @@ export const seedContent = async ({
             title: exerciseData.title,
             description: exerciseData.description || '',
             type: exerciseData.type,
+            skill: inferSkillFromType(exerciseData.type),
             question: exerciseData.question,
             instructions: exerciseData.instructions || '',
             options: Array.isArray(exerciseData.options) ? exerciseData.options : [],
