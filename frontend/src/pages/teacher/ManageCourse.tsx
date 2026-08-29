@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { FiTrash2, FiPlus } from 'react-icons/fi'
+import { FiTrash2, FiPlus, FiEdit3 } from 'react-icons/fi'
 import api from '../../services/api'
 import { useLanguageStore } from '../../store/languageStore'
 
@@ -121,9 +121,14 @@ export default function ManageCourse() {
               <div>
                 <p className="font-bold text-ink dark:text-white">{lesson.order}. {lesson.title}</p>
               </div>
-              <button onClick={() => handleDeleteLesson(lesson._id)} className="p-2 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg text-red-600">
-                <FiTrash2 size={20} />
-              </button>
+              <div className="flex items-center gap-2">
+                <Link to={`/teacher/lesson/${lesson._id}`} className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg" aria-label="Edit lesson">
+                  <FiEdit3 size={20} />
+                </Link>
+                <button onClick={() => handleDeleteLesson(lesson._id)} className="p-2 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg text-red-600" aria-label="Delete lesson">
+                  <FiTrash2 size={20} />
+                </button>
+              </div>
             </div>
           ))}
         </div>

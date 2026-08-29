@@ -61,6 +61,7 @@ const serializeUser = (user) => ({
   linguaCoins: user.linguaCoins || 0,
   hearts: typeof user.hearts === 'number' ? user.hearts : 5,
   maxHearts: typeof user.maxHearts === 'number' ? user.maxHearts : 5,
+  placementLevel: user.placementLevel || null,
 });
 
 router.get('/check-email', async (req, res) => {

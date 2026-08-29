@@ -4,6 +4,7 @@ import { FiArrowLeft, FiCheckCircle, FiVolume2, FiMic, FiEdit3, FiHelpCircle } f
 import toast from 'react-hot-toast'
 import api from '../../services/api'
 import { useLearningStore } from '../../store/learningStore'
+import VideoEmbed from '../../components/ui/VideoEmbed'
 
 interface VocabItem {
   word: string
@@ -37,6 +38,8 @@ interface LessonData {
   vocabulary: VocabItem[]
   grammar: GrammarItem[]
   exercises: ExerciseSummary[]
+  contentType?: 'text' | 'video' | 'audio' | 'interactive'
+  mediaUrl?: string
 }
 
 interface LessonListItem {
@@ -144,6 +147,15 @@ export default function LessonView() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2">
+            {lesson.contentType === 'video' && lesson.mediaUrl ? (
+              <VideoEmbed url={lesson.mediaUrl} title={lesson.title} />
+            ) : null}
+            {lesson.contentType === 'audio' && lesson.mediaUrl ? (
+              <audio controls className="mb-8 w-full" src={lesson.mediaUrl}>
+                Your browser does not support embedded audio.
+              </audio>
+            ) : null}
+
             <div className="card mb-8">
               <h2 className="text-xl sm:text-2xl font-semibold mb-3">Overview</h2>
               <div className="prose dark:prose-invert max-w-none">

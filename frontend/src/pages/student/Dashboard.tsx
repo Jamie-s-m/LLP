@@ -87,6 +87,18 @@ export default function Dashboard() {
             <p>{t('studentDashboard.teacherPending')}</p>
           </div>
         )}
+        {!user?.placementLevel && (
+          <div className="mb-8 flex flex-col gap-3 rounded-2xl border border-[var(--border)] bg-[var(--accent-light)] p-4 text-[var(--text-primary)] sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <FiTarget size={20} className="text-[var(--accent)]" />
+              <div>
+                <p className="font-semibold">{t('studentDashboard.placementNudgeTitle')}</p>
+                <p className="text-sm text-muted">{t('studentDashboard.placementNudgeCopy')}</p>
+              </div>
+            </div>
+            <Link to="/placement-test" className="btn btn-primary whitespace-nowrap">{t('studentDashboard.placementNudgeCta')}</Link>
+          </div>
+        )}
         {pendingFamilyRequests.length > 0 ? (
           <div className="atlas-panel mb-8 p-6">
             <div className="mb-5 flex items-center gap-3">

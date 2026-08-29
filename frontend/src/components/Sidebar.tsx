@@ -12,6 +12,8 @@ import {
   FiMessageCircle,
   FiCalendar,
   FiBarChart2,
+  FiTarget,
+  FiMic,
 } from 'react-icons/fi'
 import { useAuthStore } from '../store/authStore'
 import { useI18n } from '../utils/i18n'
@@ -46,6 +48,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       { label: t('sidebar.dashboard'), path: '/teacher/dashboard', icon: FiGrid },
       { label: t('sidebar.createCourse'), path: '/teacher/create-course', icon: FiEdit3 },
       { label: t('sidebar.myCourses'), path: '/teacher/courses', icon: FiBook },
+      { label: t('sidebar.speakingReviews'), path: '/teacher/speaking-reviews', icon: FiMic },
     ]
     sections = [
       { label: t('sidebar.sectionTeach'), links: teacherLinks },
@@ -73,6 +76,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         label: t('sidebar.sectionLearn'),
         links: [
           { label: t('sidebar.dashboard'), path: '/dashboard', icon: FiGrid },
+          { label: t('sidebar.placementTest'), path: '/placement-test', icon: FiTarget },
           { label: t('sidebar.myLearning'), path: '/my-learning', icon: FiBook },
           { label: t('sidebar.flashcards'), path: '/flashcards', icon: FiAward },
           { label: t('sidebar.progress'), path: '/progress', icon: FiBarChart2 },

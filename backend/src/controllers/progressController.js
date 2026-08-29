@@ -161,7 +161,7 @@ export const getStudentProgressForTeacher = async (req, res, next) => {
 export const getSkillsBreakdown = async (req, res, next) => {
   try {
     const rows = await ExerciseAttempt.aggregate([
-      { $match: { user: req.user._id } },
+      { $match: { user: req.user._id, status: 'graded' } },
       {
         $group: {
           _id: '$skill',

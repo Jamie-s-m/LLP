@@ -20,6 +20,22 @@ export const getLessonById = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Lesson not found' });
     }
 
+    // The populated exercises otherwise carry their answer key straight to the client -
+    // strip it here for anyone who doesn't manage this lesson's course (mirrors
+    // exerciseController's canManageLesson check without changing lesson.course's shape).
+    const course = await Course.findById(lesson.course).select('instructor');
+    const canSeeAnswers = req.user.role === 'admin'
+      || hasModeratorPermission(req.user, 'catalogContentQa')
+      || course?.instructor?.toString() === req.user.id.toString();
+
+    if (!canSeeAnswers) {
+      lesson.exercises.forEach((exercise) => {
+        exercise.correctAnswer = undefined;
+        exercise.correctAnswers = undefined;
+        exercise.correctPairs = undefined;
+      });
+    }
+
     res.status(200).json({ success: true, data: lesson });
   } catch (error) {
     next(error);
@@ -28,7 +44,10 @@ export const getLessonById = async (req, res, next) => {
 
 export const createLesson = async (req, res, next) => {
   try {
-    const { courseId, title, content, order, difficulty, description } = req.body;
+    const {
+      courseId, title, content, order, difficulty, description,
+      contentType, mediaUrl, vocabulary, grammar, duration, tags,
+    } = req.body;
     const course = await Course.findById(courseId);
     if (!course) {
       return res.status(404).json({ success: false, message: 'Course not found' });
@@ -44,6 +63,12 @@ export const createLesson = async (req, res, next) => {
       order,
       difficulty,
       description,
+      contentType,
+      mediaUrl,
+      vocabulary,
+      grammar,
+      duration,
+      tags,
     });
 
     course.lessons.push(lesson._id);

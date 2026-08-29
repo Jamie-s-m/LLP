@@ -8,7 +8,9 @@ import Course from './models/Course.js';
 import Lesson from './models/Lesson.js';
 import Exercise from './models/Exercise.js';
 import Flashcard from './models/Flashcard.js';
+import PlacementQuestion from './models/PlacementQuestion.js';
 import { LINGUANEST_CONTENT_LIBRARY } from './contentLibrary.js';
+import { placementQuestions } from './data/placementQuestions.js';
 import { inferSkillFromType } from './utils/skills.js';
 import logger from './utils/logger.js';
 
@@ -132,12 +134,13 @@ const getContentCounts = async () => {
     });
   }
 
-  const [courses, publishedCourses, lessons, flashcards, vocabularyCount] = await Promise.all([
+  const [courses, publishedCourses, lessons, flashcards, vocabularyCount, placementQuestionCount] = await Promise.all([
     Course.countDocuments(),
     Course.countDocuments({ isPublished: true }),
     Lesson.countDocuments(),
     Flashcard.countDocuments(),
     Flashcard.countDocuments(),
+    PlacementQuestion.countDocuments(),
   ]);
 
   const libraryMetrics = LINGUANEST_CONTENT_LIBRARY.metadata;
@@ -152,6 +155,7 @@ const getContentCounts = async () => {
     units: libraryMetrics.totalUnits,
     exercises: libraryMetrics.totalExercises,
     assessmentQuestions: libraryMetrics.totalAssessmentQuestions,
+    placementQuestions: placementQuestionCount,
   };
 };
 
@@ -170,6 +174,7 @@ export const contentStatus = async ({ mode = 'development' } = {}) => {
       `Exercises: ${counts.exercises}`,
       `Vocabulary: ${counts.vocabularyCount}`,
       `Assessment Questions: ${counts.assessmentQuestions}`,
+      `Placement Test Questions: ${counts.placementQuestions}`,
       `Published Courses: ${counts.publishedCourses}`,
     ].join('\n');
 
@@ -213,6 +218,7 @@ export const seedContent = async ({
     vocabulary: library.vocabulary.length,
     exercises: library.metadata.totalExercises,
     assessmentQuestions: library.metadata.totalAssessmentQuestions,
+    placementQuestions: placementQuestions.length,
   };
 
   const currentCounts = await getContentCounts();
@@ -220,7 +226,8 @@ export const seedContent = async ({
     && currentCounts.publishedCourses >= minimumRequirements.publishedCourses
     && currentCounts.lessons >= minimumRequirements.lessons
     && currentCounts.vocabularyCount >= minimumRequirements.vocabulary
-    && currentCounts.exercises >= minimumRequirements.exercises;
+    && currentCounts.exercises >= minimumRequirements.exercises
+    && currentCounts.placementQuestions >= minimumRequirements.placementQuestions;
 
   if (!force && catalogAlreadySatisfiesRequirements) {
     if (!silent) {
@@ -347,6 +354,14 @@ export const seedContent = async ({
         difficulty: card.difficulty || 'Medium',
         tags: [card.topic || 'general', 'seeded'],
       },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+  }
+
+  for (const questionData of placementQuestions) {
+    await PlacementQuestion.findOneAndUpdate(
+      { order: questionData.order },
+      questionData,
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
   }

@@ -2,14 +2,44 @@ import Exercise from '../models/Exercise.js';
 import Lesson from '../models/Lesson.js';
 import User from '../models/User.js';
 import ExerciseAttempt from '../models/ExerciseAttempt.js';
+import { hasModeratorPermission } from '../middleware/auth.js';
 import { applyHeartsRegen, loseHeart, serializeHearts } from '../utils/hearts.js';
 import { inferSkillFromType } from '../utils/skills.js';
 
+const canManageLesson = async (lessonId, user) => {
+  const lesson = await Lesson.findById(lessonId).populate('course', 'instructor');
+  if (!lesson) return { error: { status: 404, message: 'Lesson not found' } };
+  if (user.role !== 'admin' && !hasModeratorPermission(user, 'catalogContentQa') && lesson.course.instructor.toString() !== user.id.toString()) {
+    return { error: { status: 403, message: 'You do not manage this course' } };
+  }
+  return { lesson };
+};
+
+const assertExerciseOwnership = async (exerciseId, user) => {
+  const exercise = await Exercise.findById(exerciseId);
+  if (!exercise) return { error: { status: 404, message: 'Exercise not found' } };
+  const { error } = await canManageLesson(exercise.lesson, user);
+  if (error) return { error };
+  return { exercise };
+};
+
+// Answer fields are only visible to whoever manages the exercise's course (so the content
+// editor can load an existing exercise to edit it) - everyone else, including enrolled
+// students, gets them stripped so a quiz can't be inspected for the answer key.
 export const getExercises = async (req, res, next) => {
   try {
     const { lessonId } = req.query;
     const filter = lessonId ? { lesson: lessonId } : {};
-    const exercises = await Exercise.find(filter).select('-correctAnswer').sort({ createdAt: 1 });
+
+    let canSeeAnswers = false;
+    if (lessonId) {
+      const { error } = await canManageLesson(lessonId, req.user);
+      canSeeAnswers = !error;
+    }
+
+    const query = Exercise.find(filter).sort({ createdAt: 1 });
+    if (!canSeeAnswers) query.select('-correctAnswer -correctAnswers -correctPairs');
+    const exercises = await query;
     res.status(200).json({ success: true, data: exercises });
   } catch (error) {
     next(error);
@@ -18,10 +48,18 @@ export const getExercises = async (req, res, next) => {
 
 export const getExerciseById = async (req, res, next) => {
   try {
-    const exercise = await Exercise.findById(req.params.id).select('-correctAnswer');
+    const exercise = await Exercise.findById(req.params.id);
     if (!exercise) {
       return res.status(404).json({ success: false, message: 'Exercise not found' });
     }
+
+    const { error } = await canManageLesson(exercise.lesson, req.user);
+    if (error) {
+      exercise.correctAnswer = undefined;
+      exercise.correctAnswers = undefined;
+      exercise.correctPairs = undefined;
+    }
+
     res.status(200).json({ success: true, data: exercise });
   } catch (error) {
     next(error);
@@ -30,11 +68,19 @@ export const getExerciseById = async (req, res, next) => {
 
 export const createExercise = async (req, res, next) => {
   try {
-    const { lessonId, title, description, type, question, options, correctAnswer, points, skill } = req.body;
-    const lesson = await Lesson.findById(lessonId);
-    if (!lesson) {
-      return res.status(404).json({ success: false, message: 'Lesson not found' });
-    }
+    const {
+      lessonId, title, description, type, question, instructions,
+      options, correctAnswer,
+      sentenceTemplate, correctAnswers,
+      leftItems, rightItems, correctPairs,
+      audioReference, acceptablePronunciations,
+      maxWords, minWords,
+      audioFile, transcript,
+      difficulty, points, hints, explanation, tags, skill,
+    } = req.body;
+
+    const { error } = await canManageLesson(lessonId, req.user);
+    if (error) return res.status(error.status).json({ success: false, message: error.message });
 
     const exercise = await Exercise.create({
       lesson: lessonId,
@@ -43,13 +89,28 @@ export const createExercise = async (req, res, next) => {
       type,
       skill: skill || inferSkillFromType(type),
       question,
+      instructions,
       options,
       correctAnswer,
+      sentenceTemplate,
+      correctAnswers,
+      leftItems,
+      rightItems,
+      correctPairs,
+      audioReference,
+      acceptablePronunciations,
+      maxWords,
+      minWords,
+      audioFile,
+      transcript,
+      difficulty,
       points: points || 10,
+      hints,
+      explanation,
+      tags,
     });
 
-    lesson.exercises.push(exercise._id);
-    await lesson.save();
+    await Lesson.findByIdAndUpdate(lessonId, { $addToSet: { exercises: exercise._id } });
 
     res.status(201).json({ success: true, data: exercise });
   } catch (error) {
@@ -57,9 +118,56 @@ export const createExercise = async (req, res, next) => {
   }
 };
 
+export const updateExercise = async (req, res, next) => {
+  try {
+    const { exercise, error } = await assertExerciseOwnership(req.params.id, req.user);
+    if (error) return res.status(error.status).json({ success: false, message: error.message });
+
+    Object.assign(exercise, req.body);
+    await exercise.save();
+    res.status(200).json({ success: true, data: exercise });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteExercise = async (req, res, next) => {
+  try {
+    const { exercise, error } = await assertExerciseOwnership(req.params.id, req.user);
+    if (error) return res.status(error.status).json({ success: false, message: error.message });
+
+    await Exercise.findByIdAndDelete(exercise._id);
+    await Lesson.findByIdAndUpdate(exercise.lesson, { $pull: { exercises: exercise._id } });
+    res.status(200).json({ success: true, message: 'Exercise deleted' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const normalizeText = (value) => String(value ?? '').trim().toLowerCase();
+
+const gradeAnswer = (exercise, answer) => {
+  if (exercise.type === 'fill_blank') {
+    const candidates = exercise.correctAnswers && exercise.correctAnswers.length > 0
+      ? exercise.correctAnswers
+      : [exercise.correctAnswer].filter((value) => typeof value === 'string' && value.length > 0);
+    return candidates.some((candidate) => normalizeText(candidate) === normalizeText(answer));
+  }
+
+  // multiple_choice and listening both grade against an option index.
+  return JSON.stringify(exercise.correctAnswer) === JSON.stringify(answer);
+};
+
+const feedbackAnswer = (exercise) => {
+  if (exercise.type === 'fill_blank') {
+    return exercise.correctAnswers?.[0] ?? exercise.correctAnswer;
+  }
+  return exercise.correctAnswer;
+};
+
 export const submitExercise = async (req, res, next) => {
   try {
-    const { exerciseId, answer } = req.body;
+    const { exerciseId, answer, audioBase64 } = req.body;
     const exercise = await Exercise.findById(exerciseId);
     if (!exercise) {
       return res.status(404).json({ success: false, message: 'Exercise not found' });
@@ -68,6 +176,31 @@ export const submitExercise = async (req, res, next) => {
     const user = await User.findById(req.user.id);
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const skill = exercise.skill || inferSkillFromType(exercise.type);
+
+    // Speaking exercises can't be auto-graded: queue the recording for a teacher to review
+    // instead of gating on hearts or awarding XP now (see reviewSpeakingAttempt).
+    if (exercise.type === 'speaking') {
+      if (!audioBase64) {
+        return res.status(400).json({ success: false, message: 'A recording is required for speaking exercises' });
+      }
+
+      const attempt = await ExerciseAttempt.create({
+        user: user._id,
+        exercise: exercise._id,
+        skill,
+        isCorrect: false,
+        pointsAwarded: 0,
+        status: 'pending_review',
+        audioSubmission: audioBase64,
+      });
+
+      return res.status(200).json({
+        success: true,
+        data: { submitted: true, status: 'pending_review', attemptId: attempt._id },
+      });
     }
 
     applyHeartsRegen(user);
@@ -80,7 +213,7 @@ export const submitExercise = async (req, res, next) => {
       });
     }
 
-    const isCorrect = JSON.stringify(exercise.correctAnswer) === JSON.stringify(answer);
+    const isCorrect = gradeAnswer(exercise, answer);
     const pointsAwarded = isCorrect ? exercise.points : 0;
 
     if (isCorrect) {
@@ -94,7 +227,7 @@ export const submitExercise = async (req, res, next) => {
     await ExerciseAttempt.create({
       user: user._id,
       exercise: exercise._id,
-      skill: exercise.skill || inferSkillFromType(exercise.type),
+      skill,
       isCorrect,
       pointsAwarded,
     });
@@ -104,11 +237,72 @@ export const submitExercise = async (req, res, next) => {
       data: {
         isCorrect,
         points: pointsAwarded,
-        correctAnswer: exercise.correctAnswer,
+        correctAnswer: feedbackAnswer(exercise),
         xp: user.xp,
         ...serializeHearts(user),
       },
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const listSpeakingReviews = async (req, res, next) => {
+  try {
+    const attempts = await ExerciseAttempt.find({ status: 'pending_review' })
+      .sort({ createdAt: 1 })
+      .populate('user', 'firstName lastName email')
+      .populate({
+        path: 'exercise',
+        select: 'question instructions points lesson',
+        populate: { path: 'lesson', select: 'title course', populate: { path: 'course', select: 'title instructor' } },
+      });
+
+    const canReviewAll = req.user.role === 'admin' || hasModeratorPermission(req.user, 'catalogContentQa');
+    const visible = canReviewAll
+      ? attempts
+      : attempts.filter((attempt) => attempt.exercise?.lesson?.course?.instructor?.toString() === req.user.id.toString());
+
+    res.status(200).json({ success: true, data: visible });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const reviewSpeakingAttempt = async (req, res, next) => {
+  try {
+    const { isCorrect, feedback } = req.body;
+    const attempt = await ExerciseAttempt.findById(req.params.attemptId).populate({
+      path: 'exercise',
+      populate: { path: 'lesson', populate: { path: 'course', select: 'instructor' } },
+    });
+
+    if (!attempt || attempt.status !== 'pending_review') {
+      return res.status(404).json({ success: false, message: 'No pending review found for this submission' });
+    }
+
+    const isOwner = req.user.role === 'admin'
+      || hasModeratorPermission(req.user, 'catalogContentQa')
+      || attempt.exercise?.lesson?.course?.instructor?.toString() === req.user.id.toString();
+    if (!isOwner) {
+      return res.status(403).json({ success: false, message: 'You do not manage this course' });
+    }
+
+    const pointsAwarded = isCorrect ? (attempt.exercise?.points || 0) : 0;
+
+    attempt.isCorrect = Boolean(isCorrect);
+    attempt.pointsAwarded = pointsAwarded;
+    attempt.status = 'graded';
+    attempt.reviewedBy = req.user.id;
+    attempt.reviewFeedback = feedback || '';
+    attempt.reviewedAt = new Date();
+    await attempt.save();
+
+    if (pointsAwarded > 0) {
+      await User.findByIdAndUpdate(attempt.user, { $inc: { xp: pointsAwarded } });
+    }
+
+    res.status(200).json({ success: true, data: attempt });
   } catch (error) {
     next(error);
   }

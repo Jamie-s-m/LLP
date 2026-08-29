@@ -16,6 +16,7 @@ interface User {
   linguaCoins?: number
   hearts?: number
   maxHearts?: number
+  placementLevel?: 'Beginner' | 'Intermediate' | 'Advanced' | null
   teacherApplicationStatus?: 'none' | 'pending' | 'approved' | 'rejected'
   isEmailVerified?: boolean
   billing?: {

@@ -26,6 +26,8 @@ const userSchema = new mongoose.Schema(
     avatar: { type: String, default: '' },
     nativeLanguage: { type: String, default: 'English' },
     targetLanguages: [{ type: String }],
+    placementLevel: { type: String, enum: ['Beginner', 'Intermediate', 'Advanced', null], default: null },
+    placementCompletedAt: { type: Date, default: null },
     xp: { type: Number, default: 0 },
     streak: { type: Number, default: 0 },
     lastActiveDate: { type: Date, default: Date.now },

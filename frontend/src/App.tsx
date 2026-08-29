@@ -51,9 +51,12 @@ const Groups = lazyWithChunkRetry(() => import('./pages/student/Groups'), 'group
 const Leaderboard = lazyWithChunkRetry(() => import('./pages/student/Leaderboard'), 'leaderboard')
 const ProgressAnalytics = lazyWithChunkRetry(() => import('./pages/student/ProgressAnalytics'), 'progress-analytics')
 const Achievements = lazyWithChunkRetry(() => import('./pages/student/Achievements'), 'achievements')
+const PlacementTest = lazyWithChunkRetry(() => import('./pages/PlacementTest'), 'placement-test')
 const TeacherDashboard = lazyWithChunkRetry(() => import('./pages/teacher/Dashboard'), 'teacher-dashboard')
 const CreateCourse = lazyWithChunkRetry(() => import('./pages/teacher/CreateCourse'), 'create-course')
 const ManageCourse = lazyWithChunkRetry(() => import('./pages/teacher/ManageCourse'), 'manage-course')
+const LessonEditor = lazyWithChunkRetry(() => import('./pages/teacher/LessonEditor'), 'lesson-editor')
+const SpeakingReviews = lazyWithChunkRetry(() => import('./pages/teacher/SpeakingReviews'), 'speaking-reviews')
 const StudentProgress = lazyWithChunkRetry(() => import('./pages/teacher/StudentProgress'), 'student-progress')
 const Forum = lazyWithChunkRetry(() => import('./pages/Forum'), 'forum')
 const Chat = lazyWithChunkRetry(() => import('./pages/Chat'), 'chat')
@@ -204,6 +207,14 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/placement-test"
+          element={
+            <ProtectedRoute allowedRoles={['student']}>
+              <Layout><PlacementTest /></Layout>
+            </ProtectedRoute>
+          }
+        />
 
         {/* Teacher Routes */}
         <Route
@@ -235,6 +246,22 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['teacher', 'admin']}>
               <Layout><StudentProgress /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/teacher/lesson/:lessonId"
+          element={
+            <ProtectedRoute allowedRoles={['teacher', 'admin']}>
+              <Layout><LessonEditor /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/teacher/speaking-reviews"
+          element={
+            <ProtectedRoute allowedRoles={['teacher', 'admin']}>
+              <Layout><SpeakingReviews /></Layout>
             </ProtectedRoute>
           }
         />
