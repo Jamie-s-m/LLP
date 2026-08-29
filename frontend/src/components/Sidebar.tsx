@@ -11,6 +11,7 @@ import {
   FiTrendingUp,
   FiMessageCircle,
   FiCalendar,
+  FiBarChart2,
 } from 'react-icons/fi'
 import { useAuthStore } from '../store/authStore'
 import { useI18n } from '../utils/i18n'
@@ -74,6 +75,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           { label: t('sidebar.dashboard'), path: '/dashboard', icon: FiGrid },
           { label: t('sidebar.myLearning'), path: '/my-learning', icon: FiBook },
           { label: t('sidebar.flashcards'), path: '/flashcards', icon: FiAward },
+          { label: t('sidebar.progress'), path: '/progress', icon: FiBarChart2 },
           { label: t('sidebar.schedule'), path: '/timetable', icon: FiCalendar },
         ],
       },
@@ -82,6 +84,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         links: [
           { label: t('sidebar.groups'), path: '/groups', icon: FiUsers },
           { label: t('sidebar.leaderboard'), path: '/leaderboard', icon: FiTrendingUp },
+          { label: t('sidebar.achievements'), path: '/achievements', icon: FiAward },
           { label: t('sidebar.forum'), path: '/forum', icon: FiMessageSquare },
           { label: t('sidebar.chat'), path: '/chat', icon: FiMessageCircle },
         ],

@@ -123,6 +123,7 @@ const translations: Record<LanguageCode, TranslationTree> = {
       sectionFamily: 'Family',
       schedule: 'Schedule',
       freePlan: 'Free plan',
+      achievements: 'Achievements',
     },
     home: {
       heroKicker: 'LinguaNest fluency system',
@@ -370,7 +371,7 @@ const translations: Record<LanguageCode, TranslationTree> = {
     sidebar: {
       adminWorkspace: 'Пространство администратора', moderatorWorkspace: 'Пространство модератора', teacherWorkspace: 'Пространство преподавателя', parentWorkspace: 'Пространство родителя', studentWorkspace: 'Пространство студента',
       dashboard: 'Панель', myLearning: 'Прогресс', progress: 'Прогресс', flashcards: 'Карточки', groups: 'Группы', leaderboard: 'Рейтинг', createCourse: 'Создать курс', myCourses: 'Мои курсы', familyDesk: 'Семейный кабинет', chat: 'Чат', controlCenter: 'Центр управления', moderationDesk: 'Панель модерации', forum: 'Форум', settings: 'Настройки', closeMenu: 'Закрыть меню навигации',
-      sectionLearn: 'Обучение', sectionCommunity: 'Сообщество', sectionAccount: 'Аккаунт', sectionTeach: 'Преподавание', sectionAdmin: 'Администрирование', sectionFamily: 'Семья', schedule: 'Расписание', freePlan: 'Бесплатный тариф',
+      sectionLearn: 'Обучение', sectionCommunity: 'Сообщество', sectionAccount: 'Аккаунт', sectionTeach: 'Преподавание', sectionAdmin: 'Администрирование', sectionFamily: 'Семья', schedule: 'Расписание', freePlan: 'Бесплатный тариф', achievements: 'Достижения',
     },
     home: {
       heroKicker: 'Система беглости LinguaNest', heroTitle: 'Превратите учебное время в видимый языковой прогресс.', heroCopy: 'LinguaNest объединяет премиальные учебные пути, аналитику прогресса, семейную видимость и сопровождаемую поддержку в одной изящной системе.',
@@ -433,7 +434,7 @@ const translations: Record<LanguageCode, TranslationTree> = {
     sidebar: {
       adminWorkspace: 'Admin maydoni', moderatorWorkspace: 'Moderator maydoni', teacherWorkspace: 'Ustoz maydoni', parentWorkspace: 'Ota-ona maydoni', studentWorkspace: 'Talaba maydoni',
       dashboard: 'Panel', myLearning: 'Progress', progress: 'Progress', flashcards: 'Kartochkalar', groups: 'Guruhlar', leaderboard: 'Reyting', createCourse: 'Kurs yaratish', myCourses: 'Mening kurslarim', familyDesk: 'Oila kabineti', chat: 'Chat', controlCenter: 'Boshqaruv markazi', moderationDesk: 'Moderatsiya paneli', forum: 'Forum', settings: 'Sozlamalar', closeMenu: 'Navigatsiya menyusini yopish',
-      sectionLearn: 'O‘qish', sectionCommunity: 'Jamiyat', sectionAccount: 'Hisob', sectionTeach: 'O‘qitish', sectionAdmin: 'Boshqaruv', sectionFamily: 'Oila', schedule: 'Jadval', freePlan: 'Bepul tarif',
+      sectionLearn: 'O‘qish', sectionCommunity: 'Jamiyat', sectionAccount: 'Hisob', sectionTeach: 'O‘qitish', sectionAdmin: 'Boshqaruv', sectionFamily: 'Oila', schedule: 'Jadval', freePlan: 'Bepul tarif', achievements: 'Yutuqlar',
     },
     home: {
       heroKicker: 'LinguaNest ravonlik tizimi', heroTitle: 'O‘qish vaqtini ko‘rinadigan til progressiga aylantiring.', heroCopy: 'LinguaNest premium o‘quv yo‘llari, progress analitikasi, oilaviy kuzatuv va yo‘naltirilgan yordamni bitta chiroyli tizimga birlashtiradi.',

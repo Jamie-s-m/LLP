@@ -42,6 +42,28 @@ export default function Leaderboard() {
           <p>{ui.text}</p>
         </div>
 
+        {leaderboard.length >= 3 && (
+          <div className="atlas-panel mb-8 flex items-end justify-center gap-3 p-6 sm:gap-6">
+            {[leaderboard[1], leaderboard[0], leaderboard[2]].map((entry, position) => {
+              const place = position === 1 ? 1 : position === 0 ? 2 : 3
+              const heights = { 1: 'h-40', 2: 'h-28', 3: 'h-20' } as const
+              const medals = { 1: '🥇', 2: '🥈', 3: '🥉' } as const
+              return (
+                <div key={entry._id} className="flex flex-1 flex-col items-center gap-2">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white font-bold">
+                    {entry.firstName?.[0]}
+                  </div>
+                  <p className="max-w-[6rem] truncate text-sm font-semibold">{entry.firstName}</p>
+                  <div className={`flex w-full flex-col items-center justify-start rounded-t-xl bg-[var(--accent-light)] pt-2 ${heights[place]}`}>
+                    <span className="text-2xl">{medals[place]}</span>
+                    <span className="mt-1 text-xs font-bold text-[var(--accent)]">{entry.xp.toLocaleString()} XP</span>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+
         <div className="atlas-panel mb-8 border-2 border-primary-200 bg-gradient-to-r from-primary-50 to-secondary-50 p-6 dark:border-primary-700 dark:from-primary-900/20 dark:to-secondary-900/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
