@@ -1,0 +1,214 @@
+import jwt from 'jsonwebtoken';
+import request from 'supertest';
+import app from '../src/app.js';
+import User from '../src/models/User.js';
+import Course from '../src/models/Course.js';
+import Lesson from '../src/models/Lesson.js';
+import Exercise from '../src/models/Exercise.js';
+import ExerciseAttempt from '../src/models/ExerciseAttempt.js';
+import Flashcard from '../src/models/Flashcard.js';
+import FlashcardProgress from '../src/models/FlashcardProgress.js';
+
+const signToken = (user) =>
+  jwt.sign({ id: user._id, role: user.role || 'student' }, process.env.JWT_SECRET || 'local-development-only-secret', { expiresIn: '1h' });
+
+describe('Hearts + exercise attempts', () => {
+  let token;
+  let user;
+  let exercise;
+
+  beforeAll(async () => {
+    user = await User.create({
+      firstName: 'Hearts',
+      lastName: 'Tester',
+      email: 'hearts-tester@example.com',
+      password: 'testpass123',
+      role: 'student',
+      isEmailVerified: true,
+    });
+    token = signToken(user);
+
+    const course = await Course.create({
+      title: 'Test Course',
+      description: 'Course for hearts test',
+      language: 'English',
+      level: 'Beginner',
+      category: 'Conversation',
+      instructor: user._id,
+    });
+
+    const lesson = await Lesson.create({
+      course: course._id,
+      order: 1,
+      title: 'Test Lesson',
+      description: 'Lesson for hearts test',
+      content: 'content',
+    });
+
+    exercise = await Exercise.create({
+      lesson: lesson._id,
+      title: 'Test Exercise',
+      type: 'multiple_choice',
+      question: 'What is 2+2?',
+      options: ['3', '4', '5'],
+      correctAnswer: '4',
+      points: 20,
+    });
+  });
+
+  afterAll(async () => {
+    await User.deleteOne({ _id: user._id });
+    await ExerciseAttempt.deleteMany({ user: user._id });
+  });
+
+  test('correct answer awards XP and does not cost a heart', async () => {
+    const res = await request(app)
+      .post('/api/exercises/submit')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ exerciseId: exercise._id.toString(), answer: '4' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.isCorrect).toBe(true);
+    expect(res.body.data.points).toBe(20);
+    expect(res.body.data.hearts).toBe(5);
+  });
+
+  test('wrong answers deduct hearts down to zero, then block further attempts', async () => {
+    let lastRes;
+    for (let i = 0; i < 5; i += 1) {
+      lastRes = await request(app)
+        .post('/api/exercises/submit')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ exerciseId: exercise._id.toString(), answer: 'wrong' });
+    }
+
+    expect(lastRes.status).toBe(200);
+    expect(lastRes.body.data.isCorrect).toBe(false);
+    expect(lastRes.body.data.hearts).toBe(0);
+
+    const blocked = await request(app)
+      .post('/api/exercises/submit')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ exerciseId: exercise._id.toString(), answer: '4' });
+
+    expect(blocked.status).toBe(403);
+    expect(blocked.body.data.hearts).toBe(0);
+
+    const heartsRes = await request(app)
+      .get('/api/gamification/hearts')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(heartsRes.status).toBe(200);
+    expect(heartsRes.body.data.hearts).toBe(0);
+    expect(heartsRes.body.data.heartsRegenAt).not.toBeNull();
+  });
+
+  test('refilling hearts with coins requires enough coins', async () => {
+    const res = await request(app)
+      .post('/api/gamification/hearts/refill')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(400);
+    expect(res.body.success).toBe(false);
+
+    await User.updateOne({ _id: user._id }, { $set: { linguaCoins: 100 } });
+
+    const refilled = await request(app)
+      .post('/api/gamification/hearts/refill')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(refilled.status).toBe(200);
+    expect(refilled.body.data.hearts).toBe(5);
+    expect(refilled.body.data.linguaCoins).toBe(50);
+  });
+
+  test('exercise attempts are logged for skills analytics', async () => {
+    const attempts = await ExerciseAttempt.find({ user: user._id });
+    expect(attempts.length).toBeGreaterThanOrEqual(6);
+    expect(attempts.every((attempt) => attempt.skill === 'reading')).toBe(true);
+  });
+});
+
+describe('Flashcard SM-2 review', () => {
+  let token;
+  let user;
+  let card;
+
+  beforeAll(async () => {
+    user = await User.create({
+      firstName: 'Flash',
+      lastName: 'Tester',
+      email: 'flash-tester@example.com',
+      password: 'testpass123',
+      role: 'student',
+      isEmailVerified: true,
+    });
+    token = signToken(user);
+
+    const course = await Course.create({
+      title: 'Flash Course',
+      description: 'Course for flashcard test',
+      language: 'English',
+      level: 'Beginner',
+      category: 'Conversation',
+      instructor: user._id,
+    });
+
+    card = await Flashcard.create({
+      course: course._id,
+      language: 'English',
+      front: { text: 'Hello' },
+      back: { text: 'Hola' },
+      category: 'greetings',
+    });
+  });
+
+  afterAll(async () => {
+    await User.deleteOne({ _id: user._id });
+    await FlashcardProgress.deleteMany({ student: user._id });
+  });
+
+  test('rejects an unknown rating', async () => {
+    const res = await request(app)
+      .post(`/api/flashcards/${card._id}/review`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ rating: 'meh' });
+
+    expect(res.status).toBe(400);
+  });
+
+  test('persists SM-2 progress across repeated "easy" reviews', async () => {
+    const first = await request(app)
+      .post(`/api/flashcards/${card._id}/review`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ rating: 'easy' });
+
+    expect(first.status).toBe(200);
+    expect(first.body.data.interval).toBe(1);
+    expect(first.body.data.repetitions).toBe(1);
+
+    const second = await request(app)
+      .post(`/api/flashcards/${card._id}/review`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ rating: 'easy' });
+
+    expect(second.status).toBe(200);
+    expect(second.body.data.interval).toBe(6);
+    expect(second.body.data.repetitions).toBe(2);
+
+    const progress = await FlashcardProgress.findOne({ student: user._id, flashcard: card._id });
+    expect(progress.easeFactor).toBeGreaterThan(2.5);
+    expect(progress.deck).toBe('greetings');
+  });
+
+  test('a low rating resets repetitions', async () => {
+    const res = await request(app)
+      .post(`/api/flashcards/${card._id}/review`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ rating: 'again' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.repetitions).toBe(0);
+    expect(res.body.data.interval).toBe(1);
+  });
+});

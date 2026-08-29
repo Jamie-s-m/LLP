@@ -1,6 +1,38 @@
 import Flashcard from '../models/Flashcard.js';
 import Course from '../models/Course.js';
+import FlashcardProgress from '../models/FlashcardProgress.js';
 import { hasModeratorPermission } from '../middleware/auth.js';
+
+// SM-2 spaced-repetition rating buttons, mapped to the classic 0-5 quality scale.
+const RATING_TO_QUALITY = { again: 1, hard: 3, good: 4, easy: 5 };
+
+// Standard SM-2 algorithm: given a quality score (0-5), returns the next
+// interval/easeFactor/repetitions for a flashcard-progress record.
+const applySm2 = (progress, quality) => {
+  if (quality < 3) {
+    progress.repetitions = 0;
+    progress.interval = 1;
+  } else {
+    if (progress.repetitions === 0) progress.interval = 1;
+    else if (progress.repetitions === 1) progress.interval = 6;
+    else progress.interval = Math.round(progress.interval * progress.easeFactor);
+    progress.repetitions += 1;
+  }
+
+  progress.easeFactor = Math.max(
+    1.3,
+    progress.easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02))
+  );
+
+  progress.quality = quality;
+  progress.lastReviewDate = new Date();
+  progress.nextReviewDate = new Date(Date.now() + progress.interval * 24 * 60 * 60 * 1000);
+  progress.isNew = false;
+  progress.isLearning = progress.repetitions > 0 && progress.repetitions < 2;
+  progress.isReview = progress.repetitions >= 2;
+
+  return progress;
+};
 
 export const getFlashcards = async (req, res, next) => {
   try {
@@ -48,12 +80,41 @@ export const createFlashcard = async (req, res, next) => {
 export const reviewFlashcard = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const { rating } = req.body;
+    const quality = RATING_TO_QUALITY[rating];
+
+    if (typeof quality !== 'number') {
+      return res.status(400).json({ success: false, message: 'rating must be one of: again, hard, good, easy' });
+    }
+
     const card = await Flashcard.findById(id);
     if (!card) {
       return res.status(404).json({ success: false, message: 'Flashcard not found' });
     }
 
-    res.status(200).json({ success: true, data: { ...card.toObject(), reviewed: true } });
+    let progress = await FlashcardProgress.findOne({ student: req.user.id, flashcard: card._id });
+    if (!progress) {
+      progress = new FlashcardProgress({
+        student: req.user.id,
+        flashcard: card._id,
+        deck: card.category || String(card.course),
+      });
+    }
+
+    applySm2(progress, quality);
+    await progress.save();
+
+    res.status(200).json({
+      success: true,
+      data: {
+        ...card.toObject(),
+        reviewed: true,
+        rating,
+        interval: progress.interval,
+        nextReviewDate: progress.nextReviewDate,
+        repetitions: progress.repetitions,
+      },
+    });
   } catch (error) {
     next(error);
   }

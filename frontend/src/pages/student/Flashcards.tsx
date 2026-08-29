@@ -10,16 +10,25 @@ interface FlashcardItem {
 }
 
 const copy = {
-  en: { kicker: 'Recall practice', title: 'Vocabulary Flashcards', text: 'Master vocabulary with spaced repetition and a focused card-by-card review flow.', loading: 'Loading flashcards...', empty: 'No flashcards available yet. Check back soon!', card: 'Card {current} of {total}', masteredCount: '{count} mastered', front: 'FRONT', back: 'BACK', previous: 'Previous', mastered: '✓ Mastered', mark: 'Mark Mastered', next: 'Next' },
-  ru: { kicker: 'Практика запоминания', title: 'Словарные карточки', text: 'Осваивайте лексику через интервальные повторения и спокойный режим карточка за карточкой.', loading: 'Загрузка карточек...', empty: 'Карточек пока нет. Загляните позже!', card: 'Карточка {current} из {total}', masteredCount: 'Освоено: {count}', front: 'ЛИЦО', back: 'ОБОРОТ', previous: 'Назад', mastered: '✓ Освоено', mark: 'Отметить как освоенное', next: 'Далее' },
-  uz: { kicker: 'Eslab qolish mashqi', title: 'Lug‘at kartochkalari', text: 'Intervalli takrorlash va bitta-bitta ko‘rib chiqish oqimi bilan lug‘atni mustahkamlang.', loading: 'Kartochkalar yuklanmoqda...', empty: 'Hali kartochkalar yo‘q. Keyinroq qayta tekshiring!', card: '{total} tadan {current}-kartochka', masteredCount: '{count} tasi o‘zlashtirilgan', front: 'OLD', back: 'ORQA', previous: 'Oldingi', mastered: '✓ O‘zlashtirildi', mark: 'O‘zlashtirildi deb belgilash', next: 'Keyingi' },
+  en: { kicker: 'Recall practice', title: 'Vocabulary Flashcards', text: 'Master vocabulary with spaced repetition and a focused card-by-card review flow.', loading: 'Loading flashcards...', empty: 'No flashcards available yet. Check back soon!', card: 'Card {current} of {total}', masteredCount: '{count} reviewed', front: 'FRONT', back: 'BACK', previous: 'Previous', again: 'Again', hard: 'Hard', good: 'Good', easy: 'Easy', flipFirst: 'Flip the card to rate it', next: 'Next' },
+  ru: { kicker: 'Практика запоминания', title: 'Словарные карточки', text: 'Осваивайте лексику через интервальные повторения и спокойный режим карточка за карточкой.', loading: 'Загрузка карточек...', empty: 'Карточек пока нет. Загляните позже!', card: 'Карточка {current} из {total}', masteredCount: 'Пройдено: {count}', front: 'ЛИЦО', back: 'ОБОРОТ', previous: 'Назад', again: 'Заново', hard: 'Сложно', good: 'Хорошо', easy: 'Легко', flipFirst: 'Переверните карточку, чтобы оценить', next: 'Далее' },
+  uz: { kicker: 'Eslab qolish mashqi', title: 'Lug‘at kartochkalari', text: 'Intervalli takrorlash va bitta-bitta ko‘rib chiqish oqimi bilan lug‘atni mustahkamlang.', loading: 'Kartochkalar yuklanmoqda...', empty: 'Hali kartochkalar yo‘q. Keyinroq qayta tekshiring!', card: '{total} tadan {current}-kartochka', masteredCount: '{count} tasi ko‘rib chiqildi', front: 'OLD', back: 'ORQA', previous: 'Oldingi', again: 'Qayta', hard: 'Qiyin', good: 'Yaxshi', easy: 'Oson', flipFirst: 'Baholash uchun kartochkani ag‘daring', next: 'Keyingi' },
 } as const
+
+type Rating = 'again' | 'hard' | 'good' | 'easy'
+
+const RATING_STYLES: Record<Rating, string> = {
+  again: 'border-[var(--error)] text-[var(--error)] hover:bg-[var(--error-light)]',
+  hard: 'border-[var(--warning)] text-[var(--warning)] hover:bg-[var(--warning-light)]',
+  good: 'border-[var(--info)] text-[var(--info)] hover:bg-[var(--info-light)]',
+  easy: 'border-[var(--success)] text-[var(--success)] hover:bg-[var(--success-light)]',
+}
 
 export default function Flashcards() {
   const [cards, setCards] = useState<FlashcardItem[]>([])
   const [currentCard, setCurrentCard] = useState(0)
   const [isFlipped, setIsFlipped] = useState(false)
-  const [mastered, setMastered] = useState<string[]>([])
+  const [reviewed, setReviewed] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
   const language = useLanguageStore((state) => state.language)
   const ui = copy[language]
@@ -47,13 +56,14 @@ export default function Flashcards() {
   const activeCards = cards.length > 0 ? cards : fallbackCards
   const card = activeCards[currentCard]
   const totalCards = activeCards.length
-  const isMastered = mastered.includes(card._id)
 
-  const handleNext = () => {
+  const goToNextCard = () => {
     if (currentCard < totalCards - 1) {
       setCurrentCard(currentCard + 1)
-      setIsFlipped(false)
+    } else {
+      setCurrentCard(0)
     }
+    setIsFlipped(false)
   }
 
   const handlePrevious = () => {
@@ -63,13 +73,10 @@ export default function Flashcards() {
     }
   }
 
-  const handleMastered = () => {
-    if (isMastered) {
-      setMastered(mastered.filter((id) => id !== card._id))
-    } else {
-      setMastered([...mastered, card._id])
-      api.get(`/flashcards/${card._id}/review`).catch(() => {})
-    }
+  const handleRate = (rating: Rating) => {
+    setReviewed((prev) => new Set(prev).add(card._id))
+    api.post(`/flashcards/${card._id}/review`, { rating }).catch(() => {})
+    goToNextCard()
   }
 
   return (
@@ -84,7 +91,7 @@ export default function Flashcards() {
         <div className="atlas-panel mb-8 p-5">
           <div className="flex justify-between mb-2 text-sm font-medium">
             <span>{ui.card.replace('{current}', String(currentCard + 1)).replace('{total}', String(totalCards))}</span>
-            <span>{ui.masteredCount.replace('{count}', String(mastered.length))}</span>
+            <span>{ui.masteredCount.replace('{count}', String(reviewed.size))}</span>
           </div>
           <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2">
             <div
@@ -137,6 +144,22 @@ export default function Flashcards() {
             </button>
           </div>
 
+          {isFlipped ? (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {(['again', 'hard', 'good', 'easy'] as Rating[]).map((rating) => (
+                <button
+                  key={rating}
+                  onClick={() => handleRate(rating)}
+                  className={`rounded-xl border-2 bg-transparent px-3 py-3 text-sm font-semibold transition-colors ${RATING_STYLES[rating]}`}
+                >
+                  {ui[rating]}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-sm text-[var(--text-muted)]">{ui.flipFirst}</p>
+          )}
+
           <div className="flex gap-4">
             <button
               onClick={handlePrevious}
@@ -146,15 +169,8 @@ export default function Flashcards() {
               {ui.previous}
             </button>
             <button
-              onClick={handleMastered}
-              className={`flex-1 btn ${isMastered ? 'btn-primary' : 'btn-outline'}`}
-            >
-              {isMastered ? ui.mastered : ui.mark}
-            </button>
-            <button
-              onClick={handleNext}
-              disabled={currentCard === totalCards - 1}
-              className="flex-1 btn btn-primary"
+              onClick={goToNextCard}
+              className="flex-1 btn btn-outline"
             >
               {ui.next}
             </button>

@@ -1,5 +1,9 @@
 import Exercise from '../models/Exercise.js';
 import Lesson from '../models/Lesson.js';
+import User from '../models/User.js';
+import ExerciseAttempt from '../models/ExerciseAttempt.js';
+import { applyHeartsRegen, loseHeart, serializeHearts } from '../utils/hearts.js';
+import { inferSkillFromType } from '../utils/skills.js';
 
 export const getExercises = async (req, res, next) => {
   try {
@@ -60,13 +64,48 @@ export const submitExercise = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Exercise not found' });
     }
 
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    applyHeartsRegen(user);
+    if (user.hearts <= 0) {
+      await user.save();
+      return res.status(403).json({
+        success: false,
+        message: 'Out of hearts. Wait for them to regenerate or refill with coins.',
+        data: serializeHearts(user),
+      });
+    }
+
     const isCorrect = JSON.stringify(exercise.correctAnswer) === JSON.stringify(answer);
+    const pointsAwarded = isCorrect ? exercise.points : 0;
+
+    if (isCorrect) {
+      user.xp = (user.xp || 0) + pointsAwarded;
+    } else {
+      loseHeart(user);
+    }
+    user.lastActiveDate = new Date();
+    await user.save();
+
+    await ExerciseAttempt.create({
+      user: user._id,
+      exercise: exercise._id,
+      skill: exercise.skill || inferSkillFromType(exercise.type),
+      isCorrect,
+      pointsAwarded,
+    });
+
     res.status(200).json({
       success: true,
       data: {
         isCorrect,
-        points: isCorrect ? exercise.points : 0,
+        points: pointsAwarded,
         correctAnswer: exercise.correctAnswer,
+        xp: user.xp,
+        ...serializeHearts(user),
       },
     });
   } catch (error) {

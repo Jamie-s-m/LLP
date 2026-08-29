@@ -6,6 +6,6 @@ const router = express.Router();
 
 router.get('/', protect, getFlashcards);
 router.post('/', protect, authorizeRoleOrPermission({ roles: ['teacher', 'admin'], permissions: ['catalogContentQa'] }), createFlashcard);
-router.get('/:id/review', protect, reviewFlashcard);
+router.post('/:id/review', protect, reviewFlashcard);
 
 export default router;

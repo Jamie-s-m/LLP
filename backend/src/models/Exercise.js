@@ -1,7 +1,13 @@
 import mongoose from 'mongoose';
+import { SKILLS, inferSkillFromType } from '../utils/skills.js';
 
 const exerciseSchema = new mongoose.Schema(
   {
+    skill: {
+      type: String,
+      enum: SKILLS,
+      default: function defaultSkill() { return inferSkillFromType(this.type); },
+    },
     contentKey: {
       type: String,
       trim: true,
