@@ -108,9 +108,9 @@ export default function CourseDetail() {
       {/* Course metadata card */}
       {course ? <div className="atlas-panel mb-6 rounded-3xl p-6">
         <div className="mb-4 flex flex-wrap gap-2 text-sm text-slate-600">
-          <span className="rounded-full bg-[#102a43]/10 px-3 py-1">{course.language}</span>
-          <span className="rounded-full bg-[#102a43]/10 px-3 py-1">{course.level}</span>
-          <span className="rounded-full bg-[#102a43]/10 px-3 py-1">{course.category}</span>
+          <span className="rounded-full bg-[var(--border-light)] px-3 py-1">{course.language}</span>
+          <span className="rounded-full bg-[var(--border-light)] px-3 py-1">{course.level}</span>
+          <span className="rounded-full bg-[var(--border-light)] px-3 py-1">{course.category}</span>
         </div>
         <p className="mb-6 text-slate-700">{course.description}</p>
 
@@ -120,7 +120,7 @@ export default function CourseDetail() {
             <button
               key={lesson._id}
               onClick={() => navigate(`/lesson/${lesson._id}`)}
-              className="w-full rounded-2xl border border-[#102a43]/10 bg-white px-4 py-3 text-left text-slate-700 transition hover:border-primary-300 hover:bg-[#f6efe7]"
+              className="w-full rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-left text-[var(--text-primary)] transition hover:border-primary-300 hover:bg-[var(--accent-light)]"
             >
               {lesson.order}. {lesson.title}
             </button>

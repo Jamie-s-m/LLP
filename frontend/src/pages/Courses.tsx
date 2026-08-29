@@ -236,7 +236,7 @@ export default function Courses() {
                         {course.category}
                       </span>
                     ) : null}
-                    <span className="rounded-full bg-[#102a43]/10 px-3 py-1 text-xs font-semibold text-ink dark:text-slate-100">
+                    <span className="rounded-full bg-[var(--border-light)] px-3 py-1 text-xs font-semibold text-ink dark:text-slate-100">
                       {course.level}
                     </span>
                   </div>

@@ -46,7 +46,7 @@ describe('Platform reset flow', () => {
 
     await ForumPost.create({
       title: 'Test Post',
-      body: 'This forum post should be removed',
+      content: 'This forum post should be removed',
       author: admin._id,
     });
 

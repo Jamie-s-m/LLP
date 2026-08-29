@@ -8,6 +8,12 @@ import FamilyLink from '../models/FamilyLink.js';
 import ChatConversation from '../models/ChatConversation.js';
 import ChatMessage from '../models/ChatMessage.js';
 import Progress from '../models/Progress.js';
+import Enrollment from '../models/Enrollment.js';
+import ForumReply from '../models/ForumReply.js';
+import FlashcardProgress from '../models/FlashcardProgress.js';
+import UserAchievement from '../models/UserAchievement.js';
+import DailyRewardClaim from '../models/DailyRewardClaim.js';
+import PushSubscription from '../models/PushSubscription.js';
 import { LINGUANEST_CONTENT_LIBRARY } from '../contentLibrary.js';
 import { defaultModeratorPermissions, hasModeratorPermission, normalizeModeratorPermissions } from '../middleware/auth.js';
 
@@ -79,6 +85,41 @@ export const deleteUser = async (req, res, next) => {
     const user = await User.findByIdAndDelete(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
     res.status(200).json({ success: true, message: 'User deleted' });
+  } catch (error) { next(error); }
+};
+
+const RESET_PLATFORM_CONFIRMATION = 'RESET_PLATFORM_0';
+
+// Wipes all user-generated data (accounts, chats, forum activity, progress, groups, rewards)
+// while preserving admin accounts and the course/lesson/flashcard content library. Intended
+// for demo/staging resets, gated behind an exact confirmation phrase since it is irreversible.
+export const resetPlatform = async (req, res, next) => {
+  try {
+    if (req.body?.confirm !== RESET_PLATFORM_CONFIRMATION) {
+      return res.status(400).json({
+        success: false,
+        message: `Send { "confirm": "${RESET_PLATFORM_CONFIRMATION}" } to confirm this irreversible reset`,
+      });
+    }
+
+    await Promise.all([
+      ChatMessage.deleteMany({}),
+      ChatConversation.deleteMany({}),
+      ForumReply.deleteMany({}),
+      ForumPost.deleteMany({}),
+      Progress.deleteMany({}),
+      Enrollment.deleteMany({}),
+      FlashcardProgress.deleteMany({}),
+      UserAchievement.deleteMany({}),
+      DailyRewardClaim.deleteMany({}),
+      PushSubscription.deleteMany({}),
+      Group.deleteMany({}),
+      FamilyLink.deleteMany({}),
+    ]);
+
+    await User.deleteMany({ role: { $ne: 'admin' } });
+
+    res.status(200).json({ success: true, message: 'Platform reset complete. Admin accounts and content library were preserved.' });
   } catch (error) { next(error); }
 };
 

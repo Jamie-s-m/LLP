@@ -36,6 +36,7 @@ const Register = lazyWithChunkRetry(() => import('./pages/auth/Register'), 'regi
 const ForgotPassword = lazyWithChunkRetry(() => import('./pages/auth/ForgotPassword'), 'forgot-password')
 const ResetPassword = lazyWithChunkRetry(() => import('./pages/auth/ResetPassword'), 'reset-password')
 const VerifyEmail = lazyWithChunkRetry(() => import('./pages/auth/VerifyEmail'), 'verify-email')
+const GoogleCallback = lazyWithChunkRetry(() => import('./pages/auth/GoogleCallback'), 'google-callback')
 const Home = lazyWithChunkRetry(() => import('./pages/Home'), 'home')
 const Courses = lazyWithChunkRetry(() => import('./pages/Courses'), 'courses')
 const CourseDetail = lazyWithChunkRetry(() => import('./pages/CourseDetail'), 'course-detail')
@@ -98,6 +99,7 @@ function App() {
         <Route path="/register" element={isAuthenticated ? <Navigate to={authenticatedLandingPath} replace /> : <Layout><Register /></Layout>} />
         <Route path="/verify-email" element={<Layout><VerifyEmail /></Layout>} />
         <Route path="/forgot-password" element={<Layout><ForgotPassword /></Layout>} />
+        <Route path="/auth/google/callback" element={<Layout><GoogleCallback /></Layout>} />
         <Route path="/reset-password" element={<Layout><ResetPassword /></Layout>} />
 
         {/* Student Routes */}

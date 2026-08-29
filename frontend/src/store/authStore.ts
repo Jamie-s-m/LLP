@@ -10,8 +10,12 @@ interface User {
   avatar?: string
   nativeLanguage?: string
   targetLanguages?: string[]
-  totalPoints?: number
-  currentStreak?: number
+  xp?: number
+  level?: number
+  streak?: number
+  linguaCoins?: number
+  hearts?: number
+  maxHearts?: number
   teacherApplicationStatus?: 'none' | 'pending' | 'approved' | 'rejected'
   isEmailVerified?: boolean
   billing?: {

@@ -30,10 +30,10 @@ export default function Home() {
     { title: t('home.signal3Title'), copy: t('home.signal3Copy'), icon: FiShield },
   ]
   const quickAccessCards = [
-    { label: 'Courses', href: '/courses', accent: 'bg-[#b8d8f5]' },
-    { label: 'Tutors', href: '/tutors', accent: 'bg-[#b8ded5]' },
-    { label: 'Practice', href: '/flashcards', accent: 'bg-[#f4d99b]' },
-    { label: 'Chat', href: '/chat', accent: 'bg-[#edaaa2]' },
+    { label: 'Courses', href: '/courses', accent: 'bg-primary-100' },
+    { label: 'Tutors', href: '/tutors', accent: 'bg-secondary-100' },
+    { label: 'Practice', href: '/flashcards', accent: 'bg-accent-100' },
+    { label: 'Chat', href: '/chat', accent: 'bg-coral-100' },
   ]
 
   return (

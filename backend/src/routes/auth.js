@@ -1,16 +1,47 @@
 import express from 'express';
-import jwt from 'jsonwebtoken';
+import axios from 'axios';
+import crypto from 'crypto';
 import User from '../models/User.js';
+import generateToken from '../utils/generateToken.js';
 import { sendPushToUsers } from '../utils/push.js';
 import { sendPasswordResetEmail, sendVerificationEmail } from '../utils/email.js';
 import { generateEmailVerificationToken, generatePasswordResetToken, hashEmailVerificationToken, hashToken } from '../utils/emailVerification.js';
 import { normalizeModeratorPermissions } from '../middleware/auth.js';
 import { serializeBilling } from '../utils/billing.js';
+import { levelFromXp } from '../utils/level.js';
 import logger from '../utils/logger.js';
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'local-development-only-secret';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const GOOGLE_REDIRECT_URI =
+  process.env.GOOGLE_REDIRECT_URI ||
+  `${(process.env.API_BASE_URL || 'http://localhost:5000/api').replace(/\/+$/, '')}/auth/google/callback`;
+const FRONTEND_BASE_URL =
+  process.env.FRONTEND_URL || (process.env.NODE_ENV === 'production' ? 'https://linguanest.uz' : 'http://localhost:5173');
+const OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
+
+// Stateless CSRF state token for the OAuth redirect round-trip (no server-side session needed).
+const signOAuthState = () => {
+  const payload = String(Date.now());
+  const signature = crypto.createHmac('sha256', JWT_SECRET).update(payload).digest('hex');
+  return Buffer.from(`${payload}.${signature}`).toString('base64url');
+};
+
+const verifyOAuthState = (state) => {
+  try {
+    const [payload, signature] = Buffer.from(String(state || ''), 'base64url').toString('utf8').split('.');
+    const expected = crypto.createHmac('sha256', JWT_SECRET).update(payload).digest('hex');
+    if (!signature || signature !== expected) return false;
+    const issuedAt = Number(payload);
+    return Number.isFinite(issuedAt) && Date.now() - issuedAt < OAUTH_STATE_TTL_MS;
+  } catch {
+    return false;
+  }
+};
 
 const normalizeEmail = (email) => String(email || '').toLowerCase().trim();
 
@@ -24,6 +55,12 @@ const serializeUser = (user) => ({
   isEmailVerified: user.isEmailVerified,
   moderatorPermissions: normalizeModeratorPermissions(user.moderatorPermissions),
   billing: serializeBilling(user.billing),
+  xp: user.xp || 0,
+  level: levelFromXp(user.xp || 0),
+  streak: user.streak || 0,
+  linguaCoins: user.linguaCoins || 0,
+  hearts: typeof user.hearts === 'number' ? user.hearts : 5,
+  maxHearts: typeof user.maxHearts === 'number' ? user.maxHearts : 5,
 });
 
 router.get('/check-email', async (req, res) => {
@@ -86,7 +123,7 @@ router.post('/login', async (req, res) => {
       await user.save();
     }
 
-    const token = jwt.sign({ id: user._id, role: user.role || 'student' }, JWT_SECRET, { expiresIn: '7d' });
+    const token = generateToken(user._id, user.role || 'student');
 
     res.status(200).json({
       success: true,
@@ -308,6 +345,84 @@ router.post('/reset-password', async (req, res) => {
   } catch (error) {
     logger.error('Reset Password Error:', error);
     res.status(500).json({ success: false, message: 'Password reset failed' });
+  }
+});
+
+router.get('/google', (req, res) => {
+  if (!GOOGLE_CLIENT_ID) {
+    return res.redirect(`${FRONTEND_BASE_URL}/login?googleError=not_configured`);
+  }
+
+  const params = new URLSearchParams({
+    client_id: GOOGLE_CLIENT_ID,
+    redirect_uri: GOOGLE_REDIRECT_URI,
+    response_type: 'code',
+    scope: 'openid email profile',
+    access_type: 'online',
+    prompt: 'select_account',
+    state: signOAuthState(),
+  });
+
+  res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`);
+});
+
+router.get('/google/callback', async (req, res) => {
+  const { code, state, error: googleError } = req.query;
+
+  if (googleError || !code || !verifyOAuthState(state)) {
+    return res.redirect(`${FRONTEND_BASE_URL}/login?googleError=denied`);
+  }
+
+  if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
+    return res.redirect(`${FRONTEND_BASE_URL}/login?googleError=not_configured`);
+  }
+
+  try {
+    const tokenResponse = await axios.post('https://oauth2.googleapis.com/token', {
+      code,
+      client_id: GOOGLE_CLIENT_ID,
+      client_secret: GOOGLE_CLIENT_SECRET,
+      redirect_uri: GOOGLE_REDIRECT_URI,
+      grant_type: 'authorization_code',
+    });
+
+    const profileResponse = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { Authorization: `Bearer ${tokenResponse.data.access_token}` },
+    });
+
+    const { sub: googleId, email, given_name: givenName, family_name: familyName, email_verified: emailVerified } = profileResponse.data;
+
+    if (!email) {
+      return res.redirect(`${FRONTEND_BASE_URL}/login?googleError=no_email`);
+    }
+
+    const cleanEmail = normalizeEmail(email);
+    let user = await User.findOne({ $or: [{ googleId }, { email: cleanEmail }] });
+
+    if (!user) {
+      user = await User.create({
+        firstName: givenName || 'LinguaNest',
+        lastName: familyName || 'Learner',
+        email: cleanEmail,
+        googleId,
+        role: 'student',
+        isEmailVerified: !!emailVerified,
+      });
+    } else if (user.googleId !== googleId) {
+      user.googleId = googleId;
+      if (emailVerified) user.isEmailVerified = true;
+      await user.save();
+    }
+
+    if (!user.isActive) {
+      return res.redirect(`${FRONTEND_BASE_URL}/login?googleError=disabled`);
+    }
+
+    const token = generateToken(user._id, user.role || 'student');
+    res.redirect(`${FRONTEND_BASE_URL}/auth/google/callback?token=${encodeURIComponent(token)}`);
+  } catch (error) {
+    logger.error('Google OAuth Error:', error.response?.data || error.message);
+    res.redirect(`${FRONTEND_BASE_URL}/login?googleError=server_error`);
   }
 });
 

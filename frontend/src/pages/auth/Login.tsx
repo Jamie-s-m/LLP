@@ -2,9 +2,18 @@ import { useState } from 'react'
 import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { FiEye, FiEyeOff, FiLock } from 'react-icons/fi'
-import { useAuthStore } from '../../store/authStore'
+import { useAuthStore, api } from '../../store/authStore'
 import toast from 'react-hot-toast'
 import { useI18n } from '../../utils/i18n'
+import { useEffect } from 'react'
+
+const GOOGLE_ERROR_MESSAGES: Record<string, string> = {
+  not_configured: 'Google sign-in is coming soon — use email for now.',
+  denied: 'Google sign-in was cancelled or the request expired. Please try again.',
+  no_email: 'Your Google account has no email address we can use.',
+  disabled: 'This account has been disabled. Please contact support.',
+  server_error: 'Something went wrong signing in with Google. Please try again.',
+}
 
 export default function Login() {
   const [searchParams] = useSearchParams()
@@ -22,6 +31,14 @@ export default function Login() {
       : searchParams.get('registered') === '1'
         ? t('login.registered')
         : ''
+
+  useEffect(() => {
+    const googleError = searchParams.get('googleError')
+    if (googleError) {
+      toast.error(GOOGLE_ERROR_MESSAGES[googleError] || GOOGLE_ERROR_MESSAGES.server_error)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -153,6 +170,25 @@ export default function Login() {
                 {loading ? t('login.signingIn') : t('login.signIn')}
               </button>
             </form>
+
+            <div className="my-6 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-subtle)]">
+              <span className="h-px flex-1 bg-[var(--border)]" />
+              {t('login.orContinueWith')}
+              <span className="h-px flex-1 bg-[var(--border)]" />
+            </div>
+
+            <a
+              href={`${api.defaults.baseURL}/auth/google`}
+              className="btn btn-outline w-full gap-3"
+            >
+              <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+                <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9C16.98 14.2 17.64 11.9 17.64 9.2z" />
+                <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.98v2.33A9 9 0 0 0 9 18z" />
+                <path fill="#FBBC05" d="M3.95 10.7A5.4 5.4 0 0 1 3.67 9c0-.59.1-1.17.28-1.7V4.97H.98A9 9 0 0 0 0 9c0 1.45.35 2.83.98 4.03l2.97-2.33z" />
+                <path fill="#EA4335" d="M9 3.58c1.32 0 2.51.46 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .98 4.97l2.97 2.33C4.66 5.17 6.65 3.58 9 3.58z" />
+              </svg>
+              {t('login.continueWithGoogle')}
+            </a>
 
             <div className="mt-6 text-center space-y-2">
               <Link

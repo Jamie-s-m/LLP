@@ -7,7 +7,8 @@ const userSchema = new mongoose.Schema(
     firstName: { type: String, required: true, trim: true },
     lastName: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-    password: { type: String, required: true },
+    password: { type: String, required: function requiresPassword() { return !this.googleId; } },
+    googleId: { type: String, unique: true, sparse: true },
     role: { type: String, enum: ['student', 'teacher', 'parent', 'moderator', 'admin'], default: 'student' },
     moderatorPermissions: {
       communityModeration: { type: Boolean, default: false },
@@ -28,6 +29,10 @@ const userSchema = new mongoose.Schema(
     xp: { type: Number, default: 0 },
     streak: { type: Number, default: 0 },
     lastActiveDate: { type: Date, default: Date.now },
+    // Hearts (lesson/exercise lives) system
+    hearts: { type: Number, default: 5 },
+    maxHearts: { type: Number, default: 5 },
+    heartsRegenAt: { type: Date, default: null },
     // Daily Reward & Gamification fields
     lastDailyRewardDate: { type: Date, default: null },
     dailyRewardStreak: { type: Number, default: 0 },
@@ -56,13 +61,14 @@ const userSchema = new mongoose.Schema(
 );
 
 userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
+  if (!this.isModified('password') || !this.password) return next();
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
   next();
 });
 
 userSchema.methods.matchPassword = async function (enteredPassword) {
+  if (!this.password) return false;
   return bcrypt.compare(enteredPassword, this.password);
 };
 

@@ -323,6 +323,8 @@ const translations: Record<LanguageCode, TranslationTree> = {
       hidePassword: 'Hide password',
       loginSuccess: 'Logged in successfully!',
       loginFailed: 'Login failed',
+      orContinueWith: 'Or continue with',
+      continueWithGoogle: 'Continue with Google',
     },
   },
   ru: {
@@ -399,7 +401,7 @@ const translations: Record<LanguageCode, TranslationTree> = {
       notFound: 'Курс не найден.', lessons: 'Уроки', lessonsEmpty: 'Уроки появятся здесь, когда наставник их опубликует.', continueLearning: 'Продолжить обучение', enroll: 'Записаться на курс', enrolling: 'Запись...', loginRequired: 'Пожалуйста, войдите, чтобы записаться на этот курс.', enrollSuccess: 'Вы успешно записаны!', enrollFailed: 'Запись не удалась или вы уже записаны.', loadFailed: 'Не удалось загрузить курс', blueprintKicker: 'Учебный план', blueprintHeading: 'Премиальный структурированный путь', blueprintGoal: 'Этот путь помогает проходить уроки в чёткой последовательности с видимым прогрессом и повторяемыми учебными привычками.', lessonCount: '{count} урок в этом пути', lessonCountPlural: '{count} уроков в этом пути', pathOutcome: 'Лучше использовать как регулярный недельный учебный трек, а не для пассивного просмотра.',
     },
     login: {
-      kicker: 'С возвращением', title: 'Войти', copy: 'Продолжите свою серию и вернитесь туда, где остановились.', verified: 'Email подтверждён. Теперь можно войти.', reset: 'Пароль обновлён. Войдите с новым паролем.', registered: 'Аккаунт создан. Проверьте почту и подтвердите email перед входом.', email: 'Email', emailPlaceholder: 'you@example.com', password: 'Пароль', signIn: 'Войти', signingIn: 'Вход...', forgotPassword: 'Забыли пароль?', noAccount: 'Нет аккаунта?', signUp: 'Регистрация', showPassword: 'Показать пароль', hidePassword: 'Скрыть пароль', loginSuccess: 'Вход выполнен успешно!', loginFailed: 'Не удалось войти',
+      kicker: 'С возвращением', title: 'Войти', copy: 'Продолжите свою серию и вернитесь туда, где остановились.', verified: 'Email подтверждён. Теперь можно войти.', reset: 'Пароль обновлён. Войдите с новым паролем.', registered: 'Аккаунт создан. Проверьте почту и подтвердите email перед входом.', email: 'Email', emailPlaceholder: 'you@example.com', password: 'Пароль', signIn: 'Войти', signingIn: 'Вход...', forgotPassword: 'Забыли пароль?', noAccount: 'Нет аккаунта?', signUp: 'Регистрация', showPassword: 'Показать пароль', hidePassword: 'Скрыть пароль', loginSuccess: 'Вход выполнен успешно!', loginFailed: 'Не удалось войти', orContinueWith: 'Или продолжите с', continueWithGoogle: 'Продолжить с Google',
     },
   },
   uz: {
@@ -462,7 +464,7 @@ const translations: Record<LanguageCode, TranslationTree> = {
       notFound: 'Kurs topilmadi.', lessons: 'Darslar', lessonsEmpty: 'Mentor darslarni nashr qilgach ular shu yerda ko‘rinadi.', continueLearning: 'O‘qishni davom ettirish', enroll: 'Kursga yozilish', enrolling: 'Yozilmoqda...', loginRequired: 'Bu kursga yozilish uchun tizimga kiring.', enrollSuccess: 'Muvaffaqiyatli yozildingiz!', enrollFailed: 'Yozilish amalga oshmadi yoki siz allaqachon yozilgansiz.', loadFailed: 'Kursni yuklab bo‘lmadi', blueprintKicker: 'O‘quv rejasi', blueprintHeading: 'Premium tuzilgan yo‘l', blueprintGoal: 'Bu yo‘l sizga darslarni aniq ketma-ketlikda o‘tish, progressni ko‘rish va takrorlanuvchi o‘quv odatlarini yaratishga yordam beradi.', lessonCount: 'Bu yo‘lda {count} ta dars bor', lessonCountPlural: 'Bu yo‘lda {count} ta dars bor', pathOutcome: 'Passiv ko‘rish emas, balki muntazam haftalik o‘quv trassasi sifatida foydaliroq.',
     },
     login: {
-      kicker: 'Yana xush kelibsiz', title: 'Kirish', copy: 'Seriyangizni davom ettiring va to‘xtagan joyingizdan boshlang.', verified: 'Email tasdiqlandi. Endi kirishingiz mumkin.', reset: 'Parol yangilandi. Yangi parol bilan kiring.', registered: 'Akkount yaratildi. Kirishdan oldin emailingizni tasdiqlang.', email: 'Email manzil', emailPlaceholder: 'you@example.com', password: 'Parol', signIn: 'Kirish', signingIn: 'Kirilmoqda...', forgotPassword: 'Parolni unutdingizmi?', noAccount: 'Akkount yo‘qmi?', signUp: 'Ro‘yxatdan o‘tish', showPassword: 'Parolni ko‘rsatish', hidePassword: 'Parolni yashirish', loginSuccess: 'Muvaffaqiyatli kirildi!', loginFailed: 'Kirish amalga oshmadi',
+      kicker: 'Yana xush kelibsiz', title: 'Kirish', copy: 'Seriyangizni davom ettiring va to‘xtagan joyingizdan boshlang.', verified: 'Email tasdiqlandi. Endi kirishingiz mumkin.', reset: 'Parol yangilandi. Yangi parol bilan kiring.', registered: 'Akkount yaratildi. Kirishdan oldin emailingizni tasdiqlang.', email: 'Email manzil', emailPlaceholder: 'you@example.com', password: 'Parol', signIn: 'Kirish', signingIn: 'Kirilmoqda...', forgotPassword: 'Parolni unutdingizmi?', noAccount: 'Akkount yo‘qmi?', signUp: 'Ro‘yxatdan o‘tish', showPassword: 'Parolni ko‘rsatish', hidePassword: 'Parolni yashirish', loginSuccess: 'Muvaffaqiyatli kirildi!', loginFailed: 'Kirish amalga oshmadi', orContinueWith: 'Yoki davom eting', continueWithGoogle: 'Google bilan davom etish',
     },
   },
 }
