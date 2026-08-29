@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LinguaNest — Settings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #FDF8F3; --surface: #FFFFFF; --text-primary: #1C1917; --text-muted: #78716C; --text-subtle: #A8A29E;
+      --accent: #C84B31; --accent-light: #FDF2F0; --border: #E7E5E4; --border-light: #F5F5F4;
+      --success: #2D6A4F; --success-light: #ECFDF5; --warning: #D97706; --warning-light: #FEF3C7;
+      --info: #0369A1; --info-light: #E0F2FE;
+      --font-display: 'Bricolage Grotesque', sans-serif; --font-body: 'Source Sans 3', sans-serif;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: var(--font-body); background: var(--bg); color: var(--text-primary); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+    .app-shell { display: flex; width: 1440px; min-height: 1024px; margin: 0 auto; background: var(--bg); }
+    .sidebar { width: 260px; background: var(--surface); border-right: 1px solid var(--border-light); padding: 32px 20px; display: flex; flex-direction: column; flex-shrink: 0; }
+    .sidebar-logo { display: flex; align-items: center; gap: 12px; font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--text-primary); text-decoration: none; letter-spacing: -0.02em; padding: 0 12px; margin-bottom: 48px; }
+    .logo-icon { width: 36px; height: 36px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; position: relative; flex-shrink: 0; }
+    .logo-icon::before { content: ''; width: 18px; height: 18px; border: 2.5px solid #fff; border-radius: 50%; border-bottom-color: transparent; transform: rotate(-45deg); }
+    .sidebar-section { margin-bottom: 32px; }
+    .sidebar-label { font-size: 11px; font-weight: 700; color: var(--text-subtle); text-transform: uppercase; letter-spacing: 0.12em; padding: 0 12px; margin-bottom: 12px; }
+    .sidebar-nav { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+    .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; font-size: 15px; font-weight: 500; color: var(--text-muted); text-decoration: none; }
+    .sidebar-nav a.active { background: var(--accent-light); color: var(--accent); font-weight: 700; }
+    .nav-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .sidebar-footer { margin-top: auto; padding: 20px 12px 0; border-top: 1px solid var(--border-light); }
+    .user-mini { display: flex; align-items: center; gap: 12px; }
+    .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #E8A87C 0%, #C84B31 100%); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 14px; color: #fff; flex-shrink: 0; }
+    .user-info { display: flex; flex-direction: column; gap: 2px; }
+    .user-name { font-weight: 700; font-size: 14px; color: var(--text-primary); }
+    .user-plan { font-size: 12px; color: var(--text-subtle); }
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .topbar { height: 80px; padding: 0 40px; display: flex; align-items: center; justify-content: space-between; background: var(--bg); border-bottom: 1px solid var(--border-light); }
+    .topbar-greeting h1 { font-family: var(--font-display); font-size: 26px; font-weight: 800; letter-spacing: -0.02em; color: var(--text-primary); line-height: 1.2; }
+    .topbar-greeting p { font-size: 14px; color: var(--text-muted); margin-top: 2px; }
+    .topbar-actions { display: flex; align-items: center; gap: 16px; }
+    .icon-btn { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: var(--surface); border: 1px solid var(--border-light); font-size: 18px; color: var(--text-muted); cursor: pointer; }
+    .dashboard-scroll { flex: 1; overflow-y: auto; padding: 40px; }
+    .dashboard-grid { display: grid; grid-template-columns: 280px 1fr; gap: 32px; }
+
+    /* Profile Card */
+    .profile-card { background: var(--surface); border-radius: 20px; padding: 32px; border: 1px solid var(--border-light); text-align: center; margin-bottom: 24px; }
+    .profile-avatar-large { width: 96px; height: 96px; border-radius: 50%; background: linear-gradient(135deg, #E8A87C 0%, #C84B31 100%); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 800; font-size: 32px; color: #fff; margin: 0 auto 16px; }
+    .profile-name { font-family: var(--font-display); font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+    .profile-email { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; }
+    .profile-plan-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: var(--accent-light); color: var(--accent); font-size: 12px; font-weight: 700; border-radius: 100px; margin-bottom: 20px; }
+    .profile-stats { display: flex; justify-content: center; gap: 24px; }
+    .profile-stat { text-align: center; }
+    .profile-stat-value { font-family: var(--font-display); font-size: 22px; font-weight: 800; color: var(--text-primary); }
+    .profile-stat-label { font-size: 12px; color: var(--text-subtle); font-weight: 500; }
+
+    .settings-nav { background: var(--surface); border-radius: 20px; padding: 16px; border: 1px solid var(--border-light); }
+    .settings-nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; font-size: 15px; font-weight: 600; color: var(--text-muted); cursor: pointer; }
+    .settings-nav-item.active { background: var(--accent-light); color: var(--accent); }
+    .settings-nav-item .nav-icon { width: 20px; height: 20px; font-size: 14px; }
+
+    /* Settings Panels */
+    .settings-panel { background: var(--surface); border-radius: 20px; padding: 32px; border: 1px solid var(--border-light); margin-bottom: 24px; }
+    .settings-panel h2 { font-family: var(--font-display); font-size: 20px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 24px; }
+    .form-group { margin-bottom: 24px; }
+    .form-group:last-child { margin-bottom: 0; }
+    .form-label { display: block; font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; letter-spacing: 0.02em; }
+    .form-input { width: 100%; padding: 12px 16px; font-size: 15px; font-family: var(--font-body); border: 1.5px solid var(--border); border-radius: 12px; background: var(--bg); color: var(--text-primary); }
+    .form-input::placeholder { color: var(--text-subtle); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .form-helper { font-size: 13px; color: var(--text-subtle); margin-top: 6px; }
+
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid var(--border-light); }
+    .toggle-row:last-child { border-bottom: none; }
+    .toggle-info strong { display: block; font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+    .toggle-info span { font-size: 13px; color: var(--text-subtle); }
+    .toggle-switch { width: 48px; height: 26px; background: var(--accent); border-radius: 100px; position: relative; flex-shrink: 0; }
+    .toggle-switch::after { content: ''; position: absolute; width: 20px; height: 20px; background: #fff; border-radius: 50%; top: 3px; right: 3px; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+    .toggle-switch.off { background: var(--border); }
+    .toggle-switch.off::after { right: auto; left: 3px; }
+
+    .lang-preference { display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--bg); border-radius: 14px; border: 1.5px solid var(--border-light); margin-bottom: 12px; }
+    .lang-flag { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; background: var(--surface); border: 1.5px solid var(--border); }
+    .lang-info { flex: 1; }
+    .lang-info strong { display: block; font-size: 15px; font-weight: 700; }
+    .lang-info span { font-size: 13px; color: var(--text-subtle); }
+    .lang-level { padding: 4px 12px; background: var(--info-light); color: var(--info); font-size: 12px; font-weight: 700; border-radius: 100px; }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 24px; font-family: var(--font-body); font-size: 15px; font-weight: 700; border-radius: 12px; border: none; cursor: pointer; text-decoration: none; letter-spacing: 0.01em; }
+    .btn-primary { background: var(--accent); color: #fff; box-shadow: 0 1px 3px rgba(200,75,49,0.25), 0 4px 12px rgba(200,75,49,0.15); }
+    .btn-ghost { background: transparent; color: var(--text-muted); border: 1.5px solid var(--border); }
+    .btn-danger { background: var(--error-light); color: var(--error); border: 1.5px solid rgba(185,28,28,0.2); }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a href="#" class="sidebar-logo"><div class="logo-icon"></div>LinguaNest</a>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Learn</div>
+        <nav><ul class="sidebar-nav">
+          <li><a href="#"><span class="nav-icon">🏠</span> Dashboard</a></li>
+          <li><a href="#"><span class="nav-icon">📚</span> My Courses</a></li>
+          <li><a href="#"><span class="nav-icon">🗣️</span> AI Practice</a></li>
+          <li><a href="#"><span class="nav-icon">📊</span> Progress</a></li>
+        </ul></nav>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Community</div>
+        <nav><ul class="sidebar-nav">
+          <li><a href="#"><span class="nav-icon">👥</span> Study Groups</a></li>
+          <li><a href="#"><span class="nav-icon">🏆</span> Leaderboard</a></li>
+          <li><a href="#"><span class="nav-icon">💬</span> Discussions</a></li>
+        </ul></nav>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Account</div>
+        <nav><ul class="sidebar-nav">
+          <li><a href="#" class="active"><span class="nav-icon">⚙️</span> Settings</a></li>
+          <li><a href="#"><span class="nav-icon">❓</span> Help</a></li>
+        </ul></nav>
+      </div>
+      <div class="sidebar-footer">
+        <div class="user-mini">
+          <div class="user-avatar">SA</div>
+          <div class="user-info"><span class="user-name">Sarah A.</span><span class="user-plan">Pro Plan</span></div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-greeting"><h1>Settings</h1><p>Manage your account and preferences</p></div>
+        <div class="topbar-actions"><button class="icon-btn">🔔</button></div>
+      </header>
+      <div class="dashboard-scroll">
+        <div class="dashboard-grid">
+          <div>
+            <div class="profile-card">
+              <div class="profile-avatar-large">SA</div>
+              <div class="profile-name">Sarah Anderson</div>
+              <div class="profile-email">sarah.anderson@email.com</div>
+              <div class="profile-plan-badge">⭐ Pro Member</div>
+              <div class="profile-stats">
+                <div class="profile-stat"><div class="profile-stat-value">14</div><div class="profile-stat-label">Day Streak</div></div>
+                <div class="profile-stat"><div class="profile-stat-value">1,247</div><div class="profile-stat-label">Words</div></div>
+                <div class="profile-stat"><div class="profile-stat-value">48h</div><div class="profile-stat-label">Study Time</div></div>
+              </div>
+            </div>
+            <div class="settings-nav">
+              <div class="settings-nav-item active"><span class="nav-icon">👤</span> Account</div>
+              <div class="settings-nav-item"><span class="nav-icon">🌐</span> Languages</div>
+              <div class="settings-nav-item"><span class="nav-icon">🔔</span> Notifications</div>
+              <div class="settings-nav-item"><span class="nav-icon">🔒</span> Privacy & Security</div>
+              <div class="settings-nav-item"><span class="nav-icon">💳</span> Subscription</div>
+            </div>
+          </div>
+          <div>
+            <div class="settings-panel">
+              <h2>Account Information</h2>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">First Name</label><input type="text" class="form-input" value="Sarah"></div>
+                <div class="form-group"><label class="form-label">Last Name</label><input type="text" class="form-input" value="Anderson"></div>
+              </div>
+              <div class="form-group"><label class="form-label">Email Address</label><input type="email" class="form-input" value="sarah.anderson@email.com"></div>
+              <div class="form-group"><label class="form-label">Username</label><input type="text" class="form-input" value="sarah_a"><p class="form-helper">Your public username visible on leaderboards.</p></div>
+              <div style="display: flex; gap: 12px; justify-content: flex-end;"><button class="btn btn-ghost">Cancel</button><button class="btn btn-primary">Save Changes</button></div>
+            </div>
+
+            <div class="settings-panel">
+              <h2>My Languages</h2>
+              <div class="lang-preference">
+                <div class="lang-flag">🇩🇪</div>
+                <div class="lang-info"><strong>German</strong><span>Primary learning language</span></div>
+                <span class="lang-level">B1</span>
+              </div>
+              <div class="lang-preference">
+                <div class="lang-flag">🇪🇸</div>
+                <div class="lang-info"><strong>Spanish</strong><span>Secondary language</span></div>
+                <span class="lang-level">A2</span>
+              </div>
+              <div style="display: flex; gap: 12px; justify-content: flex-end;"><button class="btn btn-ghost">+ Add Language</button></div>
+            </div>
+
+            <div class="settings-panel">
+              <h2>Notifications</h2>
+              <div class="toggle-row">
+                <div class="toggle-info"><strong>Daily Reminders</strong><span>Get a nudge at 8:00 AM to keep your streak alive.</span></div>
+                <div class="toggle-switch"></div>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info"><strong>Weekly Progress Report</strong><span>Summary of your learning every Sunday.</span></div>
+                <div class="toggle-switch"></div>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info"><strong> Leaderboard Updates</strong><span>When someone passes your rank.</span></div>
+                <div class="toggle-switch off"></div>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info"><strong>New Course Alerts</strong><span>Be the first to know when we add content.</span></div>
+                <div class="toggle-switch"></div>
+              </div>
+            </div>
+
+            <div class="settings-panel">
+              <h2>Danger Zone</h2>
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div><strong style="font-size: 15px;">Delete Account</strong><p class="form-helper">This will permanently erase all your data and progress.</p></div>
+                <button class="btn btn-danger">Delete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
