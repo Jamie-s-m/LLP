@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Link, useLocation } from 'react-router-dom'
 import { FiMessageCircle } from 'react-icons/fi'
@@ -16,25 +16,24 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
   const { isAuthenticated } = useAuthStore()
   const totalUnread = useChatStore((state) => state.totalUnread)
   const location = useLocation()
   const { t } = useI18n()
 
-  React.useEffect(() => {
-    setSidebarOpen(false)
-  }, [location.pathname])
-
+  // Auth screens and the mobile-only "More" menu are compact, app-shell-style surfaces -
+  // the marketing footer (and the mobile bottom-nav clearance padding, on auth screens)
+  // don't belong there and only add scroll.
   const isAuthRoute = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email'].includes(location.pathname)
+  const hideFooter = isAuthRoute || location.pathname === '/more'
 
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--text-primary)] dark:bg-[var(--dark-bg)] dark:text-[var(--dark-text-primary)]">
       {isAuthenticated ? <ChatRealtimeBridge /> : null}
-      <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+      <Navbar />
 
       <div className="flex">
-        {isAuthenticated ? <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} /> : null}
+        {isAuthenticated ? <Sidebar /> : null}
 
         <main className={`flex-1 transition-all duration-300 pt-[68px] md:pt-0 lg:pt-0 ${isAuthRoute ? '' : 'pb-[112px] md:pb-0'}`}>
           <AnimatePresence mode="wait">
@@ -51,20 +50,12 @@ export default function Layout({ children }: LayoutProps) {
         </main>
       </div>
 
-      {!isAuthRoute ? <Footer /> : null}
-
-      {/* Mobile menu backdrop */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-[140] bg-black/45 backdrop-blur-[1px]"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+      {!hideFooter ? <Footer /> : null}
 
       {isAuthenticated && location.pathname !== '/chat' && !location.pathname.startsWith('/lesson/') && !location.pathname.startsWith('/exercise/') ? (
         <Link
           to="/chat"
-          className="floating-chat-launcher lg:hidden"
+          className="floating-chat-launcher hidden lg:inline-flex"
           aria-label={t('nav.openChat')}
           title={t('nav.openChat')}
         >

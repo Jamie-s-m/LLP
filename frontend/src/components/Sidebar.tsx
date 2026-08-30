@@ -1,33 +1,13 @@
 import { Link, useLocation } from 'react-router-dom'
-import {
-  FiBook,
-  FiChevronLeft,
-  FiUsers,
-  FiMessageSquare,
-  FiAward,
-  FiSettings,
-  FiGrid,
-  FiEdit3,
-  FiTrendingUp,
-  FiMessageCircle,
-  FiCalendar,
-  FiBarChart2,
-  FiTarget,
-  FiMic,
-} from 'react-icons/fi'
 import { useAuthStore } from '../store/authStore'
 import { useI18n } from '../utils/i18n'
+import { getNavSections, getAccountSection } from '../utils/navSections'
 import Avatar from './ui/Avatar'
 
-interface SidebarProps {
-  open: boolean
-  onClose: () => void
-}
-
-type NavLink = { label: string; path: string; icon: typeof FiGrid }
-type NavSection = { label?: string; links: NavLink[] }
-
-export default function Sidebar({ open, onClose }: SidebarProps) {
+// Desktop-only now: always visible at lg+ via the sticky classes below. The mobile hamburger
+// trigger and overlay-drawer behavior were removed in favor of BottomNav + the "More" screen,
+// so this component no longer takes open/onClose props or renders a mobile close button.
+export default function Sidebar() {
   const { user } = useAuthStore()
   const location = useLocation()
   const { t } = useI18n()
@@ -41,90 +21,13 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         : 'text-[var(--text-muted)] hover:bg-[var(--border-light)] hover:text-[var(--text-primary)]'
     }`
 
-  let sections: NavSection[]
-
-  if (user?.role === 'teacher' || user?.role === 'admin') {
-    const teacherLinks: NavLink[] = [
-      { label: t('sidebar.dashboard'), path: '/teacher/dashboard', icon: FiGrid },
-      { label: t('sidebar.createCourse'), path: '/teacher/create-course', icon: FiEdit3 },
-      { label: t('sidebar.myCourses'), path: '/teacher/courses', icon: FiBook },
-      { label: t('sidebar.speakingReviews'), path: '/teacher/speaking-reviews', icon: FiMic },
-    ]
-    sections = [
-      { label: t('sidebar.sectionTeach'), links: teacherLinks },
-      ...(user.role === 'admin'
-        ? [{ label: t('sidebar.sectionAdmin'), links: [{ label: t('sidebar.controlCenter'), path: '/admin/control-center', icon: FiGrid }] }]
-        : []),
-    ]
-  } else if (user?.role === 'parent') {
-    sections = [
-      {
-        label: t('sidebar.sectionFamily'),
-        links: [
-          { label: t('sidebar.familyDesk'), path: '/parent/dashboard', icon: FiGrid },
-          { label: t('sidebar.chat'), path: '/chat', icon: FiMessageCircle },
-        ],
-      },
-    ]
-  } else if (user?.role === 'moderator') {
-    sections = [
-      { label: t('sidebar.sectionAdmin'), links: [{ label: t('sidebar.moderationDesk'), path: '/admin/control-center', icon: FiGrid }] },
-    ]
-  } else {
-    sections = [
-      {
-        label: t('sidebar.sectionLearn'),
-        links: [
-          { label: t('sidebar.dashboard'), path: '/dashboard', icon: FiGrid },
-          { label: t('sidebar.placementTest'), path: '/placement-test', icon: FiTarget },
-          { label: t('sidebar.myLearning'), path: '/my-learning', icon: FiBook },
-          { label: t('sidebar.flashcards'), path: '/flashcards', icon: FiAward },
-          { label: t('sidebar.progress'), path: '/progress', icon: FiBarChart2 },
-          { label: t('sidebar.schedule'), path: '/timetable', icon: FiCalendar },
-        ],
-      },
-      {
-        label: t('sidebar.sectionCommunity'),
-        links: [
-          { label: t('sidebar.groups'), path: '/groups', icon: FiUsers },
-          { label: t('sidebar.leaderboard'), path: '/leaderboard', icon: FiTrendingUp },
-          { label: t('sidebar.achievements'), path: '/achievements', icon: FiAward },
-          { label: t('sidebar.forum'), path: '/forum', icon: FiMessageSquare },
-          { label: t('sidebar.chat'), path: '/chat', icon: FiMessageCircle },
-        ],
-      },
-    ]
-  }
-
-  const accountSection: NavSection = {
-    label: t('sidebar.sectionAccount'),
-    links: [{ label: t('sidebar.settings'), path: '/profile', icon: FiSettings }],
-  }
+  const sections = getNavSections(user?.role, t)
+  const accountSection = getAccountSection(t)
 
   return (
-    <aside
-      className={`fixed inset-y-0 left-0 z-[150] w-[min(20rem,90vw)] flex-shrink-0 overflow-y-auto border-r border-[var(--border)] bg-[var(--surface)] shadow-[0_20px_60px_rgba(15,23,42,0.28)] transition-transform lg:sticky lg:top-0 lg:z-0 lg:h-screen lg:w-64 lg:translate-x-0 lg:shadow-none ${
-        open ? 'translate-x-0' : '-translate-x-full'
-      }`}
-      aria-hidden={!open}
-    >
+    <aside className="sticky top-0 z-0 hidden h-screen w-64 flex-shrink-0 overflow-y-auto border-r border-[var(--border)] bg-[var(--surface)] lg:block">
       <div className="flex h-full flex-col p-5 sm:p-6">
-        <div className="mb-6 flex items-center justify-between lg:hidden">
-          <Link to="/" className="flex items-center gap-2">
-            <img src="/linguanest-mark.svg" alt="" className="h-8 w-8 rounded-[10px]" />
-            <span className="font-display text-lg font-bold text-[var(--text-primary)]">LinguaNest</span>
-          </Link>
-          <button
-            type="button"
-            onClick={onClose}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] text-[var(--text-muted)] transition hover:bg-[var(--border-light)]"
-            aria-label={t('sidebar.closeMenu')}
-          >
-            <FiChevronLeft size={20} />
-          </button>
-        </div>
-
-        <div className="hidden items-center gap-2 pb-8 lg:flex">
+        <div className="flex items-center gap-2 pb-8">
           <img src="/linguanest-mark.svg" alt="" className="h-9 w-9 rounded-[10px]" />
           <span className="font-display text-lg font-bold text-[var(--text-primary)]">LinguaNest</span>
         </div>
@@ -141,7 +44,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                 {section.links.map((link) => {
                   const Icon = link.icon
                   return (
-                    <Link key={link.path} to={link.path} className={linkClasses(link.path)} onClick={() => onClose()}>
+                    <Link key={link.path} to={link.path} className={linkClasses(link.path)}>
                       <Icon size={18} />
                       <span>{link.label}</span>
                     </Link>

@@ -60,6 +60,7 @@ const SpeakingReviews = lazyWithChunkRetry(() => import('./pages/teacher/Speakin
 const StudentProgress = lazyWithChunkRetry(() => import('./pages/teacher/StudentProgress'), 'student-progress')
 const Forum = lazyWithChunkRetry(() => import('./pages/Forum'), 'forum')
 const Chat = lazyWithChunkRetry(() => import('./pages/Chat'), 'chat')
+const MoreMenu = lazyWithChunkRetry(() => import('./pages/MoreMenu'), 'more-menu')
 const ParentDashboard = lazyWithChunkRetry(() => import('./pages/ParentDashboard'), 'parent-dashboard')
 const ChildProgress = lazyWithChunkRetry(() => import('./pages/ChildProgress'), 'child-progress')
 const ControlCenter = lazyWithChunkRetry(() => import('./pages/admin/ControlCenter'), 'control-center')
@@ -135,6 +136,7 @@ function App() {
         <Route path="/parent/dashboard" element={<ProtectedRoute allowedRoles={['parent']}><Layout><ParentDashboard /></Layout></ProtectedRoute>} />
         <Route path="/parent/children/:studentId" element={<ProtectedRoute allowedRoles={['parent']}><Layout><ChildProgress /></Layout></ProtectedRoute>} />
         <Route path="/chat" element={<ProtectedRoute allowedRoles={['student', 'teacher', 'parent', 'moderator', 'admin']}><Layout><Chat /></Layout></ProtectedRoute>} />
+        <Route path="/more" element={<ProtectedRoute allowedRoles={['student', 'teacher', 'parent', 'moderator', 'admin']}><Layout><MoreMenu /></Layout></ProtectedRoute>} />
         <Route
           path="/my-learning"
           element={

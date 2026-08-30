@@ -7,11 +7,7 @@ import LanguageToggle from './LanguageToggle'
 import { useI18n } from '../utils/i18n'
 import { BRAND } from '../config/brand'
 
-interface NavbarProps {
-  onMenuClick: () => void
-}
-
-export default function Navbar({ onMenuClick }: NavbarProps) {
+export default function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const { isAuthenticated, user, logout } = useAuthStore()
   const navigate = useNavigate()
@@ -106,17 +102,6 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           <LanguageToggle />
           <ThemeToggle />
-          {isAuthenticated ? (
-            <button
-              onClick={onMenuClick}
-              className="inline-flex shrink-0 items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700 dark:focus-visible:ring-offset-neutral-800 lg:hidden"
-              aria-label={t('nav.workspaceMenu')}
-              title={t('nav.workspaceNavigation')}
-            >
-              <FiGrid size={18} />
-              <span className="hidden xl:inline">{t('nav.workspace')}</span>
-            </button>
-          ) : null}
           {isAuthenticated ? (
             <div ref={dropdownRef} className="relative">
               <button

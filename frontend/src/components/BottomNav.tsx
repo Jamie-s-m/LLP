@@ -1,21 +1,22 @@
 import { Link, useLocation } from 'react-router-dom'
-import {
-  FiHome,
-  FiBook,
-  FiZap,
-  FiMessageCircle,
-  FiUser,
-  FiCalendar,
-} from 'react-icons/fi'
+import { FiGrid } from 'react-icons/fi'
 import { useAuthStore } from '../store/authStore'
 import { useChatStore } from '../store/chatStore'
 import { useI18n } from '../utils/i18n'
+import { getNavSections, getAccountSection, getPrimaryMobilePaths } from '../utils/navSections'
+
+const copy = {
+  en: { more: 'More', home: 'Home', login: 'Login', courses: 'Courses', tutors: 'Tutors', forum: 'Forum' },
+  ru: { more: 'Ещё', home: 'Главная', login: 'Войти', courses: 'Курсы', tutors: 'Репетиторы', forum: 'Форум' },
+  uz: { more: 'Yana', home: 'Bosh sahifa', login: 'Kirish', courses: 'Kurslar', tutors: "O'qituvchilar", forum: 'Forum' },
+} as const
 
 export default function BottomNav() {
   const { isAuthenticated, user } = useAuthStore()
   const totalUnread = useChatStore((state) => state.totalUnread)
   const location = useLocation()
-  const { t } = useI18n()
+  const { t, language } = useI18n()
+  const ui = copy[language]
 
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/'
@@ -29,90 +30,37 @@ export default function BottomNav() {
   const isFullscreenPage = location.pathname.startsWith('/lesson/') || location.pathname.startsWith('/exercise/')
   if (publicAuthPaths.includes(location.pathname) || isFullscreenPage) return null
 
-  // Determine home landing page based on role
-  const homePath = isAuthenticated
-    ? user?.role === 'admin' || user?.role === 'moderator'
-      ? '/admin/control-center'
-      : user?.role === 'teacher'
-        ? '/teacher/dashboard'
-        : user?.role === 'parent'
-          ? '/parent/dashboard'
-          : '/dashboard'
-    : '/'
+  let navItems: { label: string; path: string; icon: typeof FiGrid; badge: number }[]
 
-  const navItems = isAuthenticated
-    ? [
-        {
-          label: t('nav.home'),
-          path: homePath,
-          icon: FiHome,
-          badge: 0,
-        },
-        {
-          label: user?.role === 'student' ? t('sidebar.myLearning') : t('nav.courses'),
-          path: user?.role === 'student' ? '/my-learning' : '/courses',
-          icon: FiBook,
-          badge: 0,
-        },
-        {
-          label: t('mobileNav.timetable') || 'Schedule',
-          path: '/schedule',
-          icon: FiCalendar,
-          badge: 0,
-        },
-        {
-          label: t('mobileNav.practice') || 'Practice',
-          path: '/flashcards',
-          icon: FiZap,
-          badge: 0,
-        },
-        {
-          label: t('sidebar.chat'),
-          path: '/chat',
-          icon: FiMessageCircle,
-          badge: totalUnread,
-        },
-        {
-          label: t('nav.profile'),
-          path: '/profile',
-          icon: FiUser,
-          badge: 0,
-        },
-      ]
-    : [
-        {
-          label: t('nav.home'),
-          path: '/',
-          icon: FiHome,
-          badge: 0,
-        },
-        {
-          label: t('nav.courses'),
-          path: '/courses',
-          icon: FiBook,
-          badge: 0,
-        },
-        {
-          label: 'Tutors',
-          path: '/tutors',
-          icon: FiUser,
-          badge: 0,
-        },
-        {
-          label: t('nav.forum'),
-          path: '/forum',
-          icon: FiMessageCircle,
-          badge: 0,
-        },
-        {
-          label: 'Login',
-          path: '/login',
-          icon: FiUser,
-          badge: 0,
-        },
-      ]
+  if (isAuthenticated) {
+    // Primary tabs are role-aware and pulled from the same nav config Sidebar/More use, so
+    // "Home" always matches this role's real landing page and nothing here can drift out of
+    // sync with what "More" lists as the overflow.
+    const allSections = [...getNavSections(user?.role, t), getAccountSection(t)]
+    const allLinks = allSections.flatMap((section) => section.links)
+    const primaryPaths = getPrimaryMobilePaths(user?.role)
+    const primaryLinks = primaryPaths
+      .map((path) => allLinks.find((link) => link.path === path))
+      .filter((link): link is NonNullable<typeof link> => Boolean(link))
 
-  const navByKey = (item: { path: string; label: string }) => `${item.path}-${item.label}`
+    navItems = [
+      ...primaryLinks.map((link) => ({
+        label: link.label,
+        path: link.path,
+        icon: link.icon,
+        badge: link.path === '/chat' ? totalUnread : 0,
+      })),
+      { label: ui.more, path: '/more', icon: FiGrid, badge: 0 },
+    ]
+  } else {
+    navItems = [
+      { label: ui.home, path: '/', icon: FiGrid, badge: 0 },
+      { label: ui.courses, path: '/courses', icon: FiGrid, badge: 0 },
+      { label: ui.tutors, path: '/tutors', icon: FiGrid, badge: 0 },
+      { label: ui.forum, path: '/forum', icon: FiGrid, badge: 0 },
+      { label: ui.login, path: '/login', icon: FiGrid, badge: 0 },
+    ]
+  }
 
   return (
     <div style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)'}} className="fixed bottom-0 left-0 right-0 z-[130] block border-t border-[var(--border)] bg-[var(--surface)]/95 px-1.5 py-2 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] backdrop-blur-lg lg:hidden">
@@ -122,7 +70,7 @@ export default function BottomNav() {
           const active = isActive(item.path)
           return (
             <Link
-              key={navByKey(item)}
+              key={item.path}
               to={item.path}
               className={`relative flex flex-col items-center justify-center rounded-lg px-3 py-2 min-w-[56px] min-h-[56px] transition-all duration-200 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary-400 ${
                 active
