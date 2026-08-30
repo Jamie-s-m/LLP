@@ -28,7 +28,7 @@ services:
     plan: free
     envVars:
       - key: VITE_API_URL
-        value: https://api.linguanest.uz
+        value: https://api.linguanest.uz/api
       - key: VITE_DEMO_MODE
         value: "false"
       - key: VITE_APP_MODE
