@@ -7,7 +7,7 @@ type LanguageCode = 'en' | 'ru' | 'uz'
 function FlagIcon({ code }: { code: LanguageCode }) {
   const commonProps = {
     viewBox: '0 0 32 32',
-    className: 'h-5 w-5 shrink-0 overflow-hidden rounded-full border border-white/20 bg-slate-900 shadow-inner',
+    className: 'h-6 w-6 shrink-0 overflow-hidden rounded-full border border-black/10 shadow-inner dark:border-white/20',
     'aria-hidden': true,
   }
 
@@ -34,30 +34,36 @@ function FlagIcon({ code }: { code: LanguageCode }) {
     )
   }
 
+  // Uzbekistan: light blue / white / green bands separated by thin red lines, with a white
+  // crescent and a cluster of stars in the canton - not the placeholder swirl this replaced.
   return (
     <svg {...commonProps}>
-      <rect width="32" height="32" rx="16" fill="#1E40AF" />
-      <rect y="18" width="32" height="14" fill="#14B86A" />
-      <path d="M20.5 10.5c-2.5 0-4.5 2-4.5 4.5 0 2.6 2 4.7 4.5 4.7 1.9 0 3.5-1.2 4.2-2.8h-2.4c-.4.9-1.3 1.5-2.3 1.5-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5c.9 0 1.7.5 2.2 1.3h2.4c-.7-1.8-2.4-3-4.3-3Z" fill="#fff" />
-      <circle cx="21" cy="15" r="2.2" fill="#fff" />
+      <rect y="0" width="32" height="9.6" fill="#0099B5" />
+      <rect y="9.6" width="32" height="1.6" fill="#CE1126" />
+      <rect y="11.2" width="32" height="9.6" fill="#fff" />
+      <rect y="20.8" width="32" height="1.6" fill="#CE1126" />
+      <rect y="22.4" width="32" height="9.6" fill="#1EB53A" />
+      <circle cx="8" cy="5" r="3.1" fill="#fff" />
+      <circle cx="9.3" cy="5" r="2.6" fill="#0099B5" />
       <g fill="#fff">
-        <circle cx="8.5" cy="9.5" r="1.1" />
-        <circle cx="11.5" cy="8.2" r="1.1" />
-        <circle cx="14.5" cy="9.5" r="1.1" />
-        <circle cx="17.2" cy="8.2" r="1.1" />
-        <circle cx="18.8" cy="10.8" r="1.1" />
-        <circle cx="9.4" cy="12.6" r="1.1" />
-        <circle cx="12.6" cy="13.7" r="1.1" />
-        <circle cx="16.2" cy="13.7" r="1.1" />
+        <circle cx="14" cy="2.9" r="0.55" />
+        <circle cx="16.4" cy="2.9" r="0.55" />
+        <circle cx="18.8" cy="2.9" r="0.55" />
+        <circle cx="14" cy="5" r="0.55" />
+        <circle cx="16.4" cy="5" r="0.55" />
+        <circle cx="18.8" cy="5" r="0.55" />
+        <circle cx="14" cy="7.1" r="0.55" />
+        <circle cx="16.4" cy="7.1" r="0.55" />
+        <circle cx="18.8" cy="7.1" r="0.55" />
       </g>
     </svg>
   )
 }
 
-const languages: Array<{ code: LanguageCode; shortLabel: string; labelKey: string }> = [
-  { code: 'en', shortLabel: 'GB', labelKey: 'languageSwitcher.english' },
-  { code: 'ru', shortLabel: 'RU', labelKey: 'languageSwitcher.russian' },
-  { code: 'uz', shortLabel: 'UZ', labelKey: 'languageSwitcher.uzbek' },
+const languages: Array<{ code: LanguageCode; labelKey: string }> = [
+  { code: 'en', labelKey: 'languageSwitcher.english' },
+  { code: 'ru', labelKey: 'languageSwitcher.russian' },
+  { code: 'uz', labelKey: 'languageSwitcher.uzbek' },
 ]
 
 export default function LanguageToggle() {
@@ -94,19 +100,18 @@ export default function LanguageToggle() {
       <button
         type="button"
         onClick={() => setOpen((currentOpen) => !currentOpen)}
-        className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-[#0d3b3f] px-3 py-2 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(10,26,31,0.18)] transition hover:bg-[#123f43] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d3b3f] dark:border-neutral-700 dark:bg-neutral-800 dark:hover:bg-neutral-700"
+        className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface-strong)] px-2.5 py-1.5 shadow-sm transition hover:bg-[var(--border-light)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-800 dark:hover:bg-neutral-700"
         aria-label={t('languageSwitcher.label')}
         aria-haspopup="menu"
         aria-expanded={open}
         title={t(current.labelKey)}
       >
         <FlagIcon code={current.code} />
-        <span className="tracking-[0.14em] text-[11px] uppercase">{current.shortLabel}</span>
-        <FiChevronDown size={14} className={`text-white/80 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
+        <FiChevronDown size={14} className={`text-[var(--text-muted)] transition-transform dark:text-white/70 ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
       </button>
 
       {open ? (
-        <div className="absolute right-0 top-full z-[130] mt-2 flex min-w-[170px] gap-1.5 rounded-full border border-white/10 bg-[#0d3b3f] p-1.5 shadow-[0_18px_38px_rgba(10,26,31,0.2)] dark:border-neutral-700 dark:bg-neutral-800" role="menu" aria-label={t('languageSwitcher.label')}>
+        <div className="absolute right-0 top-full z-[130] mt-2 flex min-w-fit gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface-strong)] p-1.5 shadow-lg dark:border-neutral-700 dark:bg-neutral-800" role="menu" aria-label={t('languageSwitcher.label')}>
           {languages.map((item) => (
             <button
               key={item.code}
@@ -116,10 +121,13 @@ export default function LanguageToggle() {
               aria-label={t(item.labelKey)}
               title={t(item.labelKey)}
               onClick={() => selectLanguage(item.code)}
-              className={`inline-flex items-center justify-center gap-1.5 rounded-full px-2.5 py-2 text-[11px] font-semibold tracking-[0.12em] uppercase transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 ${language === item.code ? 'bg-[#142d31] text-white shadow-inner ring-1 ring-white/10' : 'text-white/75 hover:bg-white/5'}`}
+              className={`inline-flex items-center justify-center rounded-full p-1.5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 ${
+                language === item.code
+                  ? 'bg-[var(--accent-light)] ring-1 ring-[var(--accent)] dark:bg-neutral-700 dark:ring-white/10'
+                  : 'hover:bg-[var(--border-light)] dark:hover:bg-white/5'
+              }`}
             >
               <FlagIcon code={item.code} />
-              <span>{item.shortLabel}</span>
             </button>
           ))}
         </div>
