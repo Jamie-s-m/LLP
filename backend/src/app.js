@@ -29,6 +29,14 @@ dotenv.config();
 
 const app = express();
 
+// Render sits in front of this app as a single reverse proxy and sets X-Forwarded-For to the
+// real client IP. Without this, express-rate-limit can't trust that header at all (it throws
+// ERR_ERL_UNEXPECTED_X_FORWARDED_FOR rather than silently misbehaving - confirmed in production
+// logs) and every request would key rate limits off the same upstream address instead of the
+// real client. `1` trusts exactly one hop, which is what Render's own proxy adds - not `true`,
+// which would trust the whole header including any value a client tried to forge.
+app.set('trust proxy', 1);
+
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' },
