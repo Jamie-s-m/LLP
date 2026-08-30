@@ -467,9 +467,14 @@ html.dark {
     color: var(--dark-text-secondary);
   }
 
+  /* Always a dark "spotlight" card, independent of the light/dark site theme - it's built from
+     rgba(255,255,255,*) overlays (10% background tiles, white/70-white/85 text) that only read
+     correctly against a dark backdrop. .atlas-hero itself is theme-aware (light bg.white/80 in
+     light mode), so without its own background this card used to go near-invisible - white text
+     on a near-white card - whenever the site was in light mode. */
   .atlas-hero-card {
     @apply rounded-[1.75rem] p-6 text-white;
-    background: rgba(255, 255, 255, 0.1);
+    background: linear-gradient(160deg, rgba(23, 23, 23, 0.94), rgba(15, 23, 42, 0.94));
     border: 1px solid rgba(255, 255, 255, 0.14);
     box-shadow: 0 24px 60px rgba(15, 27, 76, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }

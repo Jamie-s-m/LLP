@@ -199,7 +199,7 @@ export default function Pricing() {
               ) : (
                 <Link to="/dashboard" className="btn btn-primary w-full sm:w-auto">{t('pricing.goToDashboard')}</Link>
               )}
-              <Link to="/courses" className="btn btn-outline w-full border-white/70 text-white hover:bg-white/10 dark:border-white/30 dark:text-white dark:hover:bg-white/10 sm:w-auto">{t('pricing.exploreCourses')}</Link>
+              <Link to="/courses" className="btn btn-outline w-full sm:w-auto">{t('pricing.exploreCourses')}</Link>
             </div>
           </div>
           <div className="atlas-hero-card">

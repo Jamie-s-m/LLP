@@ -62,7 +62,7 @@ export default function Dashboard() {
             <p>{t('studentDashboard.heroCopy')}</p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link to="/courses" className="btn btn-primary">{t('studentDashboard.exploreCourses')}</Link>
-              <Link to="/my-learning" className="btn btn-outline border-white/70 text-white hover:bg-white/10 dark:border-white/30 dark:text-white dark:hover:bg-white/10">{t('studentDashboard.openLearning')}</Link>
+              <Link to="/my-learning" className="btn btn-outline">{t('studentDashboard.openLearning')}</Link>
             </div>
           </div>
           <div className="atlas-hero-card">

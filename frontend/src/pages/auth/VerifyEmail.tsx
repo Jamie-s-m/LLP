@@ -16,7 +16,7 @@ const copy = {
     resendFailed: 'Unable to resend verification email',
     kicker: 'Email verification',
     title: 'Verify your account',
-    smtp: 'SMTP is not configured in this environment yet. For development only, you can open the verification link directly:',
+    smtp: 'Check your inbox (and spam folder) for the verification email. If it does not arrive, you can also verify right away with this link:',
     verified: 'Email verified',
     continue: 'Continue to sign in',
     email: 'Email address',
@@ -34,7 +34,7 @@ const copy = {
     resendFailed: 'Не удалось отправить письмо повторно',
     kicker: 'Подтверждение email',
     title: 'Подтвердите аккаунт',
-    smtp: 'SMTP пока не настроен в этой среде. Только для разработки вы можете открыть ссылку напрямую:',
+    smtp: 'Проверьте входящие (и папку спама) — там должно быть письмо с подтверждением. Если оно не пришло, вы можете подтвердить email прямо сейчас по этой ссылке:',
     verified: 'Email подтверждён',
     continue: 'Продолжить вход',
     email: 'Email адрес',
@@ -52,7 +52,7 @@ const copy = {
     resendFailed: 'Tasdiqlash emailini qayta yuborib bo‘lmadi',
     kicker: 'Email tasdig‘i',
     title: 'Akkountingizni tasdiqlang',
-    smtp: 'Bu muhitda SMTP hali sozlanmagan. Faqat development uchun havolani to‘g‘ridan-to‘g‘ri ochishingiz mumkin:',
+    smtp: 'Pochta qutingizni (va spam papkasini) tekshiring — u yerda tasdiqlash xati bo‘lishi kerak. Agar kelmasa, quyidagi havola orqali hoziroq tasdiqlashingiz mumkin:',
     verified: 'Email tasdiqlandi',
     continue: 'Kirishga o‘tish',
     email: 'Email manzil',
@@ -116,9 +116,9 @@ export default function VerifyEmail() {
         <p className="mb-5 text-muted">{message}</p>
 
         {previewUrl && !isTokenMode ? (
-          <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+          <div className="mb-6 rounded-xl border border-[var(--border)] bg-[var(--surface-strong)] p-4 text-sm text-[var(--text-muted)] dark:border-white/10 dark:bg-white/5 dark:text-[var(--dark-text-secondary)]">
             {ui.smtp}{' '}
-            <a href={previewUrl} className="break-all font-semibold underline">{previewUrl}</a>
+            <a href={previewUrl} className="break-all font-semibold text-[var(--accent)] underline">{previewUrl}</a>
           </div>
         ) : null}
 

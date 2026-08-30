@@ -50,7 +50,7 @@ export default function TeacherDashboard() {
             <p>{ui.text}</p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link to="/teacher/create-course" className="btn btn-primary">{ui.createCourse}</Link>
-              <Link to="/teacher/courses" className="btn btn-outline border-white/70 text-white hover:bg-white/10 dark:border-white/30 dark:text-white dark:hover:bg-white/10">{ui.openCourses}</Link>
+              <Link to="/teacher/courses" className="btn btn-outline">{ui.openCourses}</Link>
             </div>
           </div>
           <div className="atlas-hero-card">
