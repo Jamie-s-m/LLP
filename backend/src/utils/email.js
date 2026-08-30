@@ -30,6 +30,15 @@ const getTransporter = () => {
       user: SMTP_USER,
       pass: SMTP_PASS,
     },
+    // Without these, a network path that silently drops packets (rather than actively
+    // refusing the connection) makes sendMail hang indefinitely - and register/forgot-password
+    // await it before responding, so an unreachable SMTP host takes the whole request down
+    // with it. Confirmed in production: registration hung 60s+ with no response until these
+    // were added. 10s is generous for a real SMTP handshake and keeps registration/reset
+    // responsive even when mail delivery itself is degraded.
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 10000,
   });
 };
 
