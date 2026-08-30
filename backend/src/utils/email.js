@@ -3,6 +3,15 @@ import nodemailer from 'nodemailer';
 const getFrontendAppUrl = () =>
   String(process.env.FRONTEND_APP_URL || process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/+$/, '');
 
+// Pure URL construction, no network I/O - callers that want the link immediately (without
+// waiting for an actual send attempt against a possibly slow/unreachable SMTP host) can use
+// these directly instead of awaiting sendVerificationEmail/sendPasswordResetEmail.
+export const buildVerificationUrl = (email, token) =>
+  `${getFrontendAppUrl()}/verify-email?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`;
+
+export const buildPasswordResetUrl = (email, token) =>
+  `${getFrontendAppUrl()}/reset-password?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`;
+
 export const getEmailProviderStatus = () => {
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, EMAIL_FROM } = process.env;
   const configured = Boolean(SMTP_HOST && SMTP_PORT && SMTP_USER && SMTP_PASS);
@@ -49,7 +58,7 @@ const makeSafeEmailResult = (previewUrl, error) => ({
 });
 
 export const sendVerificationEmail = async ({ user, token }) => {
-  const verificationUrl = `${getFrontendAppUrl()}/verify-email?token=${encodeURIComponent(token)}&email=${encodeURIComponent(user.email)}`;
+  const verificationUrl = buildVerificationUrl(user.email, token);
   const transporter = getTransporter();
 
   if (!transporter) {
@@ -82,7 +91,7 @@ export const sendVerificationEmail = async ({ user, token }) => {
 };
 
 export const sendPasswordResetEmail = async ({ user, token }) => {
-  const resetUrl = `${getFrontendAppUrl()}/reset-password?token=${encodeURIComponent(token)}&email=${encodeURIComponent(user.email)}`;
+  const resetUrl = buildPasswordResetUrl(user.email, token);
   const transporter = getTransporter();
 
   if (!transporter) {

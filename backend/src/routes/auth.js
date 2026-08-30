@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import User from '../models/User.js';
 import generateToken from '../utils/generateToken.js';
 import { sendPushToUsers } from '../utils/push.js';
-import { sendPasswordResetEmail, sendVerificationEmail } from '../utils/email.js';
+import { sendPasswordResetEmail, sendVerificationEmail, buildVerificationUrl, buildPasswordResetUrl } from '../utils/email.js';
 import { generateEmailVerificationToken, generatePasswordResetToken, hashEmailVerificationToken, hashToken } from '../utils/emailVerification.js';
 import { normalizeModeratorPermissions } from '../middleware/auth.js';
 import { serializeBilling } from '../utils/billing.js';
@@ -178,7 +178,16 @@ router.post('/register', async (req, res) => {
       emailVerificationExpiresAt: verification.expiresAt,
       emailVerificationSentAt: new Date(),
     });
-    const delivery = await sendVerificationEmail({ user, token: verification.token });
+    // Registering must never block on the mail server: it's a best-effort side effect, not
+    // something the client should wait on (confirmed in production - an unreachable SMTP host
+    // used to make this whole request hang, then take ~20s even after a bounded timeout was
+    // added). The verification link is built synchronously below (pure string construction, no
+    // I/O) so it's always available in the response regardless of whether the email itself
+    // ever arrives.
+    sendVerificationEmail({ user, token: verification.token }).catch((error) => {
+      logger.error(`Verification email send failed for ${user.email}:`, error.message || error);
+    });
+    const previewUrl = buildVerificationUrl(user.email, verification.token);
 
     if (user.teacherApplicationStatus === 'pending') {
       User.find({ role: 'admin' }).select('_id').then((admins) => {
@@ -192,14 +201,11 @@ router.post('/register', async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: delivery.delivered
-        ? 'Account created. Please verify your email before signing in.'
-        : 'We couldn\'t send your verification email right now. Your account was created, but verification is still required before sign-in.',
+      message: 'Account created. Check your email to verify it, or use the link below if it doesn\'t arrive.',
       data: {
         email: user.email,
         requiresVerification: true,
-        previewUrl: delivery.previewUrl,
-        emailDelivered: delivery.delivered,
+        previewUrl,
       },
     });
   } catch (error) {
@@ -259,14 +265,14 @@ router.post('/resend-verification', async (req, res) => {
     user.emailVerificationSentAt = new Date();
     await user.save();
 
-    const delivery = await sendVerificationEmail({ user, token: verification.token });
+    sendVerificationEmail({ user, token: verification.token }).catch((error) => {
+      logger.error(`Verification email resend failed for ${user.email}:`, error.message || error);
+    });
 
     res.status(200).json({
       success: true,
-      message: delivery.delivered
-        ? 'Verification email sent'
-        : 'We couldn\'t send your verification email right now. Please retry or contact support.',
-      data: { previewUrl: process.env.NODE_ENV === 'production' ? '' : delivery.previewUrl, emailDelivered: delivery.delivered },
+      message: 'Verification email sent - check your inbox, or use the link below if it doesn\'t arrive.',
+      data: { previewUrl: buildVerificationUrl(user.email, verification.token) },
     });
   } catch (error) {
     logger.error('Resend Verification Error:', error);
@@ -283,7 +289,6 @@ router.post('/forgot-password', async (req, res) => {
 
     const user = await User.findOne({ email });
     let previewUrl = '';
-    let emailDelivered = false;
 
     if (user) {
       const resetToken = generatePasswordResetToken();
@@ -292,23 +297,20 @@ router.post('/forgot-password', async (req, res) => {
       user.passwordResetSentAt = new Date();
       await user.save();
 
-      const delivery = await sendPasswordResetEmail({ user, token: resetToken.token });
-      previewUrl = delivery.previewUrl || '';
-      emailDelivered = delivery.delivered;
-
-      if (!delivery.delivered) {
-        return res.status(200).json({
-          success: true,
-          message: 'We couldn\'t send a password reset email right now. Please retry or contact support.',
-          data: { previewUrl: process.env.NODE_ENV === 'production' ? '' : previewUrl, emailDelivered: false },
-        });
-      }
+      // Unlike verification links, a password-reset link grants control of an existing real
+      // account - it must never be returned in this response outside local/dev debugging,
+      // regardless of whether the mail server is currently reachable. Sent in the background;
+      // the request never waits on it.
+      sendPasswordResetEmail({ user, token: resetToken.token }).catch((error) => {
+        logger.error(`Password reset email failed for ${user.email}:`, error.message || error);
+      });
+      previewUrl = process.env.NODE_ENV === 'production' ? '' : buildPasswordResetUrl(user.email, resetToken.token);
     }
 
     res.status(200).json({
       success: true,
       message: 'If an account exists for this email, a password reset link has been sent.',
-      data: { previewUrl: process.env.NODE_ENV === 'production' ? '' : previewUrl, emailDelivered },
+      data: { previewUrl },
     });
   } catch (error) {
     logger.error('Forgot Password Error:', error);
