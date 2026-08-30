@@ -100,16 +100,16 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="atlas-page flex items-center justify-center px-4 py-12">
+    <div className="atlas-page auth-page flex items-center justify-center px-4 py-6">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: 'easeOut' }}
-        className="atlas-panel w-full max-w-md p-8"
+        className="atlas-panel w-full max-w-md p-6 sm:p-8"
       >
         <p className="atlas-kicker">{ui.kicker}</p>
         <h1 className="mb-2 text-3xl font-semibold text-ink">{ui.title}</h1>
-        <p className="mb-8 text-muted">{ui.text}</p>
+        <p className="mb-5 text-muted">{ui.text}</p>
 
         {!token ? (
           <div className="space-y-5">

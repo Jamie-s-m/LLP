@@ -109,11 +109,11 @@ export default function VerifyEmail() {
   }
 
   return (
-    <div className="atlas-page flex items-center justify-center px-4 py-12">
-      <div className="atlas-panel w-full max-w-xl p-8">
+    <div className="atlas-page auth-page flex items-center justify-center px-4 py-6">
+      <div className="atlas-panel w-full max-w-xl p-6 sm:p-8">
         <p className="atlas-kicker">{ui.kicker}</p>
         <h1 className="mb-2 text-3xl font-semibold text-ink">{ui.title}</h1>
-        <p className="mb-6 text-muted">{message}</p>
+        <p className="mb-5 text-muted">{message}</p>
 
         {previewUrl && !isTokenMode ? (
           <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">

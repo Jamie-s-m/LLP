@@ -203,7 +203,7 @@ html.dark {
   }
 
   .input {
-    @apply w-full rounded-2xl border border-[var(--border)] bg-white px-5 py-3.5 text-[var(--text-primary)] transition-all placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#f0bca8] dark:border-[var(--dark-border)] dark:bg-[#172838] dark:text-white;
+    @apply w-full rounded-2xl border border-[var(--border)] bg-white px-5 py-3 text-[var(--text-primary)] transition-all placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#f0bca8] dark:border-[var(--dark-border)] dark:bg-[#172838] dark:text-white;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
   }
 
@@ -226,12 +226,12 @@ html.dark {
   }
 
   .auth-card .atlas-kicker {
-    margin-top: 1.5rem;
+    margin-top: 0.5rem;
     text-align: center;
   }
 
   .auth-icon {
-    @apply mx-auto flex h-28 w-28 items-center justify-center rounded-full border-2 border-neutral-900 text-neutral-900;
+    @apply mx-auto mb-2 flex h-14 w-14 items-center justify-center rounded-full border-2 border-neutral-900 text-neutral-900;
   }
 
   .dark .auth-icon {
@@ -399,6 +399,14 @@ html.dark {
     scroll-padding-bottom: calc(env(safe-area-inset-bottom, 16px) + 88px);
     background: var(--bg);
     @apply transition-colors duration-300;
+  }
+
+  /* Auth screens (login/register/forgot/reset/verify) have no bottom nav or floating
+     chat button to clear, so the shared 88px+ bottom padding and full-viewport min-height
+     above only push the card past the fold for no reason. */
+  .atlas-page.auth-page {
+    min-height: 0;
+    padding-bottom: 0;
   }
 
   .dark .atlas-page {
@@ -833,7 +841,7 @@ html.dark {
   }
 
   .role-card {
-    @apply flex min-h-32 flex-col items-start gap-1 rounded-[1.5rem] border-2 p-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-md;
+    @apply flex flex-row items-center gap-2 rounded-xl border-2 px-3 py-1.5 text-left transition-all hover:-translate-y-0.5 hover:shadow-md;
     border-color: var(--border);
     background: var(--card);
   }
@@ -845,11 +853,7 @@ html.dark {
   }
 
   .role-card strong {
-    @apply text-ink;
-  }
-
-  .role-card span {
-    @apply text-xs text-slate-600 dark:text-slate-300;
+    @apply text-ink text-sm font-semibold;
   }
 
   .theme-toggle {

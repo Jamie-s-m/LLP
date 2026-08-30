@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { FiEye, FiEyeOff, FiLock } from 'react-icons/fi'
+import { FiEye, FiEyeOff } from 'react-icons/fi'
 import { useAuthStore, api } from '../../store/authStore'
 import toast from 'react-hot-toast'
 import { useI18n } from '../../utils/i18n'
@@ -72,9 +72,9 @@ export default function Login() {
   }
 
   return (
-    <div className="atlas-page flex items-center justify-center px-4 py-12">
+    <div className="atlas-page auth-page flex items-center justify-center px-4 py-4 sm:py-6">
       <div className="auth-shell w-full max-w-6xl overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] shadow-[0_24px_80px_rgba(17,24,39,0.08)] dark:border-[var(--dark-border)] dark:bg-[var(--dark-surface)]">
-        <div className="auth-left hidden min-h-[760px] w-[42%] flex-col justify-between p-10 lg:flex">
+        <div className="auth-left hidden w-[42%] flex-col justify-between p-10 lg:flex">
           <div className="auth-left-top">
             <div className="auth-logo mb-16 flex items-center gap-3 text-white">
               <div className="auth-logo-icon">
@@ -102,19 +102,16 @@ export default function Login() {
           </div>
         </div>
 
-        <div className="auth-right flex flex-1 items-center justify-center p-6 sm:p-8 lg:p-12">
+        <div className="auth-right flex flex-1 items-center justify-center p-5 sm:p-6 lg:p-6">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, ease: 'easeOut' }}
-            className="auth-card w-full max-w-md rounded-[2rem] bg-[var(--surface)] p-8 sm:p-10 dark:bg-[var(--dark-surface)]"
+            className="auth-card w-full max-w-md rounded-[2rem] bg-[var(--surface)] p-5 sm:p-6 dark:bg-[var(--dark-surface)]"
           >
-            <div className="auth-icon dark:border-white dark:text-white" aria-hidden="true">
-              <FiLock size={46} strokeWidth={1.5} />
-            </div>
             <p className="atlas-kicker">{t('login.kicker')}</p>
-            <h1 className="mb-2 text-center text-4xl font-semibold text-[var(--text-primary)] dark:text-white">{t('login.title')}</h1>
-            <p className="text-muted mb-8 text-[var(--text-muted)] dark:text-[var(--dark-text-secondary)]">
+            <h1 className="mb-1 text-center text-2xl font-semibold text-[var(--text-primary)] dark:text-white">{t('login.title')}</h1>
+            <p className="text-muted mb-4 text-[var(--text-muted)] dark:text-[var(--dark-text-secondary)]">
               {t('login.copy')}
             </p>
             {notice ? (
@@ -123,7 +120,7 @@ export default function Login() {
               </div>
             ) : null}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-3">
               <div>
                 <label className="label" htmlFor="login-email">{t('login.email')}</label>
                 <input
@@ -171,7 +168,7 @@ export default function Login() {
               </button>
             </form>
 
-            <div className="my-6 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-subtle)]">
+            <div className="my-3 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-subtle)]">
               <span className="h-px flex-1 bg-[var(--border)]" />
               {t('login.orContinueWith')}
               <span className="h-px flex-1 bg-[var(--border)]" />
@@ -190,7 +187,7 @@ export default function Login() {
               {t('login.continueWithGoogle')}
             </a>
 
-            <div className="mt-6 text-center space-y-2">
+            <div className="mt-3 text-center space-y-1.5">
               <Link
                 to="/forgot-password"
                 className="block text-sm font-medium text-[var(--accent)]"

@@ -26,6 +26,8 @@ export default function Layout({ children }: LayoutProps) {
     setSidebarOpen(false)
   }, [location.pathname])
 
+  const isAuthRoute = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email'].includes(location.pathname)
+
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--text-primary)] dark:bg-[var(--dark-bg)] dark:text-[var(--dark-text-primary)]">
       {isAuthenticated ? <ChatRealtimeBridge /> : null}
@@ -34,7 +36,7 @@ export default function Layout({ children }: LayoutProps) {
       <div className="flex">
         {isAuthenticated ? <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} /> : null}
 
-        <main className="flex-1 transition-all duration-300 pb-[112px] pt-[68px] md:pb-0 md:pt-0 lg:pt-0">
+        <main className={`flex-1 transition-all duration-300 pt-[68px] md:pt-0 lg:pt-0 ${isAuthRoute ? '' : 'pb-[112px] md:pb-0'}`}>
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
@@ -49,7 +51,7 @@ export default function Layout({ children }: LayoutProps) {
         </main>
       </div>
 
-      <Footer />
+      {!isAuthRoute ? <Footer /> : null}
 
       {/* Mobile menu backdrop */}
       {sidebarOpen && (
@@ -70,7 +72,7 @@ export default function Layout({ children }: LayoutProps) {
           {totalUnread > 0 ? <span className="absolute -right-1 -top-1 min-w-5 rounded-full bg-coral px-1.5 py-0.5 text-center text-[10px] font-bold text-white">{totalUnread > 99 ? '99+' : totalUnread}</span> : null}
         </Link>
       ) : null}
-      {!['/login', '/register', '/forgot-password', '/reset-password', '/verify-email'].includes(location.pathname) ? <BottomNav /> : null}
+      {!isAuthRoute ? <BottomNav /> : null}
     </div>
   )
 }

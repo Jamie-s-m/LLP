@@ -11,15 +11,12 @@ type SignupRole = 'student' | 'parent'
 
 const registerCopy = {
   en: {
-    kicker: 'Join LinguaNest',
     title: 'Create your account',
-    copy: 'Choose how you\'ll use LinguaNest. You can apply for mentor access as a student.',
+    copy: 'Choose how you\'ll use LinguaNest.',
     familyIntent: 'Family account setup selected.',
     teacherIntent: 'Teaching workspace interest selected. Your teaching request will go to admin review after signup.',
     student: 'Student',
-    studentCopy: 'Learn lessons, flashcards, and track your streak.',
     parent: 'Parent',
-    parentCopy: 'Follow a learner\'s progress and stay in touch.',
     firstName: 'First Name',
     lastName: 'Last Name',
     email: 'Email Address',
@@ -31,31 +28,27 @@ const registerCopy = {
     signInInstead: 'Sign in instead',
     continueVerification: 'Continue to verification',
     password: 'Password',
-    passwordHint: 'Use at least 8 characters.',
-    confirmPassword: 'Confirm Password',
+    passwordHint: 'At least 8 characters',
     showPassword: 'Show password',
     hidePassword: 'Hide password',
     teacherInterest: 'I\'d also like to apply to teach on LinguaNest. An admin will review this request after signup.',
+    teacherInterestToggle: 'Want to teach on LinguaNest instead?',
     creating: 'Creating Account...',
     create: 'Create Account',
     alreadyHaveAccount: 'Already have an account?',
     signIn: 'Sign In',
     orContinueWith: 'Or continue with',
     continueWithGoogle: 'Continue with Google',
-    passwordMismatch: 'Passwords do not match',
     emailInUse: 'This email is already in use. Sign in instead, or continue to email verification if the account is still pending.',
     createSuccess: 'Account created. Please verify your email to sign in.',
   },
   ru: {
-    kicker: 'Присоединяйтесь к LinguaNest',
     title: 'Создайте аккаунт',
-    copy: 'Выберите, как вы будете использовать LinguaNest. Как студент вы можете подать заявку на доступ преподавателя.',
+    copy: 'Выберите, как вы будете использовать LinguaNest.',
     familyIntent: 'Выбрана настройка семейного аккаунта.',
     teacherIntent: 'Выбран интерес к пространству преподавателя. После регистрации заявка попадёт на проверку администратору.',
     student: 'Студент',
-    studentCopy: 'Изучайте уроки, карточки и отслеживайте серию.',
     parent: 'Родитель',
-    parentCopy: 'Следите за прогрессом ученика и оставайтесь на связи.',
     firstName: 'Имя',
     lastName: 'Фамилия',
     email: 'Email',
@@ -67,31 +60,27 @@ const registerCopy = {
     signInInstead: 'Войти вместо этого',
     continueVerification: 'Перейти к подтверждению',
     password: 'Пароль',
-    passwordHint: 'Используйте не менее 8 символов.',
-    confirmPassword: 'Подтвердите пароль',
+    passwordHint: 'Не менее 8 символов',
     showPassword: 'Показать пароль',
     hidePassword: 'Скрыть пароль',
     teacherInterest: 'Я также хочу подать заявку на преподавание в LinguaNest. Администратор проверит запрос после регистрации.',
+    teacherInterestToggle: 'Хотите преподавать на LinguaNest?',
     creating: 'Создание аккаунта...',
     create: 'Создать аккаунт',
     alreadyHaveAccount: 'Уже есть аккаунт?',
     signIn: 'Войти',
     orContinueWith: 'Или продолжите с',
     continueWithGoogle: 'Продолжить с Google',
-    passwordMismatch: 'Пароли не совпадают',
     emailInUse: 'Этот email уже используется. Войдите или перейдите к подтверждению email, если аккаунт ещё не активирован.',
     createSuccess: 'Аккаунт создан. Подтвердите email, чтобы войти.',
   },
   uz: {
-    kicker: 'LinguaNest’ga qo‘shiling',
     title: 'Akkount yarating',
-    copy: 'LinguaNest’dan qanday foydalanishingizni tanlang. Talaba sifatida ustozlik uchun ariza berishingiz mumkin.',
+    copy: 'LinguaNest’dan qanday foydalanishingizni tanlang.',
     familyIntent: 'Oilaviy akkount sozlamasi tanlandi.',
     teacherIntent: 'Ustoz ish maydoniga qiziqish tanlandi. Ro‘yxatdan o‘tgach so‘rovingiz admin ko‘rib chiqishiga yuboriladi.',
     student: 'Talaba',
-    studentCopy: 'Darslar, kartochkalar va seriyangizni kuzating.',
     parent: 'Ota-ona',
-    parentCopy: 'O‘quvchi progressini kuzating va aloqada bo‘ling.',
     firstName: 'Ism',
     lastName: 'Familiya',
     email: 'Email manzil',
@@ -103,18 +92,17 @@ const registerCopy = {
     signInInstead: 'Buning o‘rniga kirish',
     continueVerification: 'Tasdiqqa o‘tish',
     password: 'Parol',
-    passwordHint: 'Kamida 8 ta belgi ishlating.',
-    confirmPassword: 'Parolni tasdiqlang',
+    passwordHint: 'Kamida 8 ta belgi',
     showPassword: 'Parolni ko‘rsatish',
     hidePassword: 'Parolni yashirish',
     teacherInterest: 'Men LinguaNest’da dars berish uchun ham ariza bermoqchiman. Admin bu so‘rovni ro‘yxatdan o‘tgandan keyin ko‘rib chiqadi.',
+    teacherInterestToggle: 'LinguaNest’da dars bermoqchimisiz?',
     creating: 'Akkount yaratilmoqda...',
     create: 'Akkount yaratish',
     alreadyHaveAccount: 'Akkountingiz bormi?',
     signIn: 'Kirish',
     orContinueWith: 'Yoki davom eting',
     continueWithGoogle: 'Google bilan davom etish',
-    passwordMismatch: 'Parollar mos emas',
     emailInUse: 'Bu email allaqachon ishlatilgan. Tizimga kiring yoki akkount hali kutilayotgan bo‘lsa email tasdig‘iga o‘ting.',
     createSuccess: 'Akkount yaratildi. Kirish uchun emailingizni tasdiqlang.',
   },
@@ -127,15 +115,14 @@ export default function Register() {
     lastName: '',
     email: '',
     password: '',
-    confirmPassword: '',
   })
   const [role, setRole] = useState<SignupRole>(searchParams.get('role') === 'parent' ? 'parent' : 'student')
   const [requestTeacherRole, setRequestTeacherRole] = useState(searchParams.get('teacherInterest') === '1')
+  const [showTeacherOption, setShowTeacherOption] = useState(searchParams.get('teacherInterest') === '1')
   const [localError, setLocalError] = useState('')
   const [emailStatus, setEmailStatus] = useState<'idle' | 'checking' | 'available' | 'exists'>('idle')
   const [emailStatusMessage, setEmailStatusMessage] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const language = useLanguageStore((state) => state.language)
   const ui = registerCopy[language]
 
@@ -181,11 +168,6 @@ export default function Register() {
     setLocalError('')
     const normalizedEmail = formData.email.trim().toLowerCase()
 
-    if (formData.password !== formData.confirmPassword) {
-      setLocalError(ui.passwordMismatch)
-      return
-    }
-
     if (emailStatus === 'exists') {
       setLocalError(ui.emailInUse)
       return
@@ -215,9 +197,9 @@ export default function Register() {
   }
 
   return (
-    <div className="atlas-page flex items-center justify-center px-4 py-12">
+    <div className="atlas-page auth-page flex items-center justify-center px-4 py-3 sm:py-4">
       <div className="auth-shell w-full max-w-6xl overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] shadow-[0_24px_80px_rgba(17,24,39,0.08)] dark:border-[var(--dark-border)] dark:bg-[var(--dark-surface)]">
-        <div className="auth-left hidden min-h-[880px] w-[42%] flex-col justify-between p-10 lg:flex">
+        <div className="auth-left hidden w-[42%] flex-col justify-between p-10 lg:flex">
           <div className="auth-left-top">
             <div className="auth-logo mb-16 flex items-center gap-3 text-white">
               <div className="auth-logo-icon">
@@ -245,16 +227,15 @@ export default function Register() {
           </div>
         </div>
 
-        <div className="auth-right flex flex-1 items-center justify-center p-6 sm:p-8 lg:p-12">
+        <div className="auth-right flex flex-1 items-center justify-center p-4 sm:p-5 lg:p-6">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, ease: 'easeOut' }}
-            className="auth-card w-full max-w-lg rounded-[2rem] bg-[var(--surface)] p-8 sm:p-10 dark:bg-[var(--dark-surface)]"
+            className="auth-card w-full max-w-lg rounded-[2rem] bg-[var(--surface)] p-4 sm:p-5 dark:bg-[var(--dark-surface)]"
           >
-            <p className="atlas-kicker">{ui.kicker}</p>
-            <h1 className="mb-2 text-3xl font-semibold text-[var(--text-primary)] dark:text-white">{ui.title}</h1>
-            <p className="text-muted mb-6 text-[var(--text-muted)] dark:text-[var(--dark-text-secondary)]">{ui.copy}</p>
+            <h1 className="mb-0.5 text-2xl font-semibold text-[var(--text-primary)] dark:text-white">{ui.title}</h1>
+            <p className="text-muted mb-2 text-[var(--text-muted)] dark:text-[var(--dark-text-secondary)]">{ui.copy}</p>
             {planIntent ? (
               <div className="mb-6 rounded-lg border border-[var(--border)] bg-[var(--accent-light)] px-4 py-3 text-sm text-[var(--accent)] dark:border-[var(--dark-border)] dark:bg-white/5 dark:text-[var(--dark-text-secondary)]">
                 {planIntent}
@@ -267,20 +248,18 @@ export default function Register() {
               </div>
             )}
 
-            <div className="role-card-grid mb-6">
+            <div className="role-card-grid mb-1.5">
               <button type="button" onClick={() => setRole('student')} className={`role-card ${role === 'student' ? 'selected' : ''}`}>
-                <FiBookOpen className="text-[var(--accent)] text-xl" />
+                <FiBookOpen className="text-[var(--accent)] text-base" />
                 <strong>{ui.student}</strong>
-                <span>{ui.studentCopy}</span>
               </button>
               <button type="button" onClick={() => { setRole('parent'); setRequestTeacherRole(false) }} className={`role-card ${role === 'parent' ? 'selected' : ''}`}>
-                <FiUsers className="text-[var(--accent)] text-xl" />
+                <FiUsers className="text-[var(--accent)] text-base" />
                 <strong>{ui.parent}</strong>
-                <span>{ui.parentCopy}</span>
               </button>
             </div>
 
-            <form className="space-y-4" onSubmit={handleSubmit}>
+            <form className="space-y-2.5" onSubmit={handleSubmit}>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="label">{ui.firstName}</label>
@@ -345,6 +324,7 @@ export default function Register() {
                     value={formData.password}
                     onChange={handleChange}
                     autoComplete="new-password"
+                    placeholder={ui.passwordHint}
                   />
                   <button
                     type="button"
@@ -355,43 +335,28 @@ export default function Register() {
                     {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
                   </button>
                 </div>
-                <p className="mt-2 text-sm text-[var(--text-muted)] dark:text-[var(--dark-text-secondary)]">{ui.passwordHint}</p>
-              </div>
-
-              <div>
-                <label className="label">{ui.confirmPassword}</label>
-                <div className="relative">
-                  <input
-                    name="confirmPassword"
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    required
-                    minLength={8}
-                    className="input pr-11"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    autoComplete="new-password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword((current) => !current)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-slate-700 dark:hover:text-slate-200"
-                    aria-label={showConfirmPassword ? ui.hidePassword : ui.showPassword}
-                  >
-                    {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
-                  </button>
-                </div>
               </div>
 
               {role === 'student' && (
-                <label className="flex items-start gap-3 rounded-lg bg-[var(--surface-strong)] p-3 text-sm text-[var(--text-muted)] dark:bg-white/5 dark:text-[var(--dark-text-secondary)]">
-                  <input
-                    type="checkbox"
-                    className="mt-1"
-                    checked={requestTeacherRole}
-                    onChange={(e) => setRequestTeacherRole(e.target.checked)}
-                  />
-                  <span>{ui.teacherInterest}</span>
-                </label>
+                showTeacherOption ? (
+                  <label className="flex items-start gap-3 rounded-lg bg-[var(--surface-strong)] p-2.5 text-sm text-[var(--text-muted)] dark:bg-white/5 dark:text-[var(--dark-text-secondary)]">
+                    <input
+                      type="checkbox"
+                      className="mt-1"
+                      checked={requestTeacherRole}
+                      onChange={(e) => setRequestTeacherRole(e.target.checked)}
+                    />
+                    <span>{ui.teacherInterest}</span>
+                  </label>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowTeacherOption(true)}
+                    className="text-sm font-semibold text-[var(--accent)]"
+                  >
+                    {ui.teacherInterestToggle}
+                  </button>
+                )
               )}
 
               <button
@@ -403,7 +368,7 @@ export default function Register() {
               </button>
             </form>
 
-            <div className="my-6 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-subtle)]">
+            <div className="my-2 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-subtle)]">
               <span className="h-px flex-1 bg-[var(--border)]" />
               {ui.orContinueWith}
               <span className="h-px flex-1 bg-[var(--border)]" />
@@ -419,7 +384,7 @@ export default function Register() {
               {ui.continueWithGoogle}
             </a>
 
-            <p className="mt-6 text-center text-[var(--text-muted)] dark:text-[var(--dark-text-secondary)]">
+            <p className="mt-1.5 text-center text-[var(--text-muted)] dark:text-[var(--dark-text-secondary)]">
               {ui.alreadyHaveAccount}{' '}
               <Link to="/login" className="font-semibold text-[var(--accent)]">
                 {ui.signIn}

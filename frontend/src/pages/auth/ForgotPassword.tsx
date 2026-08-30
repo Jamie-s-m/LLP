@@ -74,16 +74,16 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className="atlas-page flex items-center justify-center px-4 py-12">
+    <div className="atlas-page auth-page flex items-center justify-center px-4 py-6">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: 'easeOut' }}
-        className="atlas-panel w-full max-w-md p-8 text-center"
+        className="atlas-panel w-full max-w-md p-6 sm:p-8 text-center"
       >
         <p className="atlas-kicker">{ui.kicker}</p>
         <h1 className="text-3xl font-semibold text-ink mb-2">{ui.title}</h1>
-        <p className="text-muted mb-8">{ui.text}</p>
+        <p className="text-muted mb-5">{ui.text}</p>
 
         {submitted ? (
           <div className="space-y-6">
