@@ -242,11 +242,22 @@ export const seedContent = async ({
     return { seeded: false, dryRun: true, ...currentCounts };
   }
 
-  const users = await ensureDemoUsers();
-  const teacher = users.find((user) => user.role === 'teacher') || (await User.findOne({ role: 'teacher' }));
+  // Demo accounts use hardcoded, publicly-readable passwords (this file) - fine to create
+  // for local development, a real account-takeover risk if ever created on a production
+  // database. Production seeding therefore never creates them: it requires a real teacher
+  // account (created through normal signup) to already exist to attribute courses to.
+  let teacher = await User.findOne({ role: 'teacher' });
+  if (!teacher && safeMode !== 'production') {
+    const users = await ensureDemoUsers();
+    teacher = users.find((user) => user.role === 'teacher');
+  }
 
   if (!teacher) {
-    throw new Error('Teacher demo user was not created.');
+    throw new Error(
+      safeMode === 'production'
+        ? 'No teacher account exists yet. Create a real teacher account first - production seeding will not create demo accounts.'
+        : 'Teacher demo user was not created.'
+    );
   }
 
   for (const courseData of library.courses) {

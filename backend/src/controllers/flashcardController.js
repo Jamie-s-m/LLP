@@ -1,10 +1,17 @@
 import Flashcard from '../models/Flashcard.js';
 import Course from '../models/Course.js';
 import FlashcardProgress from '../models/FlashcardProgress.js';
+import User from '../models/User.js';
 import { hasModeratorPermission } from '../middleware/auth.js';
 
 // SM-2 spaced-repetition rating buttons, mapped to the classic 0-5 quality scale.
 const RATING_TO_QUALITY = { again: 1, hard: 3, good: 4, easy: 5 };
+
+// XP scales with recall quality (a correct-but-slow "hard" still counts, a failed "again"
+// gives a token amount); coins are reserved for genuine successful recall (good/easy) so
+// a large deck can't be farmed for coins by clicking through it once with "again" spam.
+const XP_BY_QUALITY = { 1: 1, 3: 3, 4: 4, 5: 5 };
+const COINS_BY_QUALITY = { 1: 0, 3: 0, 4: 1, 5: 1 };
 
 // Standard SM-2 algorithm: given a quality score (0-5), returns the next
 // interval/easeFactor/repetitions for a flashcard-progress record.
@@ -104,6 +111,14 @@ export const reviewFlashcard = async (req, res, next) => {
     applySm2(progress, quality);
     await progress.save();
 
+    const xpAwarded = XP_BY_QUALITY[quality] || 0;
+    const coinsAwarded = COINS_BY_QUALITY[quality] || 0;
+    const user = await User.findById(req.user.id);
+    user.xp = (user.xp || 0) + xpAwarded;
+    user.linguaCoins = (user.linguaCoins || 0) + coinsAwarded;
+    user.lastActiveDate = new Date();
+    await user.save();
+
     res.status(200).json({
       success: true,
       data: {
@@ -113,6 +128,10 @@ export const reviewFlashcard = async (req, res, next) => {
         interval: progress.interval,
         nextReviewDate: progress.nextReviewDate,
         repetitions: progress.repetitions,
+        xpAwarded,
+        coinsAwarded,
+        totalXp: user.xp,
+        totalLinguaCoins: user.linguaCoins,
       },
     });
   } catch (error) {

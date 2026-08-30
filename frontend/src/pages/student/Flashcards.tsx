@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { FiVolume2, FiRotateCw } from 'react-icons/fi'
+import toast from 'react-hot-toast'
 import api from '../../services/api'
 import { useLanguageStore } from '../../store/languageStore'
+import { useAuthStore } from '../../store/authStore'
 
 interface FlashcardItem {
   _id: string
@@ -10,9 +12,9 @@ interface FlashcardItem {
 }
 
 const copy = {
-  en: { kicker: 'Recall practice', title: 'Vocabulary Flashcards', text: 'Master vocabulary with spaced repetition and a focused card-by-card review flow.', loading: 'Loading flashcards...', empty: 'No flashcards available yet. Check back soon!', card: 'Card {current} of {total}', masteredCount: '{count} reviewed', front: 'FRONT', back: 'BACK', previous: 'Previous', again: 'Again', hard: 'Hard', good: 'Good', easy: 'Easy', flipFirst: 'Flip the card to rate it', next: 'Next' },
-  ru: { kicker: 'Практика запоминания', title: 'Словарные карточки', text: 'Осваивайте лексику через интервальные повторения и спокойный режим карточка за карточкой.', loading: 'Загрузка карточек...', empty: 'Карточек пока нет. Загляните позже!', card: 'Карточка {current} из {total}', masteredCount: 'Пройдено: {count}', front: 'ЛИЦО', back: 'ОБОРОТ', previous: 'Назад', again: 'Заново', hard: 'Сложно', good: 'Хорошо', easy: 'Легко', flipFirst: 'Переверните карточку, чтобы оценить', next: 'Далее' },
-  uz: { kicker: 'Eslab qolish mashqi', title: 'Lug‘at kartochkalari', text: 'Intervalli takrorlash va bitta-bitta ko‘rib chiqish oqimi bilan lug‘atni mustahkamlang.', loading: 'Kartochkalar yuklanmoqda...', empty: 'Hali kartochkalar yo‘q. Keyinroq qayta tekshiring!', card: '{total} tadan {current}-kartochka', masteredCount: '{count} tasi ko‘rib chiqildi', front: 'OLD', back: 'ORQA', previous: 'Oldingi', again: 'Qayta', hard: 'Qiyin', good: 'Yaxshi', easy: 'Oson', flipFirst: 'Baholash uchun kartochkani ag‘daring', next: 'Keyingi' },
+  en: { kicker: 'Recall practice', title: 'Vocabulary Flashcards', text: 'Master vocabulary with spaced repetition and a focused card-by-card review flow.', loading: 'Loading flashcards...', empty: 'No flashcards available yet. Check back soon!', card: 'Card {current} of {total}', masteredCount: '{count} reviewed', front: 'FRONT', back: 'BACK', previous: 'Previous', again: 'Again', hard: 'Hard', good: 'Good', easy: 'Easy', flipFirst: 'Flip the card to rate it', next: 'Next', earned: '+{xp} XP, +{coins} coins', reviewFailed: 'Could not save this review — check your connection and try again.' },
+  ru: { kicker: 'Практика запоминания', title: 'Словарные карточки', text: 'Осваивайте лексику через интервальные повторения и спокойный режим карточка за карточкой.', loading: 'Загрузка карточек...', empty: 'Карточек пока нет. Загляните позже!', card: 'Карточка {current} из {total}', masteredCount: 'Пройдено: {count}', front: 'ЛИЦО', back: 'ОБОРОТ', previous: 'Назад', again: 'Заново', hard: 'Сложно', good: 'Хорошо', easy: 'Легко', flipFirst: 'Переверните карточку, чтобы оценить', next: 'Далее', earned: '+{xp} XP, +{coins} монет', reviewFailed: 'Не удалось сохранить оценку — проверьте соединение и попробуйте снова.' },
+  uz: { kicker: 'Eslab qolish mashqi', title: 'Lug‘at kartochkalari', text: 'Intervalli takrorlash va bitta-bitta ko‘rib chiqish oqimi bilan lug‘atni mustahkamlang.', loading: 'Kartochkalar yuklanmoqda...', empty: 'Hali kartochkalar yo‘q. Keyinroq qayta tekshiring!', card: '{total} tadan {current}-kartochka', masteredCount: '{count} tasi ko‘rib chiqildi', front: 'OLD', back: 'ORQA', previous: 'Oldingi', again: 'Qayta', hard: 'Qiyin', good: 'Yaxshi', easy: 'Oson', flipFirst: 'Baholash uchun kartochkani ag‘daring', next: 'Keyingi', earned: '+{xp} XP, +{coins} tanga', reviewFailed: 'Baholashni saqlab bo‘lmadi — internetni tekshirib, qayta urinib ko‘ring.' },
 } as const
 
 type Rating = 'again' | 'hard' | 'good' | 'easy'
@@ -30,8 +32,10 @@ export default function Flashcards() {
   const [isFlipped, setIsFlipped] = useState(false)
   const [reviewed, setReviewed] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
   const language = useLanguageStore((state) => state.language)
   const ui = copy[language]
+  const { user, setUser } = useAuthStore()
 
   useEffect(() => {
     api.get('/flashcards')
@@ -73,10 +77,33 @@ export default function Flashcards() {
     }
   }
 
-  const handleRate = (rating: Rating) => {
-    setReviewed((prev) => new Set(prev).add(card._id))
-    api.post(`/flashcards/${card._id}/review`, { rating }).catch(() => {})
-    goToNextCard()
+  const handleRate = async (rating: Rating) => {
+    if (submitting) return
+    setSubmitting(true)
+    try {
+      const response = await api.post(`/flashcards/${card._id}/review`, { rating })
+      setReviewed((prev) => new Set(prev).add(card._id))
+      const { xpAwarded, coinsAwarded, totalXp, totalLinguaCoins } = response.data.data || {}
+      if (xpAwarded || coinsAwarded) {
+        toast.success(
+          ui.earned
+            .replace('{xp}', String(xpAwarded ?? 0))
+            .replace('{coins}', String(coinsAwarded ?? 0))
+        )
+      }
+      if (user && (typeof totalXp === 'number' || typeof totalLinguaCoins === 'number')) {
+        setUser({
+          ...user,
+          xp: typeof totalXp === 'number' ? totalXp : user.xp,
+          linguaCoins: typeof totalLinguaCoins === 'number' ? totalLinguaCoins : user.linguaCoins,
+        })
+      }
+      goToNextCard()
+    } catch {
+      toast.error(ui.reviewFailed)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -150,7 +177,8 @@ export default function Flashcards() {
                 <button
                   key={rating}
                   onClick={() => handleRate(rating)}
-                  className={`rounded-xl border-2 bg-transparent px-3 py-3 text-sm font-semibold transition-colors ${RATING_STYLES[rating]}`}
+                  disabled={submitting}
+                  className={`rounded-xl border-2 bg-transparent px-3 py-3 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${RATING_STYLES[rating]}`}
                 >
                   {ui[rating]}
                 </button>
