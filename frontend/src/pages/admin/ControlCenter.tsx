@@ -303,6 +303,23 @@ const copy = {
     privateGroup: 'Private group',
     saveItem: 'Save item',
     createItem: 'Create item',
+    selectAll: 'Select all',
+    selectedCount: '{count} selected',
+    clearSelection: 'Clear selection',
+    bulkSuspend: 'Suspend',
+    bulkReactivate: 'Reactivate',
+    bulkVerify: 'Verify email',
+    bulkDelete: 'Delete',
+    bulkPublish: 'Publish',
+    bulkUnpublish: 'Unpublish',
+    bulkDeleteUsersConfirm: 'Delete {count} selected users? This cannot be undone.',
+    bulkDeleteCoursesConfirm: 'Delete {count} selected courses? This cannot be undone.',
+    bulkDeleteContentConfirm: 'Delete {count} selected items? This cannot be undone.',
+    bulkActionSuccess: 'Bulk action completed',
+    bulkActionFailed: 'Bulk action failed',
+    filterAll: 'All',
+    filterPublished: 'Published',
+    filterDraft: 'Draft',
   },
   ru: {
     adminLoadFailed: 'Не удалось загрузить данные администратора',
@@ -444,6 +461,23 @@ const copy = {
     privateGroup: 'Приватная группа',
     saveItem: 'Сохранить элемент',
     createItem: 'Создать элемент',
+    selectAll: 'Выбрать всё',
+    selectedCount: 'Выбрано: {count}',
+    clearSelection: 'Снять выделение',
+    bulkSuspend: 'Приостановить',
+    bulkReactivate: 'Восстановить',
+    bulkVerify: 'Подтвердить email',
+    bulkDelete: 'Удалить',
+    bulkPublish: 'Опубликовать',
+    bulkUnpublish: 'Снять с публикации',
+    bulkDeleteUsersConfirm: 'Удалить {count} выбранных пользователей? Это действие необратимо.',
+    bulkDeleteCoursesConfirm: 'Удалить {count} выбранных курсов? Это действие необратимо.',
+    bulkDeleteContentConfirm: 'Удалить {count} выбранных элементов? Это действие необратимо.',
+    bulkActionSuccess: 'Массовое действие выполнено',
+    bulkActionFailed: 'Не удалось выполнить массовое действие',
+    filterAll: 'Все',
+    filterPublished: 'Опубликованные',
+    filterDraft: 'Черновики',
   },
   uz: {
     adminLoadFailed: 'Admin ma’lumotlarini yuklab bo‘lmadi',
@@ -585,6 +619,23 @@ const copy = {
     privateGroup: 'Yopiq guruh',
     saveItem: 'Elementni saqlash',
     createItem: 'Element yaratish',
+    selectAll: 'Barchasini tanlash',
+    selectedCount: '{count} ta tanlandi',
+    clearSelection: 'Tanlovni bekor qilish',
+    bulkSuspend: 'To‘xtatib turish',
+    bulkReactivate: 'Qayta faollashtirish',
+    bulkVerify: 'Emailni tasdiqlash',
+    bulkDelete: 'O‘chirish',
+    bulkPublish: 'Nashr qilish',
+    bulkUnpublish: 'Nashrdan olish',
+    bulkDeleteUsersConfirm: 'Tanlangan {count} foydalanuvchi o‘chirilsinmi? Bu amalni ortga qaytarib bo‘lmaydi.',
+    bulkDeleteCoursesConfirm: 'Tanlangan {count} kurs o‘chirilsinmi? Bu amalni ortga qaytarib bo‘lmaydi.',
+    bulkDeleteContentConfirm: 'Tanlangan {count} element o‘chirilsinmi? Bu amalni ortga qaytarib bo‘lmaydi.',
+    bulkActionSuccess: 'Ommaviy amal bajarildi',
+    bulkActionFailed: 'Ommaviy amalni bajarib bo‘lmadi',
+    filterAll: 'Barchasi',
+    filterPublished: 'Nashr qilingan',
+    filterDraft: 'Qoralama',
   },
 } as const
 
@@ -655,7 +706,18 @@ export default function ControlCenter() {
   const [moderationResource, setModerationResource] = useState<ModerationResource>('posts')
   const [overview, setOverview] = useState<Overview | null>(null)
   const [loading, setLoading] = useState(true)
+  const [courseStatusFilter, setCourseStatusFilter] = useState<'all' | 'published' | 'draft'>('all')
+  const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set())
+  const [selectedCourseIds, setSelectedCourseIds] = useState<Set<string>>(new Set())
+  const [selectedContentIds, setSelectedContentIds] = useState<Set<string>>(new Set())
+  const [bulkActionPending, setBulkActionPending] = useState(false)
   const pageSize = 8
+
+  const toggleSelected = (set: Set<string>, setSet: (next: Set<string>) => void, id: string) => {
+    const next = new Set(set)
+    if (next.has(id)) next.delete(id); else next.add(id)
+    setSet(next)
+  }
 
   const isAdmin = currentUser?.role === 'admin'
   const moderatorPermissions = currentUser?.moderatorPermissions || emptyModeratorPermissions()
@@ -744,6 +806,35 @@ export default function ControlCenter() {
     }
   }
 
+  const bulkPublishCourses = async (isPublished: boolean) => {
+    setBulkActionPending(true)
+    try {
+      await api.patch('/admin/content/courses/bulk', { ids: Array.from(selectedCourseIds), updates: { isPublished } })
+      setCourses((current) => current.map((course) => selectedCourseIds.has(course._id) ? { ...course, isPublished } : course))
+      setSelectedCourseIds(new Set())
+      toast.success(ui.bulkActionSuccess)
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || ui.bulkActionFailed)
+    } finally {
+      setBulkActionPending(false)
+    }
+  }
+
+  const bulkDeleteCourses = async () => {
+    if (!window.confirm(ui.bulkDeleteCoursesConfirm.replace('{count}', String(selectedCourseIds.size)))) return
+    setBulkActionPending(true)
+    try {
+      await api.post('/admin/content/courses/bulk-delete', { ids: Array.from(selectedCourseIds) })
+      setCourses((current) => current.filter((course) => !selectedCourseIds.has(course._id)))
+      setSelectedCourseIds(new Set())
+      toast.success(ui.bulkActionSuccess)
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || ui.bulkActionFailed)
+    } finally {
+      setBulkActionPending(false)
+    }
+  }
+
   const openUserModal = (user: User) => {
     setUserModal(user)
     setUserForm({
@@ -788,6 +879,27 @@ export default function ControlCenter() {
       toast.success(ui.userDeleted)
     } catch (error: any) {
       toast.error(error.response?.data?.message || ui.userDeleteFailed)
+    }
+  }
+
+  const bulkUserAction = async (action: 'suspend' | 'reactivate' | 'verify' | 'delete') => {
+    if (action === 'delete' && !window.confirm(ui.bulkDeleteUsersConfirm.replace('{count}', String(selectedUserIds.size)))) return
+    setBulkActionPending(true)
+    try {
+      const ids = Array.from(selectedUserIds)
+      await api.post('/admin/users/bulk-action', { ids, action })
+      if (action === 'delete') {
+        setUsers((current) => current.filter((user) => !selectedUserIds.has(user._id)))
+      } else {
+        const patch = action === 'suspend' ? { isActive: false } : action === 'reactivate' ? { isActive: true } : { isEmailVerified: true }
+        setUsers((current) => current.map((user) => selectedUserIds.has(user._id) ? { ...user, ...patch } : user))
+      }
+      setSelectedUserIds(new Set())
+      toast.success(ui.bulkActionSuccess)
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || ui.bulkActionFailed)
+    } finally {
+      setBulkActionPending(false)
     }
   }
 
@@ -889,6 +1001,21 @@ export default function ControlCenter() {
     }
   }
 
+  const bulkDeleteContentItems = async () => {
+    if (!window.confirm(ui.bulkDeleteContentConfirm.replace('{count}', String(selectedContentIds.size)))) return
+    setBulkActionPending(true)
+    try {
+      await api.post(`/admin/content/${currentContentResource}/bulk-delete`, { ids: Array.from(selectedContentIds) })
+      setContent((current) => current.filter((item) => !selectedContentIds.has(item._id)))
+      setSelectedContentIds(new Set())
+      toast.success(ui.bulkActionSuccess)
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || ui.bulkActionFailed)
+    } finally {
+      setBulkActionPending(false)
+    }
+  }
+
   const togglePinnedPost = async (item: ManagedContent) => {
     try {
       await api.patch(`/admin/content/posts/${item._id}`, { isPinned: !item.isPinned })
@@ -958,6 +1085,27 @@ export default function ControlCenter() {
     canSeeBilling ? ['billing', FiCreditCard, ui.tabBilling] : null,
   ].filter(Boolean) as Array<[Tab, typeof FiBookOpen, string]>
 
+  const goToTab = (value: Tab) => {
+    setTab(value)
+    if (value === 'content') loadContent(resource)
+    if (value === 'applications') loadApplications()
+    if (value === 'moderation') loadContent(moderationResource)
+    if (value === 'billing') loadBillingPlans()
+  }
+
+  const statCards: Array<{ id: string; label: string; value: number; onClick?: () => void }> = overview ? [
+    { id: 'users', label: ui.usersStat, value: overview.totals.users, onClick: canManageUsers ? () => { goToTab('users'); setUserSearch(''); setUserPage(1) } : undefined },
+    { id: 'courses', label: ui.coursesStat, value: overview.totals.courses, onClick: canManageCatalog ? () => { goToTab('courses'); setCourseStatusFilter('all') } : undefined },
+    { id: 'published', label: ui.publishedStat, value: overview.totals.publishedCourses, onClick: canManageCatalog ? () => { goToTab('courses'); setCourseStatusFilter('published') } : undefined },
+    { id: 'messages', label: ui.messagesStat, value: overview.totals.chatMessages, onClick: canHandleSupport ? () => goToTab('support') : undefined },
+    { id: 'moderators', label: ui.moderatorsStat, value: overview.totals.moderators, onClick: canManageUsers ? () => { goToTab('users'); setUserSearch('moderator'); setUserPage(1) } : undefined },
+    { id: 'pendingTeachers', label: ui.pendingTeachersStat, value: overview.totals.pendingTeacherApplications, onClick: canManageUsers ? () => goToTab('applications') : undefined },
+  ] : []
+
+  const filteredCourses = courses.filter((course) => (
+    courseStatusFilter === 'all' ? true : courseStatusFilter === 'published' ? course.isPublished : !course.isPublished
+  ))
+
   return (
     <div className="atlas-page mx-auto max-w-7xl px-4 py-8">
       <div className="atlas-heading mb-8">
@@ -968,14 +1116,18 @@ export default function ControlCenter() {
 
       {overview ? (
         <div className="atlas-stat-grid mb-8">
-          {[
-            [ui.usersStat, overview.totals.users],
-            [ui.coursesStat, overview.totals.courses],
-            [ui.publishedStat, overview.totals.publishedCourses],
-            [ui.messagesStat, overview.totals.chatMessages],
-            [ui.moderatorsStat, overview.totals.moderators],
-            [ui.pendingTeachersStat, overview.totals.pendingTeacherApplications],
-          ].map(([label, value]) => <div key={String(label)} className="atlas-stat"><strong>{value}</strong><span>{label}</span></div>)}
+          {statCards.map((stat) => (
+            <button
+              key={stat.id}
+              type="button"
+              onClick={stat.onClick}
+              disabled={!stat.onClick}
+              className={`atlas-stat text-left ${stat.onClick ? 'cursor-pointer' : 'cursor-default opacity-90'}`}
+            >
+              <strong>{stat.value}</strong>
+              <span>{stat.label}</span>
+            </button>
+          ))}
         </div>
       ) : null}
 
@@ -983,13 +1135,7 @@ export default function ControlCenter() {
         {tabEntries.map(([value, Icon, label]) => (
           <button
             key={value}
-            onClick={() => {
-              setTab(value)
-              if (value === 'content') loadContent(resource)
-              if (value === 'applications') loadApplications()
-              if (value === 'moderation') loadContent(moderationResource)
-              if (value === 'billing') loadBillingPlans()
-            }}
+            onClick={() => goToTab(value)}
             className={tab === value ? 'active' : ''}
           >
             <Icon />
@@ -1000,27 +1146,65 @@ export default function ControlCenter() {
 
       {tab === 'courses' ? (
         <section className="atlas-panel p-6">
-          <div className="mb-6 flex flex-wrap justify-between gap-4">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="atlas-kicker">{ui.contentInventory}</p>
               <h2 className="text-2xl text-ink dark:text-white">{ui.tabCourses}</h2>
             </div>
             <button onClick={() => openCourseModal()} className="btn btn-primary inline-flex items-center gap-2"><FiPlus /> {ui.newCourse}</button>
           </div>
+          <div className="mb-6 flex flex-wrap gap-2">
+            {(['all', 'published', 'draft'] as const).map((value) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setCourseStatusFilter(value)}
+                className={`status-pill ${courseStatusFilter === value ? '' : 'muted'}`}
+              >
+                {value === 'all' ? ui.filterAll : value === 'published' ? ui.filterPublished : ui.filterDraft}
+              </button>
+            ))}
+          </div>
           {loading ? (
             <div className="rounded-2xl bg-[#f6efe7] p-5 text-slate-600 dark:bg-white/5 dark:text-slate-300">{ui.loadingCurriculum}</div>
           ) : (
-            <div className="admin-table">
-              {courses.map((course) => (
-                <div className="admin-row" key={course._id}>
-                  <div><strong>{course.title}</strong><small>{localize(localizedLabels.languages, course.language)} · {localize(localizedLabels.levels, course.level)} · {ui.lessonsCount.replace('{count}', String(course.totalLessons || 0))}</small></div>
-                  <span className={`status-pill ${course.isPublished ? '' : 'muted'}`}>{course.isPublished ? ui.published : ui.draft}</span>
-                  <button onClick={() => openCourseModal(course)} className="icon-button" aria-label={`Edit ${course.title}`}><FiEdit3 /></button>
-                  <button onClick={() => removeCourse(course._id)} className="icon-button danger" aria-label={`Delete ${course.title}`}><FiTrash2 /></button>
+            <>
+              {filteredCourses.length > 0 ? (
+                <label className="mb-3 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+                  <input
+                    type="checkbox"
+                    checked={selectedCourseIds.size > 0 && filteredCourses.every((course) => selectedCourseIds.has(course._id))}
+                    onChange={(event) => setSelectedCourseIds(event.target.checked ? new Set(filteredCourses.map((course) => course._id)) : new Set())}
+                  />
+                  {ui.selectAll}
+                </label>
+              ) : null}
+              {selectedCourseIds.size > 0 ? (
+                <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl bg-[var(--accent-light)] px-4 py-3 text-sm dark:bg-white/5">
+                  <span className="font-semibold text-[var(--accent)]">{ui.selectedCount.replace('{count}', String(selectedCourseIds.size))}</span>
+                  <button disabled={bulkActionPending} onClick={() => bulkPublishCourses(true)} className="btn btn-outline text-sm">{ui.bulkPublish}</button>
+                  <button disabled={bulkActionPending} onClick={() => bulkPublishCourses(false)} className="btn btn-outline text-sm">{ui.bulkUnpublish}</button>
+                  <button disabled={bulkActionPending} onClick={bulkDeleteCourses} className="btn btn-outline text-sm text-red-600">{ui.bulkDelete}</button>
+                  <button onClick={() => setSelectedCourseIds(new Set())} className="ml-auto text-sm text-slate-500 hover:underline">{ui.clearSelection}</button>
                 </div>
-              ))}
-              {courses.length === 0 ? <div className="empty-state"><FiBookOpen /><p>{ui.emptyCourses}</p></div> : null}
-            </div>
+              ) : null}
+              <div className="admin-table">
+                {filteredCourses.map((course) => (
+                  <div className="admin-row" key={course._id}>
+                    <input
+                      type="checkbox"
+                      checked={selectedCourseIds.has(course._id)}
+                      onChange={() => toggleSelected(selectedCourseIds, setSelectedCourseIds, course._id)}
+                    />
+                    <div className="min-w-0 flex-1 break-words"><strong>{course.title}</strong><small>{localize(localizedLabels.languages, course.language)} · {localize(localizedLabels.levels, course.level)} · {ui.lessonsCount.replace('{count}', String(course.totalLessons || 0))}</small></div>
+                    <span className={`status-pill ${course.isPublished ? '' : 'muted'}`}>{course.isPublished ? ui.published : ui.draft}</span>
+                    <button onClick={() => openCourseModal(course)} className="icon-button" aria-label={`Edit ${course.title}`}><FiEdit3 /></button>
+                    <button onClick={() => removeCourse(course._id)} className="icon-button danger" aria-label={`Delete ${course.title}`}><FiTrash2 /></button>
+                  </div>
+                ))}
+                {filteredCourses.length === 0 ? <div className="empty-state"><FiBookOpen /><p>{ui.emptyCourses}</p></div> : null}
+              </div>
+            </>
           )}
         </section>
       ) : null}
@@ -1031,12 +1215,42 @@ export default function ControlCenter() {
             <h2 className="text-2xl text-ink dark:text-white">{ui.peopleRoles}</h2>
             <input className="input max-w-sm" value={userSearch} onChange={(event) => { setUserSearch(event.target.value); setUserPage(1) }} placeholder={ui.searchUsers} />
           </div>
+          {visibleUsers.length > 0 ? (
+            <label className="mb-3 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+              <input
+                type="checkbox"
+                checked={selectedUserIds.size > 0 && visibleUsers.every((user) => selectedUserIds.has(user._id))}
+                onChange={(event) => setSelectedUserIds(event.target.checked ? new Set(visibleUsers.map((user) => user._id)) : new Set())}
+              />
+              {ui.selectAll}
+            </label>
+          ) : null}
+          {selectedUserIds.size > 0 ? (
+            <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl bg-[var(--accent-light)] px-4 py-3 text-sm dark:bg-white/5">
+              <span className="font-semibold text-[var(--accent)]">{ui.selectedCount.replace('{count}', String(selectedUserIds.size))}</span>
+              <button disabled={bulkActionPending} onClick={() => bulkUserAction('suspend')} className="btn btn-outline text-sm">{ui.bulkSuspend}</button>
+              <button disabled={bulkActionPending} onClick={() => bulkUserAction('reactivate')} className="btn btn-outline text-sm">{ui.bulkReactivate}</button>
+              {isAdmin ? (
+                <>
+                  <button disabled={bulkActionPending} onClick={() => bulkUserAction('verify')} className="btn btn-outline text-sm">{ui.bulkVerify}</button>
+                  <button disabled={bulkActionPending} onClick={() => bulkUserAction('delete')} className="btn btn-outline text-sm text-red-600">{ui.bulkDelete}</button>
+                </>
+              ) : null}
+              <button onClick={() => setSelectedUserIds(new Set())} className="ml-auto text-sm text-slate-500 hover:underline">{ui.clearSelection}</button>
+            </div>
+          ) : null}
           <div className="admin-table">
             {visibleUsers.map((user) => {
               const protectedUser = user.role === 'admin' || user.role === 'moderator'
               return (
                 <div className="admin-row" key={user._id}>
-                  <div>
+                  <input
+                    type="checkbox"
+                    checked={selectedUserIds.has(user._id)}
+                    disabled={user._id === currentUser?.id}
+                    onChange={() => toggleSelected(selectedUserIds, setSelectedUserIds, user._id)}
+                  />
+                  <div className="min-w-0 flex-1 break-words">
                     <strong>{user.firstName} {user.lastName}</strong>
                     <small>{user.email} · {localize(localizedLabels.roles, user.role)}{user.role === 'moderator' ? ` · ${ui.scopedAccess}` : ''}</small>
                   </div>
@@ -1074,7 +1288,7 @@ export default function ControlCenter() {
           <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
             <h2 className="text-2xl text-ink dark:text-white">{ui.contentLibrary}</h2>
             <div className="flex flex-wrap gap-3">
-              <select className="input max-w-xs" value={resource} onChange={(event) => { const next = event.target.value as ContentResource; setResource(next); loadContent(next) }}>
+              <select className="input max-w-xs" value={resource} onChange={(event) => { const next = event.target.value as ContentResource; setResource(next); loadContent(next); setSelectedContentIds(new Set()) }}>
                 <option value="lessons">{localizedLabels.resources.lessons[language]}</option>
                 <option value="flashcards">{localizedLabels.resources.flashcards[language]}</option>
                 <option value="posts">{localizedLabels.resources.posts[language]}</option>
@@ -1083,10 +1297,32 @@ export default function ControlCenter() {
               <button className="btn btn-primary inline-flex items-center gap-2" onClick={() => openContentModal()}><FiPlus /> {ui.addItem}</button>
             </div>
           </div>
+          {content.length > 0 ? (
+            <label className="mb-3 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+              <input
+                type="checkbox"
+                checked={selectedContentIds.size > 0 && content.every((item) => selectedContentIds.has(item._id))}
+                onChange={(event) => setSelectedContentIds(event.target.checked ? new Set(content.map((item) => item._id)) : new Set())}
+              />
+              {ui.selectAll}
+            </label>
+          ) : null}
+          {selectedContentIds.size > 0 ? (
+            <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl bg-[var(--accent-light)] px-4 py-3 text-sm dark:bg-white/5">
+              <span className="font-semibold text-[var(--accent)]">{ui.selectedCount.replace('{count}', String(selectedContentIds.size))}</span>
+              <button disabled={bulkActionPending} onClick={bulkDeleteContentItems} className="btn btn-outline text-sm text-red-600">{ui.bulkDelete}</button>
+              <button onClick={() => setSelectedContentIds(new Set())} className="ml-auto text-sm text-slate-500 hover:underline">{ui.clearSelection}</button>
+            </div>
+          ) : null}
           <div className="admin-table">
             {content.map((item) => (
               <div className="admin-row" key={item._id}>
-                <div><strong>{item.title || item.name || item.content?.slice(0, 70) || ui.untitledItem}</strong><small>{localizedLabels.resources[resource][language]} · {item._id}</small></div>
+                <input
+                  type="checkbox"
+                  checked={selectedContentIds.has(item._id)}
+                  onChange={() => toggleSelected(selectedContentIds, setSelectedContentIds, item._id)}
+                />
+                <div className="min-w-0 flex-1 break-words"><strong>{item.title || item.name || item.content?.slice(0, 70) || ui.untitledItem}</strong><small>{localizedLabels.resources[resource][language]} · {item._id}</small></div>
                 <div className="flex gap-2">
                   <button onClick={() => openContentModal(item)} className="icon-button" aria-label="Edit content"><FiEdit3 /></button>
                   <button onClick={() => removeContent(item._id)} className="icon-button danger" aria-label="Delete content"><FiTrash2 /></button>

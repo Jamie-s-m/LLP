@@ -89,6 +89,48 @@ export const deleteUser = async (req, res, next) => {
   } catch (error) { next(error); }
 };
 
+const BULK_USER_ACTIONS = ['suspend', 'reactivate', 'verify', 'delete'];
+
+// Applies one of suspend/reactivate/verify/delete to a batch of users at once, reusing the
+// same permission rules as the single-user endpoints: full admins can do anything except act
+// on their own account; limited moderators may only suspend/reactivate non-admin, non-moderator
+// accounts. Targets that fail those checks are silently skipped and reported back as `skipped`
+// rather than failing the whole batch, since a mixed selection (e.g. "select all") is expected.
+export const bulkUserAction = async (req, res, next) => {
+  try {
+    const { ids, action } = req.body;
+    if (!Array.isArray(ids) || ids.length === 0) return res.status(400).json({ success: false, message: 'ids is required' });
+    if (!BULK_USER_ACTIONS.includes(action)) return res.status(400).json({ success: false, message: 'Invalid action' });
+
+    const actorIsAdmin = req.user.role === 'admin';
+    const actorIsLimitedModerator = hasModeratorPermission(req.user, 'limitedUserManagement') && req.user.role === 'moderator';
+    if (!actorIsAdmin && !actorIsLimitedModerator) return res.status(403).json({ success: false, message: 'Not authorized' });
+    if ((action === 'delete' || action === 'verify') && !actorIsAdmin) {
+      return res.status(403).json({ success: false, message: `Only admins can ${action} users` });
+    }
+
+    const targets = await User.find({ _id: { $in: ids } }).select('_id role');
+    const selfId = req.user.id.toString();
+    const applicableIds = targets
+      .filter((user) => user._id.toString() !== selfId)
+      .filter((user) => !(actorIsLimitedModerator && ['admin', 'moderator'].includes(user.role)))
+      .map((user) => user._id);
+    const skipped = ids.length - applicableIds.length;
+
+    let modifiedCount = 0;
+    if (action === 'delete') {
+      const result = await User.deleteMany({ _id: { $in: applicableIds } });
+      modifiedCount = result.deletedCount;
+    } else {
+      const update = action === 'suspend' ? { isActive: false } : action === 'reactivate' ? { isActive: true } : { isEmailVerified: true };
+      const result = await User.updateMany({ _id: { $in: applicableIds } }, update);
+      modifiedCount = result.modifiedCount;
+    }
+
+    res.status(200).json({ success: true, data: { matched: applicableIds.length, skipped, modifiedCount } });
+  } catch (error) { next(error); }
+};
+
 const RESET_PLATFORM_CONFIRMATION = 'RESET_PLATFORM_0';
 
 // Wipes all user-generated data (accounts, chats, forum activity, progress, groups, rewards)
@@ -264,6 +306,42 @@ export const deleteContent = async (req, res, next) => {
     const item = await Model.findByIdAndDelete(req.params.id);
     if (!item) return res.status(404).json({ success: false, message: 'Content item not found' });
     res.status(200).json({ success: true, message: 'Content item deleted' });
+  } catch (error) { next(error); }
+};
+
+// Field allowlist per resource for bulk updates (e.g. publish/unpublish courses, pin/unpin
+// posts) - keeps the generic $set update from accepting arbitrary fields over the wire.
+const BULK_UPDATABLE_FIELDS = { courses: ['isPublished'], posts: ['isPinned'] };
+
+export const bulkUpdateContent = async (req, res, next) => {
+  try {
+    const Model = getContentModel(req.params.resource);
+    if (!Model) return res.status(404).json({ success: false, message: 'Unknown content resource' });
+    if (!canManageResource(req.user, req.params.resource)) {
+      return res.status(403).json({ success: false, message: 'You are not allowed to manage this content resource' });
+    }
+    const { ids, updates } = req.body;
+    if (!Array.isArray(ids) || ids.length === 0) return res.status(400).json({ success: false, message: 'ids is required' });
+    const allowedFields = BULK_UPDATABLE_FIELDS[req.params.resource] || [];
+    const safeUpdates = {};
+    allowedFields.forEach((field) => { if (updates?.[field] !== undefined) safeUpdates[field] = updates[field]; });
+    if (Object.keys(safeUpdates).length === 0) return res.status(400).json({ success: false, message: 'No updatable fields provided for this resource' });
+    const result = await Model.updateMany({ _id: { $in: ids } }, safeUpdates);
+    res.status(200).json({ success: true, data: { modifiedCount: result.modifiedCount } });
+  } catch (error) { next(error); }
+};
+
+export const bulkDeleteContent = async (req, res, next) => {
+  try {
+    const Model = getContentModel(req.params.resource);
+    if (!Model) return res.status(404).json({ success: false, message: 'Unknown content resource' });
+    if (!canManageResource(req.user, req.params.resource)) {
+      return res.status(403).json({ success: false, message: 'You are not allowed to manage this content resource' });
+    }
+    const { ids } = req.body;
+    if (!Array.isArray(ids) || ids.length === 0) return res.status(400).json({ success: false, message: 'ids is required' });
+    const result = await Model.deleteMany({ _id: { $in: ids } });
+    res.status(200).json({ success: true, data: { deletedCount: result.deletedCount } });
   } catch (error) { next(error); }
 };
 

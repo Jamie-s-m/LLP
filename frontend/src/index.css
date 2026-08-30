@@ -759,7 +759,8 @@ html.dark {
 
   .admin-tabs button.active {
     @apply text-white;
-    background: linear-gradient(135deg, #36C9A5, #5B5CE2);
+    background: linear-gradient(135deg, #e8a87c, var(--accent));
+    box-shadow: 0 8px 20px rgba(200, 75, 49, 0.22);
   }
 
   .inline-form {
