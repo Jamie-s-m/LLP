@@ -152,6 +152,10 @@ html.dark {
     transform: translateY(0) scale(0.98);
   }
 
+  .btn-sm {
+    @apply px-4 py-2 text-sm;
+  }
+
   .btn-primary {
     @apply text-white;
     background: var(--accent);
