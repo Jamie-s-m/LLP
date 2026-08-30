@@ -1,10 +1,11 @@
+import axios from 'axios';
 import nodemailer from 'nodemailer';
 
 const getFrontendAppUrl = () =>
   String(process.env.FRONTEND_APP_URL || process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/+$/, '');
 
 // Pure URL construction, no network I/O - callers that want the link immediately (without
-// waiting for an actual send attempt against a possibly slow/unreachable SMTP host) can use
+// waiting for an actual send attempt against a possibly slow/unreachable mail provider) can use
 // these directly instead of awaiting sendVerificationEmail/sendPasswordResetEmail.
 export const buildVerificationUrl = (email, token) =>
   `${getFrontendAppUrl()}/verify-email?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`;
@@ -13,18 +14,49 @@ export const buildPasswordResetUrl = (email, token) =>
   `${getFrontendAppUrl()}/reset-password?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`;
 
 export const getEmailProviderStatus = () => {
+  const hasBird = Boolean(process.env.BIRD_API_KEY);
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, EMAIL_FROM } = process.env;
-  const configured = Boolean(SMTP_HOST && SMTP_PORT && SMTP_USER && SMTP_PASS);
+  const hasSmtp = Boolean(SMTP_HOST && SMTP_PORT && SMTP_USER && SMTP_PASS);
 
   return {
-    configured,
-    provider: configured ? 'smtp' : 'unconfigured',
+    configured: hasBird || hasSmtp,
+    provider: hasBird ? 'bird-api' : hasSmtp ? 'smtp' : 'unconfigured',
     from: EMAIL_FROM || 'LinguaNest <no-reply@linguanest.uz>',
     mode: String(process.env.NODE_ENV || 'development').toLowerCase(),
   };
 };
 
-const getTransporter = () => {
+const parseFromHeader = (raw) => {
+  const match = String(raw || '').match(/^(.*?)\s*<(.+)>$/);
+  if (match) return { name: match[1].trim() || undefined, email: match[2].trim() };
+  return { email: String(raw || '').trim() };
+};
+
+// Bird's HTTP API sends over standard HTTPS (443), so it's unaffected by hosting platforms that
+// block outbound SMTP ports - confirmed the hard way in production: Render's free tier blocks
+// all outbound traffic to ports 25/465/587 as of a Sept 2025 policy change, which is exactly why
+// the SMTP path kept timing out even with correct credentials. Region is derived from the key
+// itself (e.g. "bk_eu1_..." -> "eu1"), matching how Bird issues keys.
+const sendViaBirdApi = async ({ to, subject, html }) => {
+  const apiKey = process.env.BIRD_API_KEY;
+  const region = apiKey.split('_')[1] || 'us1';
+
+  await axios.post(
+    `https://${region}.platform.bird.com/v1/email/messages`,
+    {
+      from: parseFromHeader(process.env.EMAIL_FROM || 'LinguaNest <no-reply@linguanest.uz>'),
+      to: [to],
+      subject,
+      html,
+    },
+    {
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      timeout: 10000,
+    }
+  );
+};
+
+const getSmtpTransporter = () => {
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env;
 
   if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS) {
@@ -40,15 +72,30 @@ const getTransporter = () => {
       pass: SMTP_PASS,
     },
     // Without these, a network path that silently drops packets (rather than actively
-    // refusing the connection) makes sendMail hang indefinitely - and register/forgot-password
-    // await it before responding, so an unreachable SMTP host takes the whole request down
-    // with it. Confirmed in production: registration hung 60s+ with no response until these
-    // were added. 10s is generous for a real SMTP handshake and keeps registration/reset
-    // responsive even when mail delivery itself is degraded.
+    // refusing the connection) makes sendMail hang indefinitely. 10s is generous for a real
+    // SMTP handshake, and register/forgot-password no longer await this send anyway (see
+    // routes/auth.js), so this only bounds how long the background attempt can run for.
     connectionTimeout: 10000,
     greetingTimeout: 10000,
     socketTimeout: 10000,
   });
+};
+
+const sendViaSmtp = async ({ to, subject, html }) => {
+  const transporter = getSmtpTransporter();
+  if (!transporter) {
+    throw new Error('Email provider is not configured');
+  }
+  await transporter.sendMail({ from: process.env.EMAIL_FROM || 'LinguaNest <no-reply@linguanest.uz>', to, subject, html });
+};
+
+// Prefer Bird's HTTP API whenever a key is configured (see sendViaBirdApi for why); SMTP stays
+// as a fallback for other providers or environments that don't block those ports.
+const sendEmail = async (message) => {
+  if (process.env.BIRD_API_KEY) {
+    return sendViaBirdApi(message);
+  }
+  return sendViaSmtp(message);
 };
 
 const makeSafeEmailResult = (previewUrl, error) => ({
@@ -59,16 +106,9 @@ const makeSafeEmailResult = (previewUrl, error) => ({
 
 export const sendVerificationEmail = async ({ user, token }) => {
   const verificationUrl = buildVerificationUrl(user.email, token);
-  const transporter = getTransporter();
-
-  if (!transporter) {
-    console.warn(`Email transport is not configured. Verification URL for ${user.email}: ${verificationUrl}`);
-    return makeSafeEmailResult(verificationUrl, 'Email provider is not configured');
-  }
 
   try {
-    await transporter.sendMail({
-      from: process.env.EMAIL_FROM || 'LinguaNest <no-reply@linguanest.uz>',
+    await sendEmail({
       to: user.email,
       subject: 'Verify your LinguaNest email',
       html: `
@@ -85,23 +125,17 @@ export const sendVerificationEmail = async ({ user, token }) => {
 
     return { delivered: true, previewUrl: verificationUrl };
   } catch (error) {
-    console.warn(`Verification email delivery failed for ${user.email}: ${error.message || error}`);
-    return makeSafeEmailResult(verificationUrl, error.message || 'Email delivery failed');
+    const message = error.response?.data?.errors?.[0]?.message || error.message || 'Email delivery failed';
+    console.warn(`Verification email delivery failed for ${user.email}: ${message}`);
+    return makeSafeEmailResult(verificationUrl, message);
   }
 };
 
 export const sendPasswordResetEmail = async ({ user, token }) => {
   const resetUrl = buildPasswordResetUrl(user.email, token);
-  const transporter = getTransporter();
-
-  if (!transporter) {
-    console.warn(`Email transport is not configured. Password reset URL for ${user.email}: ${resetUrl}`);
-    return makeSafeEmailResult(resetUrl, 'Email provider is not configured');
-  }
 
   try {
-    await transporter.sendMail({
-      from: process.env.EMAIL_FROM || 'LinguaNest <no-reply@linguanest.uz>',
+    await sendEmail({
       to: user.email,
       subject: 'Reset your LinguaNest password',
       html: `
@@ -118,8 +152,9 @@ export const sendPasswordResetEmail = async ({ user, token }) => {
 
     return { delivered: true, previewUrl: resetUrl };
   } catch (error) {
-    console.warn(`Password reset email delivery failed for ${user.email}: ${error.message || error}`);
-    return makeSafeEmailResult(resetUrl, error.message || 'Email delivery failed');
+    const message = error.response?.data?.errors?.[0]?.message || error.message || 'Email delivery failed';
+    console.warn(`Password reset email delivery failed for ${user.email}: ${message}`);
+    return makeSafeEmailResult(resetUrl, message);
   }
 };
 
