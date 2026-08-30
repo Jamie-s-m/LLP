@@ -125,7 +125,10 @@ export const sendVerificationEmail = async ({ user, token }) => {
 
     return { delivered: true, previewUrl: verificationUrl };
   } catch (error) {
-    const message = error.response?.data?.errors?.[0]?.message || error.message || 'Email delivery failed';
+    // Bird's error body is { error: { message, code, name, ... } } (singular, not an array) -
+    // confirmed against a real 422 response; falls back to axios's generic message for non-Bird
+    // failures (e.g. the SMTP path, or a network-level error with no response body at all).
+    const message = error.response?.data?.error?.message || error.message || 'Email delivery failed';
     console.warn(`Verification email delivery failed for ${user.email}: ${message}`);
     return makeSafeEmailResult(verificationUrl, message);
   }
@@ -152,7 +155,10 @@ export const sendPasswordResetEmail = async ({ user, token }) => {
 
     return { delivered: true, previewUrl: resetUrl };
   } catch (error) {
-    const message = error.response?.data?.errors?.[0]?.message || error.message || 'Email delivery failed';
+    // Bird's error body is { error: { message, code, name, ... } } (singular, not an array) -
+    // confirmed against a real 422 response; falls back to axios's generic message for non-Bird
+    // failures (e.g. the SMTP path, or a network-level error with no response body at all).
+    const message = error.response?.data?.error?.message || error.message || 'Email delivery failed';
     console.warn(`Password reset email delivery failed for ${user.email}: ${message}`);
     return makeSafeEmailResult(resetUrl, message);
   }
