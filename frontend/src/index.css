@@ -163,7 +163,7 @@ html.dark {
   }
 
   .btn-secondary {
-    @apply border border-[var(--border)] bg-white text-[var(--text-primary)] hover:bg-[var(--border-light)];
+    @apply border border-[var(--border)] bg-[var(--card)] text-[var(--text-primary)] hover:bg-[var(--border-light)];
   }
 
   .btn-outline {
@@ -239,6 +239,21 @@ html.dark {
     background: var(--accent);
     color: white;
     box-shadow: 0 12px 24px rgba(200, 75, 49, 0.18);
+  }
+
+  /* .auth-left is `hidden lg:flex` and .auth-right is `flex flex-1` in the JSX (Login.tsx /
+     Register.tsx), but without display:flex here they were never actual flex *items* - they
+     just stacked as normal blocks, pushing the whole form ~940px down the page below a giant
+     slab of .auth-left's dark background that reads as empty space. This is the fix. */
+  .auth-shell {
+    display: flex;
+    flex-direction: column;
+  }
+
+  @media (min-width: 1024px) {
+    .auth-shell {
+      flex-direction: row;
+    }
   }
 
   .auth-left {
@@ -705,7 +720,7 @@ html.dark {
 
   .chat-compose input,
   .inline-form input {
-    @apply input bg-white;
+    @apply input;
   }
 
   .empty-state {
