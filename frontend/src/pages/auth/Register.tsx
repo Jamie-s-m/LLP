@@ -24,6 +24,8 @@ const registerCopy = {
     available: 'This email is available.',
     registered: 'This email is already registered.',
     pending: 'This account exists but is waiting for verification.',
+    googleOnly: 'This email already has an account created with Google. Sign in with Google, or reset your password below to also sign in with email.',
+    setPasswordInstead: 'Set a password for this account',
     emailCheckFailed: 'Email could not be checked',
     signInInstead: 'Sign in instead',
     continueVerification: 'Continue to verification',
@@ -56,6 +58,8 @@ const registerCopy = {
     available: 'Этот email доступен.',
     registered: 'Этот email уже зарегистрирован.',
     pending: 'Этот аккаунт существует, но ждёт подтверждения.',
+    googleOnly: 'Для этого email уже есть аккаунт, созданный через Google. Войдите через Google или сбросьте пароль ниже, чтобы также входить по email.',
+    setPasswordInstead: 'Задать пароль для этого аккаунта',
     emailCheckFailed: 'Не удалось проверить email',
     signInInstead: 'Войти вместо этого',
     continueVerification: 'Перейти к подтверждению',
@@ -88,6 +92,8 @@ const registerCopy = {
     available: 'Bu email bo‘sh.',
     registered: 'Bu email allaqachon ro‘yxatdan o‘tgan.',
     pending: 'Bu akkount mavjud, lekin tasdiq kutilmoqda.',
+    googleOnly: 'Bu email uchun Google orqali yaratilgan akkount allaqachon mavjud. Google orqali kiring yoki email bilan ham kirish uchun parolni tiklang.',
+    setPasswordInstead: 'Bu akkount uchun parol o‘rnatish',
     emailCheckFailed: 'Emailni tekshirib bo‘lmadi',
     signInInstead: 'Buning o‘rniga kirish',
     continueVerification: 'Tasdiqqa o‘tish',
@@ -122,6 +128,7 @@ export default function Register() {
   const [localError, setLocalError] = useState('')
   const [emailStatus, setEmailStatus] = useState<'idle' | 'checking' | 'available' | 'exists'>('idle')
   const [emailStatusMessage, setEmailStatusMessage] = useState('')
+  const [isGoogleOnlyEmail, setIsGoogleOnlyEmail] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const language = useLanguageStore((state) => state.language)
   const ui = registerCopy[language]
@@ -153,13 +160,16 @@ export default function Register() {
       if (data.available) {
         setEmailStatus('available')
         setEmailStatusMessage(ui.available)
+        setIsGoogleOnlyEmail(false)
       } else {
         setEmailStatus('exists')
-        setEmailStatusMessage(data.isEmailVerified ? ui.registered : ui.pending)
+        setEmailStatusMessage(data.googleOnly ? ui.googleOnly : data.isEmailVerified ? ui.registered : ui.pending)
+        setIsGoogleOnlyEmail(Boolean(data.googleOnly))
       }
     } catch (error: any) {
       setEmailStatus('idle')
       setEmailStatusMessage(error.response?.data?.message || ui.emailCheckFailed)
+      setIsGoogleOnlyEmail(false)
     }
   }
 
@@ -305,9 +315,15 @@ export default function Register() {
                 {emailStatus === 'exists' ? (
                   <div className="mt-2 flex flex-wrap gap-3 text-sm">
                     <Link to="/login" className="font-semibold text-[var(--accent)]">{ui.signInInstead}</Link>
-                    <Link to={`/verify-email?email=${encodeURIComponent(formData.email.trim().toLowerCase())}`} className="font-semibold text-[var(--accent)]">
-                      {ui.continueVerification}
-                    </Link>
+                    {!isGoogleOnlyEmail ? (
+                      <Link to={`/verify-email?email=${encodeURIComponent(formData.email.trim().toLowerCase())}`} className="font-semibold text-[var(--accent)]">
+                        {ui.continueVerification}
+                      </Link>
+                    ) : (
+                      <Link to={`/forgot-password?email=${encodeURIComponent(formData.email.trim().toLowerCase())}`} className="font-semibold text-[var(--accent)]">
+                        {ui.setPasswordInstead}
+                      </Link>
+                    )}
                   </div>
                 ) : null}
               </div>

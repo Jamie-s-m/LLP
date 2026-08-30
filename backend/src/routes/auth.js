@@ -71,7 +71,7 @@ router.get('/check-email', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Please provide a valid email address' });
     }
 
-    const existingUser = await User.findOne({ email }).select('email isEmailVerified role');
+    const existingUser = await User.findOne({ email }).select('email isEmailVerified role googleId password');
 
     res.status(200).json({
       success: true,
@@ -80,6 +80,7 @@ router.get('/check-email', async (req, res) => {
         available: !existingUser,
         exists: !!existingUser,
         isEmailVerified: existingUser?.isEmailVerified || false,
+        googleOnly: Boolean(existingUser?.googleId && !existingUser?.password),
       },
     });
   } catch (error) {
@@ -112,6 +113,13 @@ router.post('/login', async (req, res) => {
           data: { requiresVerification: true, email: user.email },
         });
       }
+    }
+
+    if (user.googleId && !user.password) {
+      return res.status(400).json({
+        message: 'This account was created with Google. Sign in with Google, or use "Forgot password" below to set a password for email sign-in.',
+        data: { googleOnly: true },
+      });
     }
 
     const isMatch = await user.matchPassword(password);
@@ -157,11 +165,14 @@ router.post('/register', async (req, res) => {
     const cleanEmail = normalizeEmail(email);
     const existingUser = await User.findOne({ email: cleanEmail });
     if (existingUser) {
+      const isGoogleOnly = Boolean(existingUser.googleId && !existingUser.password);
       return res.status(409).json({
-        message: existingUser.isEmailVerified
-          ? 'User already exists'
-          : 'Account already exists but email is not verified yet',
-        data: { requiresVerification: !existingUser.isEmailVerified, email: cleanEmail },
+        message: isGoogleOnly
+          ? 'This email already has an account created with Google. Sign in with Google, or use "Forgot password" to set a password for email sign-in.'
+          : existingUser.isEmailVerified
+            ? 'User already exists'
+            : 'Account already exists but email is not verified yet',
+        data: { requiresVerification: !existingUser.isEmailVerified, email: cleanEmail, googleOnly: isGoogleOnly },
       });
     }
 

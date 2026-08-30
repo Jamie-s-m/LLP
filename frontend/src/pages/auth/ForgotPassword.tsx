@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
 import api from '../../services/api'
@@ -45,7 +45,8 @@ const copy = {
 } as const
 
 export default function ForgotPassword() {
-  const [email, setEmail] = useState('')
+  const [searchParams] = useSearchParams()
+  const [email, setEmail] = useState(searchParams.get('email') || '')
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [previewUrl, setPreviewUrl] = useState('')
