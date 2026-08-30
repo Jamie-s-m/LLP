@@ -18,6 +18,14 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md),
 
 ## Local development
 
+`npm start` needs a real MongoDB connection (`MONGODB_URI`) - it is not the
+same as `npm test`, which spins up its own disposable in-memory database
+automatically. See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for a full
+walkthrough, including running the whole app locally against a disposable
+database with zero external services (no MongoDB install, no Atlas).
+
+Quick reference once `MONGODB_URI` is set:
+
 ```powershell
 cd backend
 npm ci
@@ -30,7 +38,7 @@ In another terminal:
 ```powershell
 cd frontend
 npm ci
-$env:VITE_API_URL = "http://localhost:5000"
+$env:VITE_API_URL = "http://localhost:5000/api"
 npm run dev
 ```
 

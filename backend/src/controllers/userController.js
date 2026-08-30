@@ -33,6 +33,7 @@ export const updateProfile = async (req, res, next) => {
     if (targetLanguages) user.targetLanguages = targetLanguages;
 
     await user.save();
+    user.password = undefined;
     res.status(200).json({ success: true, data: user });
   } catch (error) {
     next(error);

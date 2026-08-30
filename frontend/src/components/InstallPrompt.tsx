@@ -16,13 +16,10 @@ export default function InstallPrompt() {
 
   const install = async () => {
     if (!deferred) return
-    // @ts-ignore
     deferred.prompt()
-    // @ts-ignore
-    const choice = await deferred.userChoice
+    await deferred.userChoice
     setVisible(false)
     setDeferred(null)
-    // choice.outcome === 'accepted' or 'dismissed'
   }
 
   if (!visible) return null

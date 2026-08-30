@@ -748,11 +748,11 @@ html.dark {
   }
 
   .admin-row {
-    @apply flex items-center gap-4 py-4;
+    @apply flex flex-wrap items-center gap-4 py-4;
   }
 
   .admin-row > div:first-child {
-    @apply flex-1;
+    @apply min-w-0 flex-1 break-words;
   }
 
   .admin-row strong {
@@ -779,7 +779,7 @@ html.dark {
   }
 
   .icon-button {
-    @apply rounded-lg p-2 text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-white/10;
+    @apply flex h-11 w-11 items-center justify-center rounded-lg text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-white/10;
   }
 
   .icon-button.danger {

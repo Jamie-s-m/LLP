@@ -12,7 +12,6 @@ import PlacementQuestion from './models/PlacementQuestion.js';
 import { LINGUANEST_CONTENT_LIBRARY } from './contentLibrary.js';
 import { placementQuestions } from './data/placementQuestions.js';
 import { inferSkillFromType } from './utils/skills.js';
-import logger from './utils/logger.js';
 
 // Load .env from project root
 const __filename = fileURLToPath(import.meta.url);

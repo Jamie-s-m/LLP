@@ -61,7 +61,7 @@ const startServer = async () => {
         if (!token) return next(new Error('Authentication required'));
         socket.user = jwt.verify(token, process.env.JWT_SECRET || 'local-development-only-secret');
         next();
-      } catch (error) {
+      } catch {
         next(new Error('Invalid authentication token'));
       }
     });
@@ -102,7 +102,7 @@ const startServer = async () => {
           }).catch(() => {});
 
           acknowledge?.({ success: true });
-        } catch (error) {
+        } catch {
           acknowledge?.({ success: false, message: 'Message could not be sent' });
         }
       });

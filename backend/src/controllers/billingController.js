@@ -72,6 +72,10 @@ export const createCheckoutSession = async (req, res) => {
 };
 
 const validatePaymeAuth = (req) => {
+  // An unset merchant key must never authenticate - otherwise Basic "Paycom:" (empty password)
+  // would pass once PAYME_MERCHANT_KEY defaults to '', before the integration is configured.
+  if (!PAYME_MERCHANT_KEY) return false;
+
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Basic ')) return false;
 

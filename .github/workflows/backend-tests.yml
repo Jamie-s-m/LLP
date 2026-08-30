@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [ main, master ]
   push:
-    branches: [ feat/mobile-bottom-nav-darkmode ]
+    branches: [ main, master ]
 
 jobs:
   backend-tests:

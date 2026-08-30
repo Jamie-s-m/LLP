@@ -75,6 +75,7 @@ export const updateUser = async (req, res, next) => {
     }
 
     await user.save();
+    user.password = undefined;
     res.status(200).json({ success: true, data: user });
   } catch (error) { next(error); }
 };
@@ -143,6 +144,7 @@ export const reviewTeacherApplication = async (req, res, next) => {
       user.teacherApplicationStatus = 'rejected';
     }
     await user.save();
+    user.password = undefined;
     res.status(200).json({ success: true, data: user });
   } catch (error) { next(error); }
 };

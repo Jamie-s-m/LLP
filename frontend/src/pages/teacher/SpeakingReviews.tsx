@@ -46,13 +46,13 @@ export default function SpeakingReviews() {
         <div className="atlas-heading mb-8">
           <p className="atlas-kicker">Content operations</p>
           <h1>Speaking Reviews</h1>
-          <p>Listen to student recordings and grade them. Approving awards the exercise's points immediately.</p>
+          <p>Listen to student recordings and grade them. Approving awards the exercise&apos;s points immediately.</p>
         </div>
 
         {loading ? (
           <div className="atlas-panel p-6 text-muted">Loading submissions...</div>
         ) : items.length === 0 ? (
-          <div className="atlas-panel p-6 text-muted">No pending speaking submissions. Nice — you're caught up.</div>
+          <div className="atlas-panel p-6 text-muted">No pending speaking submissions. Nice — you&apos;re caught up.</div>
         ) : (
           <div className="space-y-5">
             {items.map((item) => (

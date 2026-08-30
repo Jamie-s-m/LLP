@@ -77,7 +77,7 @@ export default function StudentProgress() {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4 py-6 border-t border-b border-neutral-200 dark:border-neutral-700">
+          <div className="grid grid-cols-1 gap-4 py-6 border-t border-b border-neutral-200 dark:border-neutral-700 sm:grid-cols-3">
             <div className="text-center">
               <FiBarChart2 className="w-8 h-8 mx-auto mb-2 text-primary-500" />
               <p className="text-2xl font-bold">{avgCompletion}%</p>

@@ -398,7 +398,13 @@ router.get('/google/callback', async (req, res) => {
     }
 
     const cleanEmail = normalizeEmail(email);
-    let user = await User.findOne({ $or: [{ googleId }, { email: cleanEmail }] });
+    // Only fall back to matching an existing account by email when Google itself has verified
+    // that email - otherwise a Google account created with an unverified address could log
+    // straight into someone else's existing password account by matching on email alone.
+    let user = await User.findOne({ googleId });
+    if (!user && emailVerified) {
+      user = await User.findOne({ email: cleanEmail });
+    }
 
     if (!user) {
       user = await User.create({

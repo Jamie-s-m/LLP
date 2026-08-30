@@ -243,18 +243,23 @@ export const getUnreadSummary = async (req, res, next) => {
   }
 };
 
+// Escapes regex metacharacters so user search input can't be used to build a catastrophic-
+// backtracking pattern (or otherwise change the intended match) when passed to RegExp().
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 export const searchChatUsers = async (req, res, next) => {
   try {
-    const query = String(req.query.q || '').trim();
+    const query = String(req.query.q || '').trim().slice(0, 100);
     if (query.length < 2) return res.status(200).json({ success: true, data: [] });
 
+    const safePattern = new RegExp(escapeRegExp(query), 'i');
     const users = await User.find({
       isActive: true,
       _id: { $ne: req.user.id },
       $or: [
-        { email: new RegExp(query, 'i') },
-        { firstName: new RegExp(query, 'i') },
-        { lastName: new RegExp(query, 'i') },
+        { email: safePattern },
+        { firstName: safePattern },
+        { lastName: safePattern },
       ],
     }).select('firstName lastName email role avatar').limit(20);
 

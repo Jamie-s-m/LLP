@@ -26,6 +26,14 @@ jobs:
         working-directory: frontend
         run: npm ci
 
+      - name: Lint frontend
+        working-directory: frontend
+        run: npm run lint
+
+      - name: Test frontend
+        working-directory: frontend
+        run: npm test -- run
+
       - name: Build frontend
         working-directory: frontend
         run: npm run build
@@ -34,9 +42,15 @@ jobs:
         working-directory: backend
         run: npm ci
 
-      - name: Validate backend import
+      - name: Lint backend
         working-directory: backend
-        run: node --input-type=module -e "import('./src/app.js').then(() => console.log('backend ok'))"
+        run: npx eslint src
+
+      - name: Test backend
+        working-directory: backend
+        env:
+          NODE_ENV: test
+        run: npm test
 
   deploy-render:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'

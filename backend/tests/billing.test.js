@@ -1,4 +1,6 @@
+import request from 'supertest';
 import { findBillingPlan, getBillingPlans, serializeBilling } from '../src/utils/billing.js';
+import app from '../src/app.js';
 
 describe('billing configuration helpers', () => {
   it('returns the expected commercial plan catalog', () => {
@@ -28,5 +30,20 @@ describe('billing configuration helpers', () => {
       currentPeriodEnd: new Date('2030-01-01T00:00:00.000Z'),
       cancelAtPeriodEnd: true,
     });
+  });
+});
+
+describe('Payme webhook auth', () => {
+  it('rejects Basic "Paycom:" (empty password) when PAYME_MERCHANT_KEY is unset, instead of matching by default', async () => {
+    expect(process.env.PAYME_MERCHANT_KEY).toBeFalsy();
+
+    const emptyPasswordAuth = Buffer.from('Paycom:').toString('base64');
+    const res = await request(app)
+      .post('/api/billing/payme')
+      .set('Authorization', `Basic ${emptyPasswordAuth}`)
+      .send({ method: 'CheckPerformTransaction', params: {}, id: 1 });
+
+    expect(res.status).toBe(401);
+    expect(res.body.error).toBeDefined();
   });
 });

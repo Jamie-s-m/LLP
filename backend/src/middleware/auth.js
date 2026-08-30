@@ -53,7 +53,7 @@ export const protect = async (req, res, next) => {
     }
 
     next();
-  } catch (error) {
+  } catch {
     return res.status(401).json({ success: false, message: 'Not authorized to access this route' });
   }
 };
@@ -91,7 +91,7 @@ export const checkUserExists = async (req, res, next) => {
     }
     req.targetUser = user;
     next();
-  } catch (error) {
+  } catch {
     return res.status(400).json({ success: false, message: 'Invalid user ID' });
   }
 };

@@ -50,7 +50,7 @@ export default function DailyReward() {
 
       <div className="mt-4 flex items-center justify-between">
         <div>
-          <div className="text-sm">Today's reward preview</div>
+          <div className="text-sm">Today&apos;s reward preview</div>
           <div className="text-base font-semibold">{status.previewCoins} 🪙 • {status.previewXP} XP</div>
         </div>
         <div>

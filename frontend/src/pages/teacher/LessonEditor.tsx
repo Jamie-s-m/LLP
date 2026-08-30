@@ -337,17 +337,17 @@ export default function LessonEditor() {
           <h2 className="mb-4 text-lg font-bold text-ink dark:text-white">Exercises</h2>
           <div className="space-y-3 mb-6">
             {exercises.map((exercise) => (
-              <div key={exercise._id} className="flex items-center justify-between rounded-xl border border-[var(--border)] p-4">
-                <div>
+              <div key={exercise._id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--border)] p-4">
+                <div className="min-w-0 flex-1 break-words">
                   <p className="text-xs uppercase tracking-wide text-muted">{EXERCISE_TYPES.find((t) => t.value === exercise.type)?.label || exercise.type}</p>
                   <p className="font-medium text-ink dark:text-white">{exercise.question}</p>
                   <p className="text-xs text-muted">+{exercise.points} pts</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button onClick={() => startEditExercise(exercise._id)} className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg" aria-label="Edit exercise">
+                  <button onClick={() => startEditExercise(exercise._id)} className="flex h-11 w-11 items-center justify-center hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg" aria-label="Edit exercise">
                     <FiEdit3 size={18} />
                   </button>
-                  <button onClick={() => handleDeleteExercise(exercise._id)} className="p-2 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg text-red-600" aria-label="Delete exercise">
+                  <button onClick={() => handleDeleteExercise(exercise._id)} className="flex h-11 w-11 items-center justify-center hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg text-red-600" aria-label="Delete exercise">
                     <FiTrash2 size={18} />
                   </button>
                 </div>

@@ -9,12 +9,11 @@ if (typeof window !== 'undefined' && import.meta.env.PROD) {
   // virtual:pwa-register is provided by vite-plugin-pwa
   try {
     import('virtual:pwa-register').then(({ registerSW }) => {
-      const updateSW = registerSW({ immediate: true })
-      updateSW && updateSW.then(() => {})
+      registerSW({ immediate: true })
     }).catch(() => {
       // Fail silently if the environment doesn't support virtual registration (e.g., during tests)
     })
-  } catch (err) {
+  } catch {
     // Fail silently if the environment doesn't support virtual registration (e.g., during tests)
   }
 }

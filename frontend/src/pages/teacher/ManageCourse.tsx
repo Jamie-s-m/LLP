@@ -117,15 +117,15 @@ export default function ManageCourse() {
           {lessons.length === 0 ? (
             <div className="atlas-panel p-5 text-muted">{ui.empty}</div>
           ) : lessons.map((lesson) => (
-            <div key={lesson._id} className="atlas-panel flex items-center justify-between p-5">
-              <div>
+            <div key={lesson._id} className="atlas-panel flex flex-wrap items-center justify-between gap-3 p-5">
+              <div className="min-w-0 flex-1 break-words">
                 <p className="font-bold text-ink dark:text-white">{lesson.order}. {lesson.title}</p>
               </div>
               <div className="flex items-center gap-2">
-                <Link to={`/teacher/lesson/${lesson._id}`} className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg" aria-label="Edit lesson">
+                <Link to={`/teacher/lesson/${lesson._id}`} className="flex h-11 w-11 items-center justify-center hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg" aria-label="Edit lesson">
                   <FiEdit3 size={20} />
                 </Link>
-                <button onClick={() => handleDeleteLesson(lesson._id)} className="p-2 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg text-red-600" aria-label="Delete lesson">
+                <button onClick={() => handleDeleteLesson(lesson._id)} className="flex h-11 w-11 items-center justify-center hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg text-red-600" aria-label="Delete lesson">
                   <FiTrash2 size={20} />
                 </button>
               </div>

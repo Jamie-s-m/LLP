@@ -3,7 +3,6 @@ export type AppMode = 'demo' | 'staging' | 'production'
 export const getAppMode = (): AppMode => {
   const rawMode = String(
     import.meta.env.VITE_APP_MODE ||
-      import.meta.env.APP_MODE ||
       import.meta.env.VITE_DEMO_MODE ||
       'production'
   )

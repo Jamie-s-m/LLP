@@ -1,5 +1,4 @@
 import { cacheGet, cacheSet, cacheDel } from '../utils/redis.js';
-import logger from '../utils/logger.js';
 
 export const leaderboardCache = {
   getLeaderboard: async (type = 'global', limit = 100) => {

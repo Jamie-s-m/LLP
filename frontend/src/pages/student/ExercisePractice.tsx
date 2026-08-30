@@ -143,7 +143,7 @@ export default function ExercisePractice() {
         <div className="container mx-auto max-w-md text-center">
           <div className="card p-8">
             <div className="mb-4 flex justify-center"><HeartsRow hearts={0} size={32} /></div>
-            <h2 className="mb-2 text-2xl font-bold">You're out of hearts</h2>
+            <h2 className="mb-2 text-2xl font-bold">You&apos;re out of hearts</h2>
             <p className="mb-6 text-[var(--text-muted)]">
               {outOfHearts.heartsRegenAt
                 ? `Your next heart regenerates around ${formatRegenTime(outOfHearts.heartsRegenAt)}, or refill instantly with coins.`
@@ -272,7 +272,7 @@ export default function ExercisePractice() {
               ) : (
                 <div className="p-4 rounded-lg bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300">
                   <p className="font-bold">Submitted for review</p>
-                  <p className="text-sm mt-1">A teacher will listen and grade your answer. You'll earn {exercise.points} points once it's reviewed.</p>
+                  <p className="text-sm mt-1">A teacher will listen and grade your answer. You&apos;ll earn {exercise.points} points once it&apos;s reviewed.</p>
                 </div>
               )}
             </div>

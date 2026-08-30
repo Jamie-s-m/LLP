@@ -10,25 +10,38 @@ import { BADGE_CATALOG, iconFor, colorFor, rarityFor, isBadgeUnlocked } from '..
 export const claimDailyReward = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const user = await User.findById(userId);
-
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const lastReward = user.lastDailyRewardDate ? new Date(user.lastDailyRewardDate) : null;
-    const lastRewardDay = lastReward ? new Date(lastReward.getFullYear(), lastReward.getMonth(), lastReward.getDate()) : null;
 
-    // Check if already claimed today
-    if (lastRewardDay && lastRewardDay.getTime() === today.getTime()) {
+    // Atomically claim today's slot before computing/awarding anything: a read-then-save on
+    // `user` here would let two concurrent requests both read "not claimed yet" and both award
+    // the reward. findOneAndUpdate's filter is evaluated against MongoDB's own document state,
+    // so only one concurrent request can match and flip lastDailyRewardDate - the loser gets
+    // back null and is told the reward's already claimed, same as a genuine second attempt.
+    const user = await User.findOneAndUpdate(
+      {
+        _id: userId,
+        $or: [{ lastDailyRewardDate: null }, { lastDailyRewardDate: { $lt: today } }],
+      },
+      { $set: { lastDailyRewardDate: now } },
+      { new: false }
+    );
+
+    if (!user) {
+      const exists = await User.exists({ _id: userId });
+      if (!exists) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+      const today24h = new Date(today.getTime() + 24 * 60 * 60 * 1000);
       return res.status(400).json({
         success: false,
         message: 'Daily reward already claimed today',
-        data: { nextClaimAvailable: new Date(today.getTime() + 24 * 60 * 60 * 1000) },
+        data: { nextClaimAvailable: today24h },
       });
     }
+
+    const lastReward = user.lastDailyRewardDate ? new Date(user.lastDailyRewardDate) : null;
+    const lastRewardDay = lastReward ? new Date(lastReward.getFullYear(), lastReward.getMonth(), lastReward.getDate()) : null;
 
     // Calculate streak
     let newDailyRewardStreak = 1;
