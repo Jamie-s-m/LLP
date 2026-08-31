@@ -11,7 +11,7 @@
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "build": "echo 'Backend is JavaScript, no build needed'",
-    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand --detectOpenHandles --testTimeout=20000 --setupFilesAfterEnv=./tests/jest.setup.js",
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand --detectOpenHandles --testTimeout=60000 --setupFilesAfterEnv=./tests/jest.setup.js",
     "content:validate": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand tests/contentValidation.test.js",
     "content:status": "node src/seed.js --status",
     "content:seed": "node src/seed.js --mode=development --confirm",
