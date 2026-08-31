@@ -291,6 +291,8 @@ export const seedContent = async ({
           order: lessonData.order,
           duration: lessonData.duration || 15,
           difficulty: lessonData.difficulty || 'Easy',
+          contentType: lessonData.contentType || 'text',
+          mediaUrl: lessonData.mediaUrl || '',
           vocabulary: normalizeLessonContent(lessonData).vocabulary,
           grammar: normalizeLessonContent(lessonData).grammar,
           tags: [courseData.category, courseData.level.toLowerCase()],

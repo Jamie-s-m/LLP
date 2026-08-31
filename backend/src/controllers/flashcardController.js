@@ -41,12 +41,33 @@ const applySm2 = (progress, quality) => {
   return progress;
 };
 
+// Returns only the cards actually due for review today (no progress yet, or
+// progress.nextReviewDate has passed) - the SM-2 schedule applySm2 computes on every review
+// would otherwise be entirely write-only, and a student would review the full deck from
+// scratch every single session regardless of what they already know.
 export const getFlashcards = async (req, res, next) => {
   try {
     const { courseId } = req.query;
     const filter = courseId ? { course: courseId } : {};
     const flashcards = await Flashcard.find(filter).sort({ createdAt: -1 });
-    res.status(200).json({ success: true, data: flashcards });
+
+    const progressRecords = await FlashcardProgress.find({
+      student: req.user.id,
+      flashcard: { $in: flashcards.map((card) => card._id) },
+    }).select('flashcard nextReviewDate');
+    const nextReviewByCard = new Map(progressRecords.map((record) => [record.flashcard.toString(), record.nextReviewDate]));
+
+    const now = new Date();
+    const dueFlashcards = flashcards.filter((card) => {
+      const nextReviewDate = nextReviewByCard.get(card._id.toString());
+      return !nextReviewDate || nextReviewDate <= now;
+    });
+
+    res.status(200).json({
+      success: true,
+      data: dueFlashcards,
+      meta: { dueCount: dueFlashcards.length, totalCount: flashcards.length },
+    });
   } catch (error) {
     next(error);
   }

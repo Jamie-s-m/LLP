@@ -673,6 +673,7 @@ html.dark {
     background: rgba(255, 255, 255, 0.8);
     box-shadow: 0 16px 30px rgba(15, 35, 54, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.56);
+    overflow-wrap: anywhere;
   }
 
   .dark .message-bubble {

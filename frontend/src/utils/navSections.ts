@@ -28,6 +28,7 @@ export const getNavSections = (role: AppRole, t: (key: string) => string): NavSe
       { label: t('sidebar.dashboard'), path: '/teacher/dashboard', icon: FiGrid },
       { label: t('sidebar.createCourse'), path: '/teacher/create-course', icon: FiEdit3 },
       { label: t('sidebar.myCourses'), path: '/teacher/courses', icon: FiBook },
+      { label: t('sidebar.groups'), path: '/groups', icon: FiUsers },
       { label: t('sidebar.speakingReviews'), path: '/teacher/speaking-reviews', icon: FiMic },
       { label: t('sidebar.schedule'), path: '/timetable', icon: FiCalendar },
       { label: t('sidebar.chat'), path: '/chat', icon: FiMessageCircle },

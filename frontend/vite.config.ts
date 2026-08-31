@@ -23,6 +23,13 @@ export default defineConfig(({ mode }) => ({
       brotliSize: true,
     }),
     VitePWA({
+      // injectManifest (not the default generateSW): the service worker source is
+      // hand-written at src/sw.js so it can also handle 'push'/'notificationclick' - those
+      // don't exist under generateSW, which only ever emits its own auto-generated file and
+      // would silently overwrite anything else living at the same output path.
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.js',
       registerType: 'autoUpdate',
       injectRegister: 'auto',
       includeAssets: ['favicon.ico', 'robots.txt', 'linguanest-mark.svg', 'linguanest-orbit.svg'],
@@ -113,80 +120,11 @@ export default defineConfig(({ mode }) => ({
         ],
         prefer_related_applications: false,
       },
-      workbox: {
+      // generateSW's declarative `workbox.runtimeCaching` config doesn't apply under
+      // injectManifest - the same caching rules now live as explicit registerRoute() calls
+      // in src/sw.js instead. injectManifest only takes the precache glob config here.
+      injectManifest: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        cleanupOutdatedCaches: true,
-        clientsClaim: true,
-        skipWaiting: true,
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'google-fonts-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
-          },
-          {
-            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'gstatic-fonts-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
-          },
-          {
-            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'images-cache',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
-              }
-            }
-          },
-          // Cache core API responses for lessons and courses with NetworkFirst so offline can still read last response
-          {
-            urlPattern: /^https?:\/\/.+\/api\/(lessons|courses)\/?.*/i,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'api-lesson-course-cache',
-              networkTimeoutSeconds: 5,
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 // 1 day
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
-          },
-          {
-            urlPattern: /^https?:\/\/.+\/api\/progress\/.*/i,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'api-progress-cache',
-              networkTimeoutSeconds: 5,
-              expiration: {
-                maxEntries: 200,
-                maxAgeSeconds: 60 * 60 * 6 // 6 hours
-              }
-            }
-          }
-        ]
       }
     })
   ],

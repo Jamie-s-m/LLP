@@ -12,9 +12,9 @@ interface FlashcardItem {
 }
 
 const copy = {
-  en: { kicker: 'Recall practice', title: 'Vocabulary Flashcards', text: 'Master vocabulary with spaced repetition and a focused card-by-card review flow.', loading: 'Loading flashcards...', empty: 'No flashcards available yet. Check back soon!', card: 'Card {current} of {total}', masteredCount: '{count} reviewed', front: 'FRONT', back: 'BACK', previous: 'Previous', again: 'Again', hard: 'Hard', good: 'Good', easy: 'Easy', flipFirst: 'Flip the card to rate it', next: 'Next', earned: '+{xp} XP, +{coins} coins', reviewFailed: 'Could not save this review — check your connection and try again.' },
-  ru: { kicker: 'Практика запоминания', title: 'Словарные карточки', text: 'Осваивайте лексику через интервальные повторения и спокойный режим карточка за карточкой.', loading: 'Загрузка карточек...', empty: 'Карточек пока нет. Загляните позже!', card: 'Карточка {current} из {total}', masteredCount: 'Пройдено: {count}', front: 'ЛИЦО', back: 'ОБОРОТ', previous: 'Назад', again: 'Заново', hard: 'Сложно', good: 'Хорошо', easy: 'Легко', flipFirst: 'Переверните карточку, чтобы оценить', next: 'Далее', earned: '+{xp} XP, +{coins} монет', reviewFailed: 'Не удалось сохранить оценку — проверьте соединение и попробуйте снова.' },
-  uz: { kicker: 'Eslab qolish mashqi', title: 'Lug‘at kartochkalari', text: 'Intervalli takrorlash va bitta-bitta ko‘rib chiqish oqimi bilan lug‘atni mustahkamlang.', loading: 'Kartochkalar yuklanmoqda...', empty: 'Hali kartochkalar yo‘q. Keyinroq qayta tekshiring!', card: '{total} tadan {current}-kartochka', masteredCount: '{count} tasi ko‘rib chiqildi', front: 'OLD', back: 'ORQA', previous: 'Oldingi', again: 'Qayta', hard: 'Qiyin', good: 'Yaxshi', easy: 'Oson', flipFirst: 'Baholash uchun kartochkani ag‘daring', next: 'Keyingi', earned: '+{xp} XP, +{coins} tanga', reviewFailed: 'Baholashni saqlab bo‘lmadi — internetni tekshirib, qayta urinib ko‘ring.' },
+  en: { kicker: 'Recall practice', title: 'Vocabulary Flashcards', text: 'Master vocabulary with spaced repetition and a focused card-by-card review flow.', loading: 'Loading flashcards...', empty: 'No flashcards available yet. Check back soon!', allCaughtUp: "You're all caught up! No cards are due right now — check back later.", card: 'Card {current} of {total} due', deckSize: '{total} total in your deck', masteredCount: '{count} reviewed', front: 'FRONT', back: 'BACK', previous: 'Previous', again: 'Again', hard: 'Hard', good: 'Good', easy: 'Easy', flipFirst: 'Flip the card to rate it', next: 'Next', earned: '+{xp} XP, +{coins} coins', reviewFailed: 'Could not save this review — check your connection and try again.' },
+  ru: { kicker: 'Практика запоминания', title: 'Словарные карточки', text: 'Осваивайте лексику через интервальные повторения и спокойный режим карточка за карточкой.', loading: 'Загрузка карточек...', empty: 'Карточек пока нет. Загляните позже!', allCaughtUp: 'Вы всё повторили! Сейчас нет карточек к повторению — загляните позже.', card: 'Карточка {current} из {total} к повторению', deckSize: 'Всего в колоде: {total}', masteredCount: 'Пройдено: {count}', front: 'ЛИЦО', back: 'ОБОРОТ', previous: 'Назад', again: 'Заново', hard: 'Сложно', good: 'Хорошо', easy: 'Легко', flipFirst: 'Переверните карточку, чтобы оценить', next: 'Далее', earned: '+{xp} XP, +{coins} монет', reviewFailed: 'Не удалось сохранить оценку — проверьте соединение и попробуйте снова.' },
+  uz: { kicker: 'Eslab qolish mashqi', title: 'Lug‘at kartochkalari', text: 'Intervalli takrorlash va bitta-bitta ko‘rib chiqish oqimi bilan lug‘atni mustahkamlang.', loading: 'Kartochkalar yuklanmoqda...', empty: 'Hali kartochkalar yo‘q. Keyinroq qayta tekshiring!', allCaughtUp: 'Hammasi bajarildi! Hozircha takrorlash uchun kartochka yo‘q — keyinroq qayting.', card: '{total} tadan {current}-kartochka (takrorlash uchun)', deckSize: 'To‘plamda jami: {total}', masteredCount: '{count} tasi ko‘rib chiqildi', front: 'OLD', back: 'ORQA', previous: 'Oldingi', again: 'Qayta', hard: 'Qiyin', good: 'Yaxshi', easy: 'Oson', flipFirst: 'Baholash uchun kartochkani ag‘daring', next: 'Keyingi', earned: '+{xp} XP, +{coins} tanga', reviewFailed: 'Baholashni saqlab bo‘lmadi — internetni tekshirib, qayta urinib ko‘ring.' },
 } as const
 
 type Rating = 'again' | 'hard' | 'good' | 'easy'
@@ -28,6 +28,7 @@ const RATING_STYLES: Record<Rating, string> = {
 
 export default function Flashcards() {
   const [cards, setCards] = useState<FlashcardItem[]>([])
+  const [deckTotal, setDeckTotal] = useState(0)
   const [currentCard, setCurrentCard] = useState(0)
   const [isFlipped, setIsFlipped] = useState(false)
   const [reviewed, setReviewed] = useState<Set<string>>(new Set())
@@ -39,7 +40,10 @@ export default function Flashcards() {
 
   useEffect(() => {
     api.get('/flashcards')
-      .then((response) => setCards(response.data.data || []))
+      .then((response) => {
+        setCards(response.data.data || [])
+        setDeckTotal(response.data.meta?.totalCount ?? (response.data.data || []).length)
+      })
       .catch(() => setCards([]))
       .finally(() => setLoading(false))
   }, [])
@@ -48,16 +52,17 @@ export default function Flashcards() {
     return <div className="atlas-page px-4 py-12 text-center"><div className="mx-auto max-w-2xl atlas-panel p-6 text-muted">{ui.loading}</div></div>
   }
 
-  // If the API returned no cards, use a small production-ready demo fallback with Russian translations
-  const fallbackCards: FlashcardItem[] = [
-    { _id: 'f-hello', front: { text: 'Hello' }, back: { text: 'Привет' } },
-    { _id: 'f-goodbye', front: { text: 'Goodbye' }, back: { text: 'До свидания' } },
-    { _id: 'f-please', front: { text: 'Please' }, back: { text: 'Пожалуйста' } },
-    { _id: 'f-thanks', front: { text: 'Thank you' }, back: { text: 'Спасибо' } },
-    { _id: 'f-excuse', front: { text: 'Excuse me' }, back: { text: 'Извините' } },
-  ]
+  if (cards.length === 0) {
+    return (
+      <div className="atlas-page px-4 py-12 text-center">
+        <div className="mx-auto max-w-2xl atlas-panel p-6 text-muted">
+          {deckTotal > 0 ? ui.allCaughtUp : ui.empty}
+        </div>
+      </div>
+    )
+  }
 
-  const activeCards = cards.length > 0 ? cards : fallbackCards
+  const activeCards = cards
   const card = activeCards[currentCard]
   const totalCards = activeCards.length
 
@@ -116,10 +121,13 @@ export default function Flashcards() {
         </div>
 
         <div className="atlas-panel mb-8 p-5">
-          <div className="flex justify-between mb-2 text-sm font-medium">
+          <div className="flex justify-between mb-1 text-sm font-medium">
             <span>{ui.card.replace('{current}', String(currentCard + 1)).replace('{total}', String(totalCards))}</span>
             <span>{ui.masteredCount.replace('{count}', String(reviewed.size))}</span>
           </div>
+          {deckTotal > totalCards ? (
+            <p className="mb-2 text-xs text-muted">{ui.deckSize.replace('{total}', String(deckTotal))}</p>
+          ) : null}
           <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2">
             <div
               className="bg-primary-500 h-2 rounded-full transition-all"

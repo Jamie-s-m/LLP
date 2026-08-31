@@ -201,6 +201,35 @@ describe('Flashcard SM-2 review', () => {
     expect(progress.deck).toBe('greetings');
   });
 
+  test('GET /flashcards only returns cards actually due, not the whole deck', async () => {
+    const notYetReviewed = await Flashcard.create({
+      course: card.course,
+      language: 'English',
+      front: { text: 'Goodbye' },
+      back: { text: 'Adiós' },
+      category: 'greetings',
+    });
+
+    try {
+      const res = await request(app)
+        .get('/api/flashcards')
+        .set('Authorization', `Bearer ${token}`)
+        .query({ courseId: card.course.toString() });
+
+      expect(res.status).toBe(200);
+      const dueIds = res.body.data.map((item) => item._id);
+      // "card" was just reviewed twice as "easy", landing its nextReviewDate 6 days out -
+      // it must not reappear in the due list today.
+      expect(dueIds).not.toContain(card._id.toString());
+      // A card with no progress at all is always due (it's new).
+      expect(dueIds).toContain(notYetReviewed._id.toString());
+      expect(res.body.meta.totalCount).toBe(2);
+      expect(res.body.meta.dueCount).toBe(1);
+    } finally {
+      await Flashcard.deleteOne({ _id: notYetReviewed._id });
+    }
+  });
+
   test('a low rating resets repetitions', async () => {
     const res = await request(app)
       .post(`/api/flashcards/${card._id}/review`)

@@ -28,6 +28,7 @@ const copy = {
     browseCourses: 'Browse matching courses',
     retake: 'Retake test',
     goDashboard: 'Go to dashboard',
+    unavailable: 'The placement test isn\'t available right now. Please try again later.',
   },
   ru: {
     kicker: 'Определите свою точку старта',
@@ -47,6 +48,7 @@ const copy = {
     browseCourses: 'Смотреть подходящие курсы',
     retake: 'Пройти снова',
     goDashboard: 'Перейти в панель',
+    unavailable: 'Тест на уровень сейчас недоступен. Попробуйте позже.',
   },
   uz: {
     kicker: 'Boshlang‘ich darajangizni aniqlang',
@@ -66,6 +68,7 @@ const copy = {
     browseCourses: 'Mos kurslarni ko‘rish',
     retake: 'Qayta topshirish',
     goDashboard: 'Boshqaruv paneliga o‘tish',
+    unavailable: 'Hozircha daraja aniqlash testi mavjud emas. Keyinroq qayta urinib ko‘ring.',
   },
 } as const
 
@@ -86,7 +89,12 @@ export default function PlacementTest() {
     setLoading(true)
     try {
       const response = await api.get('/placement/questions')
-      setQuestions(response.data.data)
+      const fetchedQuestions = response.data.data || []
+      if (fetchedQuestions.length === 0) {
+        toast.error(ui.unavailable)
+        return
+      }
+      setQuestions(fetchedQuestions)
       setIndex(0)
       setAnswers({})
       setPhase('test')

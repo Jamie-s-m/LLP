@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
 import api from '../services/api'
 
 export default function DailyReward() {
@@ -25,6 +26,10 @@ export default function DailyReward() {
     try {
       const res = await api.post('/daily-reward/claim')
       setStatus((s: any) => ({ ...s, linguaCoins: res.data.data.newLinguaCoins, currentStreak: res.data.data.newDailyRewardStreak }))
+      const unlockedBadges = res.data.data.unlockedBadges as Array<{ name: string; icon?: string }> | undefined
+      unlockedBadges?.forEach((badge) => {
+        toast.success(`${badge.icon ? `${badge.icon} ` : ''}Badge unlocked: ${badge.name}!`, { duration: 5000 })
+      })
     } catch (err: any) {
       setError(err?.response?.data?.message || err.message || 'Claim failed')
     } finally {

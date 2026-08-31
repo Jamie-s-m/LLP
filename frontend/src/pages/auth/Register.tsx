@@ -135,9 +135,13 @@ export default function Register() {
 
   const { register, isLoading, error } = useAuthStore()
   const navigate = useNavigate()
+  // Suppress the teacher-intent banner once the checkbox below is already visible and
+  // pre-checked (both from the same ?teacherInterest=1 CTA) - showing both pushed the Google
+  // button and Sign In link below the fold on a 375px phone, and the checkbox's own label
+  // already says the same thing.
   const planIntent = role === 'parent'
     ? ui.familyIntent
-    : requestTeacherRole
+    : requestTeacherRole && !showTeacherOption
       ? ui.teacherIntent
       : ''
 

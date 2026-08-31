@@ -27,6 +27,7 @@ describe('billing configuration helpers', () => {
     ).toEqual({
       plan: 'family',
       status: 'active',
+      provider: 'none',
       currentPeriodEnd: new Date('2030-01-01T00:00:00.000Z'),
       cancelAtPeriodEnd: true,
     });
@@ -35,15 +36,28 @@ describe('billing configuration helpers', () => {
 
 describe('Payme webhook auth', () => {
   it('rejects Basic "Paycom:" (empty password) when PAYME_MERCHANT_KEY is unset, instead of matching by default', async () => {
-    expect(process.env.PAYME_MERCHANT_KEY).toBeFalsy();
+    // getPaymeMerchantKey() reads process.env lazily on every request (not a module-load-time
+    // constant), so the env var can be unset just for this one test and restored afterward -
+    // this is what makes it possible to exercise both the "configured" and "unconfigured"
+    // branches within the same test run at all.
+    const previousKey = process.env.PAYME_MERCHANT_KEY;
+    delete process.env.PAYME_MERCHANT_KEY;
 
-    const emptyPasswordAuth = Buffer.from('Paycom:').toString('base64');
-    const res = await request(app)
-      .post('/api/billing/payme')
-      .set('Authorization', `Basic ${emptyPasswordAuth}`)
-      .send({ method: 'CheckPerformTransaction', params: {}, id: 1 });
+    try {
+      const emptyPasswordAuth = Buffer.from('Paycom:').toString('base64');
+      const res = await request(app)
+        .post('/api/billing/payme')
+        .set('Authorization', `Basic ${emptyPasswordAuth}`)
+        .send({ method: 'CheckPerformTransaction', params: {}, id: 1 });
 
-    expect(res.status).toBe(401);
-    expect(res.body.error).toBeDefined();
+      expect(res.status).toBe(401);
+      expect(res.body.error).toBeDefined();
+    } finally {
+      if (previousKey === undefined) {
+        delete process.env.PAYME_MERCHANT_KEY;
+      } else {
+        process.env.PAYME_MERCHANT_KEY = previousKey;
+      }
+    }
   });
 });

@@ -127,6 +127,36 @@ const topicClusters = {
   nature: ['river','forest','mountain','garden','sunrise','wind','cloud','rain'],
   business: ['contract','budget','customer','sales','invoice','target','performance','strategy'],
   technology: ['device','software','signal','screen','battery','button','camera','network'],
+  // Keyed by the exact `topic` string used on each course blueprint's modules (below), so
+  // buildLesson can pick vocabulary that actually matches what each lesson is about instead
+  // of a fixed CEFR-wide list repeated on every lesson regardless of topic.
+  introductions: ['name','meet','hello','nice','from','live','age','favorite'],
+  'daily life': ['wake up','morning','evening','breakfast','sleep','routine','home','usually'],
+  shopping: ['buy','price','shop','pay','money','store','choose','receipt'],
+  routines: ['everyday','always','often','schedule','wake up','brush','walk','habit'],
+  planning: ['plan','future','tomorrow','weekend','goal','arrange','schedule','hope'],
+  routine: ['habit','everyday','usually','morning','evening','weekday','always','routine'],
+  wellbeing: ['health','healthy','exercise','sleep','doctor','diet','relax','energy'],
+  experience: ['achievement','memory','past','learned','journey','challenge','grow','milestone'],
+  society: ['news','community','culture','opinion','issue','public','media','change'],
+  'problem solving': ['solution','challenge','decide','solve','option','plan','resolve','outcome'],
+  ideas: ['concept','suggest','propose','insight','perspective','argument','viewpoint','innovate'],
+  leadership: ['manage','lead','decision','responsibility','motivate','delegate','vision','team'],
+  'digital life': ['device','online','app','network','data','digital','screen','update'],
+  precision: ['accurate','detail','exact','clarify','nuance','formal','informal','tone'],
+  'business life': ['office','colleague','workplace','career','role','company','client','task'],
+  meetings: ['agenda','discuss','schedule','attend','minutes','follow-up','decision','participant'],
+  writing: ['email','report','draft','format','subject','message','reply','attachment'],
+  pitching: ['presentation','audience','slide','pitch','persuade','summary','question','confidence'],
+  sales: ['price','deal','customer','offer','negotiate','discount','contract','agreement'],
+  'social talk': ['chat','weather','weekend','hobby','small talk','friendly','topic','conversation'],
+  storytelling: ['memory','once','happened','story','remember','exciting','funny','adventure'],
+  'professional life': ['job','colleague','task','office','career','meeting','deadline','role'],
+  opinion: ['think','believe','agree','disagree','opinion','perspective','prefer','view'],
+  children: ['family','home','mother','father','brother','sister','pet','love'],
+  animals: ['dog','cat','bird','fish','lion','elephant','rabbit','farm'],
+  play: ['game','fun','toy','ball','sport','play','friend','outside'],
+  imagination: ['story','dream','magic','pretend','adventure','fairy tale','wonder','create'],
 }
 
 const wordBank = [...new Set([
@@ -157,6 +187,36 @@ const uzTranslations = {
   "negotiate": "muzokara olib bormoq", "evidence": "dalil", "framework": "asos", "structure": "tuzilma",
   "initiative": "tashabbus", "proposal": "taklif", "resilience": "chidamlilik", "priority": "ustuvorlik",
   "delivery": "yetkazib berish",
+  // Added for the per-topic vocabulary clusters above, so a lesson's own topic words get a
+  // real translation instead of silently falling back to showing the English word again.
+  "meet": "uchrashmoq", "nice": "yoqimli", "from": "-dan", "live": "yashamoq", "age": "yosh",
+  "wake up": "uyg'onmoq", "evening": "kechqurun", "sleep": "uxlamoq", "usually": "odatda",
+  "buy": "sotib olmoq", "price": "narx", "shop": "do'kon", "pay": "to'lamoq", "money": "pul",
+  "store": "do'kon", "choose": "tanlamoq", "receipt": "kvitansiya", "always": "doim", "often": "tez-tez",
+  "brush": "cho'tkalamoq", "tomorrow": "ertaga", "weekend": "dam olish kunlari", "arrange": "tashkil qilmoq",
+  "hope": "umid qilmoq", "weekday": "ish kuni", "doctor": "shifokor", "memory": "xotira", "past": "o'tmish",
+  "learned": "o'rgangan", "challenge": "qiyinchilik", "grow": "o'smoq", "milestone": "muhim bosqich",
+  "news": "yangilik", "public": "jamoat", "solve": "hal qilmoq", "option": "variant", "resolve": "hal qilmoq",
+  "outcome": "natija", "concept": "tushuncha", "propose": "taklif qilmoq", "insight": "chuqur fikr",
+  "perspective": "nuqtai nazar", "argument": "bahs", "viewpoint": "qarash", "innovate": "yangilik kiritmoq",
+  "lead": "yetaklamoq", "decision": "qaror", "motivate": "rag'batlantirmoq", "delegate": "vakolat bermoq",
+  "vision": "tasavvur", "online": "onlayn", "app": "ilova", "data": "ma'lumot", "digital": "raqamli",
+  "update": "yangilamoq", "accurate": "aniq", "exact": "to'g'ri", "clarify": "aniqlashtirmoq",
+  "nuance": "nozik farq", "formal": "rasmiy", "informal": "norasmiy", "tone": "ohang",
+  "colleague": "hamkasb", "workplace": "ish joyi", "role": "rol", "company": "kompaniya", "task": "vazifa",
+  "agenda": "kun tartibi", "discuss": "muhokama qilmoq", "attend": "qatnashmoq", "minutes": "bayonnoma",
+  "follow-up": "keyingi qadam", "participant": "ishtirokchi", "draft": "qoralama", "subject": "sarlavha",
+  "message": "xabar", "reply": "javob bermoq", "attachment": "ilova", "presentation": "taqdimot",
+  "audience": "auditoriya", "slide": "slayd", "pitch": "taklif qilmoq", "persuade": "ishontirmoq",
+  "summary": "xulosa", "confidence": "ishonch", "deal": "bitim", "offer": "taklif", "discount": "chegirma",
+  "hobby": "sevimli mashg'ulot", "small talk": "yengil suhbat", "friendly": "do'stona", "once": "bir marta",
+  "happened": "sodir bo'ldi", "exciting": "hayajonli", "funny": "kulgili", "job": "ish", "think": "o'ylamoq",
+  "believe": "ishonmoq", "agree": "rozi bo'lmoq", "disagree": "rozi bo'lmaslik", "prefer": "afzal ko'rmoq",
+  "view": "qarash", "pet": "uy hayvoni", "love": "sevgi", "dog": "it", "cat": "mushuk", "bird": "qush",
+  "fish": "baliq", "lion": "sher", "elephant": "fil", "rabbit": "quyon", "farm": "ferma", "game": "o'yin",
+  "fun": "qiziqarli", "toy": "o'yinchoq", "ball": "to'p", "sport": "sport", "play": "o'ynamoq",
+  "outside": "tashqarida", "dream": "orzu", "magic": "sehr", "pretend": "taqlid qilmoq",
+  "fairy tale": "ertak", "wonder": "ajablanmoq",
 }
 
 const buildTranslation = (word) => uzTranslations[word] || word
@@ -279,10 +339,11 @@ const lessonPatterns = {
   },
 }
 
-const makeExercises = (lessonId, lessonTitle, cefr, orderIndex) => {
+const makeExercises = (lessonId, lessonTitle, cefr, orderIndex, speakingPrompt) => {
   const pattern = lessonPatterns[cefr] || lessonPatterns.A1
   const mc = pattern.mcQuestions[orderIndex % pattern.mcQuestions.length]
   const fillBlank = pattern.fillBlanks[orderIndex % pattern.fillBlanks.length]
+  const prompt = speakingPrompt || pattern.speakingPrompt
   const base = [
     createExercise({
       title: 'Quick Check',
@@ -309,9 +370,9 @@ const makeExercises = (lessonId, lessonTitle, cefr, orderIndex) => {
     createExercise({
       title: 'Speaking Task',
       type: 'speaking',
-      question: pattern.speakingPrompt,
+      question: prompt,
       options: [],
-      answer: pattern.speakingPrompt,
+      answer: prompt,
       explanation: 'Speak for 30 to 60 seconds and focus on clear structure and useful vocabulary.',
       difficulty: 'Medium',
       points: 20,
@@ -321,28 +382,55 @@ const makeExercises = (lessonId, lessonTitle, cefr, orderIndex) => {
   return base
 }
 
-const buildLesson = ({ lessonId, title, description, objective, content, level, cefr, order }) => ({
-  id: lessonId,
-  title,
-  description,
-  objective,
-  content,
-  order,
-  level,
-  duration: 10 + (order % 5) * 5,
-  vocabulary: lessonPatterns[cefr]?.vocabulary.slice(0, 5).map((word) => ({
-    word,
-    translation: buildTranslation(word),
-    pronunciation: word,
-    examples: [`I use "${word}" when I talk about everyday things.`],
-  })) || [],
-  grammar: lessonPatterns[cefr]?.grammar.slice(0, 2).map((rule) => ({
-    rule,
-    explanation: `${rule} is a useful pattern for this lesson.`,
-    examples: [`Example: ${rule}.`],
-  })) || [],
-  exercises: makeExercises(lessonId, title, cefr, order),
-})
+// Falls back to the CEFR-wide list only for a topic string with no cluster defined above -
+// every topic actually used by a course blueprint has one, so this is a safety net, not the
+// normal path.
+const resolveLessonVocabulary = (topic, cefr) => topicClusters[topic] || lessonPatterns[cefr]?.vocabulary || []
+
+// Explicit per-lesson video overrides, keyed by the deterministic lessonId buildCourse
+// generates (`${blueprintId}-lesson-${order}`). Kept here (not a one-off DB script) so it
+// survives reseeding/redeploys like the rest of the generated catalog. Empty by default -
+// every entry here is a real, deliberately chosen video, never a placeholder/guessed URL.
+const LESSON_MEDIA_OVERRIDES = {
+  'general-english-a1-lesson-1': {
+    contentType: 'video',
+    mediaUrl: 'https://www.youtube.com/watch?v=t26iooY3PAo',
+  },
+}
+
+const buildLesson = ({ lessonId, title, description, objective, content, level, cefr, order, topic }) => {
+  const topicWords = resolveLessonVocabulary(topic, cefr).slice(0, 5)
+  // Ties the speaking prompt to this lesson's own topic vocabulary instead of one fixed
+  // prompt shared by every lesson at the same CEFR level.
+  const speakingPrompt = topicWords.length > 0
+    ? `Talk for 30-60 seconds about ${topic}. Try to use words like ${topicWords.slice(0, 3).join(', ')}.`
+    : undefined
+  const mediaOverride = LESSON_MEDIA_OVERRIDES[lessonId]
+
+  return {
+    id: lessonId,
+    title,
+    description,
+    objective,
+    content,
+    order,
+    level,
+    duration: 10 + (order % 5) * 5,
+    ...(mediaOverride || {}),
+    vocabulary: topicWords.map((word) => ({
+      word,
+      translation: buildTranslation(word),
+      pronunciation: word,
+      examples: [`I use "${word}" when I talk about ${topic}.`],
+    })),
+    grammar: lessonPatterns[cefr]?.grammar.slice(0, 2).map((rule) => ({
+      rule,
+      explanation: `${rule} is a useful pattern for this lesson.`,
+      examples: [`Example: ${rule}.`],
+    })) || [],
+    exercises: makeExercises(lessonId, title, cefr, order, speakingPrompt),
+  }
+}
 
 const buildCourse = (blueprint) => {
   const moduleList = blueprint.modules.map((module, moduleIndex) => ({
@@ -365,6 +453,7 @@ const buildCourse = (blueprint) => {
           level: blueprint.level,
           cefr: blueprint.cefr,
           order: lessonOrder,
+          topic: module.topic,
         })
       }),
     })),

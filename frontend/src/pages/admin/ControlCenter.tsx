@@ -1486,7 +1486,7 @@ export default function ControlCenter() {
       ) : null}
 
       {courseModal !== false ? (
-        <div className="fixed inset-0 z-[170] flex items-center justify-center bg-slate-950/45 px-4">
+        <div className="fixed inset-0 z-[170] flex items-start justify-center overflow-y-auto bg-slate-950/45 px-4 py-8 sm:items-center">
           <form className="atlas-panel w-full max-w-2xl p-6" onSubmit={saveCourseModal}>
             <div className="mb-6 flex items-center justify-between gap-4">
               <h2 className="text-2xl text-ink dark:text-white">{courseModal ? ui.editCourse : ui.newCourseModal}</h2>
@@ -1505,7 +1505,7 @@ export default function ControlCenter() {
       ) : null}
 
       {userModal && isAdmin ? (
-        <div className="fixed inset-0 z-[170] flex items-center justify-center bg-slate-950/45 px-4">
+        <div className="fixed inset-0 z-[170] flex items-start justify-center overflow-y-auto bg-slate-950/45 px-4 py-8 sm:items-center">
           <form className="atlas-panel w-full max-w-2xl p-6" onSubmit={saveUserModal}>
             <div className="mb-6 flex items-center justify-between gap-4">
               <div>
@@ -1545,7 +1545,7 @@ export default function ControlCenter() {
       ) : null}
 
       {contentModal !== false ? (
-        <div className="fixed inset-0 z-[170] flex items-center justify-center bg-slate-950/45 px-4">
+        <div className="fixed inset-0 z-[170] flex items-start justify-center overflow-y-auto bg-slate-950/45 px-4 py-8 sm:items-center">
           <form className="atlas-panel w-full max-w-3xl p-6" onSubmit={saveContentModal}>
             <div className="mb-6 flex items-center justify-between gap-4">
               <div>

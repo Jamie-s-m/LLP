@@ -41,6 +41,7 @@ export default function ExercisePractice() {
   const [outOfHearts, setOutOfHearts] = useState<{ heartsRegenAt: string | null } | null>(null)
   const [hearts, setHearts] = useState({ hearts: 5, maxHearts: 5 })
   const [submitting, setSubmitting] = useState(false)
+  const [refillingHearts, setRefillingHearts] = useState(false)
 
   // Speaking recorder state
   const [isRecording, setIsRecording] = useState(false)
@@ -150,8 +151,10 @@ export default function ExercisePractice() {
                 : 'Take a short break, or refill instantly with coins.'}
             </p>
             <button
-              className="btn btn-primary mb-3 w-full"
+              className="btn btn-primary mb-3 w-full disabled:opacity-50"
+              disabled={refillingHearts}
               onClick={async () => {
+                setRefillingHearts(true)
                 try {
                   const response = await api.post('/gamification/hearts/refill')
                   setHearts(response.data.data)
@@ -159,10 +162,12 @@ export default function ExercisePractice() {
                   toast.success('Hearts refilled!')
                 } catch (error: any) {
                   toast.error(error.response?.data?.message || 'Not enough coins to refill hearts')
+                } finally {
+                  setRefillingHearts(false)
                 }
               }}
             >
-              Refill with coins
+              {refillingHearts ? 'Refilling...' : 'Refill with coins'}
             </button>
             <button className="btn btn-outline w-full" onClick={() => navigate(-1)}>
               Back to lesson

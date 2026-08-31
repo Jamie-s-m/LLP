@@ -22,6 +22,7 @@ interface User {
   billing?: {
     plan: 'none' | 'learner' | 'family' | 'teaching'
     status: 'inactive' | 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid' | 'incomplete' | 'incomplete_expired'
+    provider?: 'none' | 'stripe' | 'payme'
     currentPeriodEnd?: string | null
     cancelAtPeriodEnd?: boolean
   }

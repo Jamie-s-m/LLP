@@ -25,8 +25,23 @@ export const requestFamilyLink = async (req, res, next) => {
     const { studentEmail } = req.body;
     const student = await User.findOne({ email: String(studentEmail || '').toLowerCase().trim(), role: 'student' });
     if (!student) return res.status(404).json({ success: false, message: 'Student account not found' });
+
+    // (parent, student) has a unique index, so a previously rejected link can't just be
+    // re-created - it has to be reset back to pending instead, or the parent would be
+    // permanently stuck after one rejection.
     const existing = await FamilyLink.findOne({ parent: req.user.id, student: student._id });
-    if (existing) return res.status(400).json({ success: false, message: 'Family request already exists' });
+    if (existing) {
+      if (existing.status === 'rejected') {
+        existing.status = 'pending';
+        existing.requestedBy = req.user.id;
+        existing.reviewedBy = undefined;
+        existing.reviewedAt = undefined;
+        await existing.save();
+        return res.status(200).json({ success: true, data: existing });
+      }
+      return res.status(400).json({ success: false, message: 'Family request already exists' });
+    }
+
     const link = await FamilyLink.create({ parent: req.user.id, student: student._id, requestedBy: req.user.id });
     res.status(201).json({ success: true, data: link });
   } catch (error) { next(error); }
@@ -88,7 +103,9 @@ export const getChildDetail = async (req, res, next) => {
       success: true,
       data: {
         student,
-        courses: progressRecords.map((record) => ({
+        // record.course populates to null if the referenced course was deleted since -
+        // filter those out rather than crashing on a dangling reference.
+        courses: progressRecords.filter((record) => record.course).map((record) => ({
           courseId: record.course._id,
           title: record.course.title,
           progressPercentage: record.progressPercentage,

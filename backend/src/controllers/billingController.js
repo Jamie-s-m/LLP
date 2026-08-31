@@ -1,13 +1,37 @@
+import mongoose from 'mongoose';
 import Stripe from 'stripe';
-import { findPlanByPriceId, getBillingPlans, getFrontendAppUrl, getStripeClient, serializeBilling } from '../utils/billing.js';
+import {
+  findBillingPlan,
+  findPlanByPriceId,
+  getBillingPlans,
+  getFrontendAppUrl,
+  getPaymeCheckoutBaseUrl,
+  getPaymeMerchantId,
+  getStripeClient,
+  serializeBilling,
+} from '../utils/billing.js';
 import User from '../models/User.js';
+import PaymeTransaction from '../models/PaymeTransaction.js';
 
-const PAYME_MERCHANT_KEY = process.env.PAYME_MERCHANT_KEY || '';
+// Read lazily, not captured at module-load time: billingController.js is statically imported
+// before app.js calls dotenv.config(), so a module-level constant would always read as empty
+// in any process relying on a .env file (local dev, scripts) - only Render's directly-injected
+// env vars happened to dodge that ordering issue.
+const getPaymeMerchantKey = () => process.env.PAYME_MERCHANT_KEY || '';
+
 export const getBillingPlansController = (_req, res) => {
   try {
+    const merchantId = getPaymeMerchantId();
     return res.status(200).json({
       success: true,
-      data: { plans: getBillingPlans() },
+      data: {
+        plans: getBillingPlans(),
+        payme: {
+          available: Boolean(merchantId),
+          merchantId,
+          checkoutBaseUrl: getPaymeCheckoutBaseUrl(),
+        },
+      },
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message || 'Unable to load billing plans' });
@@ -72,9 +96,10 @@ export const createCheckoutSession = async (req, res) => {
 };
 
 const validatePaymeAuth = (req) => {
+  const merchantKey = getPaymeMerchantKey();
   // An unset merchant key must never authenticate - otherwise Basic "Paycom:" (empty password)
-  // would pass once PAYME_MERCHANT_KEY defaults to '', before the integration is configured.
-  if (!PAYME_MERCHANT_KEY) return false;
+  // would pass once the key defaults to '', before the integration is configured.
+  if (!merchantKey) return false;
 
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Basic ')) return false;
@@ -82,73 +107,222 @@ const validatePaymeAuth = (req) => {
   const credentials = Buffer.from(authHeader.split(' ')[1], 'base64').toString('ascii');
   const [login, password] = credentials.split(':');
 
-  return login === 'Paycom' && password === PAYME_MERCHANT_KEY;
+  return login === 'Paycom' && password === merchantKey;
+};
+
+// Error shapes follow Payme's Merchant API spec exactly - the numeric codes are meaningful
+// to Payme's own servers (and their certification test suite), not just human-readable text.
+const paymeError = (code, message, data) => ({ code, message, ...(data ? { data } : {}) });
+
+const PAYME_ERRORS = {
+  AUTH: paymeError(-32504, { ru: 'Недостаточно привилегий', en: 'Insufficient privileges', uz: "Ruxsat yetarli emas" }),
+  METHOD_NOT_FOUND: paymeError(-32601, { ru: 'Метод не найден', en: 'Method not found', uz: 'Metod topilmadi' }),
+  INVALID_AMOUNT: paymeError(-31001, { ru: 'Неверная сумма', en: 'Invalid amount', uz: "Summa noto'g'ri" }),
+  TRANSACTION_NOT_FOUND: paymeError(-31003, { ru: 'Транзакция не найдена', en: 'Transaction not found', uz: 'Tranzaksiya topilmadi' }),
+  COULD_NOT_CANCEL: paymeError(-31007, { ru: 'Невозможно отменить, заказ выполнен', en: 'Could not cancel, order completed', uz: "Bekor qilib bo'lmadi" }),
+  COULD_NOT_PERFORM: paymeError(-31008, { ru: 'Невозможно выполнить операцию', en: 'Could not perform this operation', uz: "Amalni bajarib bo'lmadi" }),
+  SYSTEM_ERROR: paymeError(-32400, { ru: 'Внутренняя ошибка сервера', en: 'Internal server error', uz: 'Server xatosi' }),
+  invalidAccount: (field) =>
+    paymeError(-31050, { ru: 'Неверные данные счёта', en: 'Invalid account', uz: "Hisob ma'lumotlari noto'g'ri" }, field),
+};
+
+// account.user_id / account.plan are our own field names - we choose them when a checkout
+// link is built, and Payme echoes them back verbatim on every call for this transaction.
+const resolvePaymeAccount = async (account) => {
+  const userId = account?.user_id;
+  if (!userId || !mongoose.isValidObjectId(userId)) {
+    return { error: PAYME_ERRORS.invalidAccount('user_id') };
+  }
+
+  const user = await User.findById(userId);
+  if (!user) {
+    return { error: PAYME_ERRORS.invalidAccount('user_id') };
+  }
+
+  const planKey = account?.plan;
+  const plan = findBillingPlan(planKey);
+  if (!plan || !plan.priceUzs) {
+    return { error: PAYME_ERRORS.invalidAccount('plan') };
+  }
+
+  return { user, planKey, expectedAmount: plan.priceUzs * 100 };
 };
 
 export const handlePaymeRequest = async (req, res) => {
-  if (!validatePaymeAuth(req)) {
-    return res.status(401).json({
-      error: { code: -32504, message: { ru: 'Неавторизован', en: 'Unauthorized' } },
-      id: req.body?.id || null,
-    });
-  }
-
   const { method, params, id } = req.body || {};
+
+  if (!validatePaymeAuth(req)) {
+    return res.status(401).json({ error: PAYME_ERRORS.AUTH, id: id ?? null });
+  }
 
   try {
     switch (method) {
-      case 'CheckPerformTransaction':
+      case 'CheckPerformTransaction': {
+        const resolved = await resolvePaymeAccount(params?.account);
+        if (resolved.error) return res.json({ error: resolved.error, id });
+
+        const amount = Number(params?.amount);
+        if (!Number.isFinite(amount) || amount !== resolved.expectedAmount) {
+          return res.json({ error: PAYME_ERRORS.INVALID_AMOUNT, id });
+        }
+
+        const pendingConflict = await PaymeTransaction.findOne({
+          user: resolved.user._id,
+          plan: resolved.planKey,
+          state: 1,
+        });
+        if (pendingConflict) {
+          return res.json({ error: PAYME_ERRORS.COULD_NOT_PERFORM, id });
+        }
+
         return res.json({ result: { allow: true }, id });
-      case 'CreateTransaction':
+      }
+
+      case 'CreateTransaction': {
+        const paycomTransactionId = String(params?.id || '');
+        if (!paycomTransactionId) {
+          return res.json({ error: PAYME_ERRORS.invalidAccount('id'), id });
+        }
+
+        const existing = await PaymeTransaction.findOne({ paycomTransactionId });
+        if (existing) {
+          if (existing.state !== 1) {
+            return res.json({ error: PAYME_ERRORS.COULD_NOT_PERFORM, id });
+          }
+          // Idempotent replay: echo the original create_time, never regenerate it.
+          return res.json({ result: { create_time: existing.createTime, transaction: String(existing._id), state: 1 }, id });
+        }
+
+        const resolved = await resolvePaymeAccount(params?.account);
+        if (resolved.error) return res.json({ error: resolved.error, id });
+
+        const amount = Number(params?.amount);
+        if (!Number.isFinite(amount) || amount !== resolved.expectedAmount) {
+          return res.json({ error: PAYME_ERRORS.INVALID_AMOUNT, id });
+        }
+
+        const conflicting = await PaymeTransaction.findOne({
+          user: resolved.user._id,
+          plan: resolved.planKey,
+          state: 1,
+        });
+        if (conflicting) {
+          return res.json({ error: PAYME_ERRORS.COULD_NOT_PERFORM, id });
+        }
+
+        const createTime = Date.now();
+        const txn = await PaymeTransaction.create({
+          paycomTransactionId,
+          user: resolved.user._id,
+          plan: resolved.planKey,
+          amount,
+          state: 1,
+          createTime,
+        });
+
+        return res.json({ result: { create_time: createTime, transaction: String(txn._id), state: 1 }, id });
+      }
+
+      case 'PerformTransaction': {
+        const paycomTransactionId = String(params?.id || '');
+        const txn = await PaymeTransaction.findOne({ paycomTransactionId });
+        if (!txn) {
+          return res.json({ error: PAYME_ERRORS.TRANSACTION_NOT_FOUND, id });
+        }
+
+        if (txn.state === 2) {
+          // Idempotent replay: the plan was already granted, don't re-grant it.
+          return res.json({ result: { transaction: String(txn._id), perform_time: txn.performTime, state: 2 }, id });
+        }
+
+        if (txn.state !== 1) {
+          return res.json({ error: PAYME_ERRORS.COULD_NOT_PERFORM, id });
+        }
+
+        const user = await User.findById(txn.user);
+        if (!user) {
+          return res.json({ error: PAYME_ERRORS.COULD_NOT_PERFORM, id });
+        }
+
+        const periodEnd = new Date();
+        periodEnd.setMonth(periodEnd.getMonth() + 1);
+
+        user.billing = {
+          ...(user.billing?.toObject ? user.billing.toObject() : user.billing || {}),
+          plan: txn.plan,
+          status: 'active',
+          provider: 'payme',
+          paymeTransactionId: txn.paycomTransactionId,
+          currentPeriodEnd: periodEnd,
+          cancelAtPeriodEnd: false,
+        };
+        await user.save();
+
+        const performTime = Date.now();
+        txn.state = 2;
+        txn.performTime = performTime;
+        await txn.save();
+
+        return res.json({ result: { transaction: String(txn._id), perform_time: performTime, state: 2 }, id });
+      }
+
+      case 'CancelTransaction': {
+        const paycomTransactionId = String(params?.id || '');
+        const txn = await PaymeTransaction.findOne({ paycomTransactionId });
+        if (!txn) {
+          return res.json({ error: PAYME_ERRORS.TRANSACTION_NOT_FOUND, id });
+        }
+
+        // Cancel is always idempotent-successful in the Payme spec, unlike Perform.
+        if (txn.state === -1 || txn.state === -2) {
+          return res.json({ result: { transaction: String(txn._id), cancel_time: txn.cancelTime, state: txn.state, reason: txn.reason }, id });
+        }
+
+        const wasPerformed = txn.state === 2;
+        if (wasPerformed) {
+          const user = await User.findById(txn.user);
+          if (user && user.billing?.paymeTransactionId === txn.paycomTransactionId) {
+            user.billing.plan = 'none';
+            user.billing.status = 'canceled';
+            await user.save();
+          }
+        }
+
+        const cancelTime = Date.now();
+        txn.state = wasPerformed ? -2 : -1;
+        txn.cancelTime = cancelTime;
+        txn.reason = Number(params?.reason) || null;
+        await txn.save();
+
+        return res.json({ result: { transaction: String(txn._id), cancel_time: cancelTime, state: txn.state, reason: txn.reason }, id });
+      }
+
+      case 'CheckTransaction': {
+        const paycomTransactionId = String(params?.id || '');
+        const txn = await PaymeTransaction.findOne({ paycomTransactionId });
+        if (!txn) {
+          return res.json({ error: PAYME_ERRORS.TRANSACTION_NOT_FOUND, id });
+        }
+
         return res.json({
           result: {
-            create_time: Date.now(),
-            transaction: String(params?.account?.id || 'payme_internal_txn'),
-            state: 1,
+            create_time: txn.createTime,
+            perform_time: txn.performTime,
+            cancel_time: txn.cancelTime,
+            transaction: String(txn._id),
+            state: txn.state,
+            reason: txn.reason,
           },
           id,
         });
-      case 'PerformTransaction':
-        return res.json({
-          result: {
-            perform_time: Date.now(),
-            transaction: String(params?.transaction || 'payme_internal_txn'),
-            state: 2,
-          },
-          id,
-        });
-      case 'CancelTransaction':
-        return res.json({
-          result: {
-            cancel_time: Date.now(),
-            transaction: String(params?.transaction || 'payme_internal_txn'),
-            state: -1,
-          },
-          id,
-        });
-      case 'CheckTransaction':
-        return res.json({
-          result: {
-            create_time: Date.now(),
-            perform_time: Date.now(),
-            cancel_time: 0,
-            transaction: String(params?.transaction || 'payme_internal_txn'),
-            state: 2,
-            reason: null,
-          },
-          id,
-        });
+      }
+
       default:
-        return res.status(404).json({
-          error: { code: -32601, message: { ru: 'Метод не найден', en: 'Method not found' } },
-          id,
-        });
+        return res.status(200).json({ error: PAYME_ERRORS.METHOD_NOT_FOUND, id });
     }
   } catch (error) {
-    return res.status(500).json({
-      error: { code: -31008, message: { ru: error.message, en: error.message } },
-      id,
-    });
+    console.error('Payme webhook error:', error.message);
+    return res.status(200).json({ error: PAYME_ERRORS.SYSTEM_ERROR, id: id ?? null });
   }
 };
 
@@ -187,6 +361,7 @@ export const handleStripeWebhook = async (req, res) => {
       billing.stripeCustomerId = String(payload.customer || billing.stripeCustomerId || '');
       billing.stripeSubscriptionId = String(payload.subscription || billing.stripeSubscriptionId || '');
       billing.plan = payload.metadata?.planKey || billing.plan || 'none';
+      billing.provider = 'stripe';
     }
 
     if (event.type === 'customer.subscription.created' || event.type === 'customer.subscription.updated' || event.type === 'customer.subscription.deleted') {
@@ -196,6 +371,7 @@ export const handleStripeWebhook = async (req, res) => {
       billing.stripeSubscriptionId = String(payload.id || billing.stripeSubscriptionId || '');
       billing.stripePriceId = priceId;
       billing.plan = plan?.key || billing.plan || 'none';
+      billing.provider = 'stripe';
       billing.status = event.type === 'customer.subscription.deleted' ? 'canceled' : payload.status || 'inactive';
       billing.currentPeriodEnd = payload.current_period_end ? new Date(payload.current_period_end * 1000) : null;
       billing.cancelAtPeriodEnd = Boolean(payload.cancel_at_period_end);

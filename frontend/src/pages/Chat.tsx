@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
-import { FiLifeBuoy, FiMessageCircle, FiSearch, FiSend, FiUsers } from 'react-icons/fi'
+import { FiArrowLeft, FiLifeBuoy, FiMessageCircle, FiSearch, FiSend, FiUsers } from 'react-icons/fi'
 import api from '../services/api'
 import { useAuthStore } from '../store/authStore'
 import { useChatStore } from '../store/chatStore'
@@ -50,6 +50,15 @@ export default function Chat() {
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [messages, setMessages] = useState<Message[]>([])
   const [activeId, setActiveId] = useState('')
+  // Below the lg breakpoint, .chat-layout stacks list and window in one column - without this,
+  // opening a conversation on a phone means scrolling past the entire inbox to reach it, and
+  // there's no way back to the list short of scrolling back up through the whole thread.
+  const [mobileView, setMobileView] = useState<'list' | 'chat'>('list')
+
+  const openConversation = (conversationId: string) => {
+    setActiveId(conversationId)
+    setMobileView('chat')
+  }
   const [draft, setDraft] = useState('')
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -197,7 +206,7 @@ export default function Chat() {
       const response = await api.post('/chat/conversations', { type: 'direct', participantIds: [participantId] })
       const conversation = response.data.data
       setConversations((current) => current.some((item) => item._id === conversation._id) ? current : [conversation, ...current])
-      setActiveId(conversation._id)
+      openConversation(conversation._id)
       setSearch('')
       setSearchResults([])
     } catch (error: any) {
@@ -213,7 +222,7 @@ export default function Chat() {
       const response = await api.post('/chat/conversations', { type: 'support' })
       const conversation = response.data.data
       setConversations((current) => current.some((item) => item._id === conversation._id) ? current : [conversation, ...current])
-      setActiveId(conversation._id)
+      openConversation(conversation._id)
     } catch (error: any) {
       toast.error(error.response?.data?.message || ui.supportFailed)
     } finally {
@@ -257,7 +266,7 @@ export default function Chat() {
         <p>{ui.text}</p>
       </div>
       <div className="chat-layout">
-        <aside className="atlas-panel chat-list">
+        <aside className={`atlas-panel chat-list ${mobileView === 'chat' ? 'hidden lg:block' : ''}`}>
           <div className="mb-5 flex items-center justify-between">
             <h2>{ui.inbox}</h2><FiMessageCircle className="text-coral" />
           </div>
@@ -296,16 +305,18 @@ export default function Chat() {
           ) : loading ? <p className="text-muted">{ui.loading}</p> : conversations.length === 0 ? (
             <div className="empty-state"><FiUsers /><p>{ui.empty}</p></div>
           ) : conversations.map((conversation) => (
-            <button key={conversation._id} onClick={() => setActiveId(conversation._id)} className={`chat-thread ${activeId === conversation._id ? 'active' : ''}`}>
+            <button key={conversation._id} onClick={() => openConversation(conversation._id)} className={`chat-thread ${activeId === conversation._id ? 'active' : ''}`}>
               <span className="chat-avatar">{conversation.type === 'group' ? <FiUsers /> : <FiMessageCircle />}</span>
               <span className="flex-1"><strong>{getConversationName(conversation)}</strong><small>{typeLabels[conversation.type][language]}</small></span>
               {(conversation.unreadCount || byConversation[conversation._id]) ? <span className="rounded-full bg-coral px-2 py-1 text-xs font-bold text-white">{conversation.unreadCount || byConversation[conversation._id]}</span> : null}
             </button>
           ))}
         </aside>
-        <section className="atlas-panel chat-window">
+        <section className={`atlas-panel chat-window ${mobileView === 'list' ? 'hidden lg:block' : ''}`}>
           {active ? <>
-            <header className="chat-header"><div><p className="atlas-kicker">{ui.room.replace('{type}', typeLabels[active.type][language])}</p><h2>{getConversationName(active)}</h2></div><span className="status-dot">{socketConnected ? ui.live : ui.syncing}</span></header>
+            <header className="chat-header">
+              <button type="button" className="icon-button lg:hidden" onClick={() => setMobileView('list')} aria-label={ui.inbox}><FiArrowLeft size={20} /></button>
+              <div><p className="atlas-kicker">{ui.room.replace('{type}', typeLabels[active.type][language])}</p><h2>{getConversationName(active)}</h2></div><span className="status-dot">{socketConnected ? ui.live : ui.syncing}</span></header>
             <div ref={messageListRef} className="message-list">
               {messages.length === 0 ? <div className="empty-state"><FiMessageCircle /><p>{ui.start}</p></div> : messages.map((message) => {
                 const isOwn = message.sender._id ? message.sender._id === user?.id : message.sender.firstName === user?.firstName && message.sender.lastName === user?.lastName

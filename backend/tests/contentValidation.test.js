@@ -64,7 +64,7 @@ describe('LinguaNest content library', () => {
     // Vocabulary: no "uz-123" style fake translations, no "word-123" filler words.
     // A tiny handful of words are genuine loanwords in Uzbek (e.g. "format", "signal"),
     // so uz === word is only suspicious when it isn't one of those.
-    const LOANWORDS = new Set(['format', 'signal'])
+    const LOANWORDS = new Set(['format', 'signal', 'sport'])
     for (const item of library.vocabulary) {
       expect(item.word).not.toMatch(/^word-\d+$/)
       expect(item.uz).not.toMatch(/^uz-\d+$/)
@@ -73,10 +73,13 @@ describe('LinguaNest content library', () => {
       }
     }
 
-    // Every lesson's embedded vocabulary must have a real (non-identity) translation.
+    // Every lesson's embedded vocabulary must have a real (non-identity) translation,
+    // with the same loanword exemption as the global vocabulary check above.
     for (const lesson of library.lessons) {
       for (const item of lesson.vocabulary) {
-        expect(item.translation).not.toBe(item.word)
+        if (!LOANWORDS.has(item.word)) {
+          expect(item.translation).not.toBe(item.word)
+        }
       }
     }
 

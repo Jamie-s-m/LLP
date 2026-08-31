@@ -61,10 +61,68 @@ export const createCourse = async (req, res, next) => {
       thumbnail,
       estimatedHours,
       instructor: req.user.id,
-      isPublished: true,
+      // Starts as a draft - a teacher can build out lessons privately before publishing it
+      // to the public catalog, via updateCourse's isPublished toggle.
+      isPublished: false,
     });
 
     res.status(201).json({ success: true, data: course });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Unlike getCourseById (the public catalog lookup, which only returns published courses),
+// this is for the owning teacher's own management screen - it must work regardless of
+// publish state, or a teacher gets locked out of their own course the moment it's unpublished.
+export const getCourseForManage = async (req, res, next) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(404).json({ success: false, message: 'Course not found' });
+    }
+
+    const course = await Course.findById(req.params.id).populate('instructor', 'firstName lastName email role');
+    if (!course) {
+      return res.status(404).json({ success: false, message: 'Course not found' });
+    }
+    if (!canManageCourse(course, req.user)) {
+      return res.status(403).json({ success: false, message: 'You do not manage this course' });
+    }
+
+    const lessons = await Lesson.find({ course: req.params.id }).sort({ order: 1 });
+    res.status(200).json({ success: true, data: { course, lessons } });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getCourseStudents = async (req, res, next) => {
+  try {
+    const course = await Course.findById(req.params.id).select('instructor');
+    if (!course) {
+      return res.status(404).json({ success: false, message: 'Course not found' });
+    }
+    if (!canManageCourse(course, req.user)) {
+      return res.status(403).json({ success: false, message: 'You do not manage this course' });
+    }
+
+    const progressRecords = await Progress.find({ course: req.params.id })
+      .populate('user', 'firstName lastName email')
+      .sort({ lastAccessedAt: -1 });
+
+    const students = progressRecords
+      .filter((record) => record.user)
+      .map((record) => ({
+        studentId: record.user._id,
+        firstName: record.user.firstName,
+        lastName: record.user.lastName,
+        email: record.user.email,
+        progressPercentage: record.progressPercentage,
+        isCompleted: record.isCompleted,
+        lastAccessedAt: record.lastAccessedAt,
+      }));
+
+    res.status(200).json({ success: true, data: students });
   } catch (error) {
     next(error);
   }

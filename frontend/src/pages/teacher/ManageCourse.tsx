@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { FiTrash2, FiPlus, FiEdit3 } from 'react-icons/fi'
+import { FiTrash2, FiPlus, FiEdit3, FiEye, FiEyeOff } from 'react-icons/fi'
 import api from '../../services/api'
 import { useLanguageStore } from '../../store/languageStore'
 
@@ -12,6 +12,7 @@ interface CourseDetails {
   level: string
   category: string
   rating: number
+  isPublished: boolean
 }
 
 interface LessonItem {
@@ -21,10 +22,19 @@ interface LessonItem {
   duration?: number
 }
 
+interface StudentItem {
+  studentId: string
+  firstName: string
+  lastName: string
+  email: string
+  progressPercentage: number
+  isCompleted: boolean
+}
+
 const copy = {
-  en: { loading: 'Loading course...', notFound: 'Course not found.', loadFailed: 'Course could not be loaded', createFailed: 'Lesson could not be created', deleteFailed: 'Lesson could not be deleted', deleteConfirm: 'Delete this lesson?', kicker: 'Course operations', title: 'Manage Course', text: 'Update lesson structure, monitor course inventory, and keep the learning path organized.', lessons: 'Lessons', rating: 'Rating', empty: 'No lessons yet. Add the first one below.', newLesson: 'New lesson title', add: 'Add Lesson' },
-  ru: { loading: 'Загрузка курса...', notFound: 'Курс не найден.', loadFailed: 'Не удалось загрузить курс', createFailed: 'Не удалось создать урок', deleteFailed: 'Не удалось удалить урок', deleteConfirm: 'Удалить этот урок?', kicker: 'Операции курса', title: 'Управление курсом', text: 'Обновляйте структуру уроков, отслеживайте наполнение курса и поддерживайте порядок учебного пути.', lessons: 'Уроки', rating: 'Рейтинг', empty: 'Уроков пока нет. Добавьте первый ниже.', newLesson: 'Название нового урока', add: 'Добавить урок' },
-  uz: { loading: 'Kurs yuklanmoqda...', notFound: 'Kurs topilmadi.', loadFailed: 'Kursni yuklab bo‘lmadi', createFailed: 'Darsni yaratib bo‘lmadi', deleteFailed: 'Darsni o‘chirib bo‘lmadi', deleteConfirm: 'Bu dars o‘chirilsinmi?', kicker: 'Kurs operatsiyalari', title: 'Kursni boshqarish', text: 'Dars tuzilmasini yangilang, kurs tarkibini kuzating va o‘quv yo‘lini tartibli saqlang.', lessons: 'Darslar', rating: 'Reyting', empty: 'Hali darslar yo‘q. Birinchisini quyida qo‘shing.', newLesson: 'Yangi dars nomi', add: 'Dars qo‘shish' },
+  en: { loading: 'Loading course...', notFound: 'Course not found.', loadFailed: 'Course could not be loaded', createFailed: 'Lesson could not be created', deleteFailed: 'Lesson could not be deleted', deleteConfirm: 'Delete this lesson?', kicker: 'Course operations', title: 'Manage Course', text: 'Update lesson structure, monitor course inventory, and keep the learning path organized.', lessons: 'Lessons', rating: 'Rating', empty: 'No lessons yet. Add the first one below.', newLesson: 'New lesson title', add: 'Add Lesson', published: 'Published', draft: 'Draft', publish: 'Publish', unpublish: 'Unpublish', publishFailed: 'Could not update publish status', students: 'Enrolled students', noStudents: 'No students enrolled yet.', viewProgress: 'View progress' },
+  ru: { loading: 'Загрузка курса...', notFound: 'Курс не найден.', loadFailed: 'Не удалось загрузить курс', createFailed: 'Не удалось создать урок', deleteFailed: 'Не удалось удалить урок', deleteConfirm: 'Удалить этот урок?', kicker: 'Операции курса', title: 'Управление курсом', text: 'Обновляйте структуру уроков, отслеживайте наполнение курса и поддерживайте порядок учебного пути.', lessons: 'Уроки', rating: 'Рейтинг', empty: 'Уроков пока нет. Добавьте первый ниже.', newLesson: 'Название нового урока', add: 'Добавить урок', published: 'Опубликован', draft: 'Черновик', publish: 'Опубликовать', unpublish: 'Снять с публикации', publishFailed: 'Не удалось изменить статус публикации', students: 'Записанные ученики', noStudents: 'Пока нет учеников.', viewProgress: 'Смотреть прогресс' },
+  uz: { loading: 'Kurs yuklanmoqda...', notFound: 'Kurs topilmadi.', loadFailed: 'Kursni yuklab bo‘lmadi', createFailed: 'Darsni yaratib bo‘lmadi', deleteFailed: 'Darsni o‘chirib bo‘lmadi', deleteConfirm: 'Bu dars o‘chirilsinmi?', kicker: 'Kurs operatsiyalari', title: 'Kursni boshqarish', text: 'Dars tuzilmasini yangilang, kurs tarkibini kuzating va o‘quv yo‘lini tartibli saqlang.', lessons: 'Darslar', rating: 'Reyting', empty: 'Hali darslar yo‘q. Birinchisini quyida qo‘shing.', newLesson: 'Yangi dars nomi', add: 'Dars qo‘shish', published: 'Chop etilgan', draft: 'Qoralama', publish: 'Chop etish', unpublish: 'Chop etishni bekor qilish', publishFailed: 'Nashr holatini o‘zgartirib bo‘lmadi', students: 'Ro‘yxatdan o‘tgan o‘quvchilar', noStudents: 'Hali o‘quvchilar yo‘q.', viewProgress: 'Progressni ko‘rish' },
 } as const
 
 export default function ManageCourse() {
@@ -33,16 +43,22 @@ export default function ManageCourse() {
   const ui = copy[language]
   const [course, setCourse] = useState<CourseDetails | null>(null)
   const [lessons, setLessons] = useState<LessonItem[]>([])
+  const [students, setStudents] = useState<StudentItem[]>([])
   const [loading, setLoading] = useState(true)
   const [newLessonTitle, setNewLessonTitle] = useState('')
+  const [togglingPublish, setTogglingPublish] = useState(false)
 
   const load = () => {
     if (!courseId) return
     setLoading(true)
-    api.get(`/courses/${courseId}`)
-      .then((response) => {
-        setCourse(response.data.data.course)
-        setLessons(response.data.data.lessons || [])
+    Promise.all([
+      api.get(`/courses/${courseId}/manage`),
+      api.get(`/courses/${courseId}/students`).catch(() => ({ data: { data: [] } })),
+    ])
+      .then(([courseResponse, studentsResponse]) => {
+        setCourse(courseResponse.data.data.course)
+        setLessons(courseResponse.data.data.lessons || [])
+        setStudents(studentsResponse.data.data || [])
       })
       .catch(() => toast.error(ui.loadFailed))
       .finally(() => setLoading(false))
@@ -50,15 +66,29 @@ export default function ManageCourse() {
 
   useEffect(() => { load() }, [courseId, ui.loadFailed])
 
+  const handleTogglePublish = async () => {
+    if (!course) return
+    setTogglingPublish(true)
+    try {
+      const response = await api.put(`/courses/${course._id}`, { isPublished: !course.isPublished })
+      setCourse(response.data.data)
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || ui.publishFailed)
+    } finally {
+      setTogglingPublish(false)
+    }
+  }
+
   const handleAddLesson = async (event: React.FormEvent) => {
     event.preventDefault()
     if (!newLessonTitle.trim() || !courseId) return
     try {
+      const nextOrder = lessons.reduce((max, lesson) => Math.max(max, lesson.order || 0), 0) + 1
       await api.post('/lessons', {
         courseId,
         title: newLessonTitle,
         content: 'New lesson content — edit this from the lesson editor.',
-        order: lessons.length + 1,
+        order: nextOrder,
       })
       setNewLessonTitle('')
       load()
@@ -95,9 +125,25 @@ export default function ManageCourse() {
         </div>
 
         <div className="atlas-panel mb-8 p-6">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold mb-2 text-ink dark:text-white">{course.title}</h2>
-            <p className="text-muted">{course.language} • {course.level} • {course.category}</p>
+          <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-bold mb-2 text-ink dark:text-white">{course.title}</h2>
+              <p className="text-muted">{course.language} • {course.level} • {course.category}</p>
+            </div>
+            <div className="flex flex-col items-end gap-2">
+              <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${course.isPublished ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300'}`}>
+                {course.isPublished ? ui.published : ui.draft}
+              </span>
+              <button
+                type="button"
+                onClick={handleTogglePublish}
+                disabled={togglingPublish}
+                className="btn btn-outline flex items-center gap-2 text-sm disabled:opacity-50"
+              >
+                {course.isPublished ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+                {course.isPublished ? ui.unpublish : ui.publish}
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4 py-6 border-t border-b border-neutral-200 dark:border-neutral-700">
@@ -144,6 +190,28 @@ export default function ManageCourse() {
             <FiPlus size={20} /> {ui.add}
           </button>
         </form>
+
+        <h3 className="mb-4 mt-10 text-2xl font-bold text-ink dark:text-white">{ui.students}</h3>
+        <div className="space-y-3">
+          {students.length === 0 ? (
+            <div className="atlas-panel p-5 text-muted">{ui.noStudents}</div>
+          ) : students.map((student) => (
+            <Link
+              key={student.studentId}
+              to={`/teacher/progress/${student.studentId}`}
+              className="atlas-panel flex flex-wrap items-center justify-between gap-3 p-5 transition hover:-translate-y-0.5"
+            >
+              <div className="min-w-0 flex-1 break-words">
+                <p className="font-bold text-ink dark:text-white">{student.firstName} {student.lastName}</p>
+                <p className="text-sm text-muted">{student.email}</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-semibold text-primary-500">{student.progressPercentage}%</span>
+                <span className="text-sm text-primary-500">{ui.viewProgress}</span>
+              </div>
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   )

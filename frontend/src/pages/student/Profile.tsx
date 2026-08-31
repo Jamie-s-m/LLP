@@ -4,6 +4,7 @@ import { FiAward, FiEdit2, FiSave } from 'react-icons/fi'
 import toast from 'react-hot-toast'
 import api from '../../services/api'
 import { useLanguageStore } from '../../store/languageStore'
+import NotificationOptIn from '../../components/NotificationOptIn'
 
 interface ProfileData {
   firstName: string
@@ -211,6 +212,10 @@ export default function Profile() {
               </>
             )}
           </div>
+        </div>
+
+        <div className="atlas-panel mt-6 p-6 sm:p-8">
+          <NotificationOptIn />
         </div>
       </div>
     </div>

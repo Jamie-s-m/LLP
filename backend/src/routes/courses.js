@@ -1,11 +1,23 @@
 import express from 'express';
 import { protect, authorize, authorizeRoleOrPermission } from '../middleware/auth.js';
-import { getCourses, getCourseById, createCourse, updateCourse, deleteCourse, getMyCourses, getMyCourseOverview } from '../controllers/courseController.js';
+import {
+  getCourses,
+  getCourseById,
+  getCourseForManage,
+  getCourseStudents,
+  createCourse,
+  updateCourse,
+  deleteCourse,
+  getMyCourses,
+  getMyCourseOverview,
+} from '../controllers/courseController.js';
 
 const router = express.Router();
 
 router.get('/mine', protect, authorize('teacher', 'admin'), getMyCourses);
 router.get('/mine/overview', protect, authorize('teacher', 'admin'), getMyCourseOverview);
+router.get('/:id/manage', protect, authorize('teacher', 'admin'), getCourseForManage);
+router.get('/:id/students', protect, authorize('teacher', 'admin'), getCourseStudents);
 router.get('/', getCourses);
 router.get('/:id', getCourseById);
 router.post('/', protect, authorizeRoleOrPermission({ roles: ['teacher', 'admin'], permissions: ['catalogContentQa'] }), createCourse);

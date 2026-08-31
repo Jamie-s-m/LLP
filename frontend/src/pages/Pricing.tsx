@@ -5,6 +5,7 @@ import { FiCheckCircle, FiCreditCard, FiShield, FiTarget, FiUsers } from 'react-
 import api from '../services/api'
 import { useAuthStore } from '../store/authStore'
 import { useI18n } from '../utils/i18n'
+import PaymeCheckoutButton from '../components/PaymeCheckoutButton'
 
 type BillingPlanKey = 'learner' | 'family' | 'teaching'
 
@@ -71,14 +72,21 @@ export default function Pricing() {
   const [billingStatus, setBillingStatus] = useState<{
     plan: 'none' | BillingPlanKey
     status: BillingStatus
+    provider?: 'none' | 'stripe' | 'payme'
     currentPeriodEnd?: string | null
     cancelAtPeriodEnd?: boolean
   } | null>(null)
   const [canStartCheckout, setCanStartCheckout] = useState(true)
   const [hasCustomerPortal, setHasCustomerPortal] = useState(false)
   const [configuredPlans, setConfiguredPlans] = useState<Record<string, boolean>>({})
+  const [planPricesUzs, setPlanPricesUzs] = useState<Record<string, number>>({})
+  const [payme, setPayme] = useState<{ available: boolean; merchantId: string; checkoutBaseUrl: string }>({
+    available: false,
+    merchantId: '',
+    checkoutBaseUrl: '',
+  })
   const { user, isAuthenticated, setUser } = useAuthStore()
-  const { t } = useI18n()
+  const { t, language } = useI18n()
 
   const refreshBilling = async () => {
     const response = await api.get('/billing/me')
@@ -101,6 +109,20 @@ export default function Pricing() {
             return acc
           }, {})
         )
+        setPlanPricesUzs(
+          nextPlans.reduce((acc: Record<string, number>, plan: { key: string; priceUzs?: number }) => {
+            if (plan.priceUzs) acc[plan.key] = plan.priceUzs
+            return acc
+          }, {})
+        )
+        const paymeConfig = response.data.data?.payme
+        if (paymeConfig) {
+          setPayme({
+            available: Boolean(paymeConfig.available),
+            merchantId: paymeConfig.merchantId || '',
+            checkoutBaseUrl: paymeConfig.checkoutBaseUrl || '',
+          })
+        }
       })
       .catch(() => undefined)
   }, [])
@@ -131,6 +153,17 @@ export default function Pricing() {
       toast('Checkout canceled')
     }
 
+    if (checkoutState === 'payme') {
+      // Payme's own redirect carries no reliable success/failure signal here (the webhook
+      // that actually confirms payment can land before or after this redirect), so this
+      // can't honestly claim success - it stays neutral and lets the real billing status
+      // rendered below speak for itself once refreshBilling() resolves.
+      toast(t('pricing.paymeReturnedMessage'))
+      if (isAuthenticated) {
+        refreshBilling().catch(() => undefined)
+      }
+    }
+
     const nextParams = new URLSearchParams(searchParams)
     nextParams.delete('checkout')
     setSearchParams(nextParams, { replace: true })
@@ -138,6 +171,11 @@ export default function Pricing() {
 
   const effectiveBilling = billingStatus || user?.billing || null
   const hasManagedSubscription = activeStatuses.has((effectiveBilling?.status || 'inactive') as BillingStatus)
+  // The Stripe billing portal is the only "manage billing" surface that exists - a Payme
+  // subscription is real and active, but there's nothing to hand it off to, so it must not
+  // be routed into the same dead disabled-button branch as an unconfigured Stripe portal.
+  const isStripeManaged = hasManagedSubscription && effectiveBilling?.provider === 'stripe'
+  const isPaymeManaged = hasManagedSubscription && effectiveBilling?.provider === 'payme'
 
   const enrichedPlans = useMemo(
     () => plans.map((plan) => ({
@@ -192,7 +230,7 @@ export default function Pricing() {
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               {!isAuthenticated ? (
                 <Link to="/register" className="btn btn-primary w-full sm:w-auto">{t('pricing.createAccount')}</Link>
-              ) : hasManagedSubscription ? (
+              ) : isStripeManaged ? (
                 <button type="button" className="btn btn-primary w-full sm:w-auto" onClick={openPortal} disabled={openingPortal || !hasCustomerPortal}>
                   {openingPortal ? t('pricing.openingBilling') : t('pricing.manageBilling')}
                 </button>
@@ -272,32 +310,79 @@ export default function Pricing() {
                     </li>
                   ))}
                 </ul>
-                {!isAuthenticated ? (
-                  <Link to={plan.href} className="btn btn-primary mt-6 inline-flex min-h-11 w-full items-center justify-center gap-2 text-center">
-                    <FiUsers />
-                    {plan.cta}
-                  </Link>
-                ) : hasManagedSubscription ? (
-                  <button
-                    type="button"
-                    className="btn btn-primary mt-6 inline-flex min-h-11 w-full items-center justify-center gap-2 text-center"
-                    onClick={openPortal}
-                    disabled={openingPortal || !hasCustomerPortal}
-                  >
-                    <FiCreditCard />
-                    {isCurrentPlan ? t('pricing.manageBilling') : t('pricing.changeInPortal')}
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="btn btn-primary mt-6 inline-flex min-h-11 w-full items-center justify-center gap-2 text-center"
-                    onClick={() => startCheckout(plan.key)}
-                    disabled={busyPlan === plan.key || !canSubscribeToPlan}
-                  >
-                    <FiCreditCard />
-                    {!plan.available ? t('pricing.planNotConfigured') : busyPlan === plan.key ? t('pricing.openingCheckout') : t('pricing.subscribeTo', { plan: plan.name })}
-                  </button>
-                )}
+                {(() => {
+                  const paymeSection = payme.available && planPricesUzs[plan.key] && user?.id ? (
+                    <div className="mt-5 border-t border-slate-200 pt-5 dark:border-white/10">
+                      <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+                        <span className="h-px flex-1 bg-slate-200 dark:bg-white/10" />
+                        {t('pricing.orDivider')}
+                        <span className="h-px flex-1 bg-slate-200 dark:bg-white/10" />
+                      </p>
+                      <p className="mt-3 text-sm font-semibold text-ink dark:text-white">{t('pricing.paymeSectionTitle')}</p>
+                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{t('pricing.paymeSectionCopy')} · {planPricesUzs[plan.key].toLocaleString()} so'm/month</p>
+                      <div className="mt-3">
+                        <PaymeCheckoutButton
+                          merchantId={payme.merchantId}
+                          checkoutBaseUrl={payme.checkoutBaseUrl}
+                          userId={user.id}
+                          plan={plan.key}
+                          amountTiyin={planPricesUzs[plan.key] * 100}
+                          lang={language}
+                          callbackUrl={`${window.location.origin}/pricing?checkout=payme`}
+                        />
+                      </div>
+                    </div>
+                  ) : null
+
+                  if (!isAuthenticated) {
+                    return (
+                      <Link to={plan.href} className="btn btn-primary mt-6 inline-flex min-h-11 w-full items-center justify-center gap-2 text-center">
+                        <FiUsers />
+                        {plan.cta}
+                      </Link>
+                    )
+                  }
+
+                  if (isStripeManaged) {
+                    return (
+                      <button
+                        type="button"
+                        className="btn btn-primary mt-6 inline-flex min-h-11 w-full items-center justify-center gap-2 text-center"
+                        onClick={openPortal}
+                        disabled={openingPortal || !hasCustomerPortal}
+                      >
+                        <FiCreditCard />
+                        {isCurrentPlan ? t('pricing.manageBilling') : t('pricing.changeInPortal')}
+                      </button>
+                    )
+                  }
+
+                  if (isPaymeManaged) {
+                    return (
+                      <>
+                        <p className="mt-6 rounded-xl bg-[#f6efe7] p-3 text-center text-sm font-semibold text-ink dark:bg-white/5 dark:text-white">
+                          {isCurrentPlan ? t('pricing.paymeManagedCurrent') : t('pricing.paymeManagedOther', { plan: plan.name })}
+                        </p>
+                        {paymeSection}
+                      </>
+                    )
+                  }
+
+                  return (
+                    <>
+                      <button
+                        type="button"
+                        className="btn btn-primary mt-6 inline-flex min-h-11 w-full items-center justify-center gap-2 text-center"
+                        onClick={() => startCheckout(plan.key)}
+                        disabled={busyPlan === plan.key || !canSubscribeToPlan}
+                      >
+                        <FiCreditCard />
+                        {!plan.available ? t('pricing.planNotConfigured') : busyPlan === plan.key ? t('pricing.openingCheckout') : t('pricing.subscribeTo', { plan: plan.name })}
+                      </button>
+                      {paymeSection}
+                    </>
+                  )
+                })()}
               </section>
             )
           })}

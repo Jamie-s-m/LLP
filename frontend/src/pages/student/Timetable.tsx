@@ -1,4 +1,4 @@
-import { FiCalendar, FiClock, FiMapPin } from 'react-icons/fi'
+import { FiAlertCircle, FiCalendar, FiClock, FiMapPin } from 'react-icons/fi'
 
 const schedule = [
   {
@@ -36,6 +36,11 @@ export default function Timetable() {
             <p className="atlas-kicker">Learning calendar</p>
             <h1 className="text-3xl font-bold text-ink dark:text-white">My timetable</h1>
           </div>
+        </div>
+
+        <div className="atlas-panel mb-6 flex items-start gap-3 border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-200">
+          <FiAlertCircle className="mt-0.5 shrink-0" size={18} />
+          <p>This is a sample schedule to preview the layout — live class booking isn&apos;t connected yet, so these times aren&apos;t real bookings.</p>
         </div>
 
         <div className="grid gap-4">

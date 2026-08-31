@@ -53,6 +53,7 @@ const ProgressAnalytics = lazyWithChunkRetry(() => import('./pages/student/Progr
 const Achievements = lazyWithChunkRetry(() => import('./pages/student/Achievements'), 'achievements')
 const PlacementTest = lazyWithChunkRetry(() => import('./pages/PlacementTest'), 'placement-test')
 const TeacherDashboard = lazyWithChunkRetry(() => import('./pages/teacher/Dashboard'), 'teacher-dashboard')
+const TeacherCourses = lazyWithChunkRetry(() => import('./pages/teacher/Courses'), 'teacher-courses')
 const CreateCourse = lazyWithChunkRetry(() => import('./pages/teacher/CreateCourse'), 'create-course')
 const ManageCourse = lazyWithChunkRetry(() => import('./pages/teacher/ManageCourse'), 'manage-course')
 const LessonEditor = lazyWithChunkRetry(() => import('./pages/teacher/LessonEditor'), 'lesson-editor')
@@ -180,7 +181,7 @@ function App() {
         <Route
           path="/groups"
           element={
-            <ProtectedRoute allowedRoles={['student']}>
+            <ProtectedRoute allowedRoles={['student', 'teacher', 'admin']}>
               <Layout><Groups /></Layout>
             </ProtectedRoute>
           }
@@ -224,6 +225,14 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['teacher', 'admin']}>
               <Layout><TeacherDashboard /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/teacher/courses"
+          element={
+            <ProtectedRoute allowedRoles={['teacher', 'admin']}>
+              <Layout><TeacherCourses /></Layout>
             </ProtectedRoute>
           }
         />

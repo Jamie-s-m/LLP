@@ -80,7 +80,7 @@ export default function ParentDashboard() {
             ) : links.map((link) => (
               <div key={link._id} className="flex items-center justify-between rounded-2xl bg-[#f6efe7] p-4 dark:bg-white/5">
                 <div>
-                  {link.student ? <Link className="font-semibold text-ink dark:text-white" to={`/parent/children/${link.student._id}`}>{link.student.firstName} {link.student.lastName}</Link> : <span className="font-semibold text-slate-700 dark:text-slate-100">{t('parentDashboard.learnerFallback')}</span>}
+                  {link.student && link.status === 'approved' ? <Link className="font-semibold text-ink dark:text-white" to={`/parent/children/${link.student._id}`}>{link.student.firstName} {link.student.lastName}</Link> : link.student ? <span className="font-semibold text-ink dark:text-white">{link.student.firstName} {link.student.lastName}</span> : <span className="font-semibold text-slate-700 dark:text-slate-100">{t('parentDashboard.learnerFallback')}</span>}
                   {link.student ? <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t('parentDashboard.streakDays', { xp: link.student.xp, streak: link.student.streak })}</p> : null}
                   {link.status === 'pending' ? <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t('parentDashboard.waitingApproval')}</p> : null}
                 </div>

@@ -214,17 +214,22 @@ export const spendLinguaCoins = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Invalid amount' });
     }
 
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
+    // Atomic conditional decrement - a read-then-write here would let two concurrent
+    // requests (a double-tap, or two tabs) both read the same pre-deduction balance, both
+    // pass the sufficiency check, and both deduct, driving linguaCoins negative.
+    const user = await User.findOneAndUpdate(
+      { _id: userId, linguaCoins: { $gte: amount } },
+      { $inc: { linguaCoins: -amount } },
+      { new: true }
+    );
 
-    if ((user.linguaCoins || 0) < amount) {
+    if (!user) {
+      const exists = await User.exists({ _id: userId });
+      if (!exists) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
       return res.status(400).json({ success: false, message: 'Insufficient LinguaCoins' });
     }
-
-    user.linguaCoins -= amount;
-    await user.save();
 
     res.status(200).json({
       success: true,

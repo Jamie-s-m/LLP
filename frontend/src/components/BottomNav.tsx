@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { FiGrid } from 'react-icons/fi'
+import { FiGrid, FiHome, FiBookOpen, FiUsers, FiMessageSquare, FiLogIn } from 'react-icons/fi'
 import { useAuthStore } from '../store/authStore'
 import { useChatStore } from '../store/chatStore'
 import { useI18n } from '../utils/i18n'
@@ -54,11 +54,11 @@ export default function BottomNav() {
     ]
   } else {
     navItems = [
-      { label: ui.home, path: '/', icon: FiGrid, badge: 0 },
-      { label: ui.courses, path: '/courses', icon: FiGrid, badge: 0 },
-      { label: ui.tutors, path: '/tutors', icon: FiGrid, badge: 0 },
-      { label: ui.forum, path: '/forum', icon: FiGrid, badge: 0 },
-      { label: ui.login, path: '/login', icon: FiGrid, badge: 0 },
+      { label: ui.home, path: '/', icon: FiHome, badge: 0 },
+      { label: ui.courses, path: '/courses', icon: FiBookOpen, badge: 0 },
+      { label: ui.tutors, path: '/tutors', icon: FiUsers, badge: 0 },
+      { label: ui.forum, path: '/forum', icon: FiMessageSquare, badge: 0 },
+      { label: ui.login, path: '/login', icon: FiLogIn, badge: 0 },
     ]
   }
 

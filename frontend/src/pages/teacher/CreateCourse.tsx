@@ -58,8 +58,8 @@ export default function CreateCourse() {
   }
 
   return (
-    <div className="p-8">
-      <div className="max-w-2xl">
+    <div className="atlas-page px-4 py-8 sm:px-8">
+      <div className="mx-auto max-w-2xl">
         <h1 className="text-4xl font-bold mb-8">{ui.title}</h1>
 
         <form onSubmit={handleSubmit} className="card space-y-6">
