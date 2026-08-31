@@ -50,6 +50,9 @@ jobs:
         working-directory: backend
         env:
           NODE_ENV: test
+          # Not a real secret - only used by the Payme webhook test suite to exercise the
+          # Basic-auth check locally within CI, matching backend/.env's local dev value.
+          PAYME_MERCHANT_KEY: ci_test_key_12345
         run: npm test
 
   deploy-render:

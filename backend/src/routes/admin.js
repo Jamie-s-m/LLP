@@ -11,7 +11,10 @@ router.patch('/users/:id', authorizeRoleOrPermission({ roles: ['admin'], permiss
 router.delete('/users/:id', authorize('admin'), deleteUser);
 router.post('/reset-platform', authorize('admin'), resetPlatform);
 router.get('/teacher-applications', authorizeRoleOrPermission({ roles: ['admin'], permissions: ['limitedUserManagement'] }), listTeacherApplications);
-router.patch('/teacher-applications/:id', authorizeRoleOrPermission({ roles: ['admin'], permissions: ['limitedUserManagement'] }), reviewTeacherApplication);
+// Admin-only, not limitedUserManagement: approving grants the 'teacher' role, a bigger
+// privilege change than the suspend/reactivate actions that permission scope is meant to cover
+// (updateUser explicitly blocks limited moderators from changing anyone's role - this matches).
+router.patch('/teacher-applications/:id', authorize('admin'), reviewTeacherApplication);
 router.get('/content/health', authorizeRoleOrPermission({ roles: ['admin'], permissions: ['catalogContentQa'] }), getContentHealth);
 router.get('/content/:resource', authorizeRoleOrPermission({ roles: ['admin'], permissions: ['communityModeration', 'catalogContentQa'] }), listContent);
 router.post('/content/:resource', authorizeRoleOrPermission({ roles: ['admin'], permissions: ['communityModeration', 'catalogContentQa'] }), createContent);

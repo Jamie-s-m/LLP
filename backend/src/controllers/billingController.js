@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import mongoose from 'mongoose';
 import Stripe from 'stripe';
 import {
@@ -106,8 +107,14 @@ const validatePaymeAuth = (req) => {
 
   const credentials = Buffer.from(authHeader.split(' ')[1], 'base64').toString('ascii');
   const [login, password] = credentials.split(':');
+  if (login !== 'Paycom') return false;
 
-  return login === 'Paycom' && password === merchantKey;
+  // Constant-time comparison: a plain === short-circuits at the first mismatched character,
+  // which leaks a timing signal an attacker could use to recover the key byte-by-byte.
+  const passwordBuffer = Buffer.from(password || '');
+  const keyBuffer = Buffer.from(merchantKey);
+  if (passwordBuffer.length !== keyBuffer.length) return false;
+  return crypto.timingSafeEqual(passwordBuffer, keyBuffer);
 };
 
 // Error shapes follow Payme's Merchant API spec exactly - the numeric codes are meaningful
@@ -211,90 +218,131 @@ export const handlePaymeRequest = async (req, res) => {
         }
 
         const createTime = Date.now();
-        const txn = await PaymeTransaction.create({
-          paycomTransactionId,
-          user: resolved.user._id,
-          plan: resolved.planKey,
-          amount,
-          state: 1,
-          createTime,
-        });
+        let txn;
+        try {
+          txn = await PaymeTransaction.create({
+            paycomTransactionId,
+            user: resolved.user._id,
+            plan: resolved.planKey,
+            amount,
+            state: 1,
+            createTime,
+          });
+        } catch (createError) {
+          // Two concurrent CreateTransaction calls for the same id (a plausible Payme
+          // retry-on-timeout) can both pass the findOne-above as null and both attempt
+          // create() - the unique index on paycomTransactionId then rejects the loser with
+          // an E11000, which must resolve to the same idempotent-replay response the winner
+          // gets, not a system error (a retried create is not really a failure).
+          if (createError?.code !== 11000) throw createError;
+          const raced = await PaymeTransaction.findOne({ paycomTransactionId });
+          if (!raced) throw createError;
+          return res.json({ result: { create_time: raced.createTime, transaction: String(raced._id), state: raced.state }, id });
+        }
 
         return res.json({ result: { create_time: createTime, transaction: String(txn._id), state: 1 }, id });
       }
 
       case 'PerformTransaction': {
         const paycomTransactionId = String(params?.id || '');
-        const txn = await PaymeTransaction.findOne({ paycomTransactionId });
-        if (!txn) {
-          return res.json({ error: PAYME_ERRORS.TRANSACTION_NOT_FOUND, id });
-        }
+        const performTime = Date.now();
 
-        if (txn.state === 2) {
-          // Idempotent replay: the plan was already granted, don't re-grant it.
-          return res.json({ result: { transaction: String(txn._id), perform_time: txn.performTime, state: 2 }, id });
-        }
+        // Atomic, state-guarded claim: only the request that actually flips state 1 -> 2
+        // proceeds to grant the plan. A concurrent duplicate (or a Cancel racing in) can no
+        // longer observe a stale "still state 1" snapshot and act on it - findOneAndUpdate's
+        // filter is evaluated against MongoDB's own current document state, the same pattern
+        // already used for the daily-reward claim slot above.
+        const claimed = await PaymeTransaction.findOneAndUpdate(
+          { paycomTransactionId, state: 1 },
+          { $set: { state: 2, performTime } },
+          { new: false }
+        );
 
-        if (txn.state !== 1) {
-          return res.json({ error: PAYME_ERRORS.COULD_NOT_PERFORM, id });
-        }
-
-        const user = await User.findById(txn.user);
-        if (!user) {
+        if (!claimed) {
+          const txn = await PaymeTransaction.findOne({ paycomTransactionId });
+          if (!txn) {
+            return res.json({ error: PAYME_ERRORS.TRANSACTION_NOT_FOUND, id });
+          }
+          if (txn.state === 2) {
+            // Idempotent replay: the plan was already granted, don't re-grant it.
+            return res.json({ result: { transaction: String(txn._id), perform_time: txn.performTime, state: 2 }, id });
+          }
           return res.json({ error: PAYME_ERRORS.COULD_NOT_PERFORM, id });
         }
 
         const periodEnd = new Date();
         periodEnd.setMonth(periodEnd.getMonth() + 1);
 
-        user.billing = {
-          ...(user.billing?.toObject ? user.billing.toObject() : user.billing || {}),
-          plan: txn.plan,
-          status: 'active',
-          provider: 'payme',
-          paymeTransactionId: txn.paycomTransactionId,
-          currentPeriodEnd: periodEnd,
-          cancelAtPeriodEnd: false,
-        };
-        await user.save();
+        // Atomic $set on the user doc too (not a read-modify-write .save()), so a concurrent
+        // CancelTransaction's own atomic revoke below can't be lost to a last-write-wins
+        // overwrite of the whole billing subdocument.
+        const grantedUser = await User.findOneAndUpdate(
+          { _id: claimed.user },
+          {
+            $set: {
+              'billing.plan': claimed.plan,
+              'billing.status': 'active',
+              'billing.provider': 'payme',
+              'billing.paymeTransactionId': claimed.paycomTransactionId,
+              'billing.currentPeriodEnd': periodEnd,
+              'billing.cancelAtPeriodEnd': false,
+            },
+          },
+          { new: true }
+        );
 
-        const performTime = Date.now();
-        txn.state = 2;
-        txn.performTime = performTime;
-        await txn.save();
+        if (!grantedUser) {
+          // The user account no longer exists - roll the transaction back to state 1 rather
+          // than stranding it as "performed" with nothing actually granted.
+          await PaymeTransaction.updateOne({ _id: claimed._id, state: 2 }, { $set: { state: 1 }, $unset: { performTime: 1 } });
+          return res.json({ error: PAYME_ERRORS.COULD_NOT_PERFORM, id });
+        }
 
-        return res.json({ result: { transaction: String(txn._id), perform_time: performTime, state: 2 }, id });
+        return res.json({ result: { transaction: String(claimed._id), perform_time: performTime, state: 2 }, id });
       }
 
       case 'CancelTransaction': {
         const paycomTransactionId = String(params?.id || '');
+        const cancelTime = Date.now();
+        const reason = Number(params?.reason) || null;
+
+        // Atomic, state-guarded cancel: try to claim it from state 2 (performed) first, then
+        // from state 1 (pending) - whichever the document's real current state is. This closes
+        // the same TOCTOU window as PerformTransaction: a stale snapshot can no longer decide
+        // whether billing needs revoking.
+        const claimedPerformed = await PaymeTransaction.findOneAndUpdate(
+          { paycomTransactionId, state: 2 },
+          { $set: { state: -2, cancelTime, reason } },
+          { new: true }
+        );
+
+        if (claimedPerformed) {
+          // Atomic revoke, conditioned on this still being the transaction that granted the
+          // plan - a newer Payme transaction on the same account won't be clobbered.
+          await User.updateOne(
+            { _id: claimedPerformed.user, 'billing.paymeTransactionId': claimedPerformed.paycomTransactionId },
+            { $set: { 'billing.plan': 'none', 'billing.status': 'canceled' } }
+          );
+          return res.json({ result: { transaction: String(claimedPerformed._id), cancel_time: cancelTime, state: -2, reason }, id });
+        }
+
+        const claimedPending = await PaymeTransaction.findOneAndUpdate(
+          { paycomTransactionId, state: 1 },
+          { $set: { state: -1, cancelTime, reason } },
+          { new: true }
+        );
+
+        if (claimedPending) {
+          return res.json({ result: { transaction: String(claimedPending._id), cancel_time: cancelTime, state: -1, reason }, id });
+        }
+
+        // Neither guarded update matched: either the transaction doesn't exist, or it's
+        // already cancelled - Cancel is always idempotent-successful in the Payme spec.
         const txn = await PaymeTransaction.findOne({ paycomTransactionId });
         if (!txn) {
           return res.json({ error: PAYME_ERRORS.TRANSACTION_NOT_FOUND, id });
         }
-
-        // Cancel is always idempotent-successful in the Payme spec, unlike Perform.
-        if (txn.state === -1 || txn.state === -2) {
-          return res.json({ result: { transaction: String(txn._id), cancel_time: txn.cancelTime, state: txn.state, reason: txn.reason }, id });
-        }
-
-        const wasPerformed = txn.state === 2;
-        if (wasPerformed) {
-          const user = await User.findById(txn.user);
-          if (user && user.billing?.paymeTransactionId === txn.paycomTransactionId) {
-            user.billing.plan = 'none';
-            user.billing.status = 'canceled';
-            await user.save();
-          }
-        }
-
-        const cancelTime = Date.now();
-        txn.state = wasPerformed ? -2 : -1;
-        txn.cancelTime = cancelTime;
-        txn.reason = Number(params?.reason) || null;
-        await txn.save();
-
-        return res.json({ result: { transaction: String(txn._id), cancel_time: cancelTime, state: txn.state, reason: txn.reason }, id });
+        return res.json({ result: { transaction: String(txn._id), cancel_time: txn.cancelTime, state: txn.state, reason: txn.reason }, id });
       }
 
       case 'CheckTransaction': {

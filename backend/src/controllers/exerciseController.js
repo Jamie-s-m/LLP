@@ -9,6 +9,15 @@ import { inferSkillFromType } from '../utils/skills.js';
 const canManageLesson = async (lessonId, user) => {
   const lesson = await Lesson.findById(lessonId).populate('course', 'instructor');
   if (!lesson) return { error: { status: 404, message: 'Lesson not found' } };
+  // lesson.course populates to null if the referenced course was since deleted (no cascade
+  // cleanup of orphaned lessons exists) - only an admin/moderator can manage an orphaned
+  // lesson at that point, since there's no instructor left to own it.
+  if (!lesson.course) {
+    if (user.role !== 'admin' && !hasModeratorPermission(user, 'catalogContentQa')) {
+      return { error: { status: 404, message: 'Course not found' } };
+    }
+    return { lesson };
+  }
   if (user.role !== 'admin' && !hasModeratorPermission(user, 'catalogContentQa') && lesson.course.instructor.toString() !== user.id.toString()) {
     return { error: { status: 403, message: 'You do not manage this course' } };
   }

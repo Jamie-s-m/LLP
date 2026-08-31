@@ -26,6 +26,18 @@ export const getCourses = async (req, res, next) => {
   }
 };
 
+// Unlike getCourses (the public catalog, isPublished:true only), this is for the admin
+// Control Center course list - it must include drafts, or a course becomes invisible and
+// unpublishable the moment createCourse's draft-by-default takes effect.
+export const getAllCoursesForAdmin = async (req, res, next) => {
+  try {
+    const courses = await Course.find().populate('instructor', 'firstName lastName email role').sort({ createdAt: -1 });
+    res.status(200).json({ success: true, data: courses });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getCourseById = async (req, res, next) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id)) {

@@ -745,7 +745,12 @@ export default function ControlCenter() {
     setLoading(true)
     try {
       const requests = [
-        api.get('/courses'),
+        // The public /courses endpoint only ever returns published courses - Control Center
+        // needs drafts too (createCourse now defaults isPublished:false), or a newly created
+        // or unpublished course becomes invisible and unpublishable from this screen. This
+        // route is catalogContentQa-gated like the Courses tab itself, so skip it (matching
+        // the /admin/users pattern below) for a moderator scoped to something else entirely.
+        canManageCatalog ? api.get('/courses/admin/all') : Promise.resolve({ data: { data: [] } }),
         canManageUsers ? api.get('/admin/users') : Promise.resolve({ data: { data: [] } }),
         api.get('/admin/overview'),
       ]
@@ -1343,10 +1348,16 @@ export default function ControlCenter() {
                 {applications.map((applicant) => (
                   <div className="admin-row" key={applicant._id}>
                     <div><strong>{applicant.firstName} {applicant.lastName}</strong><small>{applicant.email}</small></div>
-                    <div className="flex gap-2">
-                      <button onClick={() => reviewApplication(applicant._id, true)} className="icon-button" aria-label={`Approve ${applicant.email}`}><FiCheck /></button>
-                      <button onClick={() => reviewApplication(applicant._id, false)} className="icon-button danger" aria-label={`Reject ${applicant.email}`}><FiX /></button>
-                    </div>
+                    {isAdmin ? (
+                      <div className="flex gap-2">
+                        <button onClick={() => reviewApplication(applicant._id, true)} className="icon-button" aria-label={`Approve ${applicant.email}`}><FiCheck /></button>
+                        <button onClick={() => reviewApplication(applicant._id, false)} className="icon-button danger" aria-label={`Reject ${applicant.email}`}><FiX /></button>
+                      </div>
+                    ) : (
+                      // Approving grants the 'teacher' role - a limitedUserManagement moderator
+                      // can see the queue but only an admin can act on it, matching the backend.
+                      <span className="status-pill muted">{ui.scopedAccess}</span>
+                    )}
                   </div>
                 ))}
                 {applications.length === 0 ? <div className="empty-state"><FiUserCheck /><p>{ui.noTeacherApplications}</p></div> : null}

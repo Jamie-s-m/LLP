@@ -174,7 +174,12 @@ export default function Pricing() {
   // The Stripe billing portal is the only "manage billing" surface that exists - a Payme
   // subscription is real and active, but there's nothing to hand it off to, so it must not
   // be routed into the same dead disabled-button branch as an unconfigured Stripe portal.
-  const isStripeManaged = hasManagedSubscription && effectiveBilling?.provider === 'stripe'
+  // billing.provider is new tonight and unset ('none') on any subscription granted before
+  // this deploy - every such pre-existing active subscription is necessarily Stripe (Payme
+  // grants didn't exist until now), so treat an active status with no provider as Stripe too;
+  // otherwise a grandfathered Stripe subscriber would fall through to the live "Subscribe"
+  // button below and could start paying for a second, duplicate subscription.
+  const isStripeManaged = hasManagedSubscription && effectiveBilling?.provider !== 'payme'
   const isPaymeManaged = hasManagedSubscription && effectiveBilling?.provider === 'payme'
 
   const enrichedPlans = useMemo(
@@ -319,7 +324,7 @@ export default function Pricing() {
                         <span className="h-px flex-1 bg-slate-200 dark:bg-white/10" />
                       </p>
                       <p className="mt-3 text-sm font-semibold text-ink dark:text-white">{t('pricing.paymeSectionTitle')}</p>
-                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{t('pricing.paymeSectionCopy')} · {planPricesUzs[plan.key].toLocaleString()} so'm/month</p>
+                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{t('pricing.paymeSectionCopy')} · {planPricesUzs[plan.key].toLocaleString()} so&apos;m/month</p>
                       <div className="mt-3">
                         <PaymeCheckoutButton
                           merchantId={payme.merchantId}

@@ -17,6 +17,22 @@ import PushSubscription from '../models/PushSubscription.js';
 import { LINGUANEST_CONTENT_LIBRARY } from '../contentLibrary.js';
 import { defaultModeratorPermissions, hasModeratorPermission, normalizeModeratorPermissions } from '../middleware/auth.js';
 
+// Deleting a user leaves dangling references everywhere they participated - pull them out of
+// group membership/moderation, and remove records that are meaningless once they're gone
+// (their own family links, learning progress, flashcard progress). Group.creator is
+// intentionally left untouched: reassigning or deleting someone else's group is a product
+// decision, not something to make silently as a side effect of a user delete.
+const cleanupUserReferences = async (userIds) => {
+  const ids = Array.isArray(userIds) ? userIds : [userIds];
+  if (ids.length === 0) return;
+  await Promise.all([
+    Group.updateMany({}, { $pull: { members: { $in: ids }, moderators: { $in: ids } } }),
+    FamilyLink.deleteMany({ $or: [{ parent: { $in: ids } }, { student: { $in: ids } }] }),
+    Progress.deleteMany({ user: { $in: ids } }),
+    FlashcardProgress.deleteMany({ student: { $in: ids } }),
+  ]);
+};
+
 const contentModels = { courses: Course, lessons: Lesson, flashcards: Flashcard, posts: ForumPost, groups: Group };
 
 const getContentModel = (resource) => contentModels[resource];
@@ -85,6 +101,7 @@ export const deleteUser = async (req, res, next) => {
     if (req.params.id === req.user.id.toString()) return res.status(400).json({ success: false, message: 'You cannot delete your own admin account' });
     const user = await User.findByIdAndDelete(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    await cleanupUserReferences(user._id);
     res.status(200).json({ success: true, message: 'User deleted' });
   } catch (error) { next(error); }
 };
@@ -121,6 +138,7 @@ export const bulkUserAction = async (req, res, next) => {
     if (action === 'delete') {
       const result = await User.deleteMany({ _id: { $in: applicableIds } });
       modifiedCount = result.deletedCount;
+      await cleanupUserReferences(applicableIds);
     } else {
       const update = action === 'suspend' ? { isActive: false } : action === 'reactivate' ? { isActive: true } : { isEmailVerified: true };
       const result = await User.updateMany({ _id: { $in: applicableIds } }, update);
