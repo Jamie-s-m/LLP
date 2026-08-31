@@ -53,6 +53,16 @@ jobs:
           # Not a real secret - only used by the Payme webhook test suite to exercise the
           # Basic-auth check locally within CI, matching backend/.env's local dev value.
           PAYME_MERCHANT_KEY: ci_test_key_12345
+          # mongodb-memory-server's default MongoDB version download is built against
+          # OpenSSL 1.1 (libcrypto.so.1.1), which the ubuntu-latest runner no longer ships
+          # (removed from Ubuntu's repos after 20.04) - every test run was failing on
+          # "library is missing" before ever reaching a single assertion. Pin a MongoDB
+          # version whose official Linux build targets OpenSSL 3 instead of chasing down a
+          # legacy system package. MongoDB 7.0 also dropped the ephemeralForTest storage
+          # engine mongodb-memory-server defaults to, so wiredTiger (always available) has
+          # to be selected explicitly too.
+          MONGOMS_VERSION: 7.0.14
+          MONGOMS_STORAGE_ENGINE: wiredTiger
         run: npm test
 
   deploy-render:

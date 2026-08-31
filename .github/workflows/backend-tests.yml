@@ -21,6 +21,10 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
+          # Without this, actions/setup-node looks for a lock file at the repo root - it
+          # doesn't exist here (package-lock.json lives in backend/), so the cache step
+          # failed outright before a single dependency installed.
+          cache-dependency-path: backend/package-lock.json
 
       - name: Install backend dependencies
         working-directory: backend
@@ -33,4 +37,9 @@ jobs:
           # Not a real secret - only used by the Payme webhook test suite to exercise the
           # Basic-auth check locally within CI, matching backend/.env's local dev value.
           PAYME_MERCHANT_KEY: ci_test_key_12345
+          # See ci-cd.yml for why these are needed: mongodb-memory-server's default MongoDB
+          # version requires an OpenSSL 1.1 library ubuntu-latest no longer ships, and
+          # MongoDB 7.0 dropped the ephemeralForTest storage engine it defaults to.
+          MONGOMS_VERSION: 7.0.14
+          MONGOMS_STORAGE_ENGINE: wiredTiger
         run: npm test
