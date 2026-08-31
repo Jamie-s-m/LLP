@@ -13,6 +13,13 @@ import {
 } from '../utils/billing.js';
 import User from '../models/User.js';
 import PaymeTransaction from '../models/PaymeTransaction.js';
+import AnalyticsEvent from '../models/AnalyticsEvent.js';
+
+// Fire-and-forget: a webhook's job is to confirm payment with the provider and update
+// billing state - it must return successfully to Stripe/Payme even if this insert fails.
+const recordBillingEvent = (event, userId, metadata) => {
+  AnalyticsEvent.create({ event, user: userId, metadata }).catch(() => {});
+};
 
 // Read lazily, not captured at module-load time: billingController.js is statically imported
 // before app.js calls dotenv.config(), so a module-level constant would always read as empty
@@ -298,6 +305,7 @@ export const handlePaymeRequest = async (req, res) => {
           return res.json({ error: PAYME_ERRORS.COULD_NOT_PERFORM, id });
         }
 
+        recordBillingEvent('payment_completed', claimed.user, { provider: 'payme', plan: claimed.plan, amount: claimed.amount });
         return res.json({ result: { transaction: String(claimed._id), perform_time: performTime, state: 2 }, id });
       }
 
@@ -323,6 +331,7 @@ export const handlePaymeRequest = async (req, res) => {
             { _id: claimedPerformed.user, 'billing.paymeTransactionId': claimedPerformed.paycomTransactionId },
             { $set: { 'billing.plan': 'none', 'billing.status': 'canceled' } }
           );
+          recordBillingEvent('subscription_cancelled', claimedPerformed.user, { provider: 'payme', plan: claimedPerformed.plan, reason });
           return res.json({ result: { transaction: String(claimedPerformed._id), cancel_time: cancelTime, state: -2, reason }, id });
         }
 
@@ -410,6 +419,7 @@ export const handleStripeWebhook = async (req, res) => {
       billing.stripeSubscriptionId = String(payload.subscription || billing.stripeSubscriptionId || '');
       billing.plan = payload.metadata?.planKey || billing.plan || 'none';
       billing.provider = 'stripe';
+      recordBillingEvent('payment_completed', user._id, { provider: 'stripe', plan: billing.plan });
     }
 
     if (event.type === 'customer.subscription.created' || event.type === 'customer.subscription.updated' || event.type === 'customer.subscription.deleted') {
@@ -423,6 +433,9 @@ export const handleStripeWebhook = async (req, res) => {
       billing.status = event.type === 'customer.subscription.deleted' ? 'canceled' : payload.status || 'inactive';
       billing.currentPeriodEnd = payload.current_period_end ? new Date(payload.current_period_end * 1000) : null;
       billing.cancelAtPeriodEnd = Boolean(payload.cancel_at_period_end);
+      if (event.type === 'customer.subscription.deleted') {
+        recordBillingEvent('subscription_cancelled', user._id, { provider: 'stripe', plan: billing.plan });
+      }
     }
 
     if (event.type === 'invoice.payment_failed') {

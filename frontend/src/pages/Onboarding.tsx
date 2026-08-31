@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { FiArrowRight, FiCheck } from 'react-icons/fi'
 import api from '../services/api'
 import { useAuthStore } from '../store/authStore'
 import { useI18n } from '../utils/i18n'
+import { track } from '../utils/analytics'
 
 type Goal = 'job' | 'it' | 'abroad' | 'study' | 'confidence' | 'other'
 type SelfLevel = 'beginner' | 'basic' | 'intermediate' | 'advanced' | 'not_sure'
@@ -24,6 +25,10 @@ export default function Onboarding() {
   const [selfLevel, setSelfLevel] = useState<SelfLevel | null>(null)
   const [dailyMinutes, setDailyMinutes] = useState<DailyMinutes | null>(null)
   const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    track('onboarding_started')
+  }, [])
 
   const goalLabels: Record<Goal, string> = {
     job: t('onboarding.goalJob'),
@@ -57,6 +62,7 @@ export default function Onboarding() {
         dailyGoalMinutes: dailyMinutes,
       })
       if (user) setUser({ ...user, ...response.data.data })
+      track('onboarding_completed', { goal, dailyMinutes })
       navigate('/placement-test?onboarding=1')
     } catch {
       toast.error(t('onboarding.savingError'))

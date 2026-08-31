@@ -53,6 +53,7 @@ const ProgressAnalytics = lazyWithChunkRetry(() => import('./pages/student/Progr
 const Achievements = lazyWithChunkRetry(() => import('./pages/student/Achievements'), 'achievements')
 const PlacementTest = lazyWithChunkRetry(() => import('./pages/PlacementTest'), 'placement-test')
 const Onboarding = lazyWithChunkRetry(() => import('./pages/Onboarding'), 'onboarding')
+const VerifyCertificate = lazyWithChunkRetry(() => import('./pages/VerifyCertificate'), 'verify-certificate')
 const OnboardingPlan = lazyWithChunkRetry(() => import('./pages/OnboardingPlan'), 'onboarding-plan')
 const TeacherDashboard = lazyWithChunkRetry(() => import('./pages/teacher/Dashboard'), 'teacher-dashboard')
 const TeacherCourses = lazyWithChunkRetry(() => import('./pages/teacher/Courses'), 'teacher-courses')
@@ -67,6 +68,7 @@ const MoreMenu = lazyWithChunkRetry(() => import('./pages/MoreMenu'), 'more-menu
 const ParentDashboard = lazyWithChunkRetry(() => import('./pages/ParentDashboard'), 'parent-dashboard')
 const ChildProgress = lazyWithChunkRetry(() => import('./pages/ChildProgress'), 'child-progress')
 const ControlCenter = lazyWithChunkRetry(() => import('./pages/admin/ControlCenter'), 'control-center')
+const BusinessMetrics = lazyWithChunkRetry(() => import('./pages/admin/BusinessMetrics'), 'business-metrics')
 const Tutors = lazyWithChunkRetry(() => import('./pages/Tutors'), 'tutors')
 const Pricing = lazyWithChunkRetry(() => import('./pages/Pricing'), 'pricing')
 const Terms = lazyWithChunkRetry(() => import('./pages/Terms'), 'terms')
@@ -106,6 +108,7 @@ function App() {
         <Route path="/terms" element={<Layout><Terms /></Layout>} />
         <Route path="/privacy" element={<Layout><Privacy /></Layout>} />
         <Route path="/cookies" element={<Layout><Cookies /></Layout>} />
+        <Route path="/verify/:certificateId" element={<Layout><VerifyCertificate /></Layout>} />
         <Route path="/login" element={isAuthenticated ? <Navigate to={authenticatedLandingPath} replace /> : <Layout><Login /></Layout>} />
         <Route path="/register" element={isAuthenticated ? <Navigate to={authenticatedLandingPath} replace /> : <Layout><Register /></Layout>} />
         <Route path="/verify-email" element={<Layout><VerifyEmail /></Layout>} />
@@ -302,6 +305,7 @@ function App() {
         <Route path="/admin/users" element={<Navigate to="/admin/control-center" replace />} />
         <Route path="/admin/content" element={<Navigate to="/admin/control-center" replace />} />
         <Route path="/admin/control-center" element={<ProtectedRoute allowedRoles={['admin', 'moderator']}><Layout><ControlCenter /></Layout></ProtectedRoute>} />
+        <Route path="/admin/business-metrics" element={<ProtectedRoute allowedRoles={['admin']}><Layout><BusinessMetrics /></Layout></ProtectedRoute>} />
 
         {/* Common Routes */}
         <Route path="/forum" element={<Layout><Forum /></Layout>} />

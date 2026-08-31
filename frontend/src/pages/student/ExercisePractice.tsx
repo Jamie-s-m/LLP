@@ -4,6 +4,7 @@ import toast from 'react-hot-toast'
 import { FiArrowLeft, FiCheck, FiX, FiMic, FiSquare, FiPlay } from 'react-icons/fi'
 import api from '../../services/api'
 import HeartsRow from '../../components/ui/HeartsRow'
+import { track } from '../../utils/analytics'
 
 interface ExerciseData {
   _id: string
@@ -98,6 +99,7 @@ export default function ExercisePractice() {
     try {
       await api.post('/exercises/submit', { exerciseId: exercise._id, audioBase64: recordedBase64 })
       setSpeakingSubmitted(true)
+      track('exercise_completed', { exerciseId: exercise._id, type: exercise.type })
       toast.success('Recording submitted for review')
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Recording could not be submitted')
@@ -118,6 +120,7 @@ export default function ExercisePractice() {
       const response = await api.post('/exercises/submit', { exerciseId: exercise._id, answer })
       setResult(response.data.data)
       setHearts({ hearts: response.data.data.hearts, maxHearts: response.data.data.maxHearts })
+      track('exercise_completed', { exerciseId: exercise._id, type: exercise.type, correct: Boolean(response.data.data.isCorrect) })
     } catch (error: any) {
       if (error.response?.status === 403) {
         setOutOfHearts({ heartsRegenAt: error.response.data?.data?.heartsRegenAt || null })

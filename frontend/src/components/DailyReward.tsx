@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import api from '../services/api'
+import { track } from '../utils/analytics'
 
 export default function DailyReward() {
   const [status, setStatus] = useState<any>(null)
@@ -25,7 +26,10 @@ export default function DailyReward() {
     setError(null)
     try {
       const res = await api.post('/daily-reward/claim')
-      setStatus((s: any) => ({ ...s, linguaCoins: res.data.data.newLinguaCoins, currentStreak: res.data.data.newDailyRewardStreak }))
+      const newStreak = res.data.data.newDailyRewardStreak
+      setStatus((s: any) => ({ ...s, linguaCoins: res.data.data.newLinguaCoins, currentStreak: newStreak }))
+      track('daily_goal_completed', { streak: newStreak })
+      if (newStreak > 1) track('streak_maintained', { streak: newStreak })
       const unlockedBadges = res.data.data.unlockedBadges as Array<{ name: string; icon?: string }> | undefined
       unlockedBadges?.forEach((badge) => {
         toast.success(`${badge.icon ? `${badge.icon} ` : ''}Badge unlocked: ${badge.name}!`, { duration: 5000 })

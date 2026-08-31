@@ -6,6 +6,7 @@ import api from '../services/api'
 import { useLanguageStore } from '../store/languageStore'
 import { useAuthStore } from '../store/authStore'
 import { useI18n } from '../utils/i18n'
+import { track } from '../utils/analytics'
 
 interface Question { _id: string; question: string; options: string[]; cefr: string }
 interface PlacementResult { cefr: string; level: string; totalCorrect: number; totalQuestions: number; recommendedCourses: any[] }
@@ -102,6 +103,7 @@ export default function PlacementTest() {
       setIndex(0)
       setAnswers({})
       setPhase('test')
+      track('placement_started', { fromOnboarding, questionCount: fetchedQuestions.length })
     } catch {
       toast.error('The placement test could not be loaded')
     } finally {
@@ -129,6 +131,7 @@ export default function PlacementTest() {
       const response = await api.post('/placement/submit', { answers: payload })
       setResult(response.data.data)
       if (user) setUser({ ...user, placementLevel: response.data.data.level })
+      track('placement_completed', { cefr: response.data.data.cefr, level: response.data.data.level, fromOnboarding })
       if (fromOnboarding) {
         navigate('/onboarding/plan', { state: { result: response.data.data } })
         return

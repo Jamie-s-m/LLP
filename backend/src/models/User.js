@@ -27,6 +27,16 @@ const userSchema = new mongoose.Schema(
     nativeLanguage: { type: String, default: 'English' },
     targetLanguages: [{ type: String }],
     placementLevel: { type: String, enum: ['Beginner', 'Intermediate', 'Advanced', null], default: null },
+    // The raw CEFR tier (finer-grained than placementLevel's 3-tier bucket), plus the
+    // per-skill breakdown from that same placement attempt - persisted so a skill profile can
+    // be shown later without needing the original submission still in memory. See
+    // progressController.getSkillProfile.
+    placementCefr: { type: String, enum: ['A1', 'A2', 'B1', 'B2', null], default: null },
+    placementSkillStats: {
+      grammar: { correct: { type: Number, default: 0 }, total: { type: Number, default: 0 } },
+      vocabulary: { correct: { type: Number, default: 0 }, total: { type: Number, default: 0 } },
+      reading: { correct: { type: Number, default: 0 }, total: { type: Number, default: 0 } },
+    },
     placementCompletedAt: { type: Date, default: null },
     // Captured during the 3-step onboarding flow (goal, self-assessed level, daily time
     // commitment) that runs before the placement test on a new student's first visit.

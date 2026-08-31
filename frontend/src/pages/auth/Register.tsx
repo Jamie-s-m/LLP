@@ -6,6 +6,7 @@ import { useAuthStore } from '../../store/authStore'
 import { useLanguageStore } from '../../store/languageStore'
 import api from '../../services/api'
 import toast from 'react-hot-toast'
+import { track } from '../../utils/analytics'
 
 type SignupRole = 'student' | 'parent'
 
@@ -187,6 +188,8 @@ export default function Register() {
       return
     }
 
+    track('signup_started', { role })
+
     try {
       const payload = await register({
         firstName: formData.firstName,
@@ -196,6 +199,7 @@ export default function Register() {
         role,
         requestTeacherRole: role === 'student' && requestTeacherRole,
       })
+      track('signup_completed', { role })
       toast.success(ui.createSuccess)
       const query = new URLSearchParams({ email: formData.email.trim() })
       query.set('registered', '1')

@@ -6,6 +6,7 @@ import api from '../services/api'
 import { useAuthStore } from '../store/authStore'
 import { useI18n } from '../utils/i18n'
 import PaymeCheckoutButton from '../components/PaymeCheckoutButton'
+import { track } from '../utils/analytics'
 
 type BillingPlanKey = 'local' | 'learner' | 'family' | 'teaching'
 
@@ -102,6 +103,10 @@ export default function Pricing() {
   })
   const { user, isAuthenticated, setUser } = useAuthStore()
   const { t, language } = useI18n()
+
+  useEffect(() => {
+    track('pricing_viewed')
+  }, [])
 
   const refreshBilling = async () => {
     const response = await api.get('/billing/me')
@@ -210,6 +215,7 @@ export default function Pricing() {
   const startCheckout = async (planKey: BillingPlanKey) => {
     try {
       setBusyPlan(planKey)
+      track('checkout_started', { plan: planKey, provider: 'stripe' })
       const response = await api.post('/billing/checkout-session', { plan: planKey })
       const url = response.data.data?.url
       if (!url) {
@@ -340,7 +346,7 @@ export default function Pricing() {
                       </p>
                       <p className="mt-3 text-sm font-semibold text-ink dark:text-white">{t('pricing.paymeSectionTitle')}</p>
                       <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{t('pricing.paymeSectionCopy')} · {planPricesUzs[plan.key].toLocaleString()} so&apos;m/month</p>
-                      <div className="mt-3">
+                      <div className="mt-3" onClick={() => track('checkout_started', { plan: plan.key, provider: 'payme' })}>
                         <PaymeCheckoutButton
                           merchantId={payme.merchantId}
                           checkoutBaseUrl={payme.checkoutBaseUrl}

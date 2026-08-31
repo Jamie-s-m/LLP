@@ -62,6 +62,17 @@ const lessonSchema = new mongoose.Schema(
       default: 'Easy',
     },
     tags: [String],
+    // Explicit, measurable "the learner can..." outcomes for this lesson - see
+    // backend/src/data/curriculumBlueprint.js for the level-wide goals these should trace
+    // back to. Optional so existing/generated lessons that predate this field don't break;
+    // the reference curriculum (backend/src/data/referenceCurriculum.js) sets it on every lesson.
+    cefr: { type: String, enum: ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', null], default: null },
+    objectives: [
+      {
+        description: { type: String, required: true },
+        skill: { type: String, enum: ['grammar', 'vocabulary', 'reading', 'listening', 'speaking', 'writing'], required: true },
+      },
+    ],
   },
   { timestamps: true }
 );

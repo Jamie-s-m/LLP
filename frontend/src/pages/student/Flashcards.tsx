@@ -4,6 +4,7 @@ import toast from 'react-hot-toast'
 import api from '../../services/api'
 import { useLanguageStore } from '../../store/languageStore'
 import { useAuthStore } from '../../store/authStore'
+import { track } from '../../utils/analytics'
 
 interface FlashcardItem {
   _id: string
@@ -88,6 +89,7 @@ export default function Flashcards() {
     try {
       const response = await api.post(`/flashcards/${card._id}/review`, { rating })
       setReviewed((prev) => new Set(prev).add(card._id))
+      track('flashcard_reviewed', { rating })
       const { xpAwarded, coinsAwarded, totalXp, totalLinguaCoins } = response.data.data || {}
       if (xpAwarded || coinsAwarded) {
         toast.success(

@@ -238,7 +238,13 @@ const createExercise = ({ title, type, question, options, answer, explanation, d
   type,
   question,
   options,
-  correctAnswer: answer,
+  // multiple_choice is graded against an OPTION INDEX (exerciseController.gradeAnswer, and
+  // the placement-test question bank already stores correctAnswer this way) - storing the
+  // answer's text here instead meant every real submission (the frontend always sends the
+  // selected option's index) was graded incorrect no matter what the student picked. Only
+  // multiple_choice needs this: fill_blank is matched by normalized text, and speaking's
+  // "correctAnswer" is just the prompt echoed back, not something graded by equality.
+  correctAnswer: type === 'multiple_choice' && Array.isArray(options) ? options.indexOf(answer) : answer,
   explanation,
   difficulty,
   points,

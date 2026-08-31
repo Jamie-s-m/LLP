@@ -36,7 +36,13 @@ export const getNavSections = (role: AppRole, t: (key: string) => string): NavSe
     return [
       { label: t('sidebar.sectionTeach'), links: teacherLinks },
       ...(role === 'admin'
-        ? [{ label: t('sidebar.sectionAdmin'), links: [{ label: t('sidebar.controlCenter'), path: '/admin/control-center', icon: FiGrid }] }]
+        ? [{
+          label: t('sidebar.sectionAdmin'),
+          links: [
+            { label: t('sidebar.controlCenter'), path: '/admin/control-center', icon: FiGrid },
+            { label: t('sidebar.businessMetrics'), path: '/admin/business-metrics', icon: FiBarChart2 },
+          ],
+        }]
         : []),
     ]
   }

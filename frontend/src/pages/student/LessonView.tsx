@@ -5,6 +5,7 @@ import toast from 'react-hot-toast'
 import api from '../../services/api'
 import { useLearningStore } from '../../store/learningStore'
 import VideoEmbed from '../../components/ui/VideoEmbed'
+import { track } from '../../utils/analytics'
 
 interface VocabItem {
   word: string
@@ -81,6 +82,7 @@ export default function LessonView() {
       .then(async (response) => {
         const data = response.data.data as LessonData
         setLesson(data)
+        track('lesson_started', { lessonId: data._id, courseId: data.course })
         try {
           const listRes = await api.get('/lessons', { params: { courseId: data.course } })
           setSiblings(listRes.data.data || [])
@@ -104,6 +106,7 @@ export default function LessonView() {
     const success = await completeLesson(lesson.course, lesson._id)
     setCompleting(false)
     if (success) {
+      track('lesson_completed', { lessonId: lesson._id, courseId: lesson.course })
       toast.success('Lesson marked complete — nice work!')
     } else {
       toast.error('Could not save your progress. Are you enrolled in this course?')

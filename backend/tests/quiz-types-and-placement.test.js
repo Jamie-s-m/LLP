@@ -144,6 +144,87 @@ describe('Fill-blank grading', () => {
   });
 });
 
+describe('Multiple-choice grading (regression: correctAnswer must be an option index)', () => {
+  let token;
+  let user;
+  let exercise;
+
+  beforeAll(async () => {
+    user = await User.create({
+      firstName: 'MC',
+      lastName: 'Tester',
+      email: 'mc-tester@example.com',
+      password: 'testpass123',
+      role: 'student',
+      isEmailVerified: true,
+    });
+    token = signToken(user);
+
+    const course = await Course.create({
+      title: 'MC Course',
+      description: 'Course for multiple-choice grading test',
+      language: 'English',
+      level: 'Beginner',
+      category: 'Grammar',
+      instructor: user._id,
+    });
+    const lesson = await Lesson.create({ course: course._id, order: 1, title: 'MC Lesson', content: 'content' });
+    // Real shape: correctAnswer is the index into options, exactly what the frontend sends
+    // (see frontend/src/pages/student/ExercisePractice.tsx's setSelected(idx)) - not the
+    // option text. This was a real, live grading bug for every generated multiple_choice
+    // exercise until contentLibrary.js's createExercise was fixed this session.
+    exercise = await Exercise.create({
+      lesson: lesson._id,
+      title: 'MC Exercise',
+      type: 'multiple_choice',
+      question: 'Choose the correct sentence.',
+      options: ['She works in a bank.', 'She working in a bank.', 'She work in a bank.'],
+      correctAnswer: 0,
+      points: 10,
+    });
+  });
+
+  afterAll(async () => {
+    await User.deleteOne({ _id: user._id });
+    await ExerciseAttempt.deleteMany({ user: user._id });
+  });
+
+  test('grades the correct option index as correct', async () => {
+    const res = await request(app)
+      .post('/api/exercises/submit')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ exerciseId: exercise._id.toString(), answer: 0 });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.isCorrect).toBe(true);
+  });
+
+  test('grades a wrong option index as incorrect', async () => {
+    const res = await request(app)
+      .post('/api/exercises/submit')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ exerciseId: exercise._id.toString(), answer: 1 });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.isCorrect).toBe(false);
+  });
+});
+
+describe('Generated course content produces index-based multiple_choice answers', () => {
+  test('every generated multiple_choice exercise has an in-range numeric correctAnswer', async () => {
+    const { buildLinguaNestContentLibrary } = await import('../src/contentLibrary.js');
+    const library = buildLinguaNestContentLibrary();
+    const mcExercises = library.lessons.flatMap((lesson) => lesson.exercises).filter((exercise) => exercise.type === 'multiple_choice');
+
+    expect(mcExercises.length).toBeGreaterThan(0);
+    mcExercises.forEach((exercise) => {
+      expect(Number.isInteger(exercise.correctAnswer)).toBe(true);
+      expect(exercise.correctAnswer).toBeGreaterThanOrEqual(0);
+      expect(exercise.correctAnswer).toBeLessThan(exercise.options.length);
+    });
+  });
+});
+
 describe('Speaking exercise manual-review queue', () => {
   let teacherToken, teacher, studentToken, student, exercise, course;
 
@@ -315,6 +396,8 @@ describe('Placement test', () => {
     const refreshed = await User.findById(user._id);
     expect(refreshed.placementLevel).toBe('Advanced');
     expect(refreshed.placementCompletedAt).not.toBeNull();
+    expect(refreshed.placementCefr).toBe('B2');
+    expect(refreshed.placementSkillStats.grammar.total).toBeGreaterThan(0);
   });
 
   test('only passing the A1 tier places the student at Beginner', async () => {

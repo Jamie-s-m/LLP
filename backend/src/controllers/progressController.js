@@ -189,3 +189,59 @@ export const getSkillsBreakdown = async (req, res, next) => {
     next(error);
   }
 };
+
+// PRIORITY 9/85: a real per-skill profile instead of one percentage. Deliberately does NOT
+// invent a separate CEFR letter per skill from the placement test's per-skill counts (e.g.
+// "Grammar: B1, Vocabulary: A2") - the placement test's skill-tagged items span every CEFR
+// tier mixed together, so a blended accuracy ratio per skill is not a valid tier estimate on
+// its own (that needs a properly designed adaptive/IRT instrument - PRIORITY 84/141 explicitly
+// warn against implying that precision before it exists). Instead: ONE overall CEFR estimate
+// (from the real tier-gated placement result, which IS designed to support that), reported
+// with an honest confidence level, plus per-skill ACCURACY (not a fake CEFR letter) from both
+// the placement test and ongoing practice.
+export const getSkillProfile = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id).select('placementLevel placementCefr placementSkillStats placementCompletedAt');
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    const practiceRows = await ExerciseAttempt.aggregate([
+      { $match: { user: req.user._id, status: 'graded' } },
+      { $group: { _id: '$skill', attempts: { $sum: 1 }, correct: { $sum: { $cond: ['$isCorrect', 1, 0] } } } },
+    ]);
+    const practiceBySkill = new Map(practiceRows.map((row) => [row._id, row]));
+
+    const PLACEMENT_COVERED_SKILLS = new Set(['grammar', 'vocabulary', 'reading']);
+    const skills = SKILLS.map((skill) => {
+      const practice = practiceBySkill.get(skill);
+      const practiceAccuracy = practice?.attempts ? Math.round((practice.correct / practice.attempts) * 100) : null;
+
+      const placementStat = PLACEMENT_COVERED_SKILLS.has(skill) ? user.placementSkillStats?.[skill] : null;
+      const placementAccuracy = placementStat?.total ? Math.round((placementStat.correct / placementStat.total) * 100) : null;
+
+      return {
+        skill,
+        placement: placementStat?.total
+          ? { accuracyPercent: placementAccuracy, questionCount: placementStat.total }
+          : { accuracyPercent: null, questionCount: 0, note: PLACEMENT_COVERED_SKILLS.has(skill) ? 'no placement data yet' : 'not covered by the placement test yet' },
+        practice: practice?.attempts
+          ? { accuracyPercent: practiceAccuracy, attemptCount: practice.attempts }
+          : { accuracyPercent: null, attemptCount: 0 },
+      };
+    });
+
+    res.status(200).json({
+      success: true,
+      data: {
+        overallCefr: user.placementCefr,
+        overallLevel: user.placementLevel,
+        confidence: user.placementCompletedAt ? 'low' : 'none',
+        confidenceNote: user.placementCompletedAt
+          ? 'Based on a single 32-question placement test, not an ongoing adaptive assessment. Treat as a starting estimate, not a precise measurement.'
+          : 'No placement test completed yet.',
+        skills,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};

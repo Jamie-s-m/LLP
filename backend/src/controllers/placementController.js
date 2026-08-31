@@ -59,7 +59,12 @@ export const submitPlacement = async (req, res, next) => {
     const cefr = achievedTier || 'A1';
     const level = TIER_TO_LEVEL[cefr];
 
-    await User.findByIdAndUpdate(req.user.id, { placementLevel: level, placementCompletedAt: new Date() });
+    await User.findByIdAndUpdate(req.user.id, {
+      placementLevel: level,
+      placementCefr: cefr,
+      placementSkillStats: skillStats,
+      placementCompletedAt: new Date(),
+    });
 
     const recommendedCourses = await Course.find({ level, isPublished: true }).limit(3);
 

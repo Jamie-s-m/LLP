@@ -12,6 +12,7 @@ import PlacementQuestion from './models/PlacementQuestion.js';
 import { LINGUANEST_CONTENT_LIBRARY } from './contentLibrary.js';
 import { placementQuestions } from './data/placementQuestions.js';
 import { inferSkillFromType } from './utils/skills.js';
+import { REFERENCE_COURSE } from './data/referenceCurriculum.js';
 
 // Load .env from project root
 const __filename = fileURLToPath(import.meta.url);
@@ -209,7 +210,22 @@ export const seedContent = async ({
     await mongoose.connect(MONGODB_URI, { serverSelectionTimeoutMS: 5000 });
   }
 
-  const library = LINGUANEST_CONTENT_LIBRARY;
+  // Fold the hand-authored reference pathway (backend/src/data/referenceCurriculum.js) into
+  // the same library shape the generated catalog uses, so it goes through the exact same
+  // upsert loop below AND so the "already satisfies requirements" short-circuit further down
+  // actually accounts for it - without this, re-running seed against a database that already
+  // has the generated catalog would silently never insert the reference course, since the
+  // generated catalog alone already satisfies the old (undercounted) minimums.
+  const referenceExerciseCount = REFERENCE_COURSE.lessons.reduce((sum, lessonData) => sum + (lessonData.exercises?.length || 0), 0);
+  const library = {
+    ...LINGUANEST_CONTENT_LIBRARY,
+    courses: [...LINGUANEST_CONTENT_LIBRARY.courses, REFERENCE_COURSE],
+    lessons: [...LINGUANEST_CONTENT_LIBRARY.lessons, ...REFERENCE_COURSE.lessons],
+    metadata: {
+      ...LINGUANEST_CONTENT_LIBRARY.metadata,
+      totalExercises: LINGUANEST_CONTENT_LIBRARY.metadata.totalExercises + referenceExerciseCount,
+    },
+  };
   const minimumRequirements = {
     courses: library.courses.length,
     publishedCourses: library.courses.length,
@@ -295,6 +311,8 @@ export const seedContent = async ({
           mediaUrl: lessonData.mediaUrl || '',
           vocabulary: normalizeLessonContent(lessonData).vocabulary,
           grammar: normalizeLessonContent(lessonData).grammar,
+          cefr: lessonData.cefr || null,
+          objectives: Array.isArray(lessonData.objectives) ? lessonData.objectives : [],
           tags: [courseData.category, courseData.level.toLowerCase()],
           completionTime: lessonData.duration || 15,
         },
