@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { FiCheck, FiTarget } from 'react-icons/fi'
 import api from '../services/api'
 import { useLanguageStore } from '../store/languageStore'
 import { useAuthStore } from '../store/authStore'
+import { useI18n } from '../utils/i18n'
 
 interface Question { _id: string; question: string; options: string[]; cefr: string }
 interface PlacementResult { cefr: string; level: string; totalCorrect: number; totalQuestions: number; recommendedCourses: any[] }
@@ -77,6 +78,9 @@ export default function PlacementTest() {
   const ui = copy[language]
   const { user, setUser } = useAuthStore()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const { t } = useI18n()
+  const fromOnboarding = searchParams.get('onboarding') === '1'
 
   const [phase, setPhase] = useState<'intro' | 'test' | 'result'>('intro')
   const [questions, setQuestions] = useState<Question[]>([])
@@ -125,6 +129,10 @@ export default function PlacementTest() {
       const response = await api.post('/placement/submit', { answers: payload })
       setResult(response.data.data)
       if (user) setUser({ ...user, placementLevel: response.data.data.level })
+      if (fromOnboarding) {
+        navigate('/onboarding/plan', { state: { result: response.data.data } })
+        return
+      }
       setPhase('result')
     } catch {
       toast.error('Your result could not be saved')
@@ -202,9 +210,9 @@ export default function PlacementTest() {
           <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-[var(--accent-light)] text-[var(--accent)]">
             <FiTarget size={28} />
           </div>
-          <p className="atlas-kicker">{ui.kicker}</p>
+          <p className="atlas-kicker">{fromOnboarding ? t('onboarding.placementIntroTitle') : ui.kicker}</p>
           <h1 className="mb-3 text-3xl font-bold text-ink dark:text-white">{ui.title}</h1>
-          <p className="mb-6 text-muted">{ui.intro}</p>
+          <p className="mb-6 text-muted">{fromOnboarding ? t('onboarding.placementIntroCopy') : ui.intro}</p>
           {user?.placementLevel ? (
             <div className="mb-6 rounded-xl border border-[var(--border)] p-4 text-sm text-muted">
               <p>{ui.retakeNote}</p>
@@ -214,6 +222,15 @@ export default function PlacementTest() {
           <button onClick={start} disabled={loading} className="btn btn-primary w-full">
             {loading ? ui.loading : ui.start}
           </button>
+          {fromOnboarding ? (
+            <button
+              type="button"
+              onClick={() => navigate('/onboarding/plan')}
+              className="mt-4 text-sm font-semibold text-[var(--accent)]"
+            >
+              {t('onboarding.skip')}
+            </button>
+          ) : null}
         </div>
       </div>
     </div>

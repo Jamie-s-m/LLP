@@ -17,10 +17,14 @@ interface User {
   hearts?: number
   maxHearts?: number
   placementLevel?: 'Beginner' | 'Intermediate' | 'Advanced' | null
+  learningGoal?: 'job' | 'it' | 'abroad' | 'study' | 'confidence' | 'other' | null
+  selfAssessedLevel?: 'beginner' | 'basic' | 'intermediate' | 'advanced' | 'not_sure' | null
+  dailyGoalMinutes?: 10 | 15 | 30 | 60 | null
+  onboardingCompletedAt?: string | null
   teacherApplicationStatus?: 'none' | 'pending' | 'approved' | 'rejected'
   isEmailVerified?: boolean
   billing?: {
-    plan: 'none' | 'learner' | 'family' | 'teaching'
+    plan: 'none' | 'local' | 'learner' | 'family' | 'teaching'
     status: 'inactive' | 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid' | 'incomplete' | 'incomplete_expired'
     provider?: 'none' | 'stripe' | 'payme'
     currentPeriodEnd?: string | null

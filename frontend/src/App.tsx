@@ -52,6 +52,8 @@ const Leaderboard = lazyWithChunkRetry(() => import('./pages/student/Leaderboard
 const ProgressAnalytics = lazyWithChunkRetry(() => import('./pages/student/ProgressAnalytics'), 'progress-analytics')
 const Achievements = lazyWithChunkRetry(() => import('./pages/student/Achievements'), 'achievements')
 const PlacementTest = lazyWithChunkRetry(() => import('./pages/PlacementTest'), 'placement-test')
+const Onboarding = lazyWithChunkRetry(() => import('./pages/Onboarding'), 'onboarding')
+const OnboardingPlan = lazyWithChunkRetry(() => import('./pages/OnboardingPlan'), 'onboarding-plan')
 const TeacherDashboard = lazyWithChunkRetry(() => import('./pages/teacher/Dashboard'), 'teacher-dashboard')
 const TeacherCourses = lazyWithChunkRetry(() => import('./pages/teacher/Courses'), 'teacher-courses')
 const CreateCourse = lazyWithChunkRetry(() => import('./pages/teacher/CreateCourse'), 'create-course')
@@ -85,7 +87,9 @@ function App() {
       ? '/teacher/dashboard'
       : user?.role === 'parent'
         ? '/parent/dashboard'
-        : '/dashboard'
+        : user?.role === 'student' && !user?.onboardingCompletedAt
+          ? '/onboarding'
+          : '/dashboard'
 
   return (
     // Render serves the application from the root path.
@@ -215,6 +219,22 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['student']}>
               <Layout><PlacementTest /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/onboarding"
+          element={
+            <ProtectedRoute allowedRoles={['student']}>
+              <Layout><Onboarding /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/onboarding/plan"
+          element={
+            <ProtectedRoute allowedRoles={['student']}>
+              <Layout><OnboardingPlan /></Layout>
             </ProtectedRoute>
           }
         />

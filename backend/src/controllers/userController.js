@@ -40,6 +40,49 @@ export const updateProfile = async (req, res, next) => {
   }
 };
 
+const LEARNING_GOALS = ['job', 'it', 'abroad', 'study', 'confidence', 'other'];
+const SELF_ASSESSED_LEVELS = ['beginner', 'basic', 'intermediate', 'advanced', 'not_sure'];
+const DAILY_GOAL_MINUTES = [10, 15, 30, 60];
+
+// Saves the goal/self-assessment/time-commitment collected in the onboarding flow and marks
+// it complete. Kept separate from updateProfile (a settings-page edit) because this is a
+// one-time, ordered flow with its own validation and a completion timestamp that gates
+// whether a returning student is routed back into onboarding.
+export const completeOnboarding = async (req, res, next) => {
+  try {
+    const { learningGoal, selfAssessedLevel, dailyGoalMinutes } = req.body || {};
+
+    if (!LEARNING_GOALS.includes(learningGoal)) {
+      return res.status(400).json({ success: false, message: 'A valid learning goal is required' });
+    }
+    if (!SELF_ASSESSED_LEVELS.includes(selfAssessedLevel)) {
+      return res.status(400).json({ success: false, message: 'A valid self-assessed level is required' });
+    }
+    if (!DAILY_GOAL_MINUTES.includes(Number(dailyGoalMinutes))) {
+      return res.status(400).json({ success: false, message: 'A valid daily time commitment is required' });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      {
+        learningGoal,
+        selfAssessedLevel,
+        dailyGoalMinutes: Number(dailyGoalMinutes),
+        onboardingCompletedAt: new Date(),
+      },
+      { new: true }
+    ).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    res.status(200).json({ success: true, data: user });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getDashboardSummary = async (req, res, next) => {
   try {
     const [user, totalProgress] = await Promise.all([

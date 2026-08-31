@@ -28,6 +28,20 @@ const userSchema = new mongoose.Schema(
     targetLanguages: [{ type: String }],
     placementLevel: { type: String, enum: ['Beginner', 'Intermediate', 'Advanced', null], default: null },
     placementCompletedAt: { type: Date, default: null },
+    // Captured during the 3-step onboarding flow (goal, self-assessed level, daily time
+    // commitment) that runs before the placement test on a new student's first visit.
+    learningGoal: {
+      type: String,
+      enum: ['job', 'it', 'abroad', 'study', 'confidence', 'other', null],
+      default: null,
+    },
+    selfAssessedLevel: {
+      type: String,
+      enum: ['beginner', 'basic', 'intermediate', 'advanced', 'not_sure', null],
+      default: null,
+    },
+    dailyGoalMinutes: { type: Number, enum: [10, 15, 30, 60, null], default: null },
+    onboardingCompletedAt: { type: Date, default: null },
     xp: { type: Number, default: 0 },
     streak: { type: Number, default: 0 },
     lastActiveDate: { type: Date, default: Date.now },
@@ -45,7 +59,7 @@ const userSchema = new mongoose.Schema(
     parents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     teacherApplicationStatus: { type: String, enum: ['none', 'pending', 'approved', 'rejected'], default: 'none' },
     billing: {
-      plan: { type: String, enum: ['none', 'learner', 'family', 'teaching'], default: 'none' },
+      plan: { type: String, enum: ['none', 'local', 'learner', 'family', 'teaching'], default: 'none' },
       status: {
         type: String,
         enum: ['inactive', 'trialing', 'active', 'past_due', 'canceled', 'unpaid', 'incomplete', 'incomplete_expired'],

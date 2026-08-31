@@ -50,22 +50,22 @@ export default function Home() {
             </p>
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Link
-                to="/courses"
+                to="/placement-test"
                 className="btn btn-primary px-8 py-3.5 text-base"
+              >
+                {t('home.heroPrimaryCta')}
+              </Link>
+              <Link
+                to="/courses"
+                className="btn btn-secondary px-8 py-3.5 text-base"
               >
                 {t('home.exploreLearningPaths')}
               </Link>
-              <Link
-                to="/tutors"
-                className="btn btn-secondary px-8 py-3.5 text-base"
-              >
-                Find your tutor
-              </Link>
             </div>
             <div className="mt-6 flex flex-wrap gap-2 text-sm text-[var(--text-muted)]">
-              <span className="rounded-full border border-[var(--border)] bg-[var(--surface-strong)] px-3 py-1.5">Live tutoring</span>
-              <span className="rounded-full border border-[var(--border)] bg-[var(--surface-strong)] px-3 py-1.5">AI practice</span>
-              <span className="rounded-full border border-[var(--border)] bg-[var(--surface-strong)] px-3 py-1.5">Progress tracking</span>
+              <span className="rounded-full border border-[var(--border)] bg-[var(--surface-strong)] px-3 py-1.5">{t('home.pillPlacement')}</span>
+              <span className="rounded-full border border-[var(--border)] bg-[var(--surface-strong)] px-3 py-1.5">{t('home.pillFlashcards')}</span>
+              <span className="rounded-full border border-[var(--border)] bg-[var(--surface-strong)] px-3 py-1.5">{t('home.pillProgress')}</span>
             </div>
           </div>
           <div className="hero-orbit-wrap relative flex items-center justify-center">

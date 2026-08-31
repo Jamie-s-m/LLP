@@ -7,7 +7,7 @@ import { useAuthStore } from '../store/authStore'
 import { useI18n } from '../utils/i18n'
 import PaymeCheckoutButton from '../components/PaymeCheckoutButton'
 
-type BillingPlanKey = 'learner' | 'family' | 'teaching'
+type BillingPlanKey = 'local' | 'learner' | 'family' | 'teaching'
 
 type BillingStatus = 'inactive' | 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid' | 'incomplete' | 'incomplete_expired'
 
@@ -22,9 +22,24 @@ interface BillingPlan {
   href: string
   features: string[]
   bestFor: string
+  // Payme-only plan (no Stripe price exists for it) - the "Local" plan.
+  paymeOnly?: boolean
 }
 
 const plans: BillingPlan[] = [
+  {
+    key: 'local',
+    name: 'Local',
+    priceLabel: "39,000 so'm/month",
+    description: "LinguaNest's full learner plan, priced for Uzbekistan and paid through Payme.",
+    roleHint: 'student',
+    cta: 'Start learning',
+    href: '/register?role=student',
+    available: true,
+    paymeOnly: true,
+    bestFor: 'Learners paying in soʻm who want the full course, flashcard, and progress experience at a local price.',
+    features: ['Unlimited active courses', 'Flashcards and exercises', 'Progress tracking and streaks', 'Community chat access', 'Paid entirely through Payme'],
+  },
   {
     key: 'learner',
     name: 'Learner',
@@ -186,8 +201,8 @@ export default function Pricing() {
     () => plans.map((plan) => ({
       ...plan,
       available: configuredPlans[plan.key] ?? false,
-      name: plan.key === 'learner' ? t('pricing.learnerName') : plan.key === 'family' ? t('pricing.familyName') : t('pricing.teachingName'),
-      bestFor: plan.key === 'learner' ? t('pricing.learnerBestFor') : plan.key === 'family' ? t('pricing.familyBestFor') : t('pricing.teachingBestFor'),
+      name: plan.key === 'local' ? t('pricing.localName') : plan.key === 'learner' ? t('pricing.learnerName') : plan.key === 'family' ? t('pricing.familyName') : t('pricing.teachingName'),
+      bestFor: plan.key === 'local' ? t('pricing.localBestFor') : plan.key === 'learner' ? t('pricing.learnerBestFor') : plan.key === 'family' ? t('pricing.familyBestFor') : t('pricing.teachingBestFor'),
     })),
     [configuredPlans, t]
   )
@@ -370,6 +385,19 @@ export default function Pricing() {
                         </p>
                         {paymeSection}
                       </>
+                    )
+                  }
+
+                  // This plan only exists to be paid via Payme (see the "Local" plan) - it
+                  // has no Stripe price configured, so showing the generic Stripe subscribe
+                  // button here would either be disabled forever or 503 on click. Show only
+                  // the Payme section, or a plain "not available yet" note if Payme itself
+                  // isn't configured in this environment.
+                  if (plan.paymeOnly) {
+                    return paymeSection || (
+                      <p className="mt-6 rounded-xl bg-[#f6efe7] p-3 text-center text-sm text-slate-600 dark:bg-white/5 dark:text-slate-300">
+                        {t('pricing.planNotConfigured')}
+                      </p>
                     )
                   }
 

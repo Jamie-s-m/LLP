@@ -294,7 +294,7 @@ describe('Placement test', () => {
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.status).toBe(200);
-    expect(res.body.data.length).toBe(16);
+    expect(res.body.data.length).toBe(placementQuestions.length);
     expect(res.body.data[0].correctAnswer).toBeUndefined();
   });
 
@@ -310,7 +310,7 @@ describe('Placement test', () => {
     expect(res.status).toBe(200);
     expect(res.body.data.cefr).toBe('B2');
     expect(res.body.data.level).toBe('Advanced');
-    expect(res.body.data.totalCorrect).toBe(16);
+    expect(res.body.data.totalCorrect).toBe(placementQuestions.length);
 
     const refreshed = await User.findById(user._id);
     expect(refreshed.placementLevel).toBe('Advanced');
@@ -332,5 +332,23 @@ describe('Placement test', () => {
     expect(res.status).toBe(200);
     expect(res.body.data.cefr).toBe('A1');
     expect(res.body.data.level).toBe('Beginner');
+  });
+
+  test('reports a per-skill breakdown covering grammar, vocabulary, and reading', async () => {
+    const questions = await PlacementQuestion.find().sort({ order: 1 });
+    const answers = questions.map((question) => ({ questionId: question._id.toString(), answer: question.correctAnswer }));
+
+    const res = await request(app)
+      .post('/api/placement/submit')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ answers });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.skillStats.grammar.total).toBeGreaterThan(0);
+    expect(res.body.data.skillStats.vocabulary.total).toBeGreaterThan(0);
+    expect(res.body.data.skillStats.reading.total).toBeGreaterThan(0);
+    expect(res.body.data.skillStats.grammar.correct).toBe(res.body.data.skillStats.grammar.total);
+    expect(res.body.data.skillStats.vocabulary.correct).toBe(res.body.data.skillStats.vocabulary.total);
+    expect(res.body.data.skillStats.reading.correct).toBe(res.body.data.skillStats.reading.total);
   });
 });

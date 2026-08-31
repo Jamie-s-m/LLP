@@ -4,6 +4,22 @@ const frontendAppUrl = process.env.FRONTEND_APP_URL || process.env.FRONTEND_URL 
 
 const billingPlans = [
   {
+    // Payme-only (no Stripe priceId - this tier exists specifically for local-currency
+    // buyers, not diaspora/hard-currency ones). Priced far below the FX-converted rate on
+    // the other tiers: 800,000 UZS on the Learner plan is just $19 converted at market
+    // rate, not a price actually calibrated to local purchasing power. This is a
+    // deliberate, temporary launch price, not a permanent number - see the "Founding 100"
+    // framing on the pricing page.
+    key: 'local',
+    name: 'Local',
+    priceId: '',
+    paymeOnly: true,
+    priceLabel: "39,000 so'm/month",
+    priceUzs: 39000,
+    roleHint: 'student',
+    description: "LinguaNest's full learner plan, priced for Uzbekistan and paid through Payme.",
+  },
+  {
     key: 'learner',
     name: 'Learner',
     priceId: process.env.STRIPE_PRICE_LEARNER_MONTHLY || '',
@@ -53,7 +69,9 @@ export const getStripeClient = () => {
 export const getBillingPlans = () =>
   billingPlans.map((plan) => ({
     ...plan,
-    available: Boolean(plan.priceId),
+    // A Payme-only plan (no Stripe price) is "available" if Payme itself is configured,
+    // not if a Stripe price happens to exist for it.
+    available: plan.paymeOnly ? Boolean(getPaymeMerchantId()) : Boolean(plan.priceId),
   }));
 
 export const findBillingPlan = (key) => billingPlans.find((plan) => plan.key === key);

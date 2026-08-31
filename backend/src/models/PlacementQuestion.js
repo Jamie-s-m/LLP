@@ -10,6 +10,7 @@ const placementQuestionSchema = new mongoose.Schema(
     },
     correctAnswer: { type: Number, required: true },
     cefr: { type: String, enum: ['A1', 'A2', 'B1', 'B2'], required: true },
+    skill: { type: String, enum: ['grammar', 'vocabulary', 'reading'], default: 'grammar' },
     order: { type: Number, required: true },
   },
   { timestamps: true }

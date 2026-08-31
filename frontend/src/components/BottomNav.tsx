@@ -6,9 +6,9 @@ import { useI18n } from '../utils/i18n'
 import { getNavSections, getAccountSection, getPrimaryMobilePaths } from '../utils/navSections'
 
 const copy = {
-  en: { more: 'More', home: 'Home', login: 'Login', courses: 'Courses', tutors: 'Tutors', forum: 'Forum' },
-  ru: { more: 'Ещё', home: 'Главная', login: 'Войти', courses: 'Курсы', tutors: 'Репетиторы', forum: 'Форум' },
-  uz: { more: 'Yana', home: 'Bosh sahifa', login: 'Kirish', courses: 'Kurslar', tutors: "O'qituvchilar", forum: 'Forum' },
+  en: { more: 'More', home: 'Home', login: 'Login', courses: 'Courses', tutors: 'Speaking', forum: 'Forum' },
+  ru: { more: 'Ещё', home: 'Главная', login: 'Войти', courses: 'Курсы', tutors: 'Speaking', forum: 'Форум' },
+  uz: { more: 'Yana', home: 'Bosh sahifa', login: 'Kirish', courses: 'Kurslar', tutors: 'Speaking', forum: 'Forum' },
 } as const
 
 export default function BottomNav() {

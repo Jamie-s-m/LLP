@@ -1,140 +1,123 @@
-import { FiArrowRight, FiCheckCircle, FiClock, FiMapPin, FiStar } from 'react-icons/fi'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import toast from 'react-hot-toast'
+import { FiCheckCircle, FiMic, FiUsers } from 'react-icons/fi'
+import api from '../services/api'
+import { useAuthStore } from '../store/authStore'
+import { useI18n } from '../utils/i18n'
 
-const tutors = [
-  {
-    id: 'mila',
-    name: 'Mila Karimova',
-    role: 'English conversation coach',
-    location: 'Tashkent',
-    rating: 4.9,
-    reviews: 184,
-    available: 'Today • 4 slots',
-    specialties: ['Speaking fluency', 'Business English', 'IELTS prep'],
-    accent: 'bg-primary-500/10 text-primary-700 dark:text-primary-300',
-  },
-  {
-    id: 'nurlan',
-    name: 'Nurlan Yusupov',
-    role: 'Turkish tutor',
-    location: 'Samarkand',
-    rating: 4.8,
-    reviews: 123,
-    available: 'Tomorrow • 3 slots',
-    specialties: ['Travel Turkish', 'Grammar clarity', 'Conversation labs'],
-    accent: 'bg-secondary-500/10 text-secondary-700 dark:text-secondary-300',
-  },
-  {
-    id: 'sara',
-    name: 'Sara Mirzayeva',
-    role: 'Uzbek for beginners',
-    location: 'Bukhara',
-    rating: 5.0,
-    reviews: 210,
-    available: 'Today • 2 slots',
-    specialties: ['Family phrases', 'Listening skills', 'Daily routines'],
-    accent: 'bg-accent-100 text-amber-700 dark:text-amber-300',
-  },
-]
+interface WaitlistCountResponse {
+  data?: { count?: number }
+}
 
 export default function Tutors() {
+  const { t, language } = useI18n()
+  const { user, isAuthenticated } = useAuthStore()
+  const [email, setEmail] = useState('')
+  const [name, setName] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [joined, setJoined] = useState(false)
+  const [count, setCount] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (isAuthenticated && user?.email) {
+      setEmail(user.email)
+    }
+    if (isAuthenticated && user) {
+      setName(`${user.firstName || ''} ${user.lastName || ''}`.trim())
+    }
+  }, [isAuthenticated, user])
+
+  useEffect(() => {
+    api
+      .get<WaitlistCountResponse>('/waitlist/count', { params: { feature: 'speaking_practice' } })
+      .then((response) => setCount(response.data?.data?.count ?? null))
+      .catch(() => undefined)
+  }, [])
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault()
+    if (!email) {
+      toast.error(t('tutors.emailRequired'))
+      return
+    }
+    try {
+      setSubmitting(true)
+      await api.post('/waitlist/join', { email, name, feature: 'speaking_practice', locale: language })
+      setJoined(true)
+      setCount((previous) => (previous === null ? previous : previous + 1))
+      toast.success(t('tutors.joinedToast'))
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : undefined
+      toast.error(message || t('tutors.joinError'))
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   return (
     <div className="atlas-page">
-      <div className="mx-auto max-w-7xl px-4 py-10">
-        <div className="atlas-panel mb-8 overflow-hidden p-8">
-          <div className="grid gap-8 lg:grid-cols-[1.3fr_0.7fr] lg:items-center">
-            <div>
-              <p className="atlas-kicker">Expert tutors</p>
-              <h1 className="text-4xl font-bold text-ink dark:text-white md:text-5xl">Find the right tutor for your language goals.</h1>
-              <p className="mt-4 max-w-xl text-base text-slate-600 dark:text-slate-300">
-                Learn with real people, not just lessons. Book one-to-one sessions, practice speaking, and build fluency with guided feedback.
-              </p>
-            </div>
-            <div className="rounded-[1.75rem] bg-gradient-to-br from-primary-500 via-secondary-500 to-accent-400 p-6 text-white shadow-xl">
-              <div className="mb-5 flex items-center justify-between">
-                <span className="text-sm uppercase tracking-[0.18em] text-white/80">Live availability</span>
-                <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-medium">12 tutors online</span>
-              </div>
-              <div className="space-y-3 text-sm text-white/90">
-                <div className="flex items-center justify-between rounded-2xl bg-white/10 px-3 py-2">
-                  <span>English conversation</span>
-                  <span className="font-semibold">8 slots</span>
-                </div>
-                <div className="flex items-center justify-between rounded-2xl bg-white/10 px-3 py-2">
-                  <span>Turkish speaking</span>
-                  <span className="font-semibold">5 slots</span>
-                </div>
-                <div className="flex items-center justify-between rounded-2xl bg-white/10 px-3 py-2">
-                  <span>Uzbek basics</span>
-                  <span className="font-semibold">4 slots</span>
-                </div>
-              </div>
-            </div>
+      <div className="mx-auto max-w-4xl px-4 py-10">
+        <div className="atlas-panel mb-8 overflow-hidden p-8 text-center">
+          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-500/10 text-2xl text-primary-600 dark:text-primary-300">
+            <FiMic />
           </div>
-        </div>
+          <p className="atlas-kicker">{t('tutors.kicker')}</p>
+          <h1 className="text-3xl font-bold text-ink dark:text-white md:text-4xl">{t('tutors.title')}</h1>
+          <p className="mx-auto mt-4 max-w-xl text-base text-slate-600 dark:text-slate-300">
+            {t('tutors.copy')}
+          </p>
 
-        <div className="mb-6 flex items-center justify-between gap-3">
-          <h2 className="text-2xl font-bold text-ink dark:text-white">Top tutors this week</h2>
-          <Link to="/courses" className="inline-flex items-center gap-2 text-sm font-semibold text-primary-600 dark:text-primary-300">
-            Browse courses <FiArrowRight />
-          </Link>
-        </div>
+          {count !== null && count > 0 ? (
+            <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-[var(--surface-strong)] px-4 py-1.5 text-sm font-semibold text-[var(--text-muted)]">
+              <FiUsers /> {t('tutors.countLabel', { count: String(count) })}
+            </p>
+          ) : null}
 
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {tutors.map((tutor) => (
-            <article key={tutor.id} className="atlas-panel rounded-[1.75rem] p-6">
-              <div className="mb-4 flex items-start justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-500 to-secondary-500 text-lg font-bold text-white">
-                    {tutor.name.split(' ').map((part) => part[0]).slice(0, 2).join('')}
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-ink dark:text-white">{tutor.name}</h3>
-                    <p className="text-sm text-slate-600 dark:text-slate-300">{tutor.role}</p>
-                  </div>
-                </div>
-                <div className="rounded-full bg-amber-100 px-2 py-1 text-xs font-bold text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
-                  <span className="inline-flex items-center gap-1"><FiStar className="text-[11px]" /> {tutor.rating}</span>
-                </div>
-              </div>
-
-              <div className="mb-4 flex items-center gap-4 text-sm text-slate-600 dark:text-slate-300">
-                <span className="inline-flex items-center gap-1"><FiMapPin /> {tutor.location}</span>
-                <span className="inline-flex items-center gap-1"><FiClock /> {tutor.available}</span>
-              </div>
-
-              <div className="mb-5 flex flex-wrap gap-2">
-                {tutor.specialties.map((skill) => (
-                  <span key={skill} className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${tutor.accent}`}>
-                    {skill}
-                  </span>
-                ))}
-              </div>
-
-              <div className="mb-5 flex items-center justify-between rounded-2xl bg-slate-100/80 px-3 py-2 text-sm text-slate-700 dark:bg-white/5 dark:text-slate-200">
-                <span>{tutor.reviews} reviews</span>
-                <span className="font-semibold">{tutor.available}</span>
-              </div>
-
-              <button className="btn btn-primary w-full justify-center text-sm">
-                Book a lesson
+          {joined ? (
+            <div className="mx-auto mt-8 flex max-w-md flex-col items-center gap-2 rounded-2xl bg-success/10 px-6 py-5 text-success">
+              <FiCheckCircle className="text-2xl" />
+              <p className="font-semibold">{t('tutors.joinedTitle')}</p>
+              <p className="text-sm text-slate-600 dark:text-slate-300">{t('tutors.joinedCopy')}</p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="mx-auto mt-8 flex max-w-md flex-col gap-3 sm:flex-row">
+              <label className="sr-only" htmlFor="waitlist-email">{t('tutors.emailLabel')}</label>
+              <input
+                id="waitlist-email"
+                type="email"
+                required
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder={t('tutors.emailPlaceholder')}
+                className="w-full flex-1 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--text-primary)]"
+              />
+              <button type="submit" className="btn btn-primary whitespace-nowrap px-6 py-3 text-sm" disabled={submitting}>
+                {submitting ? t('tutors.joining') : t('tutors.joinCta')}
               </button>
-            </article>
-          ))}
+            </form>
+          )}
         </div>
 
-        <div className="atlas-panel mt-8 p-6">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="atlas-kicker">How tutoring works</p>
-              <h3 className="text-2xl font-bold text-ink dark:text-white">Schedule a tutor match in under 10 minutes.</h3>
-            </div>
-            <div className="flex flex-wrap gap-3 text-sm text-slate-600 dark:text-slate-300">
-              <span className="inline-flex items-center gap-2 rounded-full bg-success/10 px-3 py-2 text-success"><FiCheckCircle /> Match your learning goal</span>
-              <span className="inline-flex items-center gap-2 rounded-full bg-primary-500/10 px-3 py-2 text-primary-700 dark:text-primary-300"><FiCheckCircle /> Pick a slot</span>
-              <span className="inline-flex items-center gap-2 rounded-full bg-accent-100 px-3 py-2 text-amber-700 dark:text-amber-300"><FiCheckCircle /> Practice live</span>
-            </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          <div className="atlas-panel rounded-2xl p-5">
+            <p className="atlas-kicker">{t('tutors.step1Kicker')}</p>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{t('tutors.step1Copy')}</p>
           </div>
+          <div className="atlas-panel rounded-2xl p-5">
+            <p className="atlas-kicker">{t('tutors.step2Kicker')}</p>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{t('tutors.step2Copy')}</p>
+          </div>
+          <div className="atlas-panel rounded-2xl p-5">
+            <p className="atlas-kicker">{t('tutors.step3Kicker')}</p>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{t('tutors.step3Copy')}</p>
+          </div>
+        </div>
+
+        <div className="mt-8 text-center">
+          <Link to="/courses" className="text-sm font-semibold text-primary-600 dark:text-primary-300">
+            {t('tutors.browseInstead')}
+          </Link>
         </div>
       </div>
     </div>

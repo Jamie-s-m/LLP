@@ -22,6 +22,7 @@ import pushRoutes from './routes/push.js';
 import dailyRewardRoutes from './routes/dailyReward.js';
 import gamificationRoutes from './routes/gamification.js';
 import placementRoutes from './routes/placement.js';
+import waitlistRoutes from './routes/waitlist.js';
 import debugRoutes from './routes/debug.js';
 import { handleStripeWebhook } from './controllers/billingController.js';
 
@@ -171,6 +172,7 @@ app.use('/api/push', pushRoutes);
 app.use('/api/daily-reward', dailyRewardRoutes);
 app.use('/api/gamification', gamificationRoutes);
 app.use('/api/placement', placementRoutes);
+app.use('/api/waitlist', waitlistRoutes);
 app.use('/api/debug', debugRoutes);
 
 // Catch-all API 404 handler

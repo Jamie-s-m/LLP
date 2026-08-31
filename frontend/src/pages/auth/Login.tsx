@@ -48,14 +48,16 @@ export default function Login() {
     try {
       await login(normalizedEmail, password)
       toast.success(t('login.loginSuccess'))
-      const role = useAuthStore.getState().user?.role
-      const destination = role === 'admin'
+      const loggedInUser = useAuthStore.getState().user
+      const destination = loggedInUser?.role === 'admin'
         ? '/admin/control-center'
-        : role === 'parent'
+        : loggedInUser?.role === 'parent'
           ? '/parent/dashboard'
-          : role === 'teacher'
+          : loggedInUser?.role === 'teacher'
             ? '/teacher/dashboard'
-            : '/dashboard'
+            : loggedInUser?.role === 'student' && !loggedInUser?.onboardingCompletedAt
+              ? '/onboarding'
+              : '/dashboard'
       navigate(destination)
     } catch (error: any) {
       const message =
