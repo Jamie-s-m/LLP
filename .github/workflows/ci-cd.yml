@@ -9,6 +9,21 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    # A real, long-lived MongoDB service container - far more reliable in CI than each of the
+    # 16 backend test files spinning up its own MongoMemoryServer instance, which was flaky
+    # under this runner's resource constraints (slow/failed startups, unexpected exits) even
+    # after pinning a compatible MongoDB version. tests/jest.setup.js connects to this via
+    # MONGODB_TEST_URI below.
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.runCommand({ ping: 1 })' --quiet"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -53,19 +68,9 @@ jobs:
           # Not a real secret - only used by the Payme webhook test suite to exercise the
           # Basic-auth check locally within CI, matching backend/.env's local dev value.
           PAYME_MERCHANT_KEY: ci_test_key_12345
-          # mongodb-memory-server's default MongoDB version download is built against
-          # OpenSSL 1.1 (libcrypto.so.1.1), which the ubuntu-latest runner no longer ships
-          # (removed from Ubuntu's repos after 20.04) - every test run was failing on
-          # "library is missing" before ever reaching a single assertion. Pin a MongoDB
-          # version whose official Linux build targets OpenSSL 3 instead of chasing down a
-          # legacy system package. Verified against MongoDB's own download server
-          # (fastdl.mongodb.org) that this exact version+platform combo actually exists -
-          # MongoDB never published ubuntu2404 builds for the 7.0.x line at all (the runner
-          # image is Ubuntu 24.04), only from 8.0 onward. MongoDB 7+ also dropped the
-          # ephemeralForTest storage engine mongodb-memory-server defaults to, so wiredTiger
-          # (always available) has to be selected explicitly too.
-          MONGOMS_VERSION: 8.0.4
-          MONGOMS_STORAGE_ENGINE: wiredTiger
+          # Points tests/jest.setup.js at the mongodb service container above instead of
+          # spinning up MongoMemoryServer - see the services: block for why.
+          MONGODB_TEST_URI: mongodb://localhost:27017
         run: npm test
 
   deploy-render:
