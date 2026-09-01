@@ -10,9 +10,7 @@ export default function Footer() {
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:px-6 md:grid-cols-[1.3fr_1fr_1fr]">
         <div className="text-center md:text-left">
           <div className="flex items-center justify-center gap-3 md:justify-start">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--accent-light)] shadow-sm ring-2 ring-white dark:ring-[var(--dark-surface)]">
-              <img src={`${import.meta.env.BASE_URL}linguanest-mark.svg`} alt={BRAND.name} className="h-7 w-7 object-contain" />
-            </div>
+            <img src={`${import.meta.env.BASE_URL}linguanest-mark.svg`} alt={BRAND.name} className="h-9 w-9 object-contain" />
             <div>
               <p className="font-['Bricolage_Grotesque',sans-serif] text-[1.05rem] font-black tracking-[-0.06em] text-[var(--text-primary)] dark:text-white">
                 Lingua<span className="text-[var(--accent)]">Nest</span>

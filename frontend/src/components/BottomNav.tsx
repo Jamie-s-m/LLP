@@ -1,14 +1,14 @@
 import { Link, useLocation } from 'react-router-dom'
-import { FiGrid, FiHome, FiBookOpen, FiUsers, FiMessageSquare, FiLogIn } from 'react-icons/fi'
+import { FiGrid, FiHome, FiBookOpen, FiTag, FiMessageSquare, FiLogIn } from 'react-icons/fi'
 import { useAuthStore } from '../store/authStore'
 import { useChatStore } from '../store/chatStore'
 import { useI18n } from '../utils/i18n'
 import { getNavSections, getAccountSection, getPrimaryMobilePaths } from '../utils/navSections'
 
 const copy = {
-  en: { more: 'More', home: 'Home', login: 'Login', courses: 'Courses', tutors: 'Speaking', forum: 'Forum' },
-  ru: { more: 'Ещё', home: 'Главная', login: 'Войти', courses: 'Курсы', tutors: 'Speaking', forum: 'Форум' },
-  uz: { more: 'Yana', home: 'Bosh sahifa', login: 'Kirish', courses: 'Kurslar', tutors: 'Speaking', forum: 'Forum' },
+  en: { more: 'More', home: 'Home', login: 'Login', courses: 'Courses', pricing: 'Pricing', forum: 'Forum' },
+  ru: { more: 'Ещё', home: 'Главная', login: 'Войти', courses: 'Курсы', pricing: 'Тарифы', forum: 'Форум' },
+  uz: { more: 'Yana', home: 'Bosh sahifa', login: 'Kirish', courses: 'Kurslar', pricing: 'Tariflar', forum: 'Forum' },
 } as const
 
 export default function BottomNav() {
@@ -53,10 +53,13 @@ export default function BottomNav() {
       { label: ui.more, path: '/more', icon: FiGrid, badge: 0 },
     ]
   } else {
+    // "Pricing" replaces the previous "Tutors" (waitlist) slot here - Pricing was previously
+    // unreachable on mobile for guests at all (the desktop Navbar hides it below 1024px, and
+    // this was the only mobile nav guests get), while Tutors is a lower-priority waitlist page.
     navItems = [
       { label: ui.home, path: '/', icon: FiHome, badge: 0 },
       { label: ui.courses, path: '/courses', icon: FiBookOpen, badge: 0 },
-      { label: ui.tutors, path: '/tutors', icon: FiUsers, badge: 0 },
+      { label: ui.pricing, path: '/pricing', icon: FiTag, badge: 0 },
       { label: ui.forum, path: '/forum', icon: FiMessageSquare, badge: 0 },
       { label: ui.login, path: '/login', icon: FiLogIn, badge: 0 },
     ]

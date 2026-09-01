@@ -38,7 +38,7 @@ export default function Avatar({ name, src, size = 'md', className = '' }: Avata
   return (
     <div
       className={`flex flex-shrink-0 items-center justify-center rounded-full font-bold text-white ${sizeClasses[size]} ${className}`}
-      style={{ background: 'linear-gradient(135deg, #E8A87C, var(--accent))' }}
+      style={{ background: 'linear-gradient(135deg, var(--warning), var(--accent))' }}
       aria-hidden={!name}
     >
       {initialsFrom(name)}

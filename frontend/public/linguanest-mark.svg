@@ -1,26 +1,7 @@
-<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
-  <title id="title">LinguaNest logo</title>
-  <desc id="desc">A warm editorial brand mark for LinguaNest with a nest-inspired circular emblem and speech motif.</desc>
-  <defs>
-    <linearGradient id="bg" x1="20" y1="16" x2="108" y2="110" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#F3E7DD"/>
-      <stop offset="0.38" stop-color="#D97C5D"/>
-      <stop offset="1" stop-color="#B94D32"/>
-    </linearGradient>
-    <linearGradient id="mark" x1="34" y1="36" x2="92" y2="91" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#FFFDFB"/>
-      <stop offset="1" stop-color="#F7EFEA"/>
-    </linearGradient>
-  </defs>
-
-  <rect x="8" y="8" width="112" height="112" rx="28" fill="url(#bg)"/>
-  <circle cx="64" cy="64" r="39" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.22)" stroke-width="1.5"/>
-
-  <path d="M38 87C44 72 55 61 69 59C74 48 84 42 94 42C90 58 81 68 69 74C60 79 49 82 38 87Z" fill="rgba(255,255,255,0.18)"/>
-  <path d="M33 83C33 63 44 47 63 42C72 40 79 42 86 47C83 38 75 31 64 31C47 31 35 44 35 62V83H33Z" fill="url(#mark)"/>
-  <path d="M57 82V50C57 45.6 60.6 42 65 42H76C80.4 42 84 45.6 84 50V70H70V60H58V82H57Z" fill="white" fill-opacity="0.92"/>
-  <path d="M58 82V48L88 82V48" stroke="#FDE3D6" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="92" cy="34" r="8" fill="#F6D7A7"/>
-  <path d="M92 29V34L96 38" stroke="#7A3D2B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M27 91C38 87 49 85 61 88" stroke="rgba(255,255,255,0.8)" stroke-width="3.5" stroke-linecap="round"/>
+<svg width="128" height="128" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title">
+  <title id="title">LinguaNest symbol — Twin Arc</title>
+  <g style="isolation:isolate">
+    <circle cx="42" cy="50" r="27" fill="#7C2D42"/>
+    <circle cx="64" cy="50" r="27" fill="#C9932E" style="mix-blend-mode:multiply"/>
+  </g>
 </svg>
