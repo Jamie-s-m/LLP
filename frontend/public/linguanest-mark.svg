@@ -2,6 +2,6 @@
   <title id="title">LinguaNest symbol — Twin Arc</title>
   <g style="isolation:isolate">
     <circle cx="42" cy="50" r="27" fill="#7C2D42"/>
-    <circle cx="64" cy="50" r="27" fill="#C9932E" style="mix-blend-mode:multiply"/>
+    <circle cx="64" cy="50" r="27" fill="#C84B31" style="mix-blend-mode:multiply"/>
   </g>
 </svg>

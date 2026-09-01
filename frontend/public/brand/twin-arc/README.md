@@ -11,27 +11,31 @@ not yet wired in — see "Where each variant is intended to go."
 
 ## Construction
 
-Two overlapping circles, ink (wine) and gold, composited with `mix-blend-mode: multiply`
+Two overlapping circles, wine and terracotta, composited with `mix-blend-mode: multiply`
 inside an `isolation: isolate` group. The isolation is load-bearing: without it, the
-non-overlapping part of the gold circle would also blend against whatever sits behind the
-whole mark (e.g. a dark page background), muddying the gold instead of keeping it clean —
-caught and fixed during this refinement pass.
+non-overlapping part of the terracotta circle would also blend against whatever sits behind
+the whole mark (e.g. a dark page background), muddying it instead of keeping it clean —
+caught and fixed during the original refinement pass, when the second color was still gold.
 
 ## Files
 
 | File | Use |
 |---|---|
 | `symbol.svg` | Primary mark, light backgrounds |
-| `symbol-dark.svg` | Dark-mode surfaces (paper + gold, same construction) |
+| `symbol-dark.svg` | Dark-mode surfaces (same construction, dark-mode wine/terracotta values) |
 | `symbol-mono.svg` | Single-color version — one solid circle, one outlined circle. Set `color` to any single ink (works inverted: white on a dark or colored ground). Use for print, stamps, or any context that can't render two colors. |
 | `lockup-horizontal.svg` | Symbol + wordmark, for headers and marketing where there's room |
 | `favicon.svg` | Symbol only, tuned for 16–32px — larger circles, less padding than `symbol.svg`, since fine proportion is lost at tiny sizes |
 
 ## Color
 
-- Ink / wine: `#7C2D42` (dark mode: `#F3EEF0`)
-- Gold: `#C9932E` (dark mode: `#E3B65E`)
+- Wine: `#7C2D42` (dark mode: `#E497A9`, matches `--dark-wine` in `index.css`)
+- Terracotta: `#C84B31` (dark mode: `#E07A50`, matches `--dark-accent` in `index.css`)
 - Monochrome: any single ink color via `currentColor` — no gradient, ever.
+
+Both colors are live UI accents, not exclusive to the mark: terracotta is the app's primary
+accent (buttons, links, CTAs) and wine is its secondary/supporting accent (badges, highlights).
+The mark deliberately reuses the same two values rather than carrying its own separate palette.
 
 ## Clear space & minimum size
 
@@ -56,6 +60,8 @@ caught and fixed during this refinement pass.
 No gradient, no glass-overlay shading (the pattern the previous mark used). No literal bird,
 book, graduation cap, or globe. No speech-bubble tail or chat-bubble silhouette — the overlap
 itself carries the "two voices / two languages meeting" idea. One committed hero color, not
-five competing hues - originally wine, revised to gold after seeing Batch 1 live (see
-[docs/PHASE8_BRAND_MIGRATION.md](../../../../docs/PHASE8_BRAND_MIGRATION.md)); wine remains
-the secondary/supporting accent and both colors stay in the mark itself either way.
+five competing hues. The UI's primary accent has moved twice since this mark was designed
+(wine → gold → terracotta - see
+[docs/PHASE8_BRAND_MIGRATION.md](../../../../docs/PHASE8_BRAND_MIGRATION.md) for the full
+history), and the mark's own colors now track the current pairing: terracotta (primary) +
+wine (secondary), replacing the gold it briefly matched and no longer does.

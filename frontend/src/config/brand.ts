@@ -13,21 +13,17 @@ export const BRAND = {
     youtube: 'https://youtube.com/@linguanest',
   },
   colors: {
-    // Terracotta is primary again - reverted from gold at the founder's request after
-    // seeing gold live ("the original color... the orange one"). See
-    // docs/PHASE8_BRAND_MIGRATION.md for the full history (wine -> gold -> terracotta) and
-    // the open question this leaves about the Twin Arc logo mark, which is unchanged
-    // (still wine + gold) since only the broader UI accent reverted.
+    // Terracotta is primary - reverted from gold at the founder's request after seeing gold
+    // live ("the original color... the orange one"). See docs/PHASE8_BRAND_MIGRATION.md for
+    // the full history (wine -> gold -> terracotta). The Twin Arc logo mark's own colors
+    // (public/brand/twin-arc/) were updated to match: terracotta + wine, replacing gold,
+    // which no longer has any role in the product - UI or mark.
     primary: '#C84B31',
     primaryDark: '#A33D28',
     primarySoft: '#FDF2F0',
     wine: '#7C2D42',
     wineDark: '#632235',
     wineSoft: '#FBEEF1',
-    // Gold: no longer a UI role (was briefly primary), but still one of the Twin Arc logo
-    // mark's two colors - documented here for reference, not consumed by any component.
-    gold: '#C9932E',
-    goldSoft: '#FBF3E4',
     mint: '#3F6B52',
     mintDark: '#2F5140',
     mintSoft: '#EAF3EE',

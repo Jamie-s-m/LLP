@@ -7,15 +7,17 @@ revision 2, current)** - the founder's call each time, most recently after seein
 "I guess the original color of the UI was better... I mean the orange one." Terracotta is
 the pre-Phase-8 primary color this whole initiative started from.
 
-**Open question this leaves, not yet resolved**: the Twin Arc logo mark itself (two
-overlapping circles) is unchanged throughout all three revisions - it's still wine + gold,
-per its own approved spec at [frontend/public/brand/twin-arc/](../frontend/public/brand/twin-arc/).
-That was a deliberate choice each time (the mark is a separate, already-approved asset from
-the broader UI accent color), but it does mean the header logo now shows wine+gold while the
-buttons/links around it are terracotta-orange - three hero-adjacent colors in view at once.
-Flagging this rather than silently picking a side: a future session should ask the founder
-whether the logo should also move to terracotta, stay wine+gold as a fixed anchor, or
-whether this is fine as-is.
+**Resolved 2026-09-02** (was open through all three color revisions above): the Twin Arc
+mark itself stayed wine + gold through every UI accent change, on the reasoning that it's a
+separate, already-approved asset. Once terracotta had been the settled UI accent for a while,
+that gap became visible enough that the founder flagged it directly and asked for the mark to
+follow: **the mark's two colors are now wine + terracotta**, replacing gold. Gold has no
+remaining role anywhere in the product - not the UI, not the mark. Updated in every file
+under [frontend/public/brand/twin-arc/](../frontend/public/brand/twin-arc/) plus the two
+live-wired copies (`frontend/public/favicon.svg`, `frontend/public/linguanest-mark.svg`) and
+the rasterized PWA icons (`frontend/public/icons/*.png`, regenerated via
+`frontend/scripts/generate-icons.mjs`). See that directory's `README.md` for the current
+construction and color reference.
 
 ## Brand essence
 
@@ -59,7 +61,7 @@ because gold could plausibly come back) but collapses it back to one effective v
 | `--accent-vivid` | `var(--accent)` (alias, same value) | `var(--accent)` | Kept as a distinct token so any call site explicitly reaching for "the vivid fill color" doesn't break if a lighter primary is chosen again later - currently identical to `--accent`. |
 | `--on-accent` | `#FFFFFF` (white) | `#FFFFFF` | Text/icon color for anything sitting on an `--accent`/`--accent-vivid` fill. Was dark ink during the gold revision (gold needed it); white is correct for terracotta and matches the pre-Phase-8 original. |
 | `--accent-hover` | `#A33D28` (darker) | `#F2A88A` (lighter) | Hover/active emphasis. Direction flips by theme: darken for text-on-light, brighten for text-on-dark. |
-| `--wine` / `--wine-hover` / `--wine-light` | `#7C2D42` / `#632235` / `#FBEEF1` | dark-mode equivalents | Secondary/supporting accent - available for badges, links, highlight moments; one of the two colors in the logo mark. |
+| `--wine` / `--wine-hover` / `--wine-light` | `#7C2D42` / `#632235` / `#FBEEF1` | dark-mode equivalents | Secondary/supporting accent - available for badges, links, highlight moments; one of the two colors in the logo mark (the other is `--accent`/terracotta - see the "Resolved" note above). |
 | `--success` | `#3F6B52` (pine) | — | Unchanged by this revision. |
 | `--warning` | `#D97706` (amber) | `#FBBF24` | Restored to the original amber - distinct from terracotta again now that terracotta is primary. (Briefly *was* gold mid-revision, which would have collided with gold-as-primary; caught before shipping - the same class of mistake is worth re-checking any time the primary color changes.) |
 | `--info` | `#3E6FA6` (sky) | `#8FB8E0` | Unchanged by this revision. |
@@ -81,8 +83,9 @@ while the CSS variable's default was corrected; caught during this same pass, no
 
 Dark-mode (`--dark-*`) values need the equivalent shift — not tabulated here since it's
 implementation work, not a decision; the concept deck's dark-mode swatches (wine → `#E497A9`,
-gold → `#E3B65E`, pine → `#7FB899`, sky → `#8FB8E0`, paper → `#17131B`, ink → `#F3EEF0`) are
-the reference values to carry over.
+pine → `#7FB899`, sky → `#8FB8E0`, paper → `#17131B`, ink → `#F3EEF0`) are the reference
+values to carry over. (The deck's gold swatch, `#E3B65E`, is no longer relevant - gold was
+dropped from both the UI and the logo mark; see the "Resolved" note near the top of this doc.)
 
 `tailwind.config.js`'s `primary`/`secondary`/`accent`/`coral`/`sky` scales (five separate hue
 families) get consolidated toward the same wine/gold/pine/sky set — the five-family structure

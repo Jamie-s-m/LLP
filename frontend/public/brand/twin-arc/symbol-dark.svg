@@ -1,7 +1,7 @@
 <svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title">
   <title id="title">LinguaNest symbol — Twin Arc (dark mode)</title>
   <g style="isolation:isolate">
-    <circle cx="42" cy="50" r="27" fill="#F3EEF0"/>
-    <circle cx="64" cy="50" r="27" fill="#E3B65E" style="mix-blend-mode:multiply"/>
+    <circle cx="42" cy="50" r="27" fill="#E497A9"/>
+    <circle cx="64" cy="50" r="27" fill="#E07A50" style="mix-blend-mode:multiply"/>
   </g>
 </svg>
