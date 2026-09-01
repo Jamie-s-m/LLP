@@ -15,10 +15,11 @@ really implemented.
   above). The exposed `backend/resetPassword.js` script (hardcoded admin
   credential) no longer exists in the working tree, but it remains
   permanently recoverable from git history - deleting the file doesn't
-  undo that. **Whether the `moreartyjames@gmail.com` account's actual
-  password has been rotated since the exposure is unconfirmed** - this is a
-  founder-only action (no code or config change can verify or perform it)
-  and should be checked directly before treating this as closed.
+  undo that. The `moreartyjames@gmail.com` account's password has been
+  rotated since the exposure (confirmed directly by the account owner
+  2026-09-01 - not independently verifiable from the database, since
+  `User.js` has no password-specific change timestamp, only a generic
+  `updatedAt` that any account activity touches).
 - SMTP is configured against Bird's relay (`eu1.smtp.bird.com:587`) and
   verified end-to-end with a real disposable-inbox signup/verification flow,
   not just checked at the API-call layer.
