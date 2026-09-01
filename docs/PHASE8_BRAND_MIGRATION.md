@@ -1,11 +1,21 @@
 # Phase 8B/8C — Twin Arc brand system & migration strategy
 
 Originally written as a specification before implementation began; the color-token section
-below now reflects what's actually live as of Batch 1 (Foundation) plus a same-day revision -
-**gold is primary, not wine** (the founder's call after seeing Batch 1 live: "it would be
-better if we use the Gold color as the main one"). Wine is now the secondary/supporting
-accent. See [frontend/public/brand/twin-arc/README.md](../frontend/public/brand/twin-arc/README.md)
-for the logo files (unchanged by this - the mark itself still uses both colors).
+below reflects what's actually live, which has moved twice since Batch 1 shipped:
+**wine (Batch 1) &rarr; gold (same-day revision 1) &rarr; terracotta/orange (same-day
+revision 2, current)** - the founder's call each time, most recently after seeing gold live:
+"I guess the original color of the UI was better... I mean the orange one." Terracotta is
+the pre-Phase-8 primary color this whole initiative started from.
+
+**Open question this leaves, not yet resolved**: the Twin Arc logo mark itself (two
+overlapping circles) is unchanged throughout all three revisions - it's still wine + gold,
+per its own approved spec at [frontend/public/brand/twin-arc/](../frontend/public/brand/twin-arc/).
+That was a deliberate choice each time (the mark is a separate, already-approved asset from
+the broader UI accent color), but it does mean the header logo now shows wine+gold while the
+buttons/links around it are terracotta-orange - three hero-adjacent colors in view at once.
+Flagging this rather than silently picking a side: a future session should ask the founder
+whether the logo should also move to terracotta, stay wine+gold as a fixed anchor, or
+whether this is fine as-is.
 
 ## Brand essence
 
@@ -31,27 +41,37 @@ correctly reads `var(--accent)`, `var(--success)`, etc. gets the new brand for f
 token-compliant. Only the raw-hex bypass sites need individual migration (six were found and
 fixed in Batch 1 alone, in the highest-traffic files - see the redesign-progress artifact).
 
-Gold is inherently lighter than wine was, which broke an assumption a lot of existing CSS
+Gold was inherently lighter than wine, which broke an assumption a lot of existing CSS
 depended on - that a single "accent" value was safe as *both* a large solid fill (with white
 text) *and* small text-on-light (kickers, links, badges). Wine, being dark, could do both.
-Gold's true, vivid tone (`#C9932E`, the one shown in the logo/concept deck) can't - it's
-~2.7:1 as text-on-light, well under the 4.5:1 AA minimum. Resolving that required **splitting
-the single old role into two tokens** rather than a straight value swap:
+Gold's true, vivid tone (`#C9932E`, the one shown in the logo/concept deck) couldn't - it was
+~2.7:1 as text-on-light, well under the 4.5:1 AA minimum, which needed a real split into
+`--accent`/`--accent-vivid`/`--on-accent`. **Terracotta doesn't have that problem** - like
+wine, it's dark/saturated enough (~4.7:1) to safely serve as both a solid fill with white
+text and text-on-light with the same single value - so this revision keeps the
+`--accent`/`--accent-vivid`/`--on-accent` token architecture in place (for consistency and
+because gold could plausibly come back) but collapses it back to one effective value:
+`--accent-vivid` is just an alias for `--accent`, and `--on-accent` is white again.
 
 | Token | Light value | Dark value | Used for |
 |---|---|---|---|
-| `--accent` | `#8A6015` (deep gold) | `#E3B65E` (bright gold) | **Default.** Text, links, borders, kickers, active states - the ~40+ call sites across the app that read `var(--accent)` or `text-primary-*` as color, not fill. Deliberately WCAG-safe (~5.6:1) even though it's a more muted gold than the logo. |
-| `--accent-vivid` | `#C9932E` (true logo gold) | `#E3B65E` (same as `--accent` in dark mode) | Large solid fills only - `.btn-primary`, `.auth-submit`, hero glow, toggle-on state. Always paired with `--on-accent`, never with `text-white` (fails at ~2.7:1). |
-| `--on-accent` | `#211A26` (dark ink, constant across themes) | *(same)* | Text/icon color for anything sitting on an `--accent-vivid` fill. |
-| `--accent-hover` | `#6E4C11` (darker still) | `#F0C878` (lighter still) | Hover/active emphasis on already-`--accent`-colored text/borders. Direction flips by theme: darken for text-on-light, brighten for text-on-dark. |
-| `--wine` / `--wine-hover` / `--wine-light` | `#7C2D42` / `#632235` / `#FBEEF1` | dark-mode equivalents | Secondary/supporting accent (was primary before this revision) - available for badges, links, highlight moments; still both colors in the logo mark itself. |
+| `--accent` | `#C84B31` (terracotta) | `#E07A50` | **Default and solid fills alike.** Text, links, borders, kickers, active states, AND large fills (`.btn-primary`, `.auth-submit`) - one value safely does both jobs again. |
+| `--accent-vivid` | `var(--accent)` (alias, same value) | `var(--accent)` | Kept as a distinct token so any call site explicitly reaching for "the vivid fill color" doesn't break if a lighter primary is chosen again later - currently identical to `--accent`. |
+| `--on-accent` | `#FFFFFF` (white) | `#FFFFFF` | Text/icon color for anything sitting on an `--accent`/`--accent-vivid` fill. Was dark ink during the gold revision (gold needed it); white is correct for terracotta and matches the pre-Phase-8 original. |
+| `--accent-hover` | `#A33D28` (darker) | `#F2A88A` (lighter) | Hover/active emphasis. Direction flips by theme: darken for text-on-light, brighten for text-on-dark. |
+| `--wine` / `--wine-hover` / `--wine-light` | `#7C2D42` / `#632235` / `#FBEEF1` | dark-mode equivalents | Secondary/supporting accent - available for badges, links, highlight moments; one of the two colors in the logo mark. |
 | `--success` | `#3F6B52` (pine) | — | Unchanged by this revision. |
-| `--warning` | `#B8621D` (burnt orange) | `#E0985A` | **Deliberately not gold** - warning and "the brand color" must never share a hue, or a warning reads as just another call-to-action. Previously *was* the gold value in the very first pass; caught and separated before it shipped. |
+| `--warning` | `#D97706` (amber) | `#FBBF24` | Restored to the original amber - distinct from terracotta again now that terracotta is primary. (Briefly *was* gold mid-revision, which would have collided with gold-as-primary; caught before shipping - the same class of mistake is worth re-checking any time the primary color changes.) |
 | `--info` | `#3E6FA6` (sky) | `#8FB8E0` | Unchanged by this revision. |
 | `--error` | `#B91C1C` | `#F87171` | Unchanged - error red is a safety color, no reason to touch it. |
 
-Tailwind's `primary` color family mirrors this exactly - `primary-500` is the same deep,
-text-safe gold as `--accent` (not the vivid one), and `primary.vivid` matches `--accent-vivid`.
+The dark-mode *neutral* palette (`--dark-bg`/`--dark-surface`/`--dark-text-*`) also reverted
+alongside terracotta, back to the original warm near-black brown (`#0D0C0B` family) instead of
+the plum-tinted dark introduced for wine/gold - that pairing was designed around terracotta
+originally and reads more coherently with it than the plum tint does.
+
+Tailwind's `primary` color family mirrors this exactly - `primary-500` is `#C84B31`, matching
+`--accent`, and `primary.vivid` is an alias to the same value.
 Keeping the two systems numerically aligned was the actual fix for the audit's original
 "'accent' means two different colors depending which system you reach for" finding - it very
 nearly reappeared in gold form when the Tailwind ramp's `500` step was left at the vivid tone

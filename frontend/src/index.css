@@ -15,20 +15,19 @@
   --text-primary: #211a26;
   --text-muted: #78716c;
   --text-subtle: #a8a29e;
-  /* Gold is primary (promoted from secondary at the founder's request, replacing wine).
-     --accent itself is the deep, readable gold (~5.6:1 against light backgrounds) - it's
-     used as TEXT/border color at 40+ call sites throughout the app (links, kickers, active
-     states), far more often than as a solid fill, so the token that everything already
-     reaches for has to be safe by default. --accent-vivid is the true, bright gold shown
-     in the logo/concept deck (~2.7:1 as text - NOT safe on its own) - reserved for the
-     handful of large solid fills (buttons) that pair it with --on-accent text instead.
-     --accent-hover darkens further for hover/active states on text and borders.
-     Wine moves to --wine* below. */
-  --accent: #8a6015;
-  --accent-hover: #6e4c11;
-  --accent-light: #fbf3e4;
-  --accent-vivid: #c9932e;
-  --on-accent: #211a26;
+  /* Terracotta is primary again - the founder's call after seeing gold live ("the original
+     color... the orange one"). Unlike gold, terracotta is dark/saturated enough to safely
+     serve as both a solid fill (white text, ~4.7:1) and text-on-light (~4.7:1 the same
+     value both ways) - the --accent/--accent-vivid split that gold needed isn't required
+     here, so --accent-vivid just points at the same value as --accent. --on-accent is white
+     now, not dark ink, to match. The Twin Arc logo mark itself is unchanged (still wine +
+     gold) - this reverts the broader UI accent only; see docs/PHASE8_BRAND_MIGRATION.md for
+     the open question that leaves. */
+  --accent: #c84b31;
+  --accent-hover: #a33d28;
+  --accent-light: #fdf2f0;
+  --accent-vivid: var(--accent);
+  --on-accent: #ffffff;
   --wine: #7c2d42;
   --wine-hover: #632235;
   --wine-light: #fbeef1;
@@ -37,10 +36,11 @@
   --border-strong: #dcd5cd;
   --success: #3f6b52;
   --success-light: #eaf3ee;
-  /* Deliberately not gold - warning and "the brand color" must never share a hue, or a
-     warning reads as just another call-to-action. */
-  --warning: #b8621d;
-  --warning-light: #fbeee0;
+  /* Restored to the original amber - distinct from terracotta again now that terracotta is
+     primary. (This is exactly the collision this comment warned about when gold was
+     primary - worth restating since the same risk exists for any color in this role.) */
+  --warning: #d97706;
+  --warning-light: #fef3c7;
   --info: #3e6fa6;
   --info-light: #eaf1f8;
   --error: #b91c1c;
@@ -72,32 +72,28 @@
   --brand-primary-soft: var(--accent-light);
   --brand-primary-dark: var(--accent);
 
-  /* Dark theme: warm near-black with a plum bias, matching Twin Arc's dark-mode swatches. */
-  --dark-bg: #17131b;
-  --dark-surface: #1e1923;
-  --dark-surface-strong: #251f2b;
-  --dark-card: #251f2b;
-  --dark-border: rgba(243, 238, 240, 0.08);
-  --dark-border-strong: rgba(243, 238, 240, 0.14);
-  --dark-text-primary: #f3eef0;
-  --dark-text-secondary: #c3b8c6;
-  --dark-text-muted: #8e8291;
-  /* In dark mode the safety direction reverses: text wants to brighten against a dark
-     background, not darken. --dark-accent is a bright gold, safe as text-on-dark AND
-     (paired with --on-accent, not white) as a solid fill - dark mode doesn't need a
-     separate --dark-accent-vivid, --accent-vivid just points back at this same value
-     below. --dark-accent-hover brightens further for hover/active emphasis. */
-  --dark-accent: #e3b65e;
-  --dark-accent-hover: #f0c878;
-  --dark-accent-light: rgba(227, 182, 94, 0.12);
+  /* Dark theme: warm near-black brown - restored alongside terracotta, since this pairing
+     was the original design (a plum-tinted dark was introduced for wine/gold and no longer
+     has a reason to stay now that terracotta is back). */
+  --dark-bg: #0d0c0b;
+  --dark-surface: #151311;
+  --dark-surface-strong: #1c1a17;
+  --dark-card: #1c1a17;
+  --dark-border: rgba(243, 238, 234, 0.08);
+  --dark-border-strong: rgba(243, 238, 234, 0.14);
+  --dark-text-primary: #f3eeea;
+  --dark-text-secondary: #a8a09a;
+  --dark-text-muted: #6b6560;
+  --dark-accent: #e07a50;
+  --dark-accent-hover: #f2a88a;
+  --dark-accent-light: rgba(224, 122, 80, 0.12);
   --dark-wine: #e497a9;
   --dark-wine-hover: #efb3c1;
   --dark-wine-light: rgba(228, 151, 169, 0.12);
   --dark-success: #7fb899;
   --dark-success-light: rgba(127, 184, 153, 0.12);
-  /* Distinct dark-mode burnt-orange, not gold - see the --warning comment above. */
-  --dark-warning: #e0985a;
-  --dark-warning-light: rgba(224, 152, 90, 0.12);
+  --dark-warning: #fbbf24;
+  --dark-warning-light: rgba(251, 191, 36, 0.12);
   --dark-info: #8fb8e0;
   --dark-info-light: rgba(143, 184, 224, 0.12);
   --dark-error: #f87171;
@@ -136,13 +132,12 @@ html.dark {
   --accent: var(--dark-accent);
   --accent-hover: var(--dark-accent-hover);
   --accent-light: var(--dark-accent-light);
-  /* Dark mode's bright gold already works as both text-on-dark and a solid fill with
-     --on-accent text, so --accent-vivid just points at the same value as --accent here -
-     no separate --dark-accent-vivid needed. */
+  /* Terracotta doesn't need the gold-era --accent/--accent-vivid split (see :root) - this
+     line is technically redundant with --accent-vivid's :root declaration (which already
+     inherits the dark value via var(--accent)) but kept explicit for clarity. */
   --accent-vivid: var(--dark-accent);
-  /* --on-accent is intentionally NOT remapped here - it's a fixed dark ink, correct against
-     both the light-mode and dark-mode gold values (both are light/warm enough that dark
-     text stays readable on either). */
+  /* --on-accent is intentionally NOT remapped here - it's white in both themes, correct
+     against terracotta in either its light or dark-mode value. */
   --wine: var(--dark-wine);
   --wine-hover: var(--dark-wine-hover);
   --wine-light: var(--dark-wine-light);
@@ -234,10 +229,6 @@ html.dark {
     box-shadow: 0 12px 28px color-mix(in srgb, var(--accent-vivid) 22%, transparent);
   }
 
-  /* A small proportional darken, not a swap to the deep --accent: --accent is tuned to be
-     dark enough for text-on-light contexts (~5.6:1 with dark text) - notably darker than a
-     button hover state wants, since --on-accent's contrast against something that dark
-     drops below 3:1. This keeps the hover-darken visible while staying safely readable. */
   .btn-primary:hover:not(:disabled) {
     background: color-mix(in srgb, var(--accent-vivid) 88%, black);
   }
@@ -394,9 +385,6 @@ html.dark {
     width: 40px;
     height: 40px;
     border-radius: var(--radius-full);
-    /* --accent/--accent-hover, not --accent-vivid: this pairs with text-white below, and
-       the vivid gold alone fails white-text contrast (~2.7:1) - the deep gold pairing stays
-       safe end-to-end (~5.6:1+). */
     background: linear-gradient(135deg, var(--accent), var(--accent-hover));
     color: #fff;
     font-weight: 700;

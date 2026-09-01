@@ -8,26 +8,24 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Twin Arc gold - promoted to primary at the founder's request. 500 is a deep,
-        // WCAG-safe gold (~5.6:1 as text-on-light) - matches --accent in index.css, since
-        // `text-primary-500`/`bg-primary-500` are both used as text/icon color throughout
-        // the app, and the bright hero gold alone isn't safe there (~2.7:1). `vivid` is that
-        // bright gold from the logo/concept deck, for large solid fills only (pairs with
-        // dark text) - matches --accent-vivid. Keeping these two systems' values aligned is
-        // the whole point - "primary" must mean the same actual color everywhere. See
-        // docs/PHASE8_BRAND_MIGRATION.md.
+        // Terracotta is primary again - reverted from gold at the founder's request after
+        // seeing it live ("the original color... the orange one"). Terracotta is dark/
+        // saturated enough to safely serve as both a solid fill and text-on-light with one
+        // value (unlike gold, which needed the split below) - matches --accent in
+        // index.css. `vivid` is kept as an alias to 500 so any component still explicitly
+        // reaching for `primary-vivid` doesn't break. See docs/PHASE8_BRAND_MIGRATION.md.
         primary: {
-          50: "#FBF3E4",
-          100: "#F3E2BE",
-          200: "#E6C583",
-          300: "#D5A452",
-          400: "#B98530",
-          500: "#8A6015",
-          600: "#6E4C11",
-          700: "#52390D",
-          800: "#372608",
-          900: "#1F1505",
-          vivid: "#C9932E",
+          50: "#FDF2F0",
+          100: "#FBE3DE",
+          200: "#F5C4B8",
+          300: "#EDA08D",
+          400: "#DD7256",
+          500: "#C84B31",
+          600: "#A33D28",
+          700: "#832F1E",
+          800: "#642417",
+          900: "#451A10",
+          vivid: "#C84B31",
         },
         // Twin Arc pine (matches brand.ts mint/mintDark/mintSoft, shifted toward the new system).
         secondary: {
@@ -75,9 +73,8 @@ export default {
           600: "#3A76C9",
         },
         success: "#3F6B52",
-        // Distinct burnt-orange, deliberately not the primary gold - warning and "the brand
-        // color" must never be visually the same hue, or a warning reads as just another CTA.
-        warning: "#B8621D",
+        // Restored to the original amber - distinct from terracotta again.
+        warning: "#D97706",
         error: "#B91C1C",
         info: "#3E6FA6",
         neutral: {
