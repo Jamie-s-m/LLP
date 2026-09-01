@@ -9,10 +9,19 @@
      and migration order. Values below replace the previous terracotta/mint/amber system;
      variable names are unchanged so every var(--accent)-style consumer re-themes for free. */
   --bg: #f5f1ea;
-  --surface: #ffffff;
+  /* Valeology pass: surfaces were pure/near-pure white (#ffffff/#fffdfa) sitting on a warm
+     cream page background - a stark white-vs-cream luminance jump at every card edge, which
+     is exactly the kind of high-contrast glare that drives eye fatigue over a long study
+     session. Both are now warm off-whites, still a visible step up from --bg for elevation,
+     but without the raw-white spike. See docs/PHASE8_BRAND_MIGRATION.md. */
+  --surface: #fdfaf4;
   --surface-strong: #fbf9f5;
-  --card: #fffdfa;
-  --text-primary: #211a26;
+  --card: #fefaf3;
+  /* Was #211a26, ~16.9:1 against white - technically fine by WCAG but well past the point
+     where higher contrast helps; sustained reading at near-max contrast causes more
+     halation/fatigue, not less. Lightened to a warm plum-neutral (~11:1, still comfortably
+     AAA) that keeps the wine-family hue but reads softer over a 20+ minute lesson. */
+  --text-primary: #3d3340;
   --text-muted: #78716c;
   --text-subtle: #a8a29e;
   /* Terracotta is primary again - the founder's call after seeing gold live ("the original
@@ -74,14 +83,21 @@
 
   /* Dark theme: warm near-black brown - restored alongside terracotta, since this pairing
      was the original design (a plum-tinted dark was introduced for wine/gold and no longer
-     has a reason to stay now that terracotta is back). */
-  --dark-bg: #0d0c0b;
-  --dark-surface: #151311;
-  --dark-surface-strong: #1c1a17;
-  --dark-card: #1c1a17;
+     has a reason to stay now that terracotta is back).
+     Valeology pass: --dark-bg was #0d0c0b (~2% luminance, effectively true black) paired
+     with #f3eeea text (~92%) - a ~19:1 swing that reads crisp for a screenshot but is hard
+     on the eyes across a long evening study session (the same halation problem as the light
+     theme's near-black text, worse in the dark because the eye's pupil is already more
+     dilated). Lightened to a soft warm charcoal, in the same ~#121212-#1e1e1e range dark-UI
+     guidance generally recommends over true black, and dimmed the text a touch to match -
+     still ~14:1, comfortably AAA, just not eye-searing at 11pm. */
+  --dark-bg: #17140f;
+  --dark-surface: #1e1a15;
+  --dark-surface-strong: #26211a;
+  --dark-card: #26211a;
   --dark-border: rgba(243, 238, 234, 0.08);
   --dark-border-strong: rgba(243, 238, 234, 0.14);
-  --dark-text-primary: #f3eeea;
+  --dark-text-primary: #e8e1d7;
   --dark-text-secondary: #a8a09a;
   --dark-text-muted: #6b6560;
   --dark-accent: #e07a50;
@@ -165,8 +181,15 @@ html.dark {
     @apply transition-colors duration-300;
     background: var(--bg);
     color: var(--text-primary);
+    /* Source Sans 3 kept as-is - it's already a good valeology fit for body copy (open
+       apertures, generous x-height, designed for on-screen legibility rather than print),
+       so there's no ergonomic case for swapping the family itself. line-height raised
+       1.6 -> 1.7: still inside the commonly-cited 1.5-1.8 comfortable-reading range, but
+       nearer the top of it, since this app's body copy (lessons, exercises, explanations)
+       is read continuously rather than skimmed. */
     font-family: 'Source Sans 3', sans-serif;
-    line-height: 1.6;
+    line-height: 1.7;
+    letter-spacing: 0.005em;
     -webkit-font-smoothing: antialiased;
   }
 
