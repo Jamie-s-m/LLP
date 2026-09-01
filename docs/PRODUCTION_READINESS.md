@@ -30,7 +30,7 @@
 ## Verified in repository
 
 - Frontend TypeScript/Vite build, ESLint (0 errors), Vitest suite
-- Backend Jest suite (173 tests, 26 suites), ESLint (0 errors)
+- Backend Jest suite (181 tests, 27 suites), ESLint (0 errors)
 - CI (`.github/workflows/ci-cd.yml`) now runs real lint + tests for both
   projects on every push/PR to `main`, not just a frontend build and a bare
   backend import smoke test
