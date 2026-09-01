@@ -38,7 +38,10 @@ export default function Avatar({ name, src, size = 'md', className = '' }: Avata
   return (
     <div
       className={`flex flex-shrink-0 items-center justify-center rounded-full font-bold text-white ${sizeClasses[size]} ${className}`}
-      style={{ background: 'linear-gradient(135deg, var(--warning), var(--accent))' }}
+      // --accent/--accent-hover, not --accent-vivid: this pairs with text-white above, and
+      // the vivid gold alone fails white-text contrast (~2.7:1) - the deep gold pairing
+      // stays safe end-to-end (~5.6:1+).
+      style={{ background: 'linear-gradient(135deg, var(--accent), var(--accent-hover))' }}
       aria-hidden={!name}
     >
       {initialsFrom(name)}

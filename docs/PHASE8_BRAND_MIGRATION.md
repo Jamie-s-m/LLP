@@ -1,9 +1,11 @@
 # Phase 8B/8C — Twin Arc brand system & migration strategy
 
-Specification only. Nothing in this document has been applied to `tailwind.config.js`,
-`index.css`, or any component yet — that's the full redesign phase, deliberately not
-started here. See [frontend/public/brand/twin-arc/README.md](../frontend/public/brand/twin-arc/README.md)
-for the finished logo files this spec is built around.
+Originally written as a specification before implementation began; the color-token section
+below now reflects what's actually live as of Batch 1 (Foundation) plus a same-day revision -
+**gold is primary, not wine** (the founder's call after seeing Batch 1 live: "it would be
+better if we use the Gold color as the main one"). Wine is now the secondary/supporting
+accent. See [frontend/public/brand/twin-arc/README.md](../frontend/public/brand/twin-arc/README.md)
+for the logo files (unchanged by this - the mark itself still uses both colors).
 
 ## Brand essence
 
@@ -20,24 +22,40 @@ for the finished logo files this spec is built around.
 Twin Arc (Concept B, refined) — see the dedicated spec and finished files at
 [`frontend/public/brand/twin-arc/`](../frontend/public/brand/twin-arc/). Not implemented yet.
 
-## Color tokens — target values, same names
+## Color tokens — live values, same names
 
-The migration deliberately **keeps every existing CSS variable name** in `index.css` and
-`tailwind.config.js` and only changes the *values*. This matters: any component that already
+The migration deliberately **kept every existing CSS variable name** in `index.css` and
+`tailwind.config.js` and only changed the *values*. This matters: any component that already
 correctly reads `var(--accent)`, `var(--success)`, etc. gets the new brand for free the moment
-`:root` is updated — zero component-level changes needed for the ~50% of the app that's
-already token-compliant. Only the 64 raw-hex bypass sites the audit found need individual
-migration.
+`:root` updates — zero component-level changes needed for the ~50% of the app that's already
+token-compliant. Only the raw-hex bypass sites need individual migration (six were found and
+fixed in Batch 1 alone, in the highest-traffic files - see the redesign-progress artifact).
 
-| Token | Current | Target | Notes |
+Gold is inherently lighter than wine was, which broke an assumption a lot of existing CSS
+depended on - that a single "accent" value was safe as *both* a large solid fill (with white
+text) *and* small text-on-light (kickers, links, badges). Wine, being dark, could do both.
+Gold's true, vivid tone (`#C9932E`, the one shown in the logo/concept deck) can't - it's
+~2.7:1 as text-on-light, well under the 4.5:1 AA minimum. Resolving that required **splitting
+the single old role into two tokens** rather than a straight value swap:
+
+| Token | Light value | Dark value | Used for |
 |---|---|---|---|
-| `--accent` | `#c84b31` (terracotta) | `#7C2D42` (wine) | Primary brand color |
-| `--accent-hover` | `#a33d28` | `#5C2131` | Deeper wine |
-| `--accent-light` | `#fdf2f0` | `#F3E3E7` | Soft wine tint |
-| `--success` | `#2d6a4f` | `#3F6B52` (pine) | Close to current — a refinement, not a reversal |
-| `--warning` | `#d97706` | `#C9932E` (gold) | Already gold-adjacent — small shift |
-| `--info` | `#0369a1` | `#3E6FA6` (sky) | Already blue — small shift |
-| `--error` | `#b91c1c` | *unchanged* | Error red is a safety color; no brief reason to touch it |
+| `--accent` | `#8A6015` (deep gold) | `#E3B65E` (bright gold) | **Default.** Text, links, borders, kickers, active states - the ~40+ call sites across the app that read `var(--accent)` or `text-primary-*` as color, not fill. Deliberately WCAG-safe (~5.6:1) even though it's a more muted gold than the logo. |
+| `--accent-vivid` | `#C9932E` (true logo gold) | `#E3B65E` (same as `--accent` in dark mode) | Large solid fills only - `.btn-primary`, `.auth-submit`, hero glow, toggle-on state. Always paired with `--on-accent`, never with `text-white` (fails at ~2.7:1). |
+| `--on-accent` | `#211A26` (dark ink, constant across themes) | *(same)* | Text/icon color for anything sitting on an `--accent-vivid` fill. |
+| `--accent-hover` | `#6E4C11` (darker still) | `#F0C878` (lighter still) | Hover/active emphasis on already-`--accent`-colored text/borders. Direction flips by theme: darken for text-on-light, brighten for text-on-dark. |
+| `--wine` / `--wine-hover` / `--wine-light` | `#7C2D42` / `#632235` / `#FBEEF1` | dark-mode equivalents | Secondary/supporting accent (was primary before this revision) - available for badges, links, highlight moments; still both colors in the logo mark itself. |
+| `--success` | `#3F6B52` (pine) | — | Unchanged by this revision. |
+| `--warning` | `#B8621D` (burnt orange) | `#E0985A` | **Deliberately not gold** - warning and "the brand color" must never share a hue, or a warning reads as just another call-to-action. Previously *was* the gold value in the very first pass; caught and separated before it shipped. |
+| `--info` | `#3E6FA6` (sky) | `#8FB8E0` | Unchanged by this revision. |
+| `--error` | `#B91C1C` | `#F87171` | Unchanged - error red is a safety color, no reason to touch it. |
+
+Tailwind's `primary` color family mirrors this exactly - `primary-500` is the same deep,
+text-safe gold as `--accent` (not the vivid one), and `primary.vivid` matches `--accent-vivid`.
+Keeping the two systems numerically aligned was the actual fix for the audit's original
+"'accent' means two different colors depending which system you reach for" finding - it very
+nearly reappeared in gold form when the Tailwind ramp's `500` step was left at the vivid tone
+while the CSS variable's default was corrected; caught during this same pass, not after.
 | `--bg` | `#fdf8f3` (cream) | `#F5F1EA` (paper) | Moves off the cream-latte tone the audit's cliché finding named |
 | `--text-primary` | `#1c1917` | `#211A26` (ink) | Warm near-black, slight plum bias |
 

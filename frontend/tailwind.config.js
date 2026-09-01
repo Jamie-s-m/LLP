@@ -8,19 +8,26 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Twin Arc wine (matches frontend/src/config/brand.ts primary + Phase 8 brand spec).
-        // Was terracotta (#C84B31 family) - migrated per docs/PHASE8_BRAND_MIGRATION.md.
+        // Twin Arc gold - promoted to primary at the founder's request. 500 is a deep,
+        // WCAG-safe gold (~5.6:1 as text-on-light) - matches --accent in index.css, since
+        // `text-primary-500`/`bg-primary-500` are both used as text/icon color throughout
+        // the app, and the bright hero gold alone isn't safe there (~2.7:1). `vivid` is that
+        // bright gold from the logo/concept deck, for large solid fills only (pairs with
+        // dark text) - matches --accent-vivid. Keeping these two systems' values aligned is
+        // the whole point - "primary" must mean the same actual color everywhere. See
+        // docs/PHASE8_BRAND_MIGRATION.md.
         primary: {
-          50: "#FBEEF1",
-          100: "#F6DEE3",
-          200: "#EBC0CB",
-          300: "#DB96A8",
-          400: "#B25E75",
-          500: "#7C2D42",
-          600: "#632235",
-          700: "#4C1A29",
-          800: "#35121C",
-          900: "#200B11",
+          50: "#FBF3E4",
+          100: "#F3E2BE",
+          200: "#E6C583",
+          300: "#D5A452",
+          400: "#B98530",
+          500: "#8A6015",
+          600: "#6E4C11",
+          700: "#52390D",
+          800: "#372608",
+          900: "#1F1505",
+          vivid: "#C9932E",
         },
         // Twin Arc pine (matches brand.ts mint/mintDark/mintSoft, shifted toward the new system).
         secondary: {
@@ -35,18 +42,19 @@ export default {
           800: "#182A21",
           900: "#0E1913",
         },
-        // Twin Arc gold (matches brand.ts gold/goldSoft).
+        // Twin Arc wine - was primary, now the secondary/supporting accent (still in the logo
+        // mark itself; available here for badges, links, and highlight moments elsewhere).
         accent: {
-          50: "#FBF3E4",
-          100: "#F6E5C2",
-          200: "#ECC888",
-          300: "#E0AC54",
-          400: "#D49D3F",
-          500: "#C9932E",
-          600: "#A97625",
-          700: "#825A1C",
-          800: "#5C4014",
-          900: "#3A280C",
+          50: "#FBEEF1",
+          100: "#F6DEE3",
+          200: "#EBC0CB",
+          300: "#DB96A8",
+          400: "#B25E75",
+          500: "#7C2D42",
+          600: "#632235",
+          700: "#4C1A29",
+          800: "#35121C",
+          900: "#200B11",
         },
         coral: {
           50: "#FCEFED",
@@ -67,7 +75,9 @@ export default {
           600: "#3A76C9",
         },
         success: "#3F6B52",
-        warning: "#C9932E",
+        // Distinct burnt-orange, deliberately not the primary gold - warning and "the brand
+        // color" must never be visually the same hue, or a warning reads as just another CTA.
+        warning: "#B8621D",
         error: "#B91C1C",
         info: "#3E6FA6",
         neutral: {

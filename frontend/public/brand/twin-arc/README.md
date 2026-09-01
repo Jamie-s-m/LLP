@@ -3,9 +3,11 @@
 Refined from Concept B of the brand-direction concept deck (presented separately as a
 published artifact, not a repo file). See [docs/PHASE8_BRAND_MIGRATION.md](../../../../docs/PHASE8_BRAND_MIGRATION.md)
 for the full color/typography/spacing system this mark sits inside.
-Staged here for review — **not wired into the live app yet** (favicon.svg, manifest.json,
-Navbar.tsx, Footer.tsx all still reference the previous mark). Swapping these in is
-implementation work for the full redesign phase, not this checkpoint.
+The symbol itself is live as of Batch 1 (Foundation) — `favicon.svg` and
+`linguanest-mark.svg` at the public root now serve this construction, referenced from
+`index.html`, `Navbar.tsx`, `Sidebar.tsx`, and `Footer.tsx`. The additional variants below
+(`symbol-mono.svg`, `lockup-horizontal.svg`, the regenerated PWA icon PNGs) are still staged,
+not yet wired in — see "Where each variant is intended to go."
 
 ## Construction
 
@@ -53,5 +55,7 @@ caught and fixed during this refinement pass.
 
 No gradient, no glass-overlay shading (the pattern the previous mark used). No literal bird,
 book, graduation cap, or globe. No speech-bubble tail or chat-bubble silhouette — the overlap
-itself carries the "two voices / two languages meeting" idea. One committed hero color (wine)
-plus one accent (gold), not five competing hues.
+itself carries the "two voices / two languages meeting" idea. One committed hero color, not
+five competing hues - originally wine, revised to gold after seeing Batch 1 live (see
+[docs/PHASE8_BRAND_MIGRATION.md](../../../../docs/PHASE8_BRAND_MIGRATION.md)); wine remains
+the secondary/supporting accent and both colors stay in the mark itself either way.

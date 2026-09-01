@@ -13,16 +13,19 @@ export const BRAND = {
     youtube: 'https://youtube.com/@linguanest',
   },
   colors: {
-    // Twin Arc palette - see docs/PHASE8_BRAND_MIGRATION.md. "primary" is wine (was terracotta),
-    // "mint" is pine, "gold" unchanged in name but shifted to the new richer tone.
-    primary: '#7C2D42',
-    primaryDark: '#632235',
-    primarySoft: '#FBEEF1',
+    // Twin Arc palette - see docs/PHASE8_BRAND_MIGRATION.md. "primary" is gold (promoted from
+    // secondary/accent at the founder's request); primaryDark is a deliberately darker step
+    // used for text-on-light contexts, where the bright 500 value fails contrast on its own.
+    // "wine" (formerly primary) is now the supporting/secondary accent.
+    primary: '#C9932E',
+    primaryDark: '#8A6015',
+    primarySoft: '#FBF3E4',
+    wine: '#7C2D42',
+    wineDark: '#632235',
+    wineSoft: '#FBEEF1',
     mint: '#3F6B52',
     mintDark: '#2F5140',
     mintSoft: '#EAF3EE',
-    gold: '#C9932E',
-    goldSoft: '#FBF3E4',
     coral: '#EDAAA2',
     coralSoft: '#FCEFED',
     sky: '#3E6FA6',
