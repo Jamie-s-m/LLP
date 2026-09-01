@@ -87,6 +87,7 @@ export default function Onboarding() {
         <button
           key={option}
           type="button"
+          aria-pressed={selected === option}
           onClick={() => onSelect(option)}
           className={`flex items-center justify-between rounded-2xl border-2 p-4 text-left font-medium transition-all ${
             selected === option
@@ -95,7 +96,7 @@ export default function Onboarding() {
           }`}
         >
           {labels[option]}
-          {selected === option ? <FiCheck /> : null}
+          {selected === option ? <FiCheck aria-hidden="true" /> : null}
         </button>
       ))}
     </div>
@@ -147,7 +148,7 @@ export default function Onboarding() {
                 onClick={() => setStep((current) => current + 1)}
                 className="btn btn-primary inline-flex items-center gap-2"
               >
-                {t('onboarding.continueCta')} <FiArrowRight />
+                {t('onboarding.continueCta')} <FiArrowRight aria-hidden="true" />
               </button>
             ) : (
               <button
@@ -156,9 +157,18 @@ export default function Onboarding() {
                 onClick={finishAndGoToPlacement}
                 className="btn btn-primary inline-flex items-center gap-2"
               >
-                {t('onboarding.continueCta')} <FiArrowRight />
+                {saving ? t('onboarding.savingPlan') : t('onboarding.continueCta')} <FiArrowRight aria-hidden="true" />
               </button>
             )}
+          </div>
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={() => navigate('/placement-test?onboarding=1')}
+              className="text-sm font-semibold text-[var(--accent)]"
+            >
+              {t('onboarding.skip')}
+            </button>
           </div>
         </div>
       </div>

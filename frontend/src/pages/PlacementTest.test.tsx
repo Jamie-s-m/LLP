@@ -35,6 +35,10 @@ describe('PlacementTest', () => {
     mockedApi.get.mockReset()
     mockedApi.post.mockReset()
     mockedApi.post.mockResolvedValue({ data: {} }) // covers fire-and-forget analytics tracking calls
+    // The placement test now autosaves in-progress answers to localStorage (resumable
+    // sessions) - without clearing it here, one test's saved progress leaks into the next
+    // and the intro screen shows "Resume test" instead of "Start test".
+    localStorage.clear()
   })
 
   it('derives the displayed question count from the real fetched question bank, not a hardcoded number', async () => {
@@ -121,5 +125,56 @@ describe('PlacementTest', () => {
     expect(
       screen.getByText('This is a starting estimate from one placement test, not a precise or official measurement.')
     ).toBeInTheDocument()
+  })
+
+  // Regression coverage for the placement-persistence feature (Batch 3): answers must
+  // survive an unmount (simulating a refresh), the intro screen must offer an explicit
+  // resume rather than silently jumping back in, and a successful submission must clear
+  // the saved progress so it can never replay as a duplicate.
+  it('persists in-progress answers across a remount and offers to resume, then clears on submit', async () => {
+    const user = userEvent.setup()
+    mockedApi.get.mockImplementation((url: string) => {
+      if (url === '/placement/questions') return Promise.resolve({ data: { data: buildQuestions(2) } })
+      return Promise.resolve({ data: {} })
+    })
+    mockedApi.post.mockImplementation((url: string) => {
+      if (url === '/placement/submit') {
+        return Promise.resolve({ data: { data: { cefr: 'B1', level: 'Intermediate', totalCorrect: 1, totalQuestions: 2, recommendedCourses: [] } } })
+      }
+      return Promise.resolve({ data: {} })
+    })
+
+    const { unmount } = render(
+      <MemoryRouter initialEntries={['/placement-test']}>
+        <PlacementTest />
+      </MemoryRouter>
+    )
+    await user.click(screen.getByRole('button', { name: /start test/i }))
+    await screen.findByText('Question 1 of 2')
+    await user.click(screen.getByText('A'))
+
+    // Simulate a refresh: unmount and remount a fresh instance against the same localStorage.
+    unmount()
+    render(
+      <MemoryRouter initialEntries={['/placement-test']}>
+        <PlacementTest />
+      </MemoryRouter>
+    )
+
+    const resumeButton = await screen.findByRole('button', { name: /resume test/i })
+    expect(screen.getByText(/answered question 1 of 2/i)).toBeInTheDocument()
+    await user.click(resumeButton)
+
+    // The first answer ("A") should already be selected (aria-pressed), not reset.
+    const optionA = await screen.findByText('A')
+    expect(optionA.closest('button')).toHaveAttribute('aria-pressed', 'true')
+
+    await user.click(screen.getByRole('button', { name: /next/i }))
+    await screen.findByText('Question 2 of 2')
+    await user.click(screen.getByText('A'))
+    await user.click(screen.getByRole('button', { name: /see my result/i }))
+
+    expect(await screen.findByText('Intermediate (B1)')).toBeInTheDocument()
+    expect(localStorage.getItem('linguanest_placement_progress_v1')).toBeNull()
   })
 })

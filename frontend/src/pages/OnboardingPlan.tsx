@@ -21,20 +21,29 @@ export default function OnboardingPlan() {
   const cefr = result?.cefr || null
 
   const [confidenceNote, setConfidenceNote] = useState<string | null>(null)
+  const [confidenceLoading, setConfidenceLoading] = useState(true)
 
   // This screen states the recommended level as a settled fact ("Intermediate (B1)") - the
   // backend's skill-profile endpoint carries an honest confidence caveat for exactly that
   // estimate (one placement test, not an ongoing adaptive assessment). Pull the live wording
   // instead of duplicating a hardcoded copy that could drift from what the backend computes;
   // planLevelConfidenceFallback only covers the (rare) case the request fails.
+  // confidenceLoading holds the caption back until the request settles, rather than showing
+  // the fallback text and then visibly swapping it for the real wording a moment later.
   useEffect(() => {
-    if (!level) return
+    if (!level) {
+      setConfidenceLoading(false)
+      return
+    }
     let cancelled = false
     api.get('/progress/skill-profile')
       .then((response) => {
         if (!cancelled) setConfidenceNote(response.data?.data?.confidenceNote || null)
       })
       .catch(() => undefined)
+      .finally(() => {
+        if (!cancelled) setConfidenceLoading(false)
+      })
     return () => {
       cancelled = true
     }
@@ -88,7 +97,7 @@ export default function OnboardingPlan() {
                 <dt className="text-muted">{t('onboarding.planLevel')}</dt>
                 <dd className="font-semibold text-ink dark:text-white">{level ? `${level}${cefr ? ` (${cefr})` : ''}` : '—'}</dd>
               </div>
-              {level ? (
+              {level && !confidenceLoading ? (
                 <p className="mt-1 text-xs text-muted">{confidenceNote || t('onboarding.planLevelConfidenceFallback')}</p>
               ) : null}
             </div>
@@ -113,6 +122,9 @@ export default function OnboardingPlan() {
 
           <div className="flex flex-col gap-3">
             <Link to={pathHref} className="btn btn-primary w-full">{t('onboarding.startLearning')}</Link>
+            <button onClick={() => navigate('/placement-test?onboarding=1')} className="text-sm font-semibold text-[var(--accent)]">
+              {t('onboarding.retakePlacement')}
+            </button>
             <button onClick={() => navigate('/dashboard')} className="text-sm font-semibold text-[var(--accent)]">
               {t('pricing.goToDashboard')}
             </button>
