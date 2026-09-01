@@ -93,4 +93,13 @@ const exerciseSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Same rationale as Lesson's compound index (see its comment): seed.js upserts on
+// (lesson, contentKey), and a plain sparse compound index would still collide two
+// hand-created exercises in the same lesson that both simply never set contentKey, since
+// `lesson` is always present. Scope the constraint to seed-managed exercises only.
+exerciseSchema.index(
+  { lesson: 1, contentKey: 1 },
+  { unique: true, partialFilterExpression: { contentKey: { $type: 'string' } } }
+);
+
 export default mongoose.model('Exercise', exerciseSchema);

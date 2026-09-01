@@ -6,8 +6,6 @@ const courseSchema = new mongoose.Schema(
       type: String,
       required: false,
       trim: true,
-      index: true,
-      sparse: true,
     },
     title: {
       type: String,
@@ -90,6 +88,16 @@ const courseSchema = new mongoose.Schema(
     },
   },
   { timestamps: true }
+);
+
+// A plain single-field `unique: true, sparse: true` index would work for documents that
+// never set contentKey at all, but not for any future accidental `contentKey: null` (sparse
+// only excludes a genuinely *missing* field, not an explicit null) - see the compound-index
+// comment on Lesson/Exercise for the fuller version of this gotcha. A partial index sidesteps
+// it entirely and keeps all four content models consistent.
+courseSchema.index(
+  { contentKey: 1 },
+  { unique: true, partialFilterExpression: { contentKey: { $type: 'string' } } }
 );
 
 export default mongoose.model('Course', courseSchema);

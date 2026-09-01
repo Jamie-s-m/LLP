@@ -77,4 +77,18 @@ const lessonSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// seed.js upserts on this exact compound key (course + contentKey); enforce it at the
+// database layer too, not just via application-level findOneAndUpdate filters, so a
+// concurrent or repeated seed run can never create duplicate lessons for the same course.
+// A plain `sparse: true` compound index is NOT enough here: Mongo's sparse rule for compound
+// indexes only requires ONE of the fields to be present, and `course` always is - so two
+// lessons in the same course that both simply never set contentKey (every hand-created
+// lesson in tests/the admin UI) would collide on the same "missing" index entry. A partial
+// index scoped to real string contentKeys applies the constraint only to seed-managed
+// lessons, exactly the set it's meant to protect.
+lessonSchema.index(
+  { course: 1, contentKey: 1 },
+  { unique: true, partialFilterExpression: { contentKey: { $type: 'string' } } }
+);
+
 export default mongoose.model('Lesson', lessonSchema);

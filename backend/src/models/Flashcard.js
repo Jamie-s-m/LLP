@@ -5,8 +5,6 @@ const flashcardSchema = new mongoose.Schema(
     contentKey: {
       type: String,
       trim: true,
-      index: true,
-      sparse: true,
     },
     lesson: {
       type: mongoose.Schema.ObjectId,
@@ -52,6 +50,13 @@ const flashcardSchema = new mongoose.Schema(
     ],
   },
   { timestamps: true }
+);
+
+// See Course.js's identical index for why this is a partial index rather than
+// `unique + sparse`.
+flashcardSchema.index(
+  { contentKey: 1 },
+  { unique: true, partialFilterExpression: { contentKey: { $type: 'string' } } }
 );
 
 export default mongoose.model('Flashcard', flashcardSchema);

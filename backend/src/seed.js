@@ -21,10 +21,47 @@ dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
+// Gate on "is there a usable connection", not "is MONGODB_URI set" - the two are not the
+// same thing. Tests connect Mongoose themselves (via MONGODB_TEST_URI, or an in-memory
+// server - see tests/jest.setup.js) before calling seedContent()/contentStatus() directly,
+// so MONGODB_URI is legitimately unset in that context even though the database is real and
+// ready. Checking the env var instead of the connection state made every test that seeds
+// content fail in CI, since CI (correctly) never sets MONGODB_URI at all.
 const assertDatabaseConfigured = () => {
+  if (mongoose.connection.readyState === 1) return;
   if (!MONGODB_URI) {
     throw new Error('MONGODB_URI must be configured for content operations');
   }
+};
+
+// This script only ever reads MONGODB_URI from the repo-root .env (see dotenv.config()
+// above) - it does NOT read backend/.env, even though that file may hold a different,
+// intentionally-local override. If the root .env's MONGODB_URI happens to point at a real
+// remote cluster (as it does on at least one developer machine, pointed at the production
+// Atlas database), running this script in development mode would silently seed production.
+// Since seed writes are irreversible-by-default (see seedContent's upsert loop), refuse to
+// proceed outside --mode=production unless the resolved target is unambiguously local.
+export const isLocalMongoUri = (uri) => {
+  if (!uri) return false;
+  try {
+    const withoutQuery = uri.split('?')[0];
+    const afterScheme = withoutQuery.replace(/^mongodb(\+srv)?:\/\//, '');
+    const hostPart = afterScheme.split('@').pop().split('/')[0];
+    const host = (hostPart.split(',')[0].split(':')[0] || '').toLowerCase();
+    return host === 'localhost' || host === '127.0.0.1' || host === '::1';
+  } catch {
+    return false;
+  }
+};
+
+const assertSafeSeedTarget = (safeMode) => {
+  if (safeMode === 'production') return; // explicit --mode=production --confirm already required
+  if (isLocalMongoUri(MONGODB_URI)) return;
+  const redacted = String(MONGODB_URI || '').replace(/\/\/[^@]*@/, '//<redacted>@');
+  throw new Error(
+    `Refusing to run content seeding in "${safeMode}" mode against a non-local-looking ` +
+    `database (${redacted}). If this is genuinely what you want, pass --mode=production --confirm.`
+  );
 };
 
 const demoUsers = [
@@ -134,10 +171,11 @@ const getContentCounts = async () => {
     });
   }
 
-  const [courses, publishedCourses, lessons, flashcards, vocabularyCount, placementQuestionCount] = await Promise.all([
+  const [courses, publishedCourses, lessons, exercises, flashcards, vocabularyCount, placementQuestionCount] = await Promise.all([
     Course.countDocuments(),
     Course.countDocuments({ isPublished: true }),
     Lesson.countDocuments(),
+    Exercise.countDocuments(),
     Flashcard.countDocuments(),
     Flashcard.countDocuments(),
     PlacementQuestion.countDocuments(),
@@ -149,17 +187,35 @@ const getContentCounts = async () => {
     courses,
     publishedCourses,
     lessons,
+    // Live count, not library.metadata.totalExercises - that static figure is computed once
+    // from the generated catalog only and never included REFERENCE_COURSE's exercises, so
+    // the "already seeded" check below could never be satisfied once the reference pathway
+    // was added: 630 (static) >= 639 (630 generated + 9 reference) is always false, so every
+    // seed run silently fell through to re-upserting the entire catalog, forever. A live
+    // count is correct by construction for any future addition, not just this one.
+    exercises,
     flashcards,
     vocabularyCount,
     modules: libraryMetrics.totalModules,
     units: libraryMetrics.totalUnits,
-    exercises: libraryMetrics.totalExercises,
+    // No live "assessment question" collection exists yet - contentLibrary.js's
+    // assessmentBank/buildAssessmentSet is dead code, never seeded anywhere (see the release
+    // audit). This stays a static metadata figure for reporting only, and unlike `exercises`
+    // above it is intentionally NOT part of catalogAlreadySatisfiesRequirements below.
     assessmentQuestions: libraryMetrics.totalAssessmentQuestions,
     placementQuestions: placementQuestionCount,
   };
 };
 
 export const contentStatus = async ({ mode = 'development' } = {}) => {
+  // Only close the connection this call opened itself. Unconditionally disconnecting here
+  // used to be safe by accident: assertDatabaseConfigured() always threw before this point
+  // whenever there wasn't already a real MONGODB_URI-backed connection, so the only way to
+  // reach this far was for contentStatus() to have opened the connection itself. Now that a
+  // pre-existing live connection (e.g. a test's, or a future caller reusing the app's own
+  // Mongo connection) is a legitimate way to get here, tearing it down unconditionally would
+  // silently disconnect whatever else was relying on it.
+  const openedHere = mongoose.connection.readyState !== 1;
   try {
     assertDatabaseConfigured();
     const counts = await getContentCounts();
@@ -181,7 +237,7 @@ export const contentStatus = async ({ mode = 'development' } = {}) => {
     console.log(output);
     return counts;
   } finally {
-    if (mongoose.connection.readyState !== 0) {
+    if (openedHere && mongoose.connection.readyState !== 0) {
       await mongoose.disconnect();
     }
   }
@@ -207,6 +263,7 @@ export const seedContent = async ({
   assertDatabaseConfigured();
 
   if (mongoose.connection.readyState !== 1) {
+    assertSafeSeedTarget(safeMode);
     await mongoose.connect(MONGODB_URI, { serverSelectionTimeoutMS: 5000 });
   }
 
