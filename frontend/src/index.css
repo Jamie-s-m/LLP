@@ -401,24 +401,6 @@ html.dark {
     color: var(--dark-accent-hover);
   }
 
-  .testimonial-avatar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: var(--radius-full);
-    background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-    color: #fff;
-    font-weight: 700;
-    font-size: 13px;
-    flex-shrink: 0;
-  }
-
-  .testimonial-author {
-    margin-top: 16px;
-  }
-
   @media (max-width: 767px) {
     .atlas-page {
       min-height: auto;

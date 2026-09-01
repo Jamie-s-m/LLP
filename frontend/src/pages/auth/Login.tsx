@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { FiEye, FiEyeOff } from 'react-icons/fi'
+import { FiEye, FiEyeOff, FiTarget } from 'react-icons/fi'
 import { useAuthStore, api } from '../../store/authStore'
 import toast from 'react-hot-toast'
 import { useI18n } from '../../utils/i18n'
@@ -97,17 +97,12 @@ export default function Login() {
           </div>
 
           <div className="auth-testimonial rounded-[1.5rem] border border-white/10 bg-white/5 p-7 backdrop-blur-sm">
-            <div className="testimonial-stars mb-4 text-[var(--dark-accent)] tracking-[2px]" aria-hidden="true">★★★★★</div>
-            <p className="testimonial-text text-[15px] leading-6 text-white/80">
-              “The flow feels calm and motivating — I can practice daily without pressure, and my speaking confidence is finally growing.”
-            </p>
-            <div className="testimonial-author flex items-center gap-3">
-              <div className="testimonial-avatar">AM</div>
-              <div>
-                <div className="testimonial-name text-sm font-bold text-white">Amina M.</div>
-                <div className="testimonial-role text-xs text-white/50">Advanced learner</div>
-              </div>
+            <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-[var(--dark-accent)]">
+              <FiTarget size={16} aria-hidden="true" />
             </div>
+            <p className="testimonial-text text-[15px] leading-6 text-white/80">
+              Every lesson maps to a CEFR level, with spaced-repetition review built in — so what you practice today is what sticks.
+            </p>
           </div>
         </div>
 

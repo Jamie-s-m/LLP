@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { FiBookOpen, FiEye, FiEyeOff, FiUsers } from 'react-icons/fi'
+import { FiBookOpen, FiCompass, FiEye, FiEyeOff, FiUsers } from 'react-icons/fi'
 import { useAuthStore } from '../../store/authStore'
 import { useLanguageStore } from '../../store/languageStore'
 import api from '../../services/api'
@@ -232,17 +232,12 @@ export default function Register() {
           </div>
 
           <div className="auth-testimonial rounded-[1.5rem] border border-white/10 bg-white/5 p-7 backdrop-blur-sm">
-            <div className="testimonial-stars mb-4 text-[var(--dark-accent)] tracking-[2px]" aria-hidden="true">★★★★★</div>
-            <p className="testimonial-text text-[15px] leading-6 text-white/80">
-              “A thoughtful learning space for families, students, and teachers — the entire experience feels well designed and human.”
-            </p>
-            <div className="testimonial-author flex items-center gap-3">
-              <div className="testimonial-avatar">SD</div>
-              <div>
-                <div className="testimonial-name text-sm font-bold text-white">Sardor D.</div>
-                <div className="testimonial-role text-xs text-white/50">Parent & learner</div>
-              </div>
+            <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-[var(--dark-accent)]">
+              <FiCompass size={16} aria-hidden="true" />
             </div>
+            <p className="testimonial-text text-[15px] leading-6 text-white/80">
+              Start with a real placement test, then follow a structured path — from your first words to fluent conversation.
+            </p>
           </div>
         </div>
 
