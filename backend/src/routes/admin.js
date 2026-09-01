@@ -28,8 +28,14 @@ router.post('/content/:resource/bulk-delete', authorizeRoleOrPermission({ roles:
 router.patch('/content/:resource/:id', authorizeRoleOrPermission({ roles: ['admin'], permissions: ['communityModeration', 'catalogContentQa'] }), updateContent);
 router.delete('/content/:resource/:id', authorizeRoleOrPermission({ roles: ['admin'], permissions: ['communityModeration', 'catalogContentQa'] }), deleteContent);
 
-// Admin push send (test)
-router.post('/push/send', authorizeRoleOrPermission({ roles: ['admin'], permissions: ['supportChat'] }), async (req, res, next) => {
+// Admin push send (test) - admin-only. This used to also accept the 'supportChat' permission,
+// which governs picking eligible support staff for a chat conversation (chatController.js) and
+// has nothing to do with sending push notifications - it let any moderator with just that one
+// narrow permission broadcast an arbitrary spoofed title/body notification, carrying the
+// trusted LinguaNest icon, to any set of userIds with zero further scoping (sendTestPush has no
+// ownership/relationship check on top of the route guard). Found and fixed during the Phase 3
+// security re-audit.
+router.post('/push/send', authorize('admin'), async (req, res, next) => {
   try {
     await sendTestPush(req, res, next);
   } catch (err) { next(err); }

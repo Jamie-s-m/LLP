@@ -459,17 +459,44 @@ export const handleStripeWebhook = async (req, res) => {
       }
     }
 
+    // event.created is when Stripe generated the event, not when it was delivered - Stripe
+    // does not guarantee delivery order, so a same-event-id dedup alone isn't enough: a
+    // subscription.updated that logically happened BEFORE a later subscription.deleted can
+    // still arrive AFTER it (retry, redelivery, network reordering) and would silently revert
+    // real billing state back to active with no error. Requiring this event to be at least as
+    // new as whatever was last applied closes that window the same way the event-id check
+    // closes the exact-duplicate window.
+    const eventCreatedAt = event.created ? new Date(event.created * 1000) : new Date();
     updates.lastStripeEventId = event.id;
+    updates.lastStripeEventCreatedAt = eventCreatedAt;
     const setPayload = Object.fromEntries(Object.entries(updates).map(([key, value]) => [`billing.${key}`, value]));
 
     const updatedUser = await User.findOneAndUpdate(
-      { _id: user._id, 'billing.lastStripeEventId': { $ne: event.id } },
+      {
+        _id: user._id,
+        'billing.lastStripeEventId': { $ne: event.id },
+        $or: [
+          { 'billing.lastStripeEventCreatedAt': null },
+          { 'billing.lastStripeEventCreatedAt': { $lte: eventCreatedAt } },
+        ],
+      },
       { $set: setPayload },
       { new: true }
     );
 
     if (!updatedUser) {
-      return res.status(200).json({ success: true, received: true, type: event.type, duplicate: true });
+      // Distinguish an exact redelivery (same event id - a true no-op) from an out-of-order
+      // event (different id, but older than what's already applied - correctly ignored, not
+      // an error) for observability; both cases skip writing.
+      const current = await User.findById(user._id).select('billing.lastStripeEventId');
+      const isDuplicate = current?.billing?.lastStripeEventId === event.id;
+      return res.status(200).json({
+        success: true,
+        received: true,
+        type: event.type,
+        duplicate: isDuplicate,
+        outOfOrder: !isDuplicate,
+      });
     }
 
     if (event.type === 'checkout.session.completed') {

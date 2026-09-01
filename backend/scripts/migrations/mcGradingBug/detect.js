@@ -9,6 +9,7 @@
 // explicit --uri, never falls back to any .env file - see checkDuplicateContentKeys.js for why.
 import mongoose from 'mongoose';
 import { detectAffectedAttempts } from './lib.js';
+import { redactUri, reportFatal } from '../../_scriptSafety.js';
 
 const parseArgs = () => {
   const args = Object.fromEntries(
@@ -20,8 +21,13 @@ const parseArgs = () => {
   return args;
 };
 
+// Hoisted to module scope so the catch handler below can redact it out of any error that
+// echoes the connection string back - see _scriptSafety.js.
+let uri;
+
 const main = async () => {
-  const { uri, cutoff } = parseArgs();
+  let cutoff;
+  ({ uri, cutoff } = parseArgs());
   if (!uri || !cutoff) {
     console.error('Usage: node detect.js --uri="<mongodb-uri>" --cutoff=<ISO-date>');
     process.exit(1);
@@ -32,7 +38,7 @@ const main = async () => {
     process.exit(1);
   }
 
-  console.log(`Connecting (read-only) to ${uri.replace(/\/\/[^@]*@/, '//<redacted>@')} ...`);
+  console.log(`Connecting (read-only) to ${redactUri(uri)} ...`);
   await mongoose.connect(uri, { serverSelectionTimeoutMS: 10000 });
 
   const report = await detectAffectedAttempts(cutoffDate);
@@ -52,6 +58,6 @@ const main = async () => {
 };
 
 main().catch((error) => {
-  console.error('Detection failed:', error);
+  reportFatal('Detection failed', error, uri);
   process.exit(1);
 });

@@ -9,6 +9,7 @@
 //   node backend/scripts/migrations/mcGradingBug/rollback.js --uri="<mongodb-uri>" --apply
 import mongoose from 'mongoose';
 import { rollbackRemediation, DEFAULT_REASON } from './lib.js';
+import { redactUri, reportFatal } from '../../_scriptSafety.js';
 
 const parseArgs = () => {
   const argv = process.argv.slice(2);
@@ -22,14 +23,19 @@ const parseArgs = () => {
   return { ...kv, apply: flags.has('apply') };
 };
 
+// Hoisted to module scope so the catch handler below can redact it out of any error that
+// echoes the connection string back - see _scriptSafety.js.
+let uri;
+
 const main = async () => {
-  const { uri, reason = DEFAULT_REASON, apply } = parseArgs();
+  let reason, apply;
+  ({ uri, reason = DEFAULT_REASON, apply } = parseArgs());
   if (!uri) {
     console.error('Usage: node rollback.js --uri="<mongodb-uri>" [--reason=<name>] [--apply]');
     process.exit(1);
   }
 
-  console.log(`Connecting to ${uri.replace(/\/\/[^@]*@/, '//<redacted>@')} ...`);
+  console.log(`Connecting to ${redactUri(uri)} ...`);
   console.log(apply ? 'MODE: APPLY (will write)' : 'MODE: DRY RUN (no writes) - pass --apply to actually revert');
   await mongoose.connect(uri, { serverSelectionTimeoutMS: 10000 });
 
@@ -46,6 +52,6 @@ const main = async () => {
 };
 
 main().catch((error) => {
-  console.error('Rollback failed:', error);
+  reportFatal('Rollback failed', error, uri);
   process.exit(1);
 });

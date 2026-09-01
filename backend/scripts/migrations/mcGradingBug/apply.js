@@ -13,6 +13,7 @@
 // lib.js). Requires an explicit --uri, never falls back to any .env file.
 import mongoose from 'mongoose';
 import { applyGraceCredit, DEFAULT_REASON } from './lib.js';
+import { redactUri, reportFatal } from '../../_scriptSafety.js';
 
 const parseArgs = () => {
   const argv = process.argv.slice(2);
@@ -26,8 +27,13 @@ const parseArgs = () => {
   return { ...kv, apply: flags.has('apply') };
 };
 
+// Hoisted to module scope so the catch handler below can redact it out of any error that
+// echoes the connection string back - see _scriptSafety.js.
+let uri;
+
 const main = async () => {
-  const { uri, cutoff, reason = DEFAULT_REASON, apply } = parseArgs();
+  let cutoff, reason, apply;
+  ({ uri, cutoff, reason = DEFAULT_REASON, apply } = parseArgs());
   if (!uri || !cutoff) {
     console.error('Usage: node apply.js --uri="<mongodb-uri>" --cutoff=<ISO-date> [--reason=<name>] [--apply]');
     process.exit(1);
@@ -38,7 +44,7 @@ const main = async () => {
     process.exit(1);
   }
 
-  console.log(`Connecting to ${uri.replace(/\/\/[^@]*@/, '//<redacted>@')} ...`);
+  console.log(`Connecting to ${redactUri(uri)} ...`);
   console.log(apply ? 'MODE: APPLY (will write)' : 'MODE: DRY RUN (no writes) - pass --apply to actually credit XP');
   await mongoose.connect(uri, { serverSelectionTimeoutMS: 10000 });
 
@@ -61,6 +67,6 @@ const main = async () => {
 };
 
 main().catch((error) => {
-  console.error('Apply failed:', error);
+  reportFatal('Apply failed', error, uri);
   process.exit(1);
 });

@@ -51,6 +51,68 @@ describe('Analytics API', () => {
     expect(stored.metadata.lessonId).toBe('abc123');
   });
 
+  // Regression coverage for a Phase 3 security-re-audit finding: the original key-name denylist
+  // didn't cover 'fullName', 'ssn', 'dob', or 'note'/'comment'-shaped fields, so an
+  // unauthenticated POST could store a fake SSN, full name, date of birth, and a free-text note
+  // verbatim - demonstrated live by the audit against this exact route.
+  it('strips PII by key name (fullName, ssn, dob, note) that the old denylist missed', async () => {
+    const res = await request(app).post('/api/analytics/track').send({
+      event: 'pricing_viewed',
+      anonymousId: 'anon-pii-1',
+      metadata: {
+        ssn: '123-45-6789',
+        fullName: 'Jane Q. Attacker',
+        dob: '1990-01-01',
+        note: 'wants a refund to her personal bank account',
+        plan: 'local',
+      },
+    });
+    expect(res.status).toBe(204);
+
+    const stored = await AnalyticsEvent.findOne({ event: 'pricing_viewed', anonymousId: 'anon-pii-1' });
+    expect(stored.metadata.ssn).toBeUndefined();
+    expect(stored.metadata.fullName).toBeUndefined();
+    expect(stored.metadata.dob).toBeUndefined();
+    expect(stored.metadata.note).toBeUndefined();
+    expect(stored.metadata.plan).toBe('local');
+  });
+
+  it('strips a value that LOOKS like PII regardless of what its key is named', async () => {
+    const res = await request(app).post('/api/analytics/track').send({
+      event: 'pricing_viewed',
+      anonymousId: 'anon-pii-2',
+      metadata: {
+        // Renamed keys an attacker might use to dodge a key-name-only denylist.
+        taxId: '123-45-6789',
+        contact: 'attacker@example.com',
+        cardRef: '4111111111111111',
+        plan: 'learner',
+      },
+    });
+    expect(res.status).toBe(204);
+
+    const stored = await AnalyticsEvent.findOne({ event: 'pricing_viewed', anonymousId: 'anon-pii-2' });
+    expect(stored.metadata.taxId).toBeUndefined();
+    expect(stored.metadata.contact).toBeUndefined();
+    expect(stored.metadata.cardRef).toBeUndefined();
+    expect(stored.metadata.plan).toBe('learner');
+  });
+
+  it('still allows short, real-shaped values (plan keys, ids, booleans, counts)', async () => {
+    const res = await request(app).post('/api/analytics/track').send({
+      event: 'exercise_completed',
+      anonymousId: 'anon-legit-1',
+      metadata: { exerciseId: '507f1f77bcf86cd799439011', type: 'multiple_choice', correct: true, streak: 5 },
+    });
+    expect(res.status).toBe(204);
+
+    const stored = await AnalyticsEvent.findOne({ event: 'exercise_completed', anonymousId: 'anon-legit-1' });
+    expect(stored.metadata.exerciseId).toBe('507f1f77bcf86cd799439011');
+    expect(stored.metadata.type).toBe('multiple_choice');
+    expect(stored.metadata.correct).toBe(true);
+    expect(stored.metadata.streak).toBe(5);
+  });
+
   it('never fails the request even with a malformed body', async () => {
     const res = await request(app).post('/api/analytics/track').send('not json at all');
     expect([204, 400]).toContain(res.status);

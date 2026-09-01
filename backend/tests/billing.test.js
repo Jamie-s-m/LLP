@@ -250,6 +250,44 @@ describe('Stripe webhook - refunds, idempotency, and signature verification', ()
     expect(reloaded.billing.stripeSubscriptionId).toBe('sub_active_1');
   });
 
+  // Regression coverage for a Phase 3 security-re-audit finding: the same-event-id dedup guard
+  // (blocker 5) closes exact redelivery, but Stripe does not guarantee delivery ORDER - a
+  // subscription.updated that logically happened before a later subscription.deleted could
+  // still arrive after it and silently revert a real cancellation back to active.
+  it('an out-of-order webhook (older event.created, different event id) does not revert a later cancellation', async () => {
+    const user = await makeSubscriber('stripe-out-of-order@example.com', 'cus_out_of_order_1');
+    const earlier = Math.floor(Date.now() / 1000) - 3600; // 1 hour ago
+    const later = Math.floor(Date.now() / 1000); // now
+
+    const cancelEvent = await sendEvent({
+      id: 'evt_ooo_deleted',
+      type: 'customer.subscription.deleted',
+      created: later,
+      data: { object: { id: 'sub_ooo_1', customer: 'cus_out_of_order_1', status: 'canceled' } },
+    });
+    expect(cancelEvent.status).toBe(200);
+    expect((await User.findById(user._id)).billing.status).toBe('canceled');
+
+    // A stale "still active" update, generated BEFORE the cancellation but delivered after it.
+    const staleUpdateEvent = await sendEvent({
+      id: 'evt_ooo_updated_stale',
+      type: 'customer.subscription.updated',
+      created: earlier,
+      data: {
+        object: {
+          id: 'sub_ooo_1', customer: 'cus_out_of_order_1', status: 'active',
+          items: { data: [{ price: { id: 'price_unknown' } }] },
+          current_period_end: later + 30 * 24 * 60 * 60, cancel_at_period_end: false,
+        },
+      },
+    });
+    expect(staleUpdateEvent.status).toBe(200);
+    expect(staleUpdateEvent.body.outOfOrder).toBe(true);
+
+    const reloaded = await User.findById(user._id);
+    expect(reloaded.billing.status).toBe('canceled');
+  });
+
   it('ignores an event for an unrecognized customer without error', async () => {
     const res = await sendEvent({
       id: 'evt_unknown_customer_1',

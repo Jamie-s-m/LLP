@@ -7,6 +7,7 @@
 //   node backend/scripts/migrations/mcGradingBug/validate.js --uri="<mongodb-uri>" --cutoff=2026-09-02T00:00:00Z
 import mongoose from 'mongoose';
 import { validateRemediation, DEFAULT_REASON } from './lib.js';
+import { redactUri, reportFatal } from '../../_scriptSafety.js';
 
 const parseArgs = () => Object.fromEntries(
   process.argv.slice(2).map((arg) => {
@@ -15,8 +16,13 @@ const parseArgs = () => Object.fromEntries(
   })
 );
 
+// Hoisted to module scope so the catch handler below can redact it out of any error that
+// echoes the connection string back - see _scriptSafety.js.
+let uri;
+
 const main = async () => {
-  const { uri, cutoff, reason = DEFAULT_REASON } = parseArgs();
+  let cutoff, reason;
+  ({ uri, cutoff, reason = DEFAULT_REASON } = parseArgs());
   if (!uri || !cutoff) {
     console.error('Usage: node validate.js --uri="<mongodb-uri>" --cutoff=<ISO-date> [--reason=<name>]');
     process.exit(1);
@@ -27,7 +33,7 @@ const main = async () => {
     process.exit(1);
   }
 
-  console.log(`Connecting (read-only) to ${uri.replace(/\/\/[^@]*@/, '//<redacted>@')} ...`);
+  console.log(`Connecting (read-only) to ${redactUri(uri)} ...`);
   await mongoose.connect(uri, { serverSelectionTimeoutMS: 10000 });
 
   const result = await validateRemediation({ cutoffDate, reason });
@@ -51,6 +57,6 @@ const main = async () => {
 };
 
 main().catch((error) => {
-  console.error('Validation failed:', error);
+  reportFatal('Validation failed', error, uri);
   process.exit(1);
 });

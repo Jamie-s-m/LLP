@@ -3,6 +3,7 @@ import Course from '../src/models/Course.js';
 import Lesson from '../src/models/Lesson.js';
 import Exercise from '../src/models/Exercise.js';
 import Flashcard from '../src/models/Flashcard.js';
+import { redactUri, reportFatal } from './_scriptSafety.js';
 
 // Read-only pre-flight check for the new unique content-key indexes added in Phase 3
 // (see Course.js/Lesson.js/Exercise.js/Flashcard.js). Those indexes cannot be built on a
@@ -42,14 +43,18 @@ const findDuplicates = async (Model, groupExpr, label) => {
   return duplicates.length;
 };
 
+// Hoisted to module scope (not local to main()) so the catch handler below can redact it out
+// of any error that echoes the connection string back - see _scriptSafety.js.
+let uri;
+
 const main = async () => {
-  const uri = parseUri();
+  uri = parseUri();
   if (!uri) {
     console.error('Usage: node backend/scripts/checkDuplicateContentKeys.js --uri="<mongodb-connection-string>"');
     process.exit(1);
   }
 
-  console.log(`Connecting (read-only check) to ${uri.replace(/\/\/[^@]*@/, '//<redacted>@')} ...`);
+  console.log(`Connecting (read-only check) to ${redactUri(uri)} ...`);
   await mongoose.connect(uri, { serverSelectionTimeoutMS: 10000 });
 
   const results = await Promise.all([
@@ -72,6 +77,6 @@ const main = async () => {
 };
 
 main().catch((error) => {
-  console.error('Duplicate check failed:', error);
+  reportFatal('Duplicate check failed', error, uri);
   process.exit(1);
 });

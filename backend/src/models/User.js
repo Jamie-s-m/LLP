@@ -80,6 +80,11 @@ const userSchema = new mongoose.Schema(
       stripeSubscriptionId: { type: String, default: '' },
       stripePriceId: { type: String, default: '' },
       lastStripeEventId: { type: String, default: '' },
+      // Stripe's own event.created (when the event happened, not when it was delivered) - used
+      // to reject an out-of-order webhook delivery (e.g. a subscription.updated that happened
+      // BEFORE a later subscription.deleted, but arrives AFTER it) from silently reverting
+      // billing state. See handleStripeWebhook.
+      lastStripeEventCreatedAt: { type: Date, default: null },
       paymeTransactionId: { type: String, default: '' },
       currentPeriodEnd: { type: Date, default: null },
       cancelAtPeriodEnd: { type: Boolean, default: false },
