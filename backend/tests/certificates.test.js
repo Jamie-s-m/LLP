@@ -3,6 +3,10 @@ import app from '../src/app.js';
 import User from '../src/models/User.js';
 import Certificate from '../src/models/Certificate.js';
 import Course from '../src/models/Course.js';
+import Lesson from '../src/models/Lesson.js';
+import Exercise from '../src/models/Exercise.js';
+import Progress from '../src/models/Progress.js';
+import ExerciseAttempt from '../src/models/ExerciseAttempt.js';
 import { seedContent } from '../src/seed.js';
 import { REFERENCE_COURSE } from '../src/data/referenceCurriculum.js';
 
@@ -99,6 +103,53 @@ describe('Certificate system', () => {
     expect(checkAwards.status).toBe(401);
     expect(mine.status).toBe(401);
   });
+
+  // Regression coverage for a release blocker, exercised through the real HTTP route (not a
+  // reimplementation): one correct answer used to be enough for 'mastered', which fed straight
+  // into level-readiness/certificate eligibility. This reproduces that exact path end to end
+  // against the real seeded reference course and confirms no certificate is issued.
+  it('cannot earn a certificate from a single correct answer in a single lesson', async () => {
+    const gamer = await User.create({
+      firstName: 'One',
+      lastName: 'Gamer',
+      email: 'cert-gamer@example.com',
+      password: 'testpass123',
+      role: 'student',
+      isEmailVerified: true,
+    });
+    const gamerLogin = await request(app).post('/api/auth/login').send({ email: 'cert-gamer@example.com', password: 'testpass123' });
+    const gamerToken = gamerLogin.body.token;
+
+    const lessons = await Lesson.find({ course: course._id }).sort({ order: 1 });
+    const lessonA1 = lessons[0];
+    const gradableExercise = await Exercise.findOne({ lesson: lessonA1._id, type: { $in: ['multiple_choice', 'fill_blank'] } });
+
+    await Progress.create({ user: gamer._id, course: course._id, completedLessons: [lessonA1._id], progressPercentage: 33 });
+    // Grind the same single exercise repeatedly, all correct - not "one attempt", to also
+    // prove volume/duplicate submissions of one item can't substitute for real coverage.
+    for (let i = 0; i < 10; i += 1) {
+      await ExerciseAttempt.create({ user: gamer._id, exercise: gradableExercise._id, skill: gradableExercise.skill || 'grammar', isCorrect: true, status: 'graded' });
+    }
+
+    const masteryRes = await request(app)
+      .get(`/api/certificates/mastery/${course._id}`)
+      .set('Authorization', `Bearer ${gamerToken}`);
+    expect(masteryRes.status).toBe(200);
+    const lessonMastery = masteryRes.body.data.lessons.find((l) => l.lessonId === String(lessonA1._id));
+    expect(lessonMastery.state).not.toBe('mastered');
+
+    const checkRes = await request(app)
+      .post(`/api/certificates/check-awards/${course._id}`)
+      .set('Authorization', `Bearer ${gamerToken}`);
+    expect(checkRes.status).toBe(200);
+
+    const certificates = await Certificate.find({ user: gamer._id });
+    expect(certificates).toHaveLength(0);
+
+    await User.deleteOne({ _id: gamer._id });
+    await Progress.deleteMany({ user: gamer._id });
+    await ExerciseAttempt.deleteMany({ user: gamer._id });
+  }, 30000);
 
   it('rejects revocation from a non-admin', async () => {
     const loginRes = await request(app).post('/api/auth/login').send({ email: 'cert-holder@example.com', password: 'testpass123' });

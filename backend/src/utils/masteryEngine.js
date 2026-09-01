@@ -16,10 +16,26 @@ export const MASTERY_STATES = ['not_started', 'introduced', 'practicing', 'devel
 // inconsistent rule for the same data.
 const isEvidenceGraded = (attempt) => attempt.status === 'graded';
 
+// A lesson can only be called 'mastered' once the learner has demonstrated it across the
+// lesson's distinct exercises, not just repeated one easy item until the accuracy math looks
+// good. MIN_DISTINCT_EXERCISES_FOR_MASTERY is a floor beneath "attempted every exercise in the
+// lesson" (full coverage): it exists so a lesson that (today) has only 2 auto-graded exercises
+// is still reachable, while a lesson with just 1 gradable exercise can never be 'mastered' from
+// that single item alone - by design, matching the release-gate requirement that one correct
+// answer must never be sufficient evidence. As the curriculum grows past the current 3-lesson
+// reference pathway (see curriculumBlueprint.js), the real gate is full coverage - this floor
+// only matters for today's smallest lessons.
+const MIN_DISTINCT_EXERCISES_FOR_MASTERY = 2;
+
 // Pure function over already-fetched data - no DB access - so it's independently testable and
 // reusable from both computeLessonMastery (below) and any future caller (analytics, admin
 // content-coverage view) without re-querying.
-export const deriveMasteryState = ({ lessonCompleted, attempts }) => {
+//
+// totalDistinctExercises is the lesson's real exercise count (computeLessonMastery passes
+// exerciseIds.length, already fetched there) - deliberately NOT inferred from attempts, since
+// "how many exercises has this learner touched" and "how many exercises does this lesson have"
+// are different numbers and conflating them was exactly the bug (see below).
+export const deriveMasteryState = ({ lessonCompleted, attempts, totalDistinctExercises = 0 }) => {
   const graded = attempts.filter(isEvidenceGraded);
 
   if (!lessonCompleted && graded.length === 0) return 'not_started';
@@ -37,7 +53,10 @@ export const deriveMasteryState = ({ lessonCompleted, attempts }) => {
   // Recency: group by exercise, look at each exercise's most recent graded attempt. If the
   // learner was performing well historically but their latest attempt on something they'd
   // gotten right before was wrong, that's a real regression signal worth surfacing distinctly
-  // from "never learned it" (introduced/practicing) or "still learning" (developing).
+  // from "never learned it" (introduced/practicing) or "still learning" (developing). This
+  // dedup also does double duty as the evidence-coverage measure below: repeated/duplicate
+  // submissions of the same exercise collapse to one entry here, so grinding one easy item
+  // can never look like broader coverage than it is.
   const latestByExercise = new Map();
   graded
     .slice()
@@ -47,21 +66,51 @@ export const deriveMasteryState = ({ lessonCompleted, attempts }) => {
   const latestCorrectCount = latestAttempts.filter((attempt) => attempt.isCorrect).length;
   const latestAccuracy = latestAttempts.length > 0 ? latestCorrectCount / latestAttempts.length : 0;
 
+  // The bug this replaces: `graded.length >= latestAttempts.length` is a tautology (dedup of
+  // a list can never be longer than the list it came from), so it was always true and blocked
+  // nothing - one correct attempt on one exercise satisfied both this and the accuracy check.
+  // A real coverage requirement instead: every distinct exercise in the lesson must have been
+  // attempted at least once (full coverage), with a floor so today's 2-exercise lessons stay
+  // reachable - see the constant's comment above.
+  const hasSufficientDistinctEvidence = totalDistinctExercises > 0
+    && latestAttempts.length >= totalDistinctExercises
+    && latestAttempts.length >= MIN_DISTINCT_EXERCISES_FOR_MASTERY;
+
+  // hasSufficientDistinctEvidence gates BOTH 'mastered' and 'proficient', not just the top
+  // tier - PROFICIENT_STATES (below) treats either as certificate/level-readiness-eligible,
+  // so an evidence floor only on 'mastered' would leave 'proficient' as an easier, ungated
+  // route to the exact same certificate. Without enough coverage, even 100% accuracy can only
+  // reach 'developing' - an honest reflection of "too little evidence to say either way" that
+  // deliberately looks like a demotion, because it is one, on purpose.
   if (accuracy >= 0.9 && latestAccuracy < accuracy) return 'needs_review';
-  if (accuracy >= 0.9 && graded.length >= latestAttempts.length) return 'mastered';
-  if (accuracy >= 0.75) return 'proficient';
+  if (accuracy >= 0.9 && hasSufficientDistinctEvidence) return 'mastered';
+  if (accuracy >= 0.75 && hasSufficientDistinctEvidence) return 'proficient';
   if (accuracy >= 0.5) return 'developing';
   return 'practicing';
 };
+
+// Mirrors exerciseController.js#submitExercise's `if (exercise.type === 'speaking')` branch:
+// that's the only exercise type that starts 'pending_review' instead of 'graded' - it needs a
+// teacher's independent review before it can ever count as evidence (see isEvidenceGraded
+// above). Requiring full coverage of the lesson's exercises for mastery must not silently
+// require an async teacher review the learner has no control over, so it's excluded from the
+// coverage count. If it's later reviewed and graded, it still contributes to accuracy/recency
+// normally - it just isn't a hard requirement for reaching 'mastered'/'proficient'.
+const MANUAL_REVIEW_EXERCISE_TYPES = new Set(['speaking']);
 
 export const computeLessonMastery = async (userId, lessonId) => {
   const lesson = await Lesson.findById(lessonId).select('course exercises objectives cefr');
   if (!lesson) return null;
 
-  const [progress, exerciseIds] = await Promise.all([
+  const [progress, lessonExercises] = await Promise.all([
     Progress.findOne({ user: userId, course: lesson.course }),
-    Exercise.find({ lesson: lessonId }).distinct('_id'),
+    Exercise.find({ lesson: lessonId }).select('_id type'),
   ]);
+
+  const exerciseIds = lessonExercises.map((exercise) => exercise._id);
+  const autoGradableExerciseCount = lessonExercises.filter(
+    (exercise) => !MANUAL_REVIEW_EXERCISE_TYPES.has(exercise.type)
+  ).length;
 
   const lessonCompleted = Boolean(progress?.completedLessons?.some((id) => String(id) === String(lessonId)));
   const attempts = exerciseIds.length
@@ -74,7 +123,7 @@ export const computeLessonMastery = async (userId, lessonId) => {
     objectives: lesson.objectives || [],
     completed: lessonCompleted,
     attemptCount: attempts.length,
-    state: deriveMasteryState({ lessonCompleted, attempts }),
+    state: deriveMasteryState({ lessonCompleted, attempts, totalDistinctExercises: autoGradableExerciseCount }),
   };
 };
 
