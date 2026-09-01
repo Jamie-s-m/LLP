@@ -72,7 +72,7 @@ const userSchema = new mongoose.Schema(
       plan: { type: String, enum: ['none', 'local', 'learner', 'family', 'teaching'], default: 'none' },
       status: {
         type: String,
-        enum: ['inactive', 'trialing', 'active', 'past_due', 'canceled', 'unpaid', 'incomplete', 'incomplete_expired'],
+        enum: ['inactive', 'trialing', 'active', 'past_due', 'canceled', 'unpaid', 'incomplete', 'incomplete_expired', 'refunded'],
         default: 'inactive',
       },
       provider: { type: String, enum: ['none', 'stripe', 'payme'], default: 'none' },

@@ -409,42 +409,84 @@ export const handleStripeWebhook = async (req, res) => {
       return res.status(200).json({ success: true, received: true, type: event.type, ignored: true });
     }
 
-    if (user.billing?.lastStripeEventId === event.id) {
-      return res.status(200).json({ success: true, received: true, type: event.type, duplicate: true });
-    }
-
+    // Build the field updates first (pure computation, no writes yet), then apply them with a
+    // single atomic, filter-guarded update instead of read -> mutate in memory -> save(). The
+    // old pattern (findById earlier, then user.save() here) had a real TOCTOU window: two
+    // genuinely concurrent deliveries of the same event (Stripe retries are routine) could both
+    // pass the lastStripeEventId check before either wrote, double-applying the event. The
+    // filter below (`lastStripeEventId: { $ne: event.id }`) closes that window the same way the
+    // Payme handler's findOneAndUpdate calls already do elsewhere in this file - at most one
+    // concurrent request can match it.
     const billing = user.billing || {};
+    const updates = {};
+
     if (event.type === 'checkout.session.completed') {
-      billing.stripeCustomerId = String(payload.customer || billing.stripeCustomerId || '');
-      billing.stripeSubscriptionId = String(payload.subscription || billing.stripeSubscriptionId || '');
-      billing.plan = payload.metadata?.planKey || billing.plan || 'none';
-      billing.provider = 'stripe';
-      recordBillingEvent('payment_completed', user._id, { provider: 'stripe', plan: billing.plan });
+      updates.stripeCustomerId = String(payload.customer || billing.stripeCustomerId || '');
+      updates.stripeSubscriptionId = String(payload.subscription || billing.stripeSubscriptionId || '');
+      updates.plan = payload.metadata?.planKey || billing.plan || 'none';
+      updates.provider = 'stripe';
     }
 
     if (event.type === 'customer.subscription.created' || event.type === 'customer.subscription.updated' || event.type === 'customer.subscription.deleted') {
       const priceId = payload.items?.data?.[0]?.price?.id || '';
       const plan = findPlanByPriceId(priceId);
-      billing.stripeCustomerId = String(payload.customer || billing.stripeCustomerId || '');
-      billing.stripeSubscriptionId = String(payload.id || billing.stripeSubscriptionId || '');
-      billing.stripePriceId = priceId;
-      billing.plan = plan?.key || billing.plan || 'none';
-      billing.provider = 'stripe';
-      billing.status = event.type === 'customer.subscription.deleted' ? 'canceled' : payload.status || 'inactive';
-      billing.currentPeriodEnd = payload.current_period_end ? new Date(payload.current_period_end * 1000) : null;
-      billing.cancelAtPeriodEnd = Boolean(payload.cancel_at_period_end);
-      if (event.type === 'customer.subscription.deleted') {
-        recordBillingEvent('subscription_cancelled', user._id, { provider: 'stripe', plan: billing.plan });
-      }
+      updates.stripeCustomerId = String(payload.customer || billing.stripeCustomerId || '');
+      updates.stripeSubscriptionId = String(payload.id || billing.stripeSubscriptionId || '');
+      updates.stripePriceId = priceId;
+      updates.plan = plan?.key || billing.plan || 'none';
+      updates.provider = 'stripe';
+      updates.status = event.type === 'customer.subscription.deleted' ? 'canceled' : payload.status || 'inactive';
+      updates.currentPeriodEnd = payload.current_period_end ? new Date(payload.current_period_end * 1000) : null;
+      updates.cancelAtPeriodEnd = Boolean(payload.cancel_at_period_end);
     }
 
     if (event.type === 'invoice.payment_failed') {
-      billing.status = 'past_due';
+      updates.status = 'past_due';
     }
 
-    billing.lastStripeEventId = event.id;
-    user.billing = billing;
-    await user.save();
+    // A full refund revokes access the same way a cancellation does (billing.status just needs
+    // to not be 'active' - see serializeBilling/access checks elsewhere). A partial refund does
+    // NOT change access by itself - Stripe doesn't revoke a subscription for a partial refund -
+    // so billing state is deliberately left untouched; only the analytics event below records
+    // it, for revenue accounting.
+    let isFullRefund = false;
+    if (event.type === 'charge.refunded') {
+      const amount = Number(payload.amount) || 0;
+      const amountRefunded = Number(payload.amount_refunded) || 0;
+      isFullRefund = amount > 0 && amountRefunded >= amount;
+      if (isFullRefund) {
+        updates.status = 'refunded';
+      }
+    }
+
+    updates.lastStripeEventId = event.id;
+    const setPayload = Object.fromEntries(Object.entries(updates).map(([key, value]) => [`billing.${key}`, value]));
+
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: user._id, 'billing.lastStripeEventId': { $ne: event.id } },
+      { $set: setPayload },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(200).json({ success: true, received: true, type: event.type, duplicate: true });
+    }
+
+    if (event.type === 'checkout.session.completed') {
+      recordBillingEvent('payment_completed', updatedUser._id, { provider: 'stripe', plan: updatedUser.billing.plan });
+    }
+    if (event.type === 'customer.subscription.deleted') {
+      recordBillingEvent('subscription_cancelled', updatedUser._id, { provider: 'stripe', plan: updatedUser.billing.plan });
+    }
+    if (event.type === 'charge.refunded') {
+      recordBillingEvent('payment_refunded', updatedUser._id, {
+        provider: 'stripe',
+        plan: updatedUser.billing.plan,
+        full: isFullRefund,
+        amountRefunded: Number(payload.amount_refunded) || 0,
+      });
+    }
+
     return res.status(200).json({ success: true, received: true, type: event.type });
   } catch (error) {
     console.error('Stripe webhook error:', error.message);

@@ -1,6 +1,9 @@
 import request from 'supertest';
+import Stripe from 'stripe';
 import { findBillingPlan, getBillingPlans, serializeBilling } from '../src/utils/billing.js';
 import app from '../src/app.js';
+import User from '../src/models/User.js';
+import AnalyticsEvent from '../src/models/AnalyticsEvent.js';
 
 describe('billing configuration helpers', () => {
   it('returns the expected commercial plan catalog', () => {
@@ -80,5 +83,180 @@ describe('Payme webhook auth', () => {
         process.env.PAYME_MERCHANT_KEY = previousKey;
       }
     }
+  });
+});
+
+// Regression coverage for a release blocker: charge.refunded was never handled at all, so a
+// real Stripe refund left billing.status untouched - the user kept paid access and kept
+// counting as revenue. These tests use Stripe's own offline test-signature helper
+// (stripe.webhooks.generateTestHeaderString) to build genuinely-signed webhook fixtures - no
+// network call, no real Stripe account needed - and exercise the real
+// POST /api/billing/webhook route end to end.
+describe('Stripe webhook - refunds, idempotency, and signature verification', () => {
+  const WEBHOOK_SECRET = 'whsec_test_phase3';
+  const stripe = new Stripe('sk_test_dummy');
+  let previousWebhookSecret;
+  let previousSecretKey;
+
+  const sendEvent = (eventPayload, { secret = WEBHOOK_SECRET } = {}) => {
+    const rawBody = JSON.stringify(eventPayload);
+    const signature = stripe.webhooks.generateTestHeaderString({ payload: rawBody, secret });
+    return request(app)
+      .post('/api/billing/webhook')
+      .set('Content-Type', 'application/json')
+      .set('stripe-signature', signature)
+      .send(rawBody);
+  };
+
+  beforeAll(() => {
+    previousWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    previousSecretKey = process.env.STRIPE_SECRET_KEY;
+    process.env.STRIPE_WEBHOOK_SECRET = WEBHOOK_SECRET;
+    process.env.STRIPE_SECRET_KEY = 'sk_test_dummy';
+  });
+
+  afterAll(() => {
+    if (previousWebhookSecret === undefined) delete process.env.STRIPE_WEBHOOK_SECRET;
+    else process.env.STRIPE_WEBHOOK_SECRET = previousWebhookSecret;
+    if (previousSecretKey === undefined) delete process.env.STRIPE_SECRET_KEY;
+    else process.env.STRIPE_SECRET_KEY = previousSecretKey;
+  });
+
+  const makeSubscriber = async (email, customerId) => {
+    const user = await User.create({
+      firstName: 'Stripe',
+      lastName: 'Subscriber',
+      email,
+      password: 'testpass123',
+      role: 'student',
+      isEmailVerified: true,
+      billing: { plan: 'learner', status: 'active', provider: 'stripe', stripeCustomerId: customerId },
+    });
+    return user;
+  };
+
+  it('rejects a forged signature and makes no billing change', async () => {
+    const user = await makeSubscriber('stripe-forge@example.com', 'cus_forge_1');
+    const res = await sendEvent(
+      { id: 'evt_forged_1', type: 'charge.refunded', data: { object: { customer: 'cus_forge_1', amount: 1900, amount_refunded: 1900 } } },
+      { secret: 'whsec_completely_wrong' }
+    );
+    expect(res.status).toBe(400);
+
+    const reloaded = await User.findById(user._id);
+    expect(reloaded.billing.status).toBe('active');
+  });
+
+  it('a full refund sets billing.status to refunded and records payment_refunded', async () => {
+    const user = await makeSubscriber('stripe-full-refund@example.com', 'cus_full_refund_1');
+
+    const res = await sendEvent({
+      id: 'evt_refund_full_1',
+      type: 'charge.refunded',
+      data: { object: { customer: 'cus_full_refund_1', amount: 1900, amount_refunded: 1900 } },
+    });
+    expect(res.status).toBe(200);
+
+    const reloaded = await User.findById(user._id);
+    expect(reloaded.billing.status).toBe('refunded');
+
+    const stored = await AnalyticsEvent.findOne({ event: 'payment_refunded', user: user._id });
+    expect(stored).not.toBeNull();
+    expect(stored.metadata.full).toBe(true);
+  });
+
+  it('a partial refund does NOT change billing.status but still records the event', async () => {
+    const user = await makeSubscriber('stripe-partial-refund@example.com', 'cus_partial_refund_1');
+
+    const res = await sendEvent({
+      id: 'evt_refund_partial_1',
+      type: 'charge.refunded',
+      data: { object: { customer: 'cus_partial_refund_1', amount: 1900, amount_refunded: 500 } },
+    });
+    expect(res.status).toBe(200);
+
+    const reloaded = await User.findById(user._id);
+    expect(reloaded.billing.status).toBe('active');
+
+    const stored = await AnalyticsEvent.findOne({ event: 'payment_refunded', user: user._id });
+    expect(stored).not.toBeNull();
+    expect(stored.metadata.full).toBe(false);
+  });
+
+  it('a redelivered (duplicate) event id is a true no-op the second time', async () => {
+    const user = await makeSubscriber('stripe-dup@example.com', 'cus_dup_1');
+    const eventPayload = {
+      id: 'evt_dup_1',
+      type: 'charge.refunded',
+      data: { object: { customer: 'cus_dup_1', amount: 1900, amount_refunded: 1900 } },
+    };
+
+    const first = await sendEvent(eventPayload);
+    expect(first.status).toBe(200);
+    expect(first.body.duplicate).toBeFalsy();
+
+    const second = await sendEvent(eventPayload);
+    expect(second.status).toBe(200);
+    expect(second.body.duplicate).toBe(true);
+
+    const events = await AnalyticsEvent.find({ event: 'payment_refunded', user: user._id });
+    expect(events).toHaveLength(1);
+  });
+
+  it('genuinely concurrent duplicate deliveries apply the refund exactly once (no TOCTOU double-apply)', async () => {
+    const user = await makeSubscriber('stripe-concurrent-dup@example.com', 'cus_concurrent_dup_1');
+    const eventPayload = {
+      id: 'evt_concurrent_dup_1',
+      type: 'charge.refunded',
+      data: { object: { customer: 'cus_concurrent_dup_1', amount: 1900, amount_refunded: 1900 } },
+    };
+
+    const [first, second] = await Promise.all([sendEvent(eventPayload), sendEvent(eventPayload)]);
+    const results = [first, second];
+    const appliedCount = results.filter((res) => !res.body.duplicate).length;
+    const duplicateCount = results.filter((res) => res.body.duplicate === true).length;
+
+    expect(appliedCount).toBe(1);
+    expect(duplicateCount).toBe(1);
+
+    const events = await AnalyticsEvent.find({ event: 'payment_refunded', user: user._id });
+    expect(events).toHaveLength(1);
+
+    const reloaded = await User.findById(user._id);
+    expect(reloaded.billing.status).toBe('refunded');
+  });
+
+  it('an active subscription webhook still works normally alongside refund handling', async () => {
+    const user = await makeSubscriber('stripe-sub-active@example.com', 'cus_sub_active_1');
+
+    const res = await sendEvent({
+      id: 'evt_sub_active_1',
+      type: 'customer.subscription.updated',
+      data: {
+        object: {
+          id: 'sub_active_1',
+          customer: 'cus_sub_active_1',
+          status: 'active',
+          items: { data: [{ price: { id: 'price_unknown' } }] },
+          current_period_end: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60,
+          cancel_at_period_end: false,
+        },
+      },
+    });
+    expect(res.status).toBe(200);
+
+    const reloaded = await User.findById(user._id);
+    expect(reloaded.billing.status).toBe('active');
+    expect(reloaded.billing.stripeSubscriptionId).toBe('sub_active_1');
+  });
+
+  it('ignores an event for an unrecognized customer without error', async () => {
+    const res = await sendEvent({
+      id: 'evt_unknown_customer_1',
+      type: 'charge.refunded',
+      data: { object: { customer: 'cus_does_not_exist', amount: 1900, amount_refunded: 1900 } },
+    });
+    expect(res.status).toBe(200);
+    expect(res.body.ignored).toBe(true);
   });
 });
