@@ -1,10 +1,18 @@
+# NOTE: this file is not the confirmed source of truth for the live services - verified
+# directly against the Render API (2026-09-01) that the actual running configuration differs
+# from what's declared below in ways not corrected here (at minimum: the live frontend
+# service's Render-side name doesn't match `linguanest-web`). The `env: docker` change below
+# for the backend IS a verified correction (the live service runs the root Dockerfile, not a
+# Node buildpack) - made so a future Blueprint sync from this file wouldn't try to convert a
+# working Docker deployment back to one that doesn't match reality. Treat the Render dashboard
+# as authoritative for anything not explicitly confirmed here; do not assume this file is
+# currently driving the live services via Blueprint sync.
 services:
   - type: web
     name: linguanest-api
-    env: node
-    rootDir: backend
-    buildCommand: npm install
-    startCommand: npm start
+    env: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     plan: free
     healthCheckPath: /api/health
     envVars:

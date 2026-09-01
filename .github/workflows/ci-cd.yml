@@ -1,4 +1,4 @@
-name: CI/CD
+name: CI
 
 on:
   push:
@@ -73,11 +73,13 @@ jobs:
           MONGODB_TEST_URI: mongodb://localhost:27017
         run: npm test
 
-  deploy-render:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Trigger Render deploy
-        run: |
-          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+  # No deploy job here on purpose. Both Render services (linguanest-api, linguanest-web) have
+  # native GitHub auto-deploy enabled (autoDeploy: "yes", autoDeployTrigger: "commit", confirmed
+  # via the Render API) - Render watches this repo's `main` branch directly and deploys the
+  # latest commit on every push, independent of anything in this workflow. A previous version of
+  # this file also POSTed to a Render "deploy hook" URL as a second, redundant trigger; that
+  # secret (RENDER_DEPLOY_HOOK_URL) was never actually configured, so that job failed on every
+  # push while the real deployment succeeded anyway via the native path. Removed rather than
+  # fixed: maintaining two independent deploy mechanisms for the same commit is unnecessary
+  # complexity and a latent race (both would fire on every push if the secret were ever set).
+  # This job's only responsibility is now what its name says - validate, not deploy.

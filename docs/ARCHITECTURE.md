@@ -24,12 +24,36 @@ records. Redis is optional.
   (`Lesson.contentType` + `mediaUrl`); video renders via
   `frontend/src/components/ui/VideoEmbed.tsx` (YouTube/Vimeo embed, with a
   plain `<video>` fallback for direct file URLs).
-- **Exercises** support `multiple_choice`, `fill_blank`, and `listening`
-  (auto-graded in `exerciseController.submitExercise`) plus `speaking`
-  (recorded client-side, queued as `ExerciseAttempt.status: 'pending_review'`,
-  graded by a teacher via `GET/POST /api/exercises/reviews/speaking*` and
-  `frontend/src/pages/teacher/SpeakingReviews.tsx`). `matching` and `writing`
-  are modeled in the `Exercise` schema but have no practice UI yet.
+- **Exercises**: the `Exercise.type` schema enum has six values -
+  `multiple_choice`, `fill_blank`, `matching`, `speaking`, `writing`,
+  `listening` - but only three are actually reachable by a learner today.
+  `multiple_choice` and `fill_blank` are auto-graded in
+  `exerciseController.submitExercise` and are what the seeded content
+  library (`backend/src/contentLibrary.js`) actually generates. `speaking`
+  is recorded client-side, queued as
+  `ExerciseAttempt.status: 'pending_review'`, and graded by a teacher via
+  `GET/POST /api/exercises/reviews/speaking*` and
+  `frontend/src/pages/teacher/SpeakingReviews.tsx`. `listening` has a real
+  auto-grading code path in `submitExercise`, but zero `listening` exercises
+  exist in the seeded catalog - there's nothing for a learner to reach yet.
+  `matching` and `writing` are modeled in the schema but have neither
+  generator content nor a practice UI.
+- **Reference curriculum**: alongside the procedurally generated course
+  catalog, `backend/src/data/referenceCurriculum.js` defines one
+  hand-authored CEFR pathway ("English for Work", 3 lessons, A1-B1), seeded
+  like the rest of the content library. `backend/src/data/
+  curriculumBlueprint.js` holds a full A1-C2 design blueprint for expanding
+  this pathway, not yet built out beyond those 3 lessons.
+- **Mastery and certificates**: `backend/src/utils/masteryEngine.js` derives
+  a per-skill mastery state (`'mastered'` / `'proficient'` / in-progress)
+  from lesson completion plus attempts across at least
+  `MIN_DISTINCT_EXERCISES_FOR_MASTERY` (2) distinct exercises - a single
+  exercise type repeated cannot alone unlock mastery. `speaking` exercises
+  are excluded from the distinct-exercise coverage count pending teacher
+  review. Certificates are issued once mastery criteria are met, using the
+  approved wording in `backend/src/data/certificateMethodology.js`, which is
+  regression-tested to never claim official or Cambridge-equivalent
+  certification.
 - **Content authoring**: teachers edit a lesson's content, vocabulary,
   grammar, and exercises through `frontend/src/pages/teacher/LessonEditor.tsx`
   (backed by `PUT /api/lessons/:id` and the `/api/exercises` CRUD routes).

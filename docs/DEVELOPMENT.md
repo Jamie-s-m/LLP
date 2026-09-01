@@ -3,10 +3,14 @@
 ## Prerequisites
 
 - Node.js 20+ (CI runs on 24.x)
-- No local MongoDB install is required. Backend tests always use an
-  in-process `mongodb-memory-server` instance (see `backend/tests/jest.setup.js`)
-  and that same package can stand in for a real database while developing
-  locally, without touching MongoDB Atlas or installing MongoDB yourself.
+- No local MongoDB install is required. Locally, backend tests fall back to
+  an in-process `mongodb-memory-server` instance automatically (see
+  `backend/tests/jest.setup.js`) - no setup needed, and no need to touch
+  MongoDB Atlas. CI instead points the same tests at a real, long-lived
+  MongoDB service container via `MONGODB_TEST_URI`
+  (`.github/workflows/ci-cd.yml`) - per-file in-memory servers were flaky
+  under the CI runner's resource constraints. Both paths run the identical
+  test files; only the database backing them differs.
 
 ## Environment files
 
