@@ -107,12 +107,12 @@ export default function CourseDetail() {
       {course ? <h1 className="mb-4 text-4xl font-bold text-ink">{course.title}</h1> : null}
       {/* Course metadata card */}
       {course ? <div className="atlas-panel mb-6 rounded-3xl p-6">
-        <div className="mb-4 flex flex-wrap gap-2 text-sm text-slate-600">
+        <div className="mb-4 flex flex-wrap gap-2 text-sm text-slate-600 dark:text-slate-300">
           <span className="rounded-full bg-[var(--border-light)] px-3 py-1">{course.language}</span>
           <span className="rounded-full bg-[var(--border-light)] px-3 py-1">{course.level}</span>
           <span className="rounded-full bg-[var(--border-light)] px-3 py-1">{course.category}</span>
         </div>
-        <p className="mb-6 text-slate-700">{course.description}</p>
+        <p className="mb-6 text-slate-700 dark:text-slate-200">{course.description}</p>
 
         <h2 className="mb-3 text-xl font-semibold text-ink">{t('courseDetail.lessons')}</h2>
         {lessons.length > 0 ? <div className="space-y-2 mb-6">

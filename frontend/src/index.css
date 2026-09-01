@@ -33,6 +33,8 @@
   --brand-text-primary: var(--text-primary);
   --brand-text-secondary: var(--text-muted);
   --brand-text-muted: var(--text-subtle);
+  --brand-primary-soft: var(--accent-light);
+  --brand-primary-dark: var(--accent);
 
   /* Dark theme: warm near-black palette (LinguaNest dark mockups), not the old cool navy set. */
   --dark-bg: #0d0c0b;

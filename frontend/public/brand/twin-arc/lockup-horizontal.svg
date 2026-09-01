@@ -1,0 +1,8 @@
+<svg width="220" height="52" viewBox="0 0 220 52" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title">
+  <title id="title">LinguaNest horizontal lockup — Twin Arc</title>
+  <g style="isolation:isolate" transform="translate(0,1)">
+    <circle cx="21" cy="25" r="14" fill="#7C2D42"/>
+    <circle cx="33" cy="25" r="14" fill="#C9932E" style="mix-blend-mode:multiply"/>
+  </g>
+  <text x="56" y="34" font-family="Bricolage Grotesque, sans-serif" font-size="28" font-weight="700" fill="#211A26">lingua<tspan fill="#7C2D42">nest</tspan></text>
+</svg>

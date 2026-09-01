@@ -1,0 +1,9 @@
+<svg width="32" height="32" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title">
+  <title id="title">LinguaNest favicon — Twin Arc</title>
+  <!-- Tuned for legibility at 16-32px: larger circles relative to the canvas and less
+       padding than symbol.svg, since fine proportion differences disappear at tiny sizes. -->
+  <g style="isolation:isolate">
+    <circle cx="38" cy="50" r="32" fill="#7C2D42"/>
+    <circle cx="64" cy="50" r="32" fill="#C9932E" style="mix-blend-mode:multiply"/>
+  </g>
+</svg>

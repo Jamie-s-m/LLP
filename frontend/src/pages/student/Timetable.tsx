@@ -1,28 +1,5 @@
-import { FiAlertCircle, FiCalendar, FiClock, FiMapPin } from 'react-icons/fi'
-
-const schedule = [
-  {
-    day: 'Mon',
-    time: '09:00 - 10:00',
-    title: 'Conversation Lab',
-    teacher: 'Amina Karimova',
-    room: 'Live room A',
-  },
-  {
-    day: 'Wed',
-    time: '13:30 - 14:30',
-    title: 'Grammar Sprint',
-    teacher: 'Daniel Lee',
-    room: 'Lesson studio',
-  },
-  {
-    day: 'Fri',
-    time: '16:00 - 17:00',
-    title: 'Speaking Clinic',
-    teacher: 'Mila Hasan',
-    room: 'Mentor lounge',
-  },
-]
+import { Link } from 'react-router-dom'
+import { FiCalendar, FiUsers } from 'react-icons/fi'
 
 export default function Timetable() {
   return (
@@ -38,40 +15,20 @@ export default function Timetable() {
           </div>
         </div>
 
-        <div className="atlas-panel mb-6 flex items-start gap-3 border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-200">
-          <FiAlertCircle className="mt-0.5 shrink-0" size={18} />
-          <p>This is a sample schedule to preview the layout — live class booking isn&apos;t connected yet, so these times aren&apos;t real bookings.</p>
-        </div>
-
-        <div className="grid gap-4">
-          {schedule.map((item) => (
-            <div key={`${item.day}-${item.time}`} className="atlas-panel p-5">
-              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div>
-                  <div className="mb-2 inline-flex rounded-full bg-primary-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-primary-700 dark:bg-primary-500/10 dark:text-primary-300">
-                    {item.day}
-                  </div>
-                  <h2 className="text-xl font-semibold text-ink dark:text-white">{item.title}</h2>
-                </div>
-
-                <div className="flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-sm text-slate-700 dark:bg-white/5 dark:text-slate-200">
-                  <FiClock size={15} />
-                  {item.time}
-                </div>
-              </div>
-
-              <div className="mt-4 flex flex-col gap-3 text-sm text-slate-600 dark:text-slate-300 md:flex-row md:items-center md:justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-ink dark:text-white">Tutor:</span>
-                  <span>{item.teacher}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <FiMapPin size={15} />
-                  <span>{item.room}</span>
-                </div>
-              </div>
-            </div>
-          ))}
+        <div className="atlas-panel flex flex-col items-center gap-4 p-10 text-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-100 text-primary-600 dark:bg-primary-500/10 dark:text-primary-300">
+            <FiUsers size={26} />
+          </div>
+          <div>
+            <h2 className="text-xl font-semibold text-ink dark:text-white">Live scheduled classes aren&apos;t available yet</h2>
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600 dark:text-slate-300">
+              LinguaNest doesn&apos;t have real tutor-led class bookings connected yet, so this page won&apos;t show a fabricated schedule.
+              Join the tutor waitlist to be notified when live, bookable sessions launch.
+            </p>
+          </div>
+          <Link to="/tutors" className="btn btn-primary mt-2">
+            Join the tutor waitlist
+          </Link>
         </div>
       </div>
     </div>

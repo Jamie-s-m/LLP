@@ -435,10 +435,19 @@ export default function Pricing() {
               t('pricing.trust1'),
               t('pricing.trust2'),
               t('pricing.trust3'),
-              t('pricing.trust4'),
             ].map((item) => (
               <div key={item} className="rounded-2xl bg-[#f6efe7] p-4 text-sm text-slate-700 dark:bg-white/5 dark:text-slate-200">{item}</div>
             ))}
+            <div className="rounded-2xl bg-[#f6efe7] p-4 text-sm text-slate-700 dark:bg-white/5 dark:text-slate-200">
+              {t('pricing.trust4')}{' '}
+              <Link to="/terms" className="font-semibold text-primary-600 underline dark:text-primary-300">
+                {t('pricing.readTerms')}
+              </Link>
+              {' · '}
+              <Link to="/privacy" className="font-semibold text-primary-600 underline dark:text-primary-300">
+                {t('pricing.readPrivacy')}
+              </Link>
+            </div>
           </div>
         </section>
 
