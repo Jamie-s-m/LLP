@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { FiFilter, FiSearch, FiTarget, FiX } from 'react-icons/fi'
 import { useLearningStore } from '../store/learningStore'
 import { useI18n } from '../utils/i18n'
+import { Spinner } from '../components/ui'
 
 type SortMode = 'recommended' | 'title' | 'level'
 
@@ -136,10 +137,11 @@ export default function Courses() {
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
             <div className="xl:col-span-2">
-              <label className="label">{t('common.search')}</label>
+              <label className="label" htmlFor="courses-search">{t('common.search')}</label>
               <div className="relative">
-                <FiSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <FiSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden="true" />
                 <input
+                  id="courses-search"
                   className="input pl-10"
                   value={filters.query}
                   onChange={(event) => setFilters({ ...filters, query: event.target.value })}
@@ -148,8 +150,9 @@ export default function Courses() {
               </div>
             </div>
             <div>
-              <label className="label">{t('common.language')}</label>
+              <label className="label" htmlFor="courses-language">{t('common.language')}</label>
               <select
+                id="courses-language"
                 className="input"
                 value={filters.language}
                 onChange={(event) => setFilters({ ...filters, language: event.target.value })}
@@ -161,8 +164,9 @@ export default function Courses() {
               </select>
             </div>
             <div>
-              <label className="label">{t('common.level')}</label>
+              <label className="label" htmlFor="courses-level">{t('common.level')}</label>
               <select
+                id="courses-level"
                 className="input"
                 value={filters.level}
                 onChange={(event) => setFilters({ ...filters, level: event.target.value })}
@@ -174,8 +178,9 @@ export default function Courses() {
               </select>
             </div>
             <div>
-              <label className="label">{t('common.category')}</label>
+              <label className="label" htmlFor="courses-category">{t('common.category')}</label>
               <select
+                id="courses-category"
                 className="input"
                 value={filters.category}
                 onChange={(event) => setFilters({ ...filters, category: event.target.value })}
@@ -189,11 +194,13 @@ export default function Courses() {
           </div>
           <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-              <FiTarget className="text-primary-500" />
+              <FiTarget className="text-primary-500" aria-hidden="true" />
               <span>{resultLabel}</span>
             </div>
             <div className="flex flex-wrap items-center gap-3">
+              <label className="sr-only" htmlFor="courses-sort">{t('courses.sortRecommended')}</label>
               <select
+                id="courses-sort"
                 className="input min-w-44"
                 value={filters.sort}
                 onChange={(event) => setFilters({ ...filters, sort: event.target.value as SortMode })}
@@ -212,7 +219,9 @@ export default function Courses() {
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {isLoading ? (
-            <div className="col-span-full py-12 text-center">Loading...</div>
+            <div className="col-span-full flex justify-center py-12">
+              <Spinner size={28} label={t('courses.title')} />
+            </div>
           ) : filteredCourses.length > 0 ? (
             filteredCourses.map((course) => {
               const courseId = course._id || course.id

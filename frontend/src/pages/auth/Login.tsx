@@ -6,6 +6,7 @@ import { useAuthStore, api } from '../../store/authStore'
 import toast from 'react-hot-toast'
 import { useI18n } from '../../utils/i18n'
 import { useEffect } from 'react'
+import { Alert } from '../../components/ui'
 
 const GOOGLE_ERROR_MESSAGES: Record<string, string> = {
   not_configured: 'Google sign-in is coming soon — use email for now.',
@@ -21,6 +22,7 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [loginError, setLoginError] = useState('')
   const navigate = useNavigate()
   const { login } = useAuthStore()
   const { t } = useI18n()
@@ -43,6 +45,7 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setLoginError('')
     const normalizedEmail = email.trim().toLowerCase()
 
     try {
@@ -67,6 +70,10 @@ export default function Login() {
       if (error.response?.status === 403 && error.response?.data?.data?.requiresVerification) {
         navigate(`/verify-email?email=${encodeURIComponent(error.response.data.data.email)}`)
       }
+      // A toast alone is easy to miss (auto-dismisses, can appear off-screen on some
+      // layouts) - keep it for the ambient signal, but also leave a message in the form
+      // itself so a user who misses the toast can still see what went wrong.
+      setLoginError(message)
       toast.error(message)
     } finally {
       setLoading(false)
@@ -90,7 +97,7 @@ export default function Login() {
           </div>
 
           <div className="auth-testimonial rounded-[1.5rem] border border-white/10 bg-white/5 p-7 backdrop-blur-sm">
-            <div className="testimonial-stars mb-4 text-[#fbbf24] tracking-[2px]">★★★★★</div>
+            <div className="testimonial-stars mb-4 text-[var(--dark-accent)] tracking-[2px]" aria-hidden="true">★★★★★</div>
             <p className="testimonial-text text-[15px] leading-6 text-white/80">
               “The flow feels calm and motivating — I can practice daily without pressure, and my speaking confidence is finally growing.”
             </p>
@@ -117,9 +124,10 @@ export default function Login() {
               {t('login.copy')}
             </p>
             {notice ? (
-              <div className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-                {notice}
-              </div>
+              <Alert variant="success" className="mb-4">{notice}</Alert>
+            ) : null}
+            {loginError ? (
+              <Alert variant="error" className="mb-4">{loginError}</Alert>
             ) : null}
 
             <form onSubmit={handleSubmit} className="space-y-3">
@@ -131,7 +139,7 @@ export default function Login() {
                   className="input"
                   placeholder={t('login.emailPlaceholder')}
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => { setEmail(e.target.value); setLoginError('') }}
                   autoComplete="email"
                   required
                 />
@@ -146,14 +154,14 @@ export default function Login() {
                     className="input pr-11"
                     placeholder="••••••••"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => { setPassword(e.target.value); setLoginError('') }}
                     autoComplete="current-password"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((current) => !current)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-slate-700 dark:hover:text-slate-200"
+                    className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-500 transition hover:bg-[var(--border-light)] hover:text-slate-700 dark:hover:bg-white/10 dark:hover:text-slate-200"
                     aria-label={showPassword ? t('login.hidePassword') : t('login.showPassword')}
                   >
                     {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}

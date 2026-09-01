@@ -81,6 +81,17 @@ const plans: BillingPlan[] = [
 
 const activeStatuses = new Set<BillingStatus>(['trialing', 'active', 'past_due', 'unpaid', 'incomplete'])
 
+const STATUS_LABEL_KEYS: Record<BillingStatus, string> = {
+  inactive: 'pricing.statusInactive',
+  trialing: 'pricing.statusTrialing',
+  active: 'pricing.statusActive',
+  past_due: 'pricing.statusPastDue',
+  canceled: 'pricing.statusCanceled',
+  unpaid: 'pricing.statusUnpaid',
+  incomplete: 'pricing.statusIncomplete',
+  incomplete_expired: 'pricing.statusIncompleteExpired',
+}
+
 export default function Pricing() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [busyPlan, setBusyPlan] = useState<BillingPlanKey | null>(null)
@@ -212,6 +223,10 @@ export default function Pricing() {
     [configuredPlans, t]
   )
 
+  // Friendly plan name for the raw plan key stored on a billing record ('none' when there
+  // isn't a subscription yet) - previously interpolated straight into user-facing copy.
+  const planNameFor = (planKey: string) => enrichedPlans.find((plan) => plan.key === planKey)?.name || planKey
+
   const startCheckout = async (planKey: BillingPlanKey) => {
     try {
       setBusyPlan(planKey)
@@ -269,21 +284,21 @@ export default function Pricing() {
           <div className="atlas-hero-card">
             <div className="space-y-4 text-sm text-white/85">
               <div className="flex items-start gap-3">
-                <FiCreditCard className="mt-0.5 text-lg text-[#f8c16c]" />
+                <FiCreditCard className="mt-0.5 text-lg text-[var(--dark-accent)]" aria-hidden="true" />
                 <div>
                   <p className="font-semibold text-white">{t('pricing.stripeTitle')}</p>
                   <p>{t('pricing.stripeCopy')}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <FiShield className="mt-0.5 text-lg text-[#a7e8d5]" />
+                <FiShield className="mt-0.5 text-lg text-[var(--dark-success)]" aria-hidden="true" />
                 <div>
                   <p className="font-semibold text-white">{t('pricing.accountStatus')}</p>
                   <p>
                     {effectiveBilling
                       ? t('pricing.accountStatusValue', {
-                        plan: effectiveBilling.plan,
-                        status: effectiveBilling.status,
+                        plan: planNameFor(effectiveBilling.plan),
+                        status: t(STATUS_LABEL_KEYS[effectiveBilling.status] || 'pricing.statusInactive'),
                         cancelSuffix: effectiveBilling.cancelAtPeriodEnd ? t('pricing.cancelSuffix') : '',
                       })
                       : t('pricing.accountStatusEmpty')}
@@ -291,7 +306,7 @@ export default function Pricing() {
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <FiTarget className="mt-0.5 text-lg text-[#cdd5ff]" />
+                <FiTarget className="mt-0.5 text-lg text-[var(--dark-info)]" aria-hidden="true" />
                 <div>
                   <p className="font-semibold text-white">{t('pricing.clearNextStep')}</p>
                   <p>{t('pricing.clearNextStepCopy')}</p>
@@ -306,7 +321,7 @@ export default function Pricing() {
           <h2 className="text-2xl text-ink dark:text-white">{t('pricing.simplerPath')}</h2>
           <div className="mt-5 grid gap-4 md:grid-cols-3">
             {[t('pricing.onboarding1'), t('pricing.onboarding2'), t('pricing.onboarding3')].map((step, index) => (
-              <div key={step} className="rounded-2xl bg-[#f6efe7] p-5 dark:bg-white/5">
+              <div key={step} className="rounded-2xl bg-[var(--surface-strong)] p-5 dark:bg-white/5">
                 <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">0{index + 1}</p>
                 <p className="mt-3 text-sm text-slate-700 dark:text-slate-200">{step}</p>
               </div>
@@ -314,17 +329,17 @@ export default function Pricing() {
           </div>
         </section>
 
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
           {enrichedPlans.map((plan) => {
             const isCurrentPlan = effectiveBilling?.plan === plan.key && hasManagedSubscription
             const canSubscribeToPlan = isAuthenticated && canStartCheckout && plan.available
 
             return (
               <section key={plan.name} className="atlas-panel p-6">
-                <p className="atlas-kicker">{plan.name}</p>
+                <h2 className="atlas-kicker">{plan.name}</h2>
                 <strong className="mt-2 block text-4xl text-ink dark:text-white">{plan.priceLabel}</strong>
                 <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">{plan.description}</p>
-                <div className="mt-4 rounded-2xl bg-[#f6efe7] p-4 text-sm text-slate-700 dark:bg-white/5 dark:text-slate-200">
+                <div className="mt-4 rounded-2xl bg-[var(--surface-strong)] p-4 text-sm text-slate-700 dark:bg-white/5 dark:text-slate-200">
                   <strong className="block text-ink dark:text-white">{t('common.bestFor')}</strong>
                   <p className="mt-2">{plan.bestFor}</p>
                 </div>
@@ -386,7 +401,7 @@ export default function Pricing() {
                   if (isPaymeManaged) {
                     return (
                       <>
-                        <p className="mt-6 rounded-xl bg-[#f6efe7] p-3 text-center text-sm font-semibold text-ink dark:bg-white/5 dark:text-white">
+                        <p className="mt-6 rounded-xl bg-[var(--surface-strong)] p-3 text-center text-sm font-semibold text-ink dark:bg-white/5 dark:text-white">
                           {isCurrentPlan ? t('pricing.paymeManagedCurrent') : t('pricing.paymeManagedOther', { plan: plan.name })}
                         </p>
                         {paymeSection}
@@ -401,7 +416,7 @@ export default function Pricing() {
                   // isn't configured in this environment.
                   if (plan.paymeOnly) {
                     return paymeSection || (
-                      <p className="mt-6 rounded-xl bg-[#f6efe7] p-3 text-center text-sm text-slate-600 dark:bg-white/5 dark:text-slate-300">
+                      <p className="mt-6 rounded-xl bg-[var(--surface-strong)] p-3 text-center text-sm text-slate-600 dark:bg-white/5 dark:text-slate-300">
                         {t('pricing.planNotConfigured')}
                       </p>
                     )
@@ -436,9 +451,9 @@ export default function Pricing() {
               t('pricing.trust2'),
               t('pricing.trust3'),
             ].map((item) => (
-              <div key={item} className="rounded-2xl bg-[#f6efe7] p-4 text-sm text-slate-700 dark:bg-white/5 dark:text-slate-200">{item}</div>
+              <div key={item} className="rounded-2xl bg-[var(--surface-strong)] p-4 text-sm text-slate-700 dark:bg-white/5 dark:text-slate-200">{item}</div>
             ))}
-            <div className="rounded-2xl bg-[#f6efe7] p-4 text-sm text-slate-700 dark:bg-white/5 dark:text-slate-200">
+            <div className="rounded-2xl bg-[var(--surface-strong)] p-4 text-sm text-slate-700 dark:bg-white/5 dark:text-slate-200">
               {t('pricing.trust4')}{' '}
               <Link to="/terms" className="font-semibold text-primary-600 underline dark:text-primary-300">
                 {t('pricing.readTerms')}

@@ -7,6 +7,7 @@ import { useLanguageStore } from '../../store/languageStore'
 import api from '../../services/api'
 import toast from 'react-hot-toast'
 import { track } from '../../utils/analytics'
+import { Alert } from '../../components/ui'
 
 type SignupRole = 'student' | 'parent'
 
@@ -231,7 +232,7 @@ export default function Register() {
           </div>
 
           <div className="auth-testimonial rounded-[1.5rem] border border-white/10 bg-white/5 p-7 backdrop-blur-sm">
-            <div className="testimonial-stars mb-4 text-[#fbbf24] tracking-[2px]">★★★★★</div>
+            <div className="testimonial-stars mb-4 text-[var(--dark-accent)] tracking-[2px]" aria-hidden="true">★★★★★</div>
             <p className="testimonial-text text-[15px] leading-6 text-white/80">
               “A thoughtful learning space for families, students, and teachers — the entire experience feels well designed and human.”
             </p>
@@ -261,18 +262,16 @@ export default function Register() {
             ) : null}
 
             {(localError || error) && (
-              <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-                {localError || error}
-              </div>
+              <Alert variant="error" className="mb-6">{localError || error}</Alert>
             )}
 
             <div className="role-card-grid mb-1.5">
-              <button type="button" onClick={() => setRole('student')} className={`role-card ${role === 'student' ? 'selected' : ''}`}>
-                <FiBookOpen className="text-[var(--accent)] text-base" />
+              <button type="button" aria-pressed={role === 'student'} onClick={() => setRole('student')} className={`role-card ${role === 'student' ? 'selected' : ''}`}>
+                <FiBookOpen className="text-[var(--accent)] text-base" aria-hidden="true" />
                 <strong>{ui.student}</strong>
               </button>
-              <button type="button" onClick={() => { setRole('parent'); setRequestTeacherRole(false) }} className={`role-card ${role === 'parent' ? 'selected' : ''}`}>
-                <FiUsers className="text-[var(--accent)] text-base" />
+              <button type="button" aria-pressed={role === 'parent'} onClick={() => { setRole('parent'); setRequestTeacherRole(false) }} className={`role-card ${role === 'parent' ? 'selected' : ''}`}>
+                <FiUsers className="text-[var(--accent)] text-base" aria-hidden="true" />
                 <strong>{ui.parent}</strong>
               </button>
             </div>
@@ -280,32 +279,37 @@ export default function Register() {
             <form className="space-y-2.5" onSubmit={handleSubmit}>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="label">{ui.firstName}</label>
+                  <label className="label" htmlFor="register-firstName">{ui.firstName}</label>
                   <input
+                    id="register-firstName"
                     name="firstName"
                     type="text"
                     required
                     className="input"
                     value={formData.firstName}
                     onChange={handleChange}
+                    autoComplete="given-name"
                   />
                 </div>
                 <div>
-                  <label className="label">{ui.lastName}</label>
+                  <label className="label" htmlFor="register-lastName">{ui.lastName}</label>
                   <input
+                    id="register-lastName"
                     name="lastName"
                     type="text"
                     required
                     className="input"
                     value={formData.lastName}
                     onChange={handleChange}
+                    autoComplete="family-name"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="label">{ui.email}</label>
+                <label className="label" htmlFor="register-email">{ui.email}</label>
                 <input
+                  id="register-email"
                   name="email"
                   type="email"
                   required
@@ -316,7 +320,7 @@ export default function Register() {
                   autoComplete="email"
                 />
                 {emailStatusMessage ? (
-                  <p className={`mt-2 text-sm ${emailStatus === 'available' ? 'text-emerald-600' : emailStatus === 'exists' ? 'text-amber-700' : 'text-slate-500'}`}>
+                  <p className={`mt-2 text-sm ${emailStatus === 'available' ? 'text-[var(--success)] dark:text-[var(--dark-success)]' : emailStatus === 'exists' ? 'text-[var(--warning)] dark:text-[var(--dark-warning)]' : 'text-slate-500 dark:text-slate-400'}`}>
                     {emailStatus === 'checking' ? ui.checking : emailStatusMessage}
                   </p>
                 ) : null}
@@ -337,9 +341,10 @@ export default function Register() {
               </div>
 
               <div>
-                <label className="label">{ui.password}</label>
+                <label className="label" htmlFor="register-password">{ui.password}</label>
                 <div className="relative">
                   <input
+                    id="register-password"
                     name="password"
                     type={showPassword ? 'text' : 'password'}
                     required
@@ -353,7 +358,7 @@ export default function Register() {
                   <button
                     type="button"
                     onClick={() => setShowPassword((current) => !current)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-slate-700 dark:hover:text-slate-200"
+                    className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-500 transition hover:bg-[var(--border-light)] hover:text-slate-700 dark:hover:bg-white/10 dark:hover:text-slate-200"
                     aria-label={showPassword ? ui.hidePassword : ui.showPassword}
                   >
                     {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}

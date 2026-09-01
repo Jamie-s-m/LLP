@@ -4,6 +4,7 @@ import { FiArrowRight, FiBookOpen, FiCheckCircle, FiMessageCircle, FiShield, FiT
 import { BRAND } from '../config/brand'
 import { useLearningStore } from '../store/learningStore'
 import { useI18n } from '../utils/i18n'
+import { Spinner, EmptyState, Alert } from '../components/ui'
 
 export default function Home() {
   const { courses, fetchCourses, isLoading, error } = useLearningStore()
@@ -43,7 +44,7 @@ export default function Home() {
               {BRAND.tagline}
             </h1>
             <p className="mb-2 max-w-2xl text-sm font-medium uppercase tracking-[0.18em] text-[var(--text-muted)]">
-              The language nest concept
+              {t('home.conceptLabel')}
             </p>
             <p className="mb-8 max-w-2xl text-lg leading-8 text-[var(--text-muted)]">
               {BRAND.concept}
@@ -103,7 +104,7 @@ export default function Home() {
             {workflowSteps.map((step, index) => {
               const Icon = step.icon
               return (
-                <div key={step.title} className="rounded-3xl bg-[#f6efe7] p-5 dark:bg-white/5">
+                <div key={step.title} className="rounded-3xl bg-[var(--surface-strong)] p-5 dark:bg-white/5">
                   <div className="mb-4 flex items-center justify-between">
                     <div className="inline-flex rounded-2xl bg-white/80 p-3 text-primary-600 dark:bg-white/10 dark:text-primary-300">
                       <Icon />
@@ -156,17 +157,25 @@ export default function Home() {
 
         {isLoading ? (
           <div className="flex justify-center py-12">
-            <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-primary-500"></div>
+            <Spinner size={32} label={t('home.featuredPaths')} />
           </div>
         ) : error ? (
-          <div role="alert" className="atlas-panel flex flex-col items-start gap-4 p-6">
-            <p className="text-sm text-slate-600 dark:text-slate-300">{t('home.coursesLoadError')}</p>
-            <button type="button" className="btn btn-primary" onClick={() => fetchCourses({ limit: 6 })}>
+          <Alert variant="error">
+            <p className="mb-3">{t('home.coursesLoadError')}</p>
+            <button type="button" className="btn btn-primary btn-sm" onClick={() => fetchCourses({ limit: 6 })}>
               {t('home.retryCourses')}
             </button>
-          </div>
+          </Alert>
         ) : safeCourses.length === 0 ? (
-          <p className="text-slate-400">{t('home.noCourses')}</p>
+          <EmptyState
+            icon={FiBookOpen}
+            title={t('home.noCourses')}
+            action={
+              <Link to="/courses" className="btn btn-outline btn-sm">
+                {t('common.openPath')}
+              </Link>
+            }
+          />
         ) : (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {safeCourses.slice(0, 6).map((course) => {
@@ -178,7 +187,7 @@ export default function Home() {
                 >
                   <div>
                     <div className="flex flex-wrap gap-2">
-                      <span className="inline-flex rounded-full bg-[#102a43]/10 px-2.5 py-1 text-xs font-semibold text-ink">
+                      <span className="inline-flex rounded-full bg-[var(--border-light)] px-2.5 py-1 text-xs font-semibold text-ink dark:bg-white/10 dark:text-white">
                         {course.level || 'All Levels'}
                       </span>
                       {course.language ? (
