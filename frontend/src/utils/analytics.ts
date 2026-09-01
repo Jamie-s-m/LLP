@@ -1,14 +1,17 @@
 import api from '../services/api'
 
-// Must match backend/src/models/AnalyticsEvent.js's ANALYTICS_EVENTS exactly - the server
-// rejects anything else.
+// Must match backend/src/models/AnalyticsEvent.js's PUBLIC_ANALYTICS_EVENTS exactly - the
+// server rejects anything else. Deliberately excludes payment_completed/subscription_cancelled/
+// payment_refunded: those can only be asserted by a verified Stripe/Payme webhook, never by
+// this client, and the backend enforces that separately (INTERNAL_ANALYTICS_EVENTS) - they
+// aren't in this union so no frontend call site can even attempt to send one.
 export type AnalyticsEvent =
   | 'signup_started' | 'signup_completed'
   | 'onboarding_started' | 'onboarding_completed'
   | 'placement_started' | 'placement_completed'
   | 'lesson_started' | 'lesson_completed' | 'exercise_completed' | 'flashcard_reviewed'
   | 'daily_goal_completed' | 'streak_maintained'
-  | 'pricing_viewed' | 'checkout_started' | 'payment_completed' | 'subscription_cancelled'
+  | 'pricing_viewed' | 'checkout_started'
   | 'referral_started' | 'referral_completed'
 
 const ANON_ID_KEY = 'ln_anon_id'

@@ -55,4 +55,48 @@ describe('Analytics API', () => {
     const res = await request(app).post('/api/analytics/track').send('not json at all');
     expect([204, 400]).toContain(res.status);
   });
+
+  // Regression coverage for a release blocker: an unauthenticated POST to this exact route
+  // with event=payment_completed or event=subscription_cancelled used to be accepted and
+  // wrote a real AnalyticsEvent row that GET /api/admin/business-metrics reads
+  // (cancellationsLast30d) - a single anonymous HTTP request could move a founder-facing
+  // revenue metric. These events must now be indistinguishable from any other unrecognized
+  // event name from this route's point of view.
+  describe('monetization events cannot be forged through the public endpoint', () => {
+    it.each(['payment_completed', 'subscription_cancelled', 'payment_refunded'])(
+      'rejects an unauthenticated %s event and never stores it',
+      async (event) => {
+        const res = await request(app)
+          .post('/api/analytics/track')
+          .send({ event, metadata: { provider: 'stripe', plan: 'learner' } });
+
+        expect(res.status).toBe(400);
+        const stored = await AnalyticsEvent.findOne({ event });
+        expect(stored).toBeNull();
+      }
+    );
+
+    it('also rejects the same events when sent by an authenticated user', async () => {
+      const user = await User.create({
+        firstName: 'Would-Be',
+        lastName: 'Forger',
+        email: 'analytics-forger@example.com',
+        password: 'testpass123',
+        role: 'student',
+        isEmailVerified: true,
+      });
+      const loginRes = await request(app)
+        .post('/api/auth/login')
+        .send({ email: 'analytics-forger@example.com', password: 'testpass123' });
+
+      const res = await request(app)
+        .post('/api/analytics/track')
+        .set('Authorization', `Bearer ${loginRes.body.token}`)
+        .send({ event: 'subscription_cancelled' });
+
+      expect(res.status).toBe(400);
+      const stored = await AnalyticsEvent.findOne({ event: 'subscription_cancelled', user: user._id });
+      expect(stored).toBeNull();
+    });
+  });
 });

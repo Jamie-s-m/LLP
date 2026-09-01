@@ -4,7 +4,17 @@ import mongoose from 'mongoose';
 // fixed list (validated in the controller, not just documented here) so this collection
 // answers "where do users stop" cleanly instead of accumulating whatever string a future
 // call site happens to pass.
-export const ANALYTICS_EVENTS = [
+//
+// Split in two, deliberately: PUBLIC_ANALYTICS_EVENTS is the only list the unauthenticated
+// POST /api/analytics/track controller validates against. INTERNAL_ANALYTICS_EVENTS names
+// events whose truth can only come from a trusted server-side source (a verified Stripe/Payme
+// webhook) - a client claiming "I just paid" or "I just cancelled" is not evidence of
+// anything, and a founder dashboard built on that claim is forgeable by a single anonymous
+// HTTP request. recordBillingEvent() (billingController.js) writes these directly via
+// AnalyticsEvent.create(), never through the public controller, so they still need to be
+// valid according to the Mongoose schema - just not postable by a client. ANALYTICS_EVENTS
+// (the schema-level enum) is the union of both; only PUBLIC_ANALYTICS_EVENTS is client-facing.
+export const PUBLIC_ANALYTICS_EVENTS = [
   // Acquisition
   'signup_started', 'signup_completed',
   // Onboarding
@@ -15,11 +25,18 @@ export const ANALYTICS_EVENTS = [
   'lesson_started', 'lesson_completed', 'exercise_completed', 'flashcard_reviewed',
   // Engagement
   'daily_goal_completed', 'streak_maintained',
-  // Monetization
-  'pricing_viewed', 'checkout_started', 'payment_completed', 'subscription_cancelled',
+  // Monetization (viewing/starting checkout is a real client action - completing or
+  // cancelling a paid subscription is not something a client can honestly assert)
+  'pricing_viewed', 'checkout_started',
   // Referral (event names reserved for when a referral feature exists - not wired up yet)
   'referral_started', 'referral_completed',
 ];
+
+export const INTERNAL_ANALYTICS_EVENTS = [
+  'payment_completed', 'subscription_cancelled', 'payment_refunded',
+];
+
+export const ANALYTICS_EVENTS = [...PUBLIC_ANALYTICS_EVENTS, ...INTERNAL_ANALYTICS_EVENTS];
 
 const analyticsEventSchema = new mongoose.Schema(
   {

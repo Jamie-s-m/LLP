@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import AnalyticsEvent, { ANALYTICS_EVENTS } from '../models/AnalyticsEvent.js';
+import AnalyticsEvent, { PUBLIC_ANALYTICS_EVENTS } from '../models/AnalyticsEvent.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'local-development-only-secret';
 const SENSITIVE_KEYS = ['email', 'password', 'token', 'firstname', 'lastname', 'phone', 'address'];
@@ -39,7 +39,12 @@ export const trackEvent = async (req, res) => {
   try {
     const { event, metadata, path, anonymousId } = req.body || {};
 
-    if (!ANALYTICS_EVENTS.includes(event)) {
+    // This route is intentionally unauthenticated (fires from pre-signup pages), so it must
+    // never accept an event whose truth can't be independently verified from the request
+    // itself. payment_completed/subscription_cancelled/payment_refunded are NOT in this list -
+    // see PUBLIC_ANALYTICS_EVENTS's comment in the model - so they 400 here exactly like any
+    // other unrecognized event name, the same way a forged event always has.
+    if (!PUBLIC_ANALYTICS_EVENTS.includes(event)) {
       return res.status(400).json({ success: false, message: 'Unknown event name' });
     }
 

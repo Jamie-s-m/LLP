@@ -8,6 +8,7 @@ import ExerciseAttempt from '../src/models/ExerciseAttempt.js';
 import Exercise from '../src/models/Exercise.js';
 import FlashcardProgress from '../src/models/FlashcardProgress.js';
 import Flashcard from '../src/models/Flashcard.js';
+import AnalyticsEvent from '../src/models/AnalyticsEvent.js';
 
 describe('Business metrics API', () => {
   let adminToken;
@@ -106,6 +107,22 @@ describe('Business metrics API', () => {
     expect(learning.vocabularyReviews).toBeGreaterThanOrEqual(3);
     expect(retention._label).toBe('ESTIMATE');
     expect(typeof retention.methodology).toBe('string');
+  });
+
+  // Reproduces the exact original exploit end-to-end: before the fix, this single
+  // unauthenticated request moved this dashboard number by one.
+  it('cancellationsLast30d does not move from an unauthenticated forged subscription_cancelled event', async () => {
+    const before = await request(app).get('/api/admin/business-metrics').set('Authorization', `Bearer ${adminToken}`);
+    const cancellationsBefore = before.body.data.monetization.cancellationsLast30d;
+
+    const forgeAttempt = await request(app)
+      .post('/api/analytics/track')
+      .send({ event: 'subscription_cancelled', metadata: { provider: 'stripe', plan: 'learner' } });
+    expect(forgeAttempt.status).toBe(400);
+    expect(await AnalyticsEvent.countDocuments({ event: 'subscription_cancelled' })).toBe(0);
+
+    const after = await request(app).get('/api/admin/business-metrics').set('Authorization', `Bearer ${adminToken}`);
+    expect(after.body.data.monetization.cancellationsLast30d).toBe(cancellationsBefore);
   });
 
   it('lists real paying users for founder outreach', async () => {
