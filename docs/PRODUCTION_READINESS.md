@@ -34,7 +34,7 @@
 - CI (`.github/workflows/ci-cd.yml`) now runs real lint + tests for both
   projects on every push/PR to `main`, not just a frontend build and a bare
   backend import smoke test
-- Explicit, non-startup content seeding, including a 16-question CEFR
+- Explicit, non-startup content seeding, including a 32-question CEFR
   placement-test bank
 - JWT authentication and role authorization
 - Production CORS configuration (see the DNS blocker above re: which origin

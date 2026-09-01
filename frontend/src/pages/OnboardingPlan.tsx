@@ -1,7 +1,9 @@
+import { useEffect, useState } from 'react'
 import { useLocation, useNavigate, Link } from 'react-router-dom'
 import { FiCheckCircle } from 'react-icons/fi'
 import { useAuthStore } from '../store/authStore'
 import { useI18n } from '../utils/i18n'
+import api from '../services/api'
 
 interface PlacementResult {
   cefr: string
@@ -17,6 +19,26 @@ export default function OnboardingPlan() {
 
   const level = result?.level || user?.placementLevel || null
   const cefr = result?.cefr || null
+
+  const [confidenceNote, setConfidenceNote] = useState<string | null>(null)
+
+  // This screen states the recommended level as a settled fact ("Intermediate (B1)") - the
+  // backend's skill-profile endpoint carries an honest confidence caveat for exactly that
+  // estimate (one placement test, not an ongoing adaptive assessment). Pull the live wording
+  // instead of duplicating a hardcoded copy that could drift from what the backend computes;
+  // planLevelConfidenceFallback only covers the (rare) case the request fails.
+  useEffect(() => {
+    if (!level) return
+    let cancelled = false
+    api.get('/progress/skill-profile')
+      .then((response) => {
+        if (!cancelled) setConfidenceNote(response.data?.data?.confidenceNote || null)
+      })
+      .catch(() => undefined)
+    return () => {
+      cancelled = true
+    }
+  }, [level])
 
   const goalLabels: Record<string, string> = {
     job: t('onboarding.goalJob'),
@@ -61,9 +83,14 @@ export default function OnboardingPlan() {
           <h1 className="mb-6 text-3xl font-bold text-ink dark:text-white">{t('onboarding.planTitle')}</h1>
 
           <dl className="mb-6 space-y-3 rounded-2xl border border-[var(--border)] p-5 text-left text-sm">
-            <div className="flex items-center justify-between">
-              <dt className="text-muted">{t('onboarding.planLevel')}</dt>
-              <dd className="font-semibold text-ink dark:text-white">{level ? `${level}${cefr ? ` (${cefr})` : ''}` : '—'}</dd>
+            <div>
+              <div className="flex items-center justify-between">
+                <dt className="text-muted">{t('onboarding.planLevel')}</dt>
+                <dd className="font-semibold text-ink dark:text-white">{level ? `${level}${cefr ? ` (${cefr})` : ''}` : '—'}</dd>
+              </div>
+              {level ? (
+                <p className="mt-1 text-xs text-muted">{confidenceNote || t('onboarding.planLevelConfidenceFallback')}</p>
+              ) : null}
             </div>
             <div className="flex items-center justify-between">
               <dt className="text-muted">{t('onboarding.planGoal')}</dt>

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { FiCheck, FiTarget } from 'react-icons/fi'
@@ -15,7 +15,7 @@ const copy = {
   en: {
     kicker: 'Find your starting point',
     title: 'Placement Test',
-    intro: 'Answer 16 short questions (about 5 minutes) and we\'ll recommend the right course level to start with.',
+    intro: 'Answer 32 short questions (about 10 minutes) and we\'ll recommend the right course level to start with.',
     retakeNote: 'You\'ve already completed this test. Taking it again will update your recommended level.',
     currentLevel: 'Your current level',
     start: 'Start test',
@@ -27,6 +27,7 @@ const copy = {
     submitting: 'Scoring your answers...',
     resultTitle: 'Your recommended level',
     resultCopy: (correct: number, total: number) => `You answered ${correct} of ${total} questions correctly.`,
+    confidenceFallback: 'This is a starting estimate from one placement test, not a precise or official measurement.',
     browseCourses: 'Browse matching courses',
     retake: 'Retake test',
     goDashboard: 'Go to dashboard',
@@ -35,7 +36,7 @@ const copy = {
   ru: {
     kicker: 'Определите свою точку старта',
     title: 'Тест на уровень',
-    intro: 'Ответьте на 16 коротких вопросов (около 5 минут), и мы порекомендуем подходящий уровень курса.',
+    intro: 'Ответьте на 32 коротких вопроса (около 10 минут), и мы порекомендуем подходящий уровень курса.',
     retakeNote: 'Вы уже проходили этот тест. Повторное прохождение обновит рекомендованный уровень.',
     currentLevel: 'Ваш текущий уровень',
     start: 'Начать тест',
@@ -47,6 +48,7 @@ const copy = {
     submitting: 'Оцениваем ваши ответы...',
     resultTitle: 'Рекомендованный уровень',
     resultCopy: (correct: number, total: number) => `Вы ответили правильно на ${correct} из ${total} вопросов.`,
+    confidenceFallback: 'Это предварительная оценка по результатам одного теста, а не точное или официальное измерение.',
     browseCourses: 'Смотреть подходящие курсы',
     retake: 'Пройти снова',
     goDashboard: 'Перейти в панель',
@@ -55,7 +57,7 @@ const copy = {
   uz: {
     kicker: 'Boshlang‘ich darajangizni aniqlang',
     title: 'Daraja aniqlash testi',
-    intro: '16 ta qisqa savolga javob bering (taxminan 5 daqiqa), biz mos kurs darajasini tavsiya qilamiz.',
+    intro: '32 ta qisqa savolga javob bering (taxminan 10 daqiqa), biz mos kurs darajasini tavsiya qilamiz.',
     retakeNote: 'Siz bu testni allaqachon topshirgansiz. Qayta topshirish tavsiya etilgan darajani yangilaydi.',
     currentLevel: 'Joriy darajangiz',
     start: 'Testni boshlash',
@@ -67,6 +69,7 @@ const copy = {
     submitting: 'Javoblaringiz baholanmoqda...',
     resultTitle: 'Tavsiya etilgan daraja',
     resultCopy: (correct: number, total: number) => `Siz ${total} ta savoldan ${correct} tasiga to‘g‘ri javob berdingiz.`,
+    confidenceFallback: 'Bu bitta daraja aniqlash testiga asoslangan boshlang‘ich taxmin, aniq yoki rasmiy o‘lchov emas.',
     browseCourses: 'Mos kurslarni ko‘rish',
     retake: 'Qayta topshirish',
     goDashboard: 'Boshqaruv paneliga o‘tish',
@@ -89,6 +92,25 @@ export default function PlacementTest() {
   const [index, setIndex] = useState(0)
   const [answers, setAnswers] = useState<Record<string, number>>({})
   const [result, setResult] = useState<PlacementResult | null>(null)
+  const [confidenceNote, setConfidenceNote] = useState<string | null>(null)
+
+  // The result screen states a single CEFR letter as the recommendation - the backend's own
+  // skill-profile endpoint carries an honest confidence caveat for exactly this estimate
+  // (based on one 32-question test, not an ongoing adaptive assessment). Pull the live wording
+  // rather than duplicating a hardcoded copy that could drift from what the backend actually
+  // computes; ui.confidenceFallback only covers the (rare) case the request fails.
+  useEffect(() => {
+    if (phase !== 'result') return
+    let cancelled = false
+    api.get('/progress/skill-profile')
+      .then((response) => {
+        if (!cancelled) setConfidenceNote(response.data?.data?.confidenceNote || null)
+      })
+      .catch(() => undefined)
+    return () => {
+      cancelled = true
+    }
+  }, [phase])
 
   const start = async () => {
     setLoading(true)
@@ -154,7 +176,8 @@ export default function PlacementTest() {
             </div>
             <p className="atlas-kicker">{ui.resultTitle}</p>
             <h1 className="mb-2 text-3xl font-bold text-ink dark:text-white">{result.level} ({result.cefr})</h1>
-            <p className="mb-6 text-muted">{ui.resultCopy(result.totalCorrect, result.totalQuestions)}</p>
+            <p className="mb-2 text-muted">{ui.resultCopy(result.totalCorrect, result.totalQuestions)}</p>
+            <p className="mb-6 text-xs text-muted">{confidenceNote || ui.confidenceFallback}</p>
             <div className="flex flex-col gap-3">
               <Link to={`/courses?level=${result.level}`} className="btn btn-primary w-full">{ui.browseCourses}</Link>
               <button onClick={() => setPhase('intro')} className="btn btn-outline w-full">{ui.retake}</button>

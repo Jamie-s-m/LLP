@@ -36,7 +36,7 @@ records. Redis is optional.
   Only the course's own instructor, an admin, or a moderator with the
   `catalogContentQa` permission can see an exercise's answer key or edit it.
 - **Placement test**: `backend/src/models/PlacementQuestion.js` holds a
-  16-question CEFR (A1-B2) bank (`backend/src/data/placementQuestions.js`,
+  32-question CEFR (A1-B2) bank (`backend/src/data/placementQuestions.js`,
   seeded like the rest of the content library). Scoring requires 75%+ correct
   within a CEFR tier to advance to the next; the result maps to
   `User.placementLevel` (Beginner/Intermediate/Advanced, matching the levels
