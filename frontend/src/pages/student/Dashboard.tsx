@@ -16,6 +16,12 @@ interface Summary {
   streak: number
 }
 
+interface TodayRecommendation {
+  continueLesson: { lessonId: string; courseId: string; courseTitle: string; lessonTitle: string; cefr: string | null } | null
+  weakestSkill: { skill: string; state: string; courseId: string } | null
+  overdueFlashcardCount: number
+}
+
 interface FamilyLinkRequest {
   _id: string
   status: 'pending' | 'approved' | 'rejected'
@@ -31,13 +37,21 @@ export default function Dashboard() {
   const { t } = useI18n()
   const [summary, setSummary] = useState<Summary | null>(null)
   const [familyLinks, setFamilyLinks] = useState<FamilyLinkRequest[]>([])
+  const [today, setToday] = useState<TodayRecommendation | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    Promise.all([api.get('/users/dashboard-summary'), api.get('/family')])
-      .then(([summaryResponse, familyResponse]) => {
+    Promise.all([
+      api.get('/users/dashboard-summary'),
+      api.get('/family'),
+      // Caught separately: this recommendation is a nice-to-have on top of the dashboard's
+      // core stats, not a reason to fail the whole page if it errors.
+      api.get('/progress/today').catch(() => null),
+    ])
+      .then(([summaryResponse, familyResponse, todayResponse]) => {
         setSummary(summaryResponse.data.data)
         setFamilyLinks(familyResponse.data.data || [])
+        setToday(todayResponse?.data?.data ?? null)
       })
       .finally(() => setLoading(false))
   }, [])
@@ -152,7 +166,14 @@ export default function Dashboard() {
                 <p className="atlas-kicker">{t('studentDashboard.progressKicker')}</p>
                 <h2 className="text-2xl text-ink dark:text-white">{t('studentDashboard.progressHeading')}</h2>
                 <p className="mt-2 text-muted">{t('studentDashboard.progressCopy', { completed: summary?.completedCourses ?? 0, total: summary?.totalCourses ?? 0 })}</p>
-                <div className="mt-6 h-3 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
+                <div
+                  role="progressbar"
+                  aria-label={t('studentDashboard.overallCompletion')}
+                  aria-valuenow={progressPercent}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  className="mt-6 h-3 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10"
+                >
                   <div className="h-full rounded-full bg-gradient-to-r from-primary-500 to-secondary-500" style={{ width: `${progressPercent}%` }} />
                 </div>
                 <div className="mt-3 flex items-center justify-between text-sm text-slate-600 dark:text-slate-300">
@@ -166,12 +187,35 @@ export default function Dashboard() {
                 <div className="atlas-panel p-6">
                   <p className="atlas-kicker">{t('studentDashboard.nextStepKicker')}</p>
                   <h2 className="text-2xl text-ink dark:text-white">{t('studentDashboard.nextStepHeading')}</h2>
-                  <p className="mt-2 text-muted">{summary?.totalCourses ? t('studentDashboard.nextStepContinue') : t('studentDashboard.nextStepStart')}</p>
+                  <p className="mt-2 text-muted">
+                    {today?.continueLesson
+                      ? t('studentDashboard.nextStepContinueLesson', { title: today.continueLesson.lessonTitle })
+                      : summary?.totalCourses ? t('studentDashboard.nextStepContinue') : t('studentDashboard.nextStepStart')}
+                  </p>
                   <div className="mt-5">
-                    <Link to={summary?.totalCourses ? '/my-learning' : '/courses'} className="btn btn-primary">
-                      {summary?.totalCourses ? t('studentDashboard.resumeLearning') : t('studentDashboard.browseCourses')}
-                    </Link>
+                    {today?.continueLesson ? (
+                      <Link to={`/lesson/${today.continueLesson.lessonId}`} className="btn btn-primary">
+                        {t('studentDashboard.resumeLearning')}
+                      </Link>
+                    ) : (
+                      <Link to={summary?.totalCourses ? '/my-learning' : '/courses'} className="btn btn-primary">
+                        {summary?.totalCourses ? t('studentDashboard.resumeLearning') : t('studentDashboard.browseCourses')}
+                      </Link>
+                    )}
                   </div>
+                  {today?.weakestSkill ? (
+                    <p className="mt-4 text-sm text-muted">
+                      {t('studentDashboard.nextStepWeakSkill', { skill: t(`skills.${today.weakestSkill.skill}`) })}
+                    </p>
+                  ) : null}
+                  {today && today.overdueFlashcardCount > 0 ? (
+                    <Link to="/flashcards" className="mt-3 inline-block text-sm font-semibold text-[var(--accent)]">
+                      {t(
+                        today.overdueFlashcardCount === 1 ? 'studentDashboard.nextStepFlashcardsDue' : 'studentDashboard.nextStepFlashcardsDuePlural',
+                        { count: today.overdueFlashcardCount }
+                      )}
+                    </Link>
+                  ) : null}
                 </div>
 
                 <DailyReward />

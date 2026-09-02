@@ -8,6 +8,7 @@ import api from '../services/api'
 interface PlacementResult {
   cefr: string
   level: 'Beginner' | 'Intermediate' | 'Advanced'
+  recommendedLesson?: { lessonId: string; courseId: string; title: string } | null
 }
 
 export default function OnboardingPlan() {
@@ -66,21 +67,28 @@ export default function OnboardingPlan() {
 
   // Only two real, purpose-built course tracks exist today (Business English and English
   // Speaking) - everything else recommends by CEFR level rather than claiming a specialized
-  // track (e.g. "IT English", "Migration English") that hasn't actually been built yet.
+  // track (e.g. "IT English", "Migration English") that hasn't actually been built yet. Outside
+  // those two tracks, prefer the specific starting Lesson the placement test just resolved (via
+  // Lesson.cefr) over a coarse course-level filter - only available right after a placement
+  // submission (result.recommendedLesson), not on a later revisit of this page.
   const pathHref = user?.learningGoal === 'job' || user?.learningGoal === 'it'
     ? '/courses?category=Business English'
     : user?.learningGoal === 'confidence'
       ? '/courses?category=Conversation'
-      : level
-        ? `/courses?level=${level}`
-        : '/courses'
+      : result?.recommendedLesson
+        ? `/lesson/${result.recommendedLesson.lessonId}`
+        : level
+          ? `/courses?level=${level}`
+          : '/courses'
   const pathLabel = user?.learningGoal === 'job' || user?.learningGoal === 'it'
     ? 'Business English'
     : user?.learningGoal === 'confidence'
       ? 'English Speaking'
-      : level
-        ? `${level} courses`
-        : 'Courses'
+      : result?.recommendedLesson
+        ? result.recommendedLesson.title
+        : level
+          ? `${level} courses`
+          : 'Courses'
 
   return (
     <div className="atlas-page px-4 py-12">

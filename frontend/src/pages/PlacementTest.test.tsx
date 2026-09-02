@@ -127,6 +127,45 @@ describe('PlacementTest', () => {
     ).toBeInTheDocument()
   })
 
+  it('routes the result CTA to the specific recommended lesson when the backend resolves one', async () => {
+    const user = userEvent.setup()
+    mockedApi.get.mockImplementation((url: string) => {
+      if (url === '/placement/questions') return Promise.resolve({ data: { data: buildQuestions(1) } })
+      return Promise.resolve({ data: {} })
+    })
+    mockedApi.post.mockImplementation((url: string) => {
+      if (url === '/placement/submit') {
+        return Promise.resolve({
+          data: {
+            data: {
+              cefr: 'A1',
+              level: 'Beginner',
+              totalCorrect: 1,
+              totalQuestions: 1,
+              recommendedCourses: [],
+              recommendedLesson: { lessonId: 'lesson-123', courseId: 'course-456', title: 'Greetings' },
+            },
+          },
+        })
+      }
+      return Promise.resolve({ data: {} })
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/placement-test']}>
+        <PlacementTest />
+      </MemoryRouter>
+    )
+
+    await user.click(screen.getByRole('button', { name: /start test/i }))
+    await screen.findByText('Question 1 of 1')
+    await user.click(screen.getByText('A'))
+    await user.click(screen.getByRole('button', { name: /see my result/i }))
+
+    const startLessonLink = await screen.findByRole('link', { name: /start "Greetings"/i })
+    expect(startLessonLink).toHaveAttribute('href', '/lesson/lesson-123')
+  })
+
   // Regression coverage for the placement-persistence feature (Batch 3): answers must
   // survive an unmount (simulating a refresh), the intro screen must offer an explicit
   // resume rather than silently jumping back in, and a successful submission must clear

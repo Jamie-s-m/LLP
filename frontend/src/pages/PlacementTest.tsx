@@ -9,7 +9,8 @@ import { useI18n } from '../utils/i18n'
 import { track } from '../utils/analytics'
 
 interface Question { _id: string; question: string; options: string[]; cefr: string }
-interface PlacementResult { cefr: string; level: string; totalCorrect: number; totalQuestions: number; recommendedCourses: any[] }
+interface RecommendedLesson { lessonId: string; courseId: string; title: string }
+interface PlacementResult { cefr: string; level: string; totalCorrect: number; totalQuestions: number; recommendedCourses: any[]; recommendedLesson: RecommendedLesson | null }
 
 // Placement-test progress persistence. Client-side (localStorage) only, deliberately -
 // this is an unproctored self-assessment that recommends a starting course level, not a
@@ -84,6 +85,7 @@ const copy = {
     resultTitle: 'Your recommended level',
     resultCopy: (correct: number, total: number) => `You answered ${correct} of ${total} questions correctly.`,
     confidenceFallback: 'This is a starting estimate from one placement test, not a precise or official measurement.',
+    startLesson: (title: string) => `Start "${title}"`,
     browseCourses: 'Browse matching courses',
     retake: 'Retake test',
     goDashboard: 'Go to dashboard',
@@ -113,6 +115,7 @@ const copy = {
     resultTitle: 'Рекомендованный уровень',
     resultCopy: (correct: number, total: number) => `Вы ответили правильно на ${correct} из ${total} вопросов.`,
     confidenceFallback: 'Это предварительная оценка по результатам одного теста, а не точное или официальное измерение.',
+    startLesson: (title: string) => `Начать «${title}»`,
     browseCourses: 'Смотреть подходящие курсы',
     retake: 'Пройти снова',
     goDashboard: 'Перейти в панель',
@@ -138,6 +141,7 @@ const copy = {
     resultTitle: 'Tavsiya etilgan daraja',
     resultCopy: (correct: number, total: number) => `Siz ${total} ta savoldan ${correct} tasiga to‘g‘ri javob berdingiz.`,
     confidenceFallback: 'Bu bitta daraja aniqlash testiga asoslangan boshlang‘ich taxmin, aniq yoki rasmiy o‘lchov emas.',
+    startLesson: (title: string) => `"${title}" darsini boshlash`,
     browseCourses: 'Mos kurslarni ko‘rish',
     retake: 'Qayta topshirish',
     goDashboard: 'Boshqaruv paneliga o‘tish',
@@ -301,7 +305,16 @@ export default function PlacementTest() {
               <p className="mb-6 text-xs text-muted">&nbsp;</p>
             )}
             <div className="flex flex-col gap-3">
-              <Link to={`/courses?level=${result.level}`} className="btn btn-primary w-full">{ui.browseCourses}</Link>
+              {result.recommendedLesson ? (
+                <>
+                  <Link to={`/lesson/${result.recommendedLesson.lessonId}`} className="btn btn-primary w-full">
+                    {ui.startLesson(result.recommendedLesson.title)}
+                  </Link>
+                  <Link to={`/courses?level=${result.level}`} className="text-sm font-semibold text-[var(--accent)]">{ui.browseCourses}</Link>
+                </>
+              ) : (
+                <Link to={`/courses?level=${result.level}`} className="btn btn-primary w-full">{ui.browseCourses}</Link>
+              )}
               <button onClick={() => setPhase('intro')} className="btn btn-outline w-full">{ui.retake}</button>
               <button onClick={() => navigate('/dashboard')} className="text-sm text-[var(--accent)] font-semibold">{ui.goDashboard}</button>
             </div>
