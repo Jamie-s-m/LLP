@@ -6,8 +6,9 @@ import Lesson from '../src/models/Lesson.js';
 import Exercise from '../src/models/Exercise.js';
 import Progress from '../src/models/Progress.js';
 import ExerciseAttempt from '../src/models/ExerciseAttempt.js';
-import { deriveMasteryState, computeLessonMastery, computeCourseMastery, isLevelReady } from '../src/utils/masteryEngine.js';
+import { deriveMasteryState, applyRecencyDecay, computeLessonMastery, computeSkillMastery, computeCourseMastery, isLevelReady } from '../src/utils/masteryEngine.js';
 import { REFERENCE_COURSE } from '../src/data/referenceCurriculum.js';
+import { SKILLS } from '../src/utils/skills.js';
 
 describe('deriveMasteryState (pure function)', () => {
   const attempt = (isCorrect, exercise = 'ex1', status = 'graded', createdAt = new Date()) => ({ isCorrect, exercise, status, createdAt });
@@ -169,6 +170,37 @@ describe('deriveMasteryState - adversarial mastery-gaming regression coverage', 
   });
 });
 
+describe('applyRecencyDecay (pure function)', () => {
+  it('leaves a state untouched when there is no prior evidence at all', () => {
+    expect(applyRecencyDecay('mastered', null)).toBe('mastered');
+    expect(applyRecencyDecay('mastered', undefined)).toBe('mastered');
+  });
+
+  it('leaves non-decaying states untouched regardless of elapsed time', () => {
+    expect(applyRecencyDecay('developing', 9999)).toBe('developing');
+    expect(applyRecencyDecay('not_started', 9999)).toBe('not_started');
+    expect(applyRecencyDecay('needs_review', 9999)).toBe('needs_review');
+  });
+
+  it('leaves proficient/mastered untouched right up to their threshold', () => {
+    expect(applyRecencyDecay('proficient', 45)).toBe('proficient');
+    expect(applyRecencyDecay('mastered', 60)).toBe('mastered');
+  });
+
+  it('demotes proficient to needs_review once evidence is more than 45 days stale', () => {
+    expect(applyRecencyDecay('proficient', 46)).toBe('needs_review');
+  });
+
+  it('demotes mastered to needs_review once evidence is more than 60 days stale', () => {
+    expect(applyRecencyDecay('mastered', 61)).toBe('needs_review');
+  });
+
+  it('mastered survives longer than proficient before decaying - same elapsed time can differ by state', () => {
+    expect(applyRecencyDecay('proficient', 50)).toBe('needs_review');
+    expect(applyRecencyDecay('mastered', 50)).toBe('mastered');
+  });
+});
+
 describe('mastery engine against real seeded reference content', () => {
   let student;
   let course;
@@ -249,5 +281,123 @@ describe('mastery engine against real seeded reference content', () => {
     const fakeId = new mongoose.Types.ObjectId();
     expect(await computeLessonMastery(student._id, fakeId)).toBeNull();
     expect(await computeCourseMastery(student._id, fakeId)).toBeNull();
+  });
+});
+
+// Purpose-built fixtures rather than the reference course above: computeSkillMastery groups
+// evidence course-wide per skill, so reaching 'mastered' (for the decay test below) requires
+// full coverage of every auto-gradable exercise tagged with that skill across the whole
+// course - a number this suite needs to control exactly, not infer from the reference
+// curriculum's real exercise counts.
+describe('computeSkillMastery against purpose-built fixtures', () => {
+  let skillStudent;
+  let skillCourse;
+  let skillLesson;
+  let grammarExercises;
+  let speakingExercise;
+
+  beforeAll(async () => {
+    skillStudent = await User.create({
+      firstName: 'Skill',
+      lastName: 'Tester',
+      email: 'skill-tester@example.com',
+      password: 'testpass123',
+      role: 'student',
+      isEmailVerified: true,
+    });
+
+    skillCourse = await Course.create({
+      title: 'Skill Mastery Fixture Course',
+      description: 'Purpose-built fixture for computeSkillMastery coverage/decay tests.',
+      language: 'English',
+      level: 'Beginner',
+      instructor: skillStudent._id,
+      category: 'Grammar',
+    });
+
+    skillLesson = await Lesson.create({
+      title: 'Skill Fixture Lesson',
+      course: skillCourse._id,
+      order: 1,
+      content: 'Fixture content.',
+      cefr: 'A1',
+    });
+
+    skillCourse.lessons = [skillLesson._id];
+    await skillCourse.save();
+
+    grammarExercises = await Exercise.create([
+      { lesson: skillLesson._id, title: 'Grammar 1', type: 'multiple_choice', question: 'Q1', skill: 'grammar' },
+      { lesson: skillLesson._id, title: 'Grammar 2', type: 'multiple_choice', question: 'Q2', skill: 'grammar' },
+    ]);
+
+    // A manual-review (speaking) exercise in a different skill bucket, so it can prove the
+    // MANUAL_REVIEW_EXERCISE_TYPES coverage exclusion applies per-skill without disturbing the
+    // grammar coverage math above.
+    speakingExercise = await Exercise.create({
+      lesson: skillLesson._id,
+      title: 'Speaking 1',
+      type: 'speaking',
+      question: 'Talk about it',
+      skill: 'speaking',
+    });
+  });
+
+  afterAll(async () => {
+    await ExerciseAttempt.deleteMany({ user: skillStudent._id });
+    await Exercise.deleteMany({ lesson: skillLesson._id });
+    await Lesson.deleteOne({ _id: skillLesson._id });
+    await Course.deleteOne({ _id: skillCourse._id });
+    await User.deleteOne({ _id: skillStudent._id });
+  });
+
+  it('reports every tracked skill, not_started before any attempts, including skills with zero exercises in this course', async () => {
+    const mastery = await computeSkillMastery(skillStudent._id, skillCourse._id);
+    expect(mastery.map((entry) => entry.skill).sort()).toEqual([...SKILLS].sort());
+
+    const grammar = mastery.find((entry) => entry.skill === 'grammar');
+    expect(grammar.state).toBe('not_started');
+    expect(grammar.totalExercises).toBe(2);
+
+    const vocabulary = mastery.find((entry) => entry.skill === 'vocabulary');
+    expect(vocabulary.state).toBe('not_started');
+    expect(vocabulary.totalExercises).toBe(0);
+  });
+
+  it('reaches mastered once every grammar exercise in the course has correct graded evidence', async () => {
+    for (const exercise of grammarExercises) {
+      await ExerciseAttempt.create({ user: skillStudent._id, exercise: exercise._id, skill: 'grammar', isCorrect: true, status: 'graded' });
+    }
+    const mastery = await computeSkillMastery(skillStudent._id, skillCourse._id);
+    const grammar = mastery.find((entry) => entry.skill === 'grammar');
+    expect(grammar.attemptCount).toBe(2);
+    expect(grammar.state).toBe('mastered');
+  });
+
+  it('a lone pending-review speaking attempt engages the speaking skill without ever mastering it', async () => {
+    await ExerciseAttempt.create({ user: skillStudent._id, exercise: speakingExercise._id, skill: 'speaking', isCorrect: false, status: 'pending_review' });
+    const mastery = await computeSkillMastery(skillStudent._id, skillCourse._id);
+    const speaking = mastery.find((entry) => entry.skill === 'speaking');
+    expect(speaking.state).not.toBe('not_started');
+    expect(speaking.state).not.toBe('mastered');
+  });
+
+  it('demotes a mastered skill to needs_review once its graded evidence goes stale past the 60-day decay threshold', async () => {
+    // createdAt is immutable on this schema (Mongoose's timestamps default), so an updateMany
+    // $set on an existing attempt is silently dropped - backdate by recreating instead.
+    const staleDate = new Date(Date.now() - 61 * 24 * 60 * 60 * 1000);
+    await ExerciseAttempt.deleteMany({ user: skillStudent._id, skill: 'grammar' });
+    for (const exercise of grammarExercises) {
+      await ExerciseAttempt.create({ user: skillStudent._id, exercise: exercise._id, skill: 'grammar', isCorrect: true, status: 'graded', createdAt: staleDate });
+    }
+
+    const mastery = await computeSkillMastery(skillStudent._id, skillCourse._id);
+    const grammar = mastery.find((entry) => entry.skill === 'grammar');
+    expect(grammar.state).toBe('needs_review');
+  });
+
+  it('returns null for a non-existent course rather than throwing', async () => {
+    const fakeId = new mongoose.Types.ObjectId();
+    expect(await computeSkillMastery(skillStudent._id, fakeId)).toBeNull();
   });
 });

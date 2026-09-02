@@ -3,6 +3,7 @@ import ExerciseAttempt from '../models/ExerciseAttempt.js';
 import Exercise from '../models/Exercise.js';
 import Lesson from '../models/Lesson.js';
 import Course from '../models/Course.js';
+import { SKILLS } from './skills.js';
 
 // PRIORITY 17/18: mastery is evidence-based, not "did they click complete." A lesson can be
 // marked complete in Progress.completedLessons while genuinely not being mastered (low
@@ -89,6 +90,30 @@ export const deriveMasteryState = ({ lessonCompleted, attempts, totalDistinctExe
   return 'practicing';
 };
 
+// Time-based decay, layered on top of deriveMasteryState's evidence-based result - not a
+// replacement for it. Until now, 'needs_review' only fired from an accuracy regression within
+// existing graded attempts (deriveMasteryState line ~85); a lesson/skill that reached
+// 'mastered' and then simply had no further activity stayed 'mastered' forever. Reuses the SM-2
+// spaced-repetition intuition already implemented correctly for flashcards
+// (flashcardController.js's applySm2) - a much cruder, un-parameterized version of the same
+// idea, applied to mastery states rather than flashcard review intervals, and deliberately NOT
+// touching flashcards' own SM-2 (a different system, a different cadence).
+const DECAY_THRESHOLD_DAYS = { proficient: 45, mastered: 60 };
+
+export const applyRecencyDecay = (state, daysSinceLastEvidence) => {
+  if (daysSinceLastEvidence === null || daysSinceLastEvidence === undefined) return state;
+  const threshold = DECAY_THRESHOLD_DAYS[state];
+  if (threshold !== undefined && daysSinceLastEvidence > threshold) return 'needs_review';
+  return state;
+};
+
+const daysSinceLatestGradedEvidence = (attempts) => {
+  const graded = attempts.filter(isEvidenceGraded);
+  if (graded.length === 0) return null;
+  const mostRecentMs = Math.max(...graded.map((attempt) => new Date(attempt.createdAt).getTime()));
+  return (Date.now() - mostRecentMs) / (1000 * 60 * 60 * 24);
+};
+
 // Mirrors exerciseController.js#submitExercise's `if (exercise.type === 'speaking')` branch:
 // that's the only exercise type that starts 'pending_review' instead of 'graded' - it needs a
 // teacher's independent review before it can ever count as evidence (see isEvidenceGraded
@@ -117,14 +142,57 @@ export const computeLessonMastery = async (userId, lessonId) => {
     ? await ExerciseAttempt.find({ user: userId, exercise: { $in: exerciseIds } }).select('exercise isCorrect status createdAt')
     : [];
 
+  const rawState = deriveMasteryState({ lessonCompleted, attempts, totalDistinctExercises: autoGradableExerciseCount });
+
   return {
     lessonId: String(lessonId),
     cefr: lesson.cefr || null,
     objectives: lesson.objectives || [],
     completed: lessonCompleted,
     attemptCount: attempts.length,
-    state: deriveMasteryState({ lessonCompleted, attempts, totalDistinctExercises: autoGradableExerciseCount }),
+    state: applyRecencyDecay(rawState, daysSinceLatestGradedEvidence(attempts)),
   };
+};
+
+// Per-skill-domain mastery across an entire course, not per-lesson - complements
+// computeLessonMastery rather than replacing it. Reuses deriveMasteryState unchanged (it only
+// ever looked at an attempts array + a distinct-exercise count, never anything lesson-specific)
+// by bucketing ExerciseAttempt records by their own denormalized `skill` field (set at
+// submission time from Exercise.skill - see ExerciseAttempt.js) instead of by lesson. Matches
+// progressController.getSkillsBreakdown's existing skill-grouping approach rather than
+// introducing a second, differently-shaped one.
+export const computeSkillMastery = async (userId, courseId) => {
+  const course = await Course.findById(courseId).select('lessons');
+  if (!course) return null;
+
+  const exercises = await Exercise.find({ lesson: { $in: course.lessons } }).select('_id type skill');
+  const bySkill = new Map();
+  exercises.forEach((exercise) => {
+    const bucket = bySkill.get(exercise.skill) || { exerciseIds: new Set(), autoGradableCount: 0 };
+    bucket.exerciseIds.add(String(exercise._id));
+    if (!MANUAL_REVIEW_EXERCISE_TYPES.has(exercise.type)) bucket.autoGradableCount += 1;
+    bySkill.set(exercise.skill, bucket);
+  });
+
+  const exerciseIds = exercises.map((exercise) => exercise._id);
+  const attempts = exerciseIds.length
+    ? await ExerciseAttempt.find({ user: userId, exercise: { $in: exerciseIds } }).select('exercise skill isCorrect status createdAt')
+    : [];
+
+  return SKILLS.map((skill) => {
+    const bucket = bySkill.get(skill);
+    const skillAttempts = attempts.filter((attempt) => attempt.skill === skill);
+    const hasEngaged = skillAttempts.length > 0;
+    const rawState = bucket
+      ? deriveMasteryState({ lessonCompleted: hasEngaged, attempts: skillAttempts, totalDistinctExercises: bucket.autoGradableCount })
+      : 'not_started';
+    return {
+      skill,
+      attemptCount: skillAttempts.length,
+      totalExercises: bucket ? bucket.exerciseIds.size : 0,
+      state: applyRecencyDecay(rawState, daysSinceLatestGradedEvidence(skillAttempts)),
+    };
+  });
 };
 
 const PROFICIENT_STATES = new Set(['proficient', 'mastered']);
