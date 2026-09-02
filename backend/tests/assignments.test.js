@@ -168,6 +168,11 @@ describe('Assignment feature (teacher assigns a lesson/exercise to students or a
     expect(res.body.data.title).toBe('Read Lesson 1');
     expect(res.body.data.students).toContain(studentTarget._id.toString());
     expect(res.body.data.assignedBy).toBe(owningTeacher._id.toString());
+    // Regression: the create response must carry the same completedCount/totalCount shape
+    // getAssignmentsForCourse returns, so the frontend can prepend it straight into its list
+    // state without rendering "undefined of undefined completed".
+    expect(res.body.data.completedCount).toBe(0);
+    expect(res.body.data.totalCount).toBe(1);
   });
 
   test('a teacher who does not own the course gets 403 creating the same assignment', async () => {

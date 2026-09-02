@@ -122,7 +122,18 @@ export const createAssignment = async (req, res, next) => {
       dueDate,
     });
 
-    res.status(201).json({ success: true, data: assignment });
+    // Match getAssignmentsForCourse's response shape (completedCount/totalCount) so the
+    // frontend can prepend this response straight into its list state without a stale
+    // "undefined of undefined completed" row. Computed for real, not hardcoded to 0 - a
+    // student can already have completed the target lesson/exercise before this assignment
+    // existed (e.g. the teacher assigning something as a formality after the fact).
+    const targetStudentIds = await resolveTargetStudentIds(assignment);
+    const completed = await computeCompletedStudentIds(assignment, targetStudentIds);
+
+    res.status(201).json({
+      success: true,
+      data: { ...assignment.toObject(), completedCount: completed.size, totalCount: targetStudentIds.length },
+    });
   } catch (error) {
     next(error);
   }
