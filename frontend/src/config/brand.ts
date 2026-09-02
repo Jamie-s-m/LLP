@@ -40,9 +40,3 @@ export const BRAND = {
     textMuted: '#78716C',
   },
 } as const
-
-export const BRAND_NAME = BRAND.name
-export const BRAND_SHORT_NAME = BRAND.shortName
-export const BRAND_DOMAIN = BRAND.domain
-export const BRAND_TAGLINE = BRAND.tagline
-export const BRAND_SUPPORT_EMAIL = BRAND.supportEmail

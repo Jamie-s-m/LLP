@@ -22,5 +22,4 @@ export const getAppMode = (): AppMode => {
 
 export const isDemoMode = () => getAppMode() === 'demo'
 export const isStagingMode = () => getAppMode() === 'staging'
-export const isProductionMode = () => getAppMode() === 'production'
 export const isDemoFallbackAllowed = () => isDemoMode() || isStagingMode()
