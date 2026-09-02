@@ -25,8 +25,8 @@ interface User {
   isEmailVerified?: boolean
   billing?: {
     plan: 'none' | 'local' | 'learner' | 'family' | 'teaching'
-    status: 'inactive' | 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid' | 'incomplete' | 'incomplete_expired'
-    provider?: 'none' | 'stripe' | 'payme'
+    status: 'inactive' | 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid' | 'refunded'
+    provider?: 'none' | 'payme' | 'click'
     currentPeriodEnd?: string | null
     cancelAtPeriodEnd?: boolean
   }

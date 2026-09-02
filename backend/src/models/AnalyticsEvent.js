@@ -7,7 +7,7 @@ import mongoose from 'mongoose';
 //
 // Split in two, deliberately: PUBLIC_ANALYTICS_EVENTS is the only list the unauthenticated
 // POST /api/analytics/track controller validates against. INTERNAL_ANALYTICS_EVENTS names
-// events whose truth can only come from a trusted server-side source (a verified Stripe/Payme
+// events whose truth can only come from a trusted server-side source (a verified Payme/Click
 // webhook) - a client claiming "I just paid" or "I just cancelled" is not evidence of
 // anything, and a founder dashboard built on that claim is forgeable by a single anonymous
 // HTTP request. recordBillingEvent() (billingController.js) writes these directly via

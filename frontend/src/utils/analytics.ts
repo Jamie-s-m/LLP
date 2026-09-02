@@ -2,7 +2,7 @@ import api from '../services/api'
 
 // Must match backend/src/models/AnalyticsEvent.js's PUBLIC_ANALYTICS_EVENTS exactly - the
 // server rejects anything else. Deliberately excludes payment_completed/subscription_cancelled/
-// payment_refunded: those can only be asserted by a verified Stripe/Payme webhook, never by
+// payment_refunded: those can only be asserted by a verified Payme/Click webhook, never by
 // this client, and the backend enforces that separately (INTERNAL_ANALYTICS_EVENTS) - they
 // aren't in this union so no frontend call site can even attempt to send one.
 export type AnalyticsEvent =

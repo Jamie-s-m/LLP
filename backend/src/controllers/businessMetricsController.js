@@ -3,20 +3,9 @@ import Progress from '../models/Progress.js';
 import ExerciseAttempt from '../models/ExerciseAttempt.js';
 import FlashcardProgress from '../models/FlashcardProgress.js';
 import AnalyticsEvent from '../models/AnalyticsEvent.js';
+import { findBillingPlan } from '../utils/billing.js';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-
-// Same implied rate the pricing tiers already use (800,000 UZS == $19 on the Learner plan),
-// used only to express the local-currency-only "Local" plan in the same MRR total as the
-// USD-priced Stripe plans. This is a conversion, not a live FX rate - MRR/ARPU below are
-// explicitly labeled ESTIMATE because of it.
-const IMPLIED_UZS_PER_USD = 800000 / 19;
-const PLAN_USD_PRICE = {
-  local: 39000 / IMPLIED_UZS_PER_USD,
-  learner: 19,
-  family: 39,
-  teaching: 99,
-};
 
 const pctOf = (numerator, denominator) => (denominator > 0 ? Math.round((numerator / denominator) * 1000) / 10 : 0);
 
@@ -79,7 +68,10 @@ export const getBusinessMetrics = async (req, res, next) => {
     payingByPlan.forEach((row) => {
       if (row._id && Object.prototype.hasOwnProperty.call(byPlan, row._id)) byPlan[row._id] = row.count;
     });
-    const mrrUsd = Object.entries(byPlan).reduce((sum, [plan, count]) => sum + (PLAN_USD_PRICE[plan] || 0) * count, 0);
+    // Every plan is UZS-native now (Payme/Click, no more Stripe/USD to convert), so MRR is a
+    // direct sum from the live plan catalog's own priceUzs - no hand-maintained price map that
+    // could drift out of sync with what pricing.tsx actually charges.
+    const mrrUzs = Object.entries(byPlan).reduce((sum, [plan, count]) => sum + (findBillingPlan(plan)?.priceUzs || 0) * count, 0);
 
     const exerciseTotals = exerciseStats[0] || { total: 0, correct: 0 };
 
@@ -111,12 +103,12 @@ export const getBusinessMetrics = async (req, res, next) => {
           d30CohortSize: retentionEligibleD30,
         },
         monetization: {
-          _label: 'FACT, except mrrUsd/arpuUsd which are ESTIMATE (currency conversion)',
+          _label: 'FACT',
           payingUsers: totalPaying,
           conversionRate: pctOf(totalPaying, registeredStudents),
           payingByPlan: byPlan,
-          mrrUsd: Math.round(mrrUsd * 100) / 100,
-          arpuUsd: totalPaying > 0 ? Math.round((mrrUsd / totalPaying) * 100) / 100 : 0,
+          mrrUzs,
+          arpuUzs: totalPaying > 0 ? Math.round(mrrUzs / totalPaying) : 0,
           cancellationsLast30d,
         },
         learning: {

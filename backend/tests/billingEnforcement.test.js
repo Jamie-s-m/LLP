@@ -110,15 +110,15 @@ describe('Billing enforcement (paywall)', () => {
     });
 
     it.each(['active', 'trialing'])('serves full content for the gated lesson to a %s-plan student', async (status) => {
-      const student = await makeStudent({ plan: 'learner', status, provider: 'stripe' });
+      const student = await makeStudent({ plan: 'learner', status, provider: 'payme' });
       const res = await request(app).get(`/api/lessons/${gatedLesson._id}`).set('Authorization', `Bearer ${signToken(student)}`);
       expect(res.status).toBe(200);
       expect(res.body.data.content).toBe('Real content behind the paywall.');
       await User.deleteOne({ _id: student._id });
     });
 
-    it.each(['past_due', 'canceled', 'unpaid', 'incomplete', 'inactive'])('keeps the gated lesson locked for a %s-status student', async (status) => {
-      const student = await makeStudent({ plan: 'learner', status, provider: 'stripe' });
+    it.each(['past_due', 'canceled', 'unpaid', 'refunded', 'inactive'])('keeps the gated lesson locked for a %s-status student', async (status) => {
+      const student = await makeStudent({ plan: 'learner', status, provider: 'payme' });
       const res = await request(app).get(`/api/lessons/${gatedLesson._id}`).set('Authorization', `Bearer ${signToken(student)}`);
       expect(res.status).toBe(200);
       expect(res.body.meta.locked).toBe(true);
@@ -161,7 +161,7 @@ describe('Billing enforcement (paywall)', () => {
     });
 
     it('grades the gated-lesson exercise for an active-plan student', async () => {
-      const student = await makeStudent({ plan: 'learner', status: 'active', provider: 'stripe' });
+      const student = await makeStudent({ plan: 'learner', status: 'active', provider: 'payme' });
       const res = await request(app)
         .post('/api/exercises/submit')
         .set('Authorization', `Bearer ${signToken(student)}`)
@@ -228,7 +228,7 @@ describe('Billing enforcement (paywall)', () => {
     });
 
     it('shows flashcards from every course, gated or not, to an active-plan student', async () => {
-      const student = await makeStudent({ plan: 'learner', status: 'active', provider: 'stripe' });
+      const student = await makeStudent({ plan: 'learner', status: 'active', provider: 'payme' });
       const res = await request(app).get('/api/flashcards').set('Authorization', `Bearer ${signToken(student)}`);
       expect(res.status).toBe(200);
       const ids = res.body.data.map((card) => card._id);

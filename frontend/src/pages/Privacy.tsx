@@ -26,7 +26,7 @@ export default function Privacy() {
 
             <section>
               <h2 className="text-lg font-semibold text-ink dark:text-white">2. What we don&apos;t store</h2>
-              <p className="mt-2">We never receive or store your full card number. Payments are processed by Stripe (for USD plans) or Payme (for UZS plans) through their own hosted checkout forms — card details go directly to them, not through LinguaNest&apos;s servers.</p>
+              <p className="mt-2">We never receive or store your full card number. Payments are processed by Payme or Click through their own hosted checkout forms — card details go directly to them, not through LinguaNest&apos;s servers.</p>
             </section>
 
             <section>
@@ -36,7 +36,7 @@ export default function Privacy() {
 
             <section>
               <h2 className="text-lg font-semibold text-ink dark:text-white">4. Who we share it with</h2>
-              <p className="mt-2">We use a small number of named third-party services to operate LinguaNest: <strong>Stripe</strong> and <strong>Payme</strong> (payment processing), <strong>MongoDB Atlas</strong> (database hosting), <strong>Bird</strong> (transactional email delivery — verification links, password resets), and, if you choose to sign in that way, <strong>Google</strong> (OAuth sign-in). We don&apos;t sell personal data to anyone.</p>
+              <p className="mt-2">We use a small number of named third-party services to operate LinguaNest: <strong>Payme</strong> and <strong>Click</strong> (payment processing), <strong>MongoDB Atlas</strong> (database hosting), <strong>Bird</strong> (transactional email delivery — verification links, password resets), and, if you choose to sign in that way, <strong>Google</strong> (OAuth sign-in). We don&apos;t sell personal data to anyone.</p>
             </section>
 
             <section>

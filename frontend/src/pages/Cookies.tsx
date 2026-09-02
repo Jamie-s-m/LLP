@@ -26,7 +26,7 @@ export default function Cookies() {
 
             <section>
               <h2 className="text-lg font-semibold text-ink dark:text-white">Third-party services</h2>
-              <p className="mt-2">When you check out, Stripe or Payme&apos;s own hosted payment pages may set their own cookies under their domains — those are governed by Stripe&apos;s and Payme&apos;s own policies, not this one. If you sign in with Google, Google&apos;s sign-in flow may do the same.</p>
+              <p className="mt-2">When you check out, Payme or Click&apos;s own hosted payment pages may set their own cookies under their domains — those are governed by Payme&apos;s and Click&apos;s own policies, not this one. If you sign in with Google, Google&apos;s sign-in flow may do the same.</p>
             </section>
 
             <section>

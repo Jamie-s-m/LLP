@@ -1,23 +1,23 @@
 import crypto from 'crypto';
 import mongoose from 'mongoose';
-import Stripe from 'stripe';
 import {
   findBillingPlan,
-  findPlanByPriceId,
   getBillingPlans,
-  getFrontendAppUrl,
+  getClickCheckoutBaseUrl,
+  getClickMerchantId,
+  getClickServiceId,
   getPaymeCheckoutBaseUrl,
   getPaymeMerchantId,
-  getStripeClient,
   serializeBilling,
 } from '../utils/billing.js';
 import User from '../models/User.js';
 import PaymeTransaction from '../models/PaymeTransaction.js';
+import ClickTransaction from '../models/ClickTransaction.js';
 import AnalyticsEvent from '../models/AnalyticsEvent.js';
 import logger from '../utils/logger.js';
 
 // Fire-and-forget: a webhook's job is to confirm payment with the provider and update
-// billing state - it must return successfully to Stripe/Payme even if this insert fails.
+// billing state - it must return successfully to Payme/Click even if this insert fails.
 const recordBillingEvent = (event, userId, metadata) => {
   AnalyticsEvent.create({ event, user: userId, metadata }).catch(() => {});
 };
@@ -27,10 +27,12 @@ const recordBillingEvent = (event, userId, metadata) => {
 // in any process relying on a .env file (local dev, scripts) - only Render's directly-injected
 // env vars happened to dodge that ordering issue.
 const getPaymeMerchantKey = () => process.env.PAYME_MERCHANT_KEY || '';
+const getClickSecretKey = () => process.env.CLICK_SECRET_KEY || '';
 
 export const getBillingPlansController = (_req, res) => {
   try {
     const merchantId = getPaymeMerchantId();
+    const clickServiceId = getClickServiceId();
     return res.status(200).json({
       success: true,
       data: {
@@ -39,6 +41,12 @@ export const getBillingPlansController = (_req, res) => {
           available: Boolean(merchantId),
           merchantId,
           checkoutBaseUrl: getPaymeCheckoutBaseUrl(),
+        },
+        click: {
+          available: Boolean(clickServiceId) && Boolean(getClickMerchantId()),
+          serviceId: clickServiceId,
+          merchantId: getClickMerchantId(),
+          checkoutBaseUrl: getClickCheckoutBaseUrl(),
         },
       },
     });
@@ -58,49 +66,10 @@ export const getMyBillingState = async (req, res) => {
         billing: serializeBilling(billing),
         plan: billing?.plan || 'none',
         role: user?.role || 'student',
-        canStartCheckout: Boolean(process.env.STRIPE_SECRET_KEY),
-        hasCustomerPortal: Boolean(process.env.STRIPE_SECRET_KEY && billing?.stripeCustomerId),
       },
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message || 'Unable to load billing state' });
-  }
-};
-
-export const createCheckoutSession = async (req, res) => {
-  try {
-    const { plan, planKey, planId } = req.body || {};
-    const selectedPlan = getBillingPlans().find((item) => item.key === plan || item.key === planKey || item.key === planId);
-
-    if (!req.user) {
-      return res.status(401).json({ success: false, message: 'Authentication required' });
-    }
-
-    if (!selectedPlan) {
-      return res.status(400).json({ success: false, message: 'Billing plan not found' });
-    }
-
-    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-    if (stripeSecretKey && selectedPlan.priceId) {
-      const stripe = getStripeClient();
-      const session = await stripe.checkout.sessions.create({
-        mode: 'subscription',
-        line_items: [{ price: selectedPlan.priceId, quantity: 1 }],
-        success_url: `${getFrontendAppUrl()}/pricing?checkout=success`,
-        cancel_url: `${getFrontendAppUrl()}/pricing?checkout=canceled`,
-        customer_email: req.user.email,
-        metadata: {
-          userId: String(req.user._id),
-          planKey: selectedPlan.key,
-        },
-      });
-
-      return res.status(200).json({ success: true, data: { url: session.url, provider: 'stripe', plan: selectedPlan.key } });
-    }
-
-    return res.status(503).json({ success: false, message: 'Selected billing plan is not configured for checkout' });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: error.message || 'Unable to create checkout session' });
   }
 };
 
@@ -384,159 +353,209 @@ export const handlePaymeRequest = async (req, res) => {
   }
 };
 
-export const handleStripeWebhook = async (req, res) => {
-  const stripeSecret = process.env.STRIPE_WEBHOOK_SECRET;
-  const signature = req.headers['stripe-signature'];
-
-  if (!stripeSecret || !signature) {
-    return res.status(501).json({ success: false, message: 'Stripe webhook is not configured on this server' });
-  }
-
-  try {
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
-    const event = stripe.webhooks.constructEvent(req.body, signature, stripeSecret);
-
-    const payload = event.data.object;
-    const customerId = payload.customer || payload.customer_details?.id;
-    const user = payload.metadata?.userId
-      ? await User.findById(payload.metadata.userId)
-      : customerId
-        ? await User.findOne({ 'billing.stripeCustomerId': customerId })
-        : payload.customer_email
-          ? await User.findOne({ email: payload.customer_email.toLowerCase() })
-          : null;
-
-    if (!user) {
-      return res.status(200).json({ success: true, received: true, type: event.type, ignored: true });
-    }
-
-    // Build the field updates first (pure computation, no writes yet), then apply them with a
-    // single atomic, filter-guarded update instead of read -> mutate in memory -> save(). The
-    // old pattern (findById earlier, then user.save() here) had a real TOCTOU window: two
-    // genuinely concurrent deliveries of the same event (Stripe retries are routine) could both
-    // pass the lastStripeEventId check before either wrote, double-applying the event. The
-    // filter below (`lastStripeEventId: { $ne: event.id }`) closes that window the same way the
-    // Payme handler's findOneAndUpdate calls already do elsewhere in this file - at most one
-    // concurrent request can match it.
-    const billing = user.billing || {};
-    const updates = {};
-
-    if (event.type === 'checkout.session.completed') {
-      updates.stripeCustomerId = String(payload.customer || billing.stripeCustomerId || '');
-      updates.stripeSubscriptionId = String(payload.subscription || billing.stripeSubscriptionId || '');
-      updates.plan = payload.metadata?.planKey || billing.plan || 'none';
-      updates.provider = 'stripe';
-    }
-
-    if (event.type === 'customer.subscription.created' || event.type === 'customer.subscription.updated' || event.type === 'customer.subscription.deleted') {
-      const priceId = payload.items?.data?.[0]?.price?.id || '';
-      const plan = findPlanByPriceId(priceId);
-      updates.stripeCustomerId = String(payload.customer || billing.stripeCustomerId || '');
-      updates.stripeSubscriptionId = String(payload.id || billing.stripeSubscriptionId || '');
-      updates.stripePriceId = priceId;
-      updates.plan = plan?.key || billing.plan || 'none';
-      updates.provider = 'stripe';
-      updates.status = event.type === 'customer.subscription.deleted' ? 'canceled' : payload.status || 'inactive';
-      updates.currentPeriodEnd = payload.current_period_end ? new Date(payload.current_period_end * 1000) : null;
-      updates.cancelAtPeriodEnd = Boolean(payload.cancel_at_period_end);
-    }
-
-    if (event.type === 'invoice.payment_failed') {
-      updates.status = 'past_due';
-    }
-
-    // A full refund revokes access the same way a cancellation does (billing.status just needs
-    // to not be 'active' - see serializeBilling/access checks elsewhere). A partial refund does
-    // NOT change access by itself - Stripe doesn't revoke a subscription for a partial refund -
-    // so billing state is deliberately left untouched; only the analytics event below records
-    // it, for revenue accounting.
-    let isFullRefund = false;
-    if (event.type === 'charge.refunded') {
-      const amount = Number(payload.amount) || 0;
-      const amountRefunded = Number(payload.amount_refunded) || 0;
-      isFullRefund = amount > 0 && amountRefunded >= amount;
-      if (isFullRefund) {
-        updates.status = 'refunded';
-      }
-    }
-
-    // event.created is when Stripe generated the event, not when it was delivered - Stripe
-    // does not guarantee delivery order, so a same-event-id dedup alone isn't enough: a
-    // subscription.updated that logically happened BEFORE a later subscription.deleted can
-    // still arrive AFTER it (retry, redelivery, network reordering) and would silently revert
-    // real billing state back to active with no error. Requiring this event to be at least as
-    // new as whatever was last applied closes that window the same way the event-id check
-    // closes the exact-duplicate window.
-    const eventCreatedAt = event.created ? new Date(event.created * 1000) : new Date();
-    updates.lastStripeEventId = event.id;
-    updates.lastStripeEventCreatedAt = eventCreatedAt;
-    const setPayload = Object.fromEntries(Object.entries(updates).map(([key, value]) => [`billing.${key}`, value]));
-
-    const updatedUser = await User.findOneAndUpdate(
-      {
-        _id: user._id,
-        'billing.lastStripeEventId': { $ne: event.id },
-        $or: [
-          { 'billing.lastStripeEventCreatedAt': null },
-          { 'billing.lastStripeEventCreatedAt': { $lte: eventCreatedAt } },
-        ],
-      },
-      { $set: setPayload },
-      { new: true }
-    );
-
-    if (!updatedUser) {
-      // Distinguish an exact redelivery (same event id - a true no-op) from an out-of-order
-      // event (different id, but older than what's already applied - correctly ignored, not
-      // an error) for observability; both cases skip writing.
-      const current = await User.findById(user._id).select('billing.lastStripeEventId');
-      const isDuplicate = current?.billing?.lastStripeEventId === event.id;
-      return res.status(200).json({
-        success: true,
-        received: true,
-        type: event.type,
-        duplicate: isDuplicate,
-        outOfOrder: !isDuplicate,
-      });
-    }
-
-    if (event.type === 'checkout.session.completed') {
-      recordBillingEvent('payment_completed', updatedUser._id, { provider: 'stripe', plan: updatedUser.billing.plan });
-    }
-    if (event.type === 'customer.subscription.deleted') {
-      recordBillingEvent('subscription_cancelled', updatedUser._id, { provider: 'stripe', plan: updatedUser.billing.plan });
-    }
-    if (event.type === 'charge.refunded') {
-      recordBillingEvent('payment_refunded', updatedUser._id, {
-        provider: 'stripe',
-        plan: updatedUser.billing.plan,
-        full: isFullRefund,
-        amountRefunded: Number(payload.amount_refunded) || 0,
-      });
-    }
-
-    return res.status(200).json({ success: true, received: true, type: event.type });
-  } catch (error) {
-    logger.error('Stripe webhook error:', { message: error.message });
-    return res.status(400).json({ success: false, message: 'Invalid Stripe signature' });
-  }
+// Click's Merchant Shop-API error codes (https://docs.click.uz - merchant cabinet). Unlike
+// Payme's JSON-RPC error objects, Click expects a flat { error, error_note } pair on every
+// response, success included (error: 0).
+const CLICK_ERROR = {
+  SUCCESS: 0,
+  SIGN_FAILED: -1,
+  INVALID_AMOUNT: -2,
+  ACTION_NOT_FOUND: -3,
+  ALREADY_PAID: -4,
+  USER_NOT_FOUND: -5,
+  TRANSACTION_NOT_FOUND: -6,
+  FAILED_TO_UPDATE: -7,
+  ERROR_IN_REQUEST: -8,
+  TRANSACTION_CANCELLED: -9,
 };
 
-export const createPortalSession = async (req, res) => {
+const clickReply = (data, error, errorNote) => ({ ...data, error, error_note: errorNote });
+
+// Click signs every webhook call with an MD5 hash of a specific field concatenation, order
+// matters, and the Complete call (action=1) additionally includes merchant_prepare_id in the
+// hashed string. This is Click's documented algorithm as of this integration - verify it
+// against the merchant cabinet's own API reference once real CLICK_SECRET_KEY credentials are
+// issued, the same way Payme's integration was verified against its own docs at setup time.
+const verifyClickSignature = (params, secretKey) => {
+  const { click_trans_id, service_id, merchant_trans_id, merchant_prepare_id, amount, action, sign_time, sign_string } = params;
+  if (!sign_string) return false;
+
+  const isComplete = Number(action) === 1;
+  const pieces = isComplete
+    ? [click_trans_id, service_id, secretKey, merchant_trans_id, merchant_prepare_id, amount, action, sign_time]
+    : [click_trans_id, service_id, secretKey, merchant_trans_id, amount, action, sign_time];
+
+  const expected = crypto.createHash('md5').update(pieces.map((piece) => (piece ?? '')).join('')).digest('hex');
+  return expected === String(sign_string);
+};
+
+// merchant_trans_id is a single opaque string field (Click has no structured "account" object
+// the way Payme does) - built client-side as "<userId>:<planKey>:<nonce>" when the checkout
+// redirect is constructed (see ClickCheckoutButton.tsx). The nonce only exists so a user
+// retrying the same plan doesn't reuse an identical merchant_trans_id across attempts.
+const parseMerchantTransId = (merchantTransId) => {
+  const [userId, planKey] = String(merchantTransId || '').split(':');
+  return { userId, planKey };
+};
+
+const handleClickPrepare = async (params, res) => {
+  const { click_trans_id, merchant_trans_id, amount } = params;
+  const echo = { click_trans_id, merchant_trans_id };
+
+  const { userId, planKey } = parseMerchantTransId(merchant_trans_id);
+  if (!userId || !mongoose.isValidObjectId(userId)) {
+    return res.json(clickReply(echo, CLICK_ERROR.USER_NOT_FOUND, 'User not found'));
+  }
+
+  const user = await User.findById(userId);
+  if (!user) {
+    return res.json(clickReply(echo, CLICK_ERROR.USER_NOT_FOUND, 'User not found'));
+  }
+
+  const plan = findBillingPlan(planKey);
+  if (!plan || !plan.priceUzs) {
+    return res.json(clickReply(echo, CLICK_ERROR.ERROR_IN_REQUEST, 'Invalid plan'));
+  }
+
+  // Click sends amount as a decimal so'm string (e.g. "39000.00"); a small epsilon avoids a
+  // false mismatch from floating-point round-tripping, unlike Payme's tiyin (always integer).
+  const expectedAmount = plan.priceUzs;
+  if (!Number.isFinite(Number(amount)) || Math.abs(Number(amount) - expectedAmount) > 1) {
+    return res.json(clickReply(echo, CLICK_ERROR.INVALID_AMOUNT, 'Invalid amount'));
+  }
+
+  // Idempotent replay: a retried Prepare for a click_trans_id we've already seen must echo the
+  // same merchant_prepare_id, never generate a second one.
+  const existing = await ClickTransaction.findOne({ clickTransId: String(click_trans_id) });
+  if (existing) {
+    return res.json(clickReply({ ...echo, merchant_prepare_id: existing.merchantPrepareId }, CLICK_ERROR.SUCCESS, 'Success'));
+  }
+
+  const merchantPrepareId = new mongoose.Types.ObjectId().toString();
+  const createTime = Date.now();
   try {
-    const customerId = req.user?.billing?.stripeCustomerId;
-    if (!process.env.STRIPE_SECRET_KEY || !customerId) {
-      return res.status(400).json({ success: false, message: 'Billing portal is not available for this account' });
+    await ClickTransaction.create({
+      clickTransId: String(click_trans_id),
+      merchantTransId: String(merchant_trans_id),
+      merchantPrepareId,
+      user: user._id,
+      plan: planKey,
+      amount: Number(amount),
+      state: 0,
+      createTime,
+    });
+  } catch (createError) {
+    // Two concurrent Prepare calls for the same click_trans_id (a plausible Click retry) can
+    // both pass the findOne above as null - the unique index on clickTransId then rejects the
+    // loser, which must resolve to the same idempotent-replay reply the winner gets.
+    if (createError?.code !== 11000) throw createError;
+    const raced = await ClickTransaction.findOne({ clickTransId: String(click_trans_id) });
+    if (raced) {
+      return res.json(clickReply({ ...echo, merchant_prepare_id: raced.merchantPrepareId }, CLICK_ERROR.SUCCESS, 'Success'));
+    }
+    throw createError;
+  }
+
+  return res.json(clickReply({ ...echo, merchant_prepare_id: merchantPrepareId }, CLICK_ERROR.SUCCESS, 'Success'));
+};
+
+const handleClickComplete = async (params, res) => {
+  const { click_trans_id, merchant_trans_id, merchant_prepare_id, error: clickReportedError } = params;
+  const echo = { click_trans_id, merchant_trans_id, merchant_confirm_id: merchant_prepare_id };
+
+  const txn = await ClickTransaction.findOne({ clickTransId: String(click_trans_id), merchantPrepareId: String(merchant_prepare_id || '') });
+  if (!txn) {
+    return res.json(clickReply({ click_trans_id, merchant_trans_id }, CLICK_ERROR.TRANSACTION_NOT_FOUND, 'Transaction not found'));
+  }
+
+  // Click reports its own payment outcome via `error` on the Complete call - a nonzero value
+  // means the charge itself failed on Click's side (declined card, timeout, etc.); mark our
+  // record cancelled and never grant.
+  if (Number(clickReportedError) !== 0) {
+    await ClickTransaction.updateOne({ _id: txn._id, state: 0 }, { $set: { state: -1, cancelTime: Date.now() } });
+    return res.json(clickReply(echo, CLICK_ERROR.SUCCESS, 'Success'));
+  }
+
+  if (txn.state === 1) {
+    // Idempotent replay - already granted, don't re-grant.
+    return res.json(clickReply(echo, CLICK_ERROR.SUCCESS, 'Already paid'));
+  }
+  if (txn.state !== 0) {
+    return res.json(clickReply({ click_trans_id, merchant_trans_id }, CLICK_ERROR.TRANSACTION_CANCELLED, 'Transaction cancelled'));
+  }
+
+  const performTime = Date.now();
+  // Atomic, state-guarded claim - only the request that actually flips state 0 -> 1 proceeds
+  // to grant the plan, mirroring PerformTransaction's race-safety above.
+  const claimed = await ClickTransaction.findOneAndUpdate(
+    { _id: txn._id, state: 0 },
+    { $set: { state: 1, performTime } },
+    { new: false }
+  );
+
+  if (!claimed) {
+    // Lost the race to another concurrent Complete for the same transaction - reply
+    // idempotently rather than granting twice.
+    return res.json(clickReply(echo, CLICK_ERROR.SUCCESS, 'Already paid'));
+  }
+
+  const periodEnd = new Date();
+  periodEnd.setMonth(periodEnd.getMonth() + 1);
+
+  const grantedUser = await User.findOneAndUpdate(
+    { _id: claimed.user },
+    {
+      $set: {
+        'billing.plan': claimed.plan,
+        'billing.status': 'active',
+        'billing.provider': 'click',
+        'billing.clickTransactionId': claimed.clickTransId,
+        'billing.currentPeriodEnd': periodEnd,
+        'billing.cancelAtPeriodEnd': false,
+      },
+    },
+    { new: true }
+  );
+
+  if (!grantedUser) {
+    // The user account no longer exists - roll the transaction back to state 0 rather than
+    // stranding it as "performed" with nothing actually granted.
+    await ClickTransaction.updateOne({ _id: claimed._id, state: 1 }, { $set: { state: 0 }, $unset: { performTime: 1 } });
+    return res.json(clickReply({ click_trans_id, merchant_trans_id }, CLICK_ERROR.USER_NOT_FOUND, 'User not found'));
+  }
+
+  recordBillingEvent('payment_completed', claimed.user, { provider: 'click', plan: claimed.plan, amount: claimed.amount });
+  return res.json(clickReply(echo, CLICK_ERROR.SUCCESS, 'Success'));
+};
+
+export const handleClickRequest = async (req, res) => {
+  const params = req.body || {};
+
+  try {
+    const secretKey = getClickSecretKey();
+    if (!secretKey || !verifyClickSignature(params, secretKey)) {
+      return res.json(clickReply(
+        { click_trans_id: params.click_trans_id, merchant_trans_id: params.merchant_trans_id },
+        CLICK_ERROR.SIGN_FAILED,
+        'SIGN CHECK FAILED!'
+      ));
     }
 
-    const stripe = getStripeClient();
-    const session = await stripe.billingPortal.sessions.create({
-      customer: customerId,
-      return_url: `${getFrontendAppUrl()}/pricing`,
-    });
+    const action = Number(params.action);
+    if (action === 0) return await handleClickPrepare(params, res);
+    if (action === 1) return await handleClickComplete(params, res);
 
-    return res.status(200).json({ success: true, data: { url: session.url } });
+    return res.json(clickReply(
+      { click_trans_id: params.click_trans_id, merchant_trans_id: params.merchant_trans_id },
+      CLICK_ERROR.ACTION_NOT_FOUND,
+      'Action not found'
+    ));
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message || 'Unable to open billing portal' });
+    logger.error('Click webhook error:', { message: error.message });
+    return res.json(clickReply(
+      { click_trans_id: params.click_trans_id, merchant_trans_id: params.merchant_trans_id },
+      CLICK_ERROR.ERROR_IN_REQUEST,
+      'Internal server error'
+    ));
   }
 };

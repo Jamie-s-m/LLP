@@ -44,6 +44,32 @@ describe('Payme merchant webhook (/api/billing/payme)', () => {
     expect(wrongAuth.body.error.code).toBe(-32504);
   });
 
+  test('rejects Basic "Paycom:" (empty password) when PAYME_MERCHANT_KEY is unset, instead of matching by default', async () => {
+    // getPaymeMerchantKey() reads process.env lazily on every request (not a module-load-time
+    // constant), so the env var can be unset just for this one test and restored afterward -
+    // this is what makes it possible to exercise both the "configured" and "unconfigured"
+    // branches within the same test run at all.
+    const previousKey = process.env.PAYME_MERCHANT_KEY;
+    delete process.env.PAYME_MERCHANT_KEY;
+
+    try {
+      const emptyPasswordAuth = Buffer.from('Paycom:').toString('base64');
+      const res = await request(app)
+        .post('/api/billing/payme')
+        .set('Authorization', `Basic ${emptyPasswordAuth}`)
+        .send({ method: 'CheckPerformTransaction', params: {}, id: 1 });
+
+      expect(res.status).toBe(401);
+      expect(res.body.error).toBeDefined();
+    } finally {
+      if (previousKey === undefined) {
+        delete process.env.PAYME_MERCHANT_KEY;
+      } else {
+        process.env.PAYME_MERCHANT_KEY = previousKey;
+      }
+    }
+  });
+
   test('unknown method returns -32601', async () => {
     const res = await rpc({ method: 'NotARealMethod', params: {} });
     expect(res.body.error.code).toBe(-32601);

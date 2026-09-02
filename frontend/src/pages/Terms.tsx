@@ -43,7 +43,7 @@ export default function Terms() {
 
             <section>
               <h2 className="text-lg font-semibold text-ink dark:text-white">4. Subscriptions &amp; billing</h2>
-              <p className="mt-2">Paid plans are billed on a recurring monthly basis, in the currency and via the payment method shown at checkout: USD through Stripe, or UZS (so&apos;m) through Payme. Neither LinguaNest&apos;s servers nor its frontend ever receive your full card number — card details are entered directly into Stripe&apos;s or Payme&apos;s own hosted payment form. Current pricing is shown on the <a href="/pricing" className="text-primary-600 underline dark:text-primary-300">Pricing</a> page before you check out.</p>
+              <p className="mt-2">Paid plans are charged in UZS (so&apos;m) via Payme or Click, whichever you choose at checkout. Each payment covers one month of access — neither provider auto-renews your plan, so you pay again to continue or to switch plans. Neither LinguaNest&apos;s servers nor its frontend ever receive your full card number — card details are entered directly into Payme&apos;s or Click&apos;s own hosted payment form. Current pricing is shown on the <a href="/pricing" className="text-primary-600 underline dark:text-primary-300">Pricing</a> page before you check out.</p>
               <div className="mt-3">
                 <PendingDecision>
                   No refund or cancellation window is defined yet (e.g. prorated refunds, a grace period, or a no-refund policy).

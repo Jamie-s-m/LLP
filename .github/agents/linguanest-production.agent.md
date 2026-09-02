@@ -10,7 +10,7 @@ argument-hint: "Describe what you need help with in the LinguaNest.uz project."
 ## Контекст проекта
 
 - Frontend: React 18, TypeScript, Vite, Tailwind CSS, Redux/Zustand, React Router, PWA.
-- Backend: Node.js 20+, Express 5, MongoDB/Mongoose, Redis, Socket.IO, JWT, Stripe, web push.
+- Backend: Node.js 20+, Express 5, MongoDB/Mongoose, Redis, Socket.IO, JWT, Payme/Click billing, web push.
 - Продукт: изучение языков, курсы и уроки, упражнения, словарь и flashcards, прогресс, gamification, tutor marketplace, messaging, family accounts, moderation и subscriptions.
 - Production: frontend на Render Static Site, API на Render Web Service, база MongoDB Atlas; production URLs описаны в README и документации.
 - Backend-команды: `npm test`, `npm run content:validate`, `npm run content:status`, `npm run lint`.

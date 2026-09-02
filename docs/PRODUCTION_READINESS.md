@@ -25,8 +25,10 @@ really implemented.
   not just checked at the API-call layer.
 - Payme's webhook correctly rejects requests when `PAYME_MERCHANT_KEY` is
   unset (previously an unset key accepted Basic `Paycom:` with an empty
-  password). Click integration does not exist in the backend; nothing
-  references it in `.env.example`.
+  password). Stripe has been removed entirely (not available in
+  Uzbekistan); billing now runs on Payme and Click exclusively - see
+  `backend/tests/click.test.js` for the Click webhook's signature
+  verification and Prepare/Complete lifecycle coverage.
 
 ## Verified in repository
 
@@ -42,9 +44,10 @@ really implemented.
   bank, idempotent via unique partial indexes on content identity keys.
 - JWT authentication and role authorization.
 - Production CORS restricted to configured HTTPS origins.
-- Stripe billing webhook rewritten around one atomic `findOneAndUpdate`
-  (closes a duplicate-webhook/TOCTOU race) with `charge.refunded` handling
-  and event-ordering guards.
+- Payme and Click billing webhooks (Stripe is not available in Uzbekistan and
+  has been removed) both built around one atomic `findOneAndUpdate` per
+  transaction (closes a duplicate-webhook/TOCTOU race), with idempotent
+  replay on retried calls and cancellation handling.
 
 ## Known product limitations (not blockers - real, current gaps)
 
@@ -60,7 +63,12 @@ really implemented.
   A1-B1). The full A1-C2 blueprint
   (`backend/src/data/curriculumBlueprint.js`) is a design document, not yet
   built out.
-- Click (as opposed to Payme) payment integration does not exist.
+- Click integration is built and tested against the documented Merchant
+  Shop-API protocol, but has not yet been verified against Click's live
+  merchant cabinet with real credentials (still using dummy env values -
+  `CLICK_SERVICE_ID`/`CLICK_MERCHANT_ID`/`CLICK_SECRET_KEY` need real
+  values from Click's merchant onboarding before this rail can process a
+  real payment).
 
 ## Ongoing operational practice
 

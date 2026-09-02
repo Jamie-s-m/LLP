@@ -11,8 +11,8 @@ export const createIndexes = async () => {
     await User.collection.createIndex({ isActive: 1 });
     await User.collection.createIndex({ emailVerificationToken: 1 });
     await User.collection.createIndex({ passwordResetToken: 1 });
-    await User.collection.createIndex({ 'billing.stripeCustomerId': 1 });
-    await User.collection.createIndex({ 'billing.stripeSubscriptionId': 1 });
+    await User.collection.createIndex({ 'billing.paymeTransactionId': 1 });
+    await User.collection.createIndex({ 'billing.clickTransactionId': 1 });
     await User.collection.createIndex({ createdAt: -1 });
 
     await Course.collection.createIndex({ isPublished: 1, createdAt: -1 });

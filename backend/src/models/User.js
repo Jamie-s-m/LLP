@@ -70,22 +70,19 @@ const userSchema = new mongoose.Schema(
     teacherApplicationStatus: { type: String, enum: ['none', 'pending', 'approved', 'rejected'], default: 'none' },
     billing: {
       plan: { type: String, enum: ['none', 'local', 'learner', 'family', 'teaching'], default: 'none' },
+      // No incomplete/incomplete_expired - those were Stripe payment-intent states with no
+      // Payme/Click equivalent (both are simple one-time checkouts, not a multi-step
+      // payment-intent flow).
       status: {
         type: String,
-        enum: ['inactive', 'trialing', 'active', 'past_due', 'canceled', 'unpaid', 'incomplete', 'incomplete_expired', 'refunded'],
+        enum: ['inactive', 'trialing', 'active', 'past_due', 'canceled', 'unpaid', 'refunded'],
         default: 'inactive',
       },
-      provider: { type: String, enum: ['none', 'stripe', 'payme'], default: 'none' },
-      stripeCustomerId: { type: String, default: '' },
-      stripeSubscriptionId: { type: String, default: '' },
-      stripePriceId: { type: String, default: '' },
-      lastStripeEventId: { type: String, default: '' },
-      // Stripe's own event.created (when the event happened, not when it was delivered) - used
-      // to reject an out-of-order webhook delivery (e.g. a subscription.updated that happened
-      // BEFORE a later subscription.deleted, but arrives AFTER it) from silently reverting
-      // billing state. See handleStripeWebhook.
-      lastStripeEventCreatedAt: { type: Date, default: null },
+      // Stripe is not available in Uzbekistan and was removed - Payme and Click are the only
+      // two rails, both UZS-native. Every plan is now priced/sold identically through both.
+      provider: { type: String, enum: ['none', 'payme', 'click'], default: 'none' },
       paymeTransactionId: { type: String, default: '' },
+      clickTransactionId: { type: String, default: '' },
       currentPeriodEnd: { type: Date, default: null },
       cancelAtPeriodEnd: { type: Boolean, default: false },
     },

@@ -39,7 +39,7 @@ describe('Business metrics API', () => {
       onboardingCompletedAt: new Date(),
       placementCompletedAt: new Date(),
       streak: 5,
-      billing: { plan: 'learner', status: 'active', provider: 'stripe' },
+      billing: { plan: 'learner', status: 'active', provider: 'payme' },
     });
     const studentLogin = await request(app).post('/api/auth/login').send({ email: 'biz-paying@example.com', password: 'testpass123' });
     studentToken = studentLogin.body.token;
@@ -100,7 +100,7 @@ describe('Business metrics API', () => {
     expect(activation.onboardingCompletionRate).toBeGreaterThan(0);
     expect(monetization.payingUsers).toBeGreaterThanOrEqual(1);
     expect(monetization.payingByPlan.learner).toBeGreaterThanOrEqual(1);
-    expect(monetization.mrrUsd).toBeGreaterThanOrEqual(19);
+    expect(monetization.mrrUzs).toBeGreaterThanOrEqual(800000);
     expect(learning.lessonsCompleted).toBeGreaterThanOrEqual(1);
     expect(learning.exercisesCompleted).toBeGreaterThanOrEqual(2);
     expect(learning.averageAccuracyPercent).toBe(50);
@@ -117,7 +117,7 @@ describe('Business metrics API', () => {
 
     const forgeAttempt = await request(app)
       .post('/api/analytics/track')
-      .send({ event: 'subscription_cancelled', metadata: { provider: 'stripe', plan: 'learner' } });
+      .send({ event: 'subscription_cancelled', metadata: { provider: 'payme', plan: 'learner' } });
     expect(forgeAttempt.status).toBe(400);
     expect(await AnalyticsEvent.countDocuments({ event: 'subscription_cancelled' })).toBe(0);
 

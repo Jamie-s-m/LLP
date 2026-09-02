@@ -1,22 +1,21 @@
 import express from 'express';
 import { protect } from '../middleware/auth.js';
-import { 
-  getBillingPlansController, 
-  getMyBillingState, 
-  createCheckoutSession, 
-  createPortalSession,
-  handlePaymeRequest 
+import {
+  getBillingPlansController,
+  getMyBillingState,
+  handlePaymeRequest,
+  handleClickRequest,
 } from '../controllers/billingController.js';
 
 const router = express.Router();
 
-// Public JSON-RPC endpoint for Payme Webhooks / Callbacks
+// Public webhook endpoints for Payme / Click - both authenticate/verify in-handler (Payme via
+// Basic auth, Click via its own MD5 signature), not via the protect middleware.
 router.post('/payme', handlePaymeRequest);
+router.post('/click', handleClickRequest);
 
 // Protected endpoints for user billing UI
 router.get('/plans', getBillingPlansController);
 router.get('/me', protect, getMyBillingState);
-router.post('/checkout-session', protect, createCheckoutSession);
-router.post('/portal-session', protect, createPortalSession);
 
 export default router;

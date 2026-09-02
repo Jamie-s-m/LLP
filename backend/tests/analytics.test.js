@@ -130,7 +130,7 @@ describe('Analytics API', () => {
       async (event) => {
         const res = await request(app)
           .post('/api/analytics/track')
-          .send({ event, metadata: { provider: 'stripe', plan: 'learner' } });
+          .send({ event, metadata: { provider: 'payme', plan: 'learner' } });
 
         expect(res.status).toBe(400);
         const stored = await AnalyticsEvent.findOne({ event });
