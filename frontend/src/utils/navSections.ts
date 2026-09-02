@@ -12,6 +12,7 @@ import {
   FiBarChart2,
   FiTarget,
   FiMic,
+  FiClipboard,
 } from 'react-icons/fi'
 import type { IconType } from 'react-icons'
 
@@ -74,6 +75,7 @@ export const getNavSections = (role: AppRole, t: (key: string) => string): NavSe
         { label: t('sidebar.dashboard'), path: '/dashboard', icon: FiGrid },
         { label: t('sidebar.placementTest'), path: '/placement-test', icon: FiTarget },
         { label: t('sidebar.myLearning'), path: '/my-learning', icon: FiBook },
+        { label: t('sidebar.myAssignments'), path: '/assignments', icon: FiClipboard },
         { label: t('sidebar.flashcards'), path: '/flashcards', icon: FiAward },
         { label: t('sidebar.progress'), path: '/progress', icon: FiBarChart2 },
         { label: t('sidebar.schedule'), path: '/timetable', icon: FiCalendar },

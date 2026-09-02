@@ -45,6 +45,7 @@ const CourseDetail = lazyWithChunkRetry(() => import('./pages/CourseDetail'), 'c
 const Dashboard = lazyWithChunkRetry(() => import('./pages/student/Dashboard'), 'student-dashboard')
 const Timetable = lazyWithChunkRetry(() => import('./pages/student/Timetable'), 'student-timetable')
 const MyLearning = lazyWithChunkRetry(() => import('./pages/student/MyLearning'), 'my-learning')
+const StudentAssignments = lazyWithChunkRetry(() => import('./pages/student/Assignments'), 'student-assignments')
 const LessonView = lazyWithChunkRetry(() => import('./pages/student/LessonView'), 'lesson-view')
 const ExercisePractice = lazyWithChunkRetry(() => import('./pages/student/ExercisePractice'), 'exercise-practice')
 const Flashcards = lazyWithChunkRetry(() => import('./pages/student/Flashcards'), 'flashcards')
@@ -64,6 +65,9 @@ const ManageCourse = lazyWithChunkRetry(() => import('./pages/teacher/ManageCour
 const LessonEditor = lazyWithChunkRetry(() => import('./pages/teacher/LessonEditor'), 'lesson-editor')
 const SpeakingReviews = lazyWithChunkRetry(() => import('./pages/teacher/SpeakingReviews'), 'speaking-reviews')
 const StudentProgress = lazyWithChunkRetry(() => import('./pages/teacher/StudentProgress'), 'student-progress')
+const TeacherAssignments = lazyWithChunkRetry(() => import('./pages/teacher/Assignments'), 'teacher-assignments')
+const TeacherAttendance = lazyWithChunkRetry(() => import('./pages/teacher/Attendance'), 'teacher-attendance')
+const TeacherClassAnalytics = lazyWithChunkRetry(() => import('./pages/teacher/ClassAnalytics'), 'teacher-class-analytics')
 const Forum = lazyWithChunkRetry(() => import('./pages/Forum'), 'forum')
 const Chat = lazyWithChunkRetry(() => import('./pages/Chat'), 'chat')
 const MoreMenu = lazyWithChunkRetry(() => import('./pages/MoreMenu'), 'more-menu')
@@ -154,6 +158,14 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['student']}>
               <Layout><MyLearning /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/assignments"
+          element={
+            <ProtectedRoute allowedRoles={['student']}>
+              <Layout><StudentAssignments /></Layout>
             </ProtectedRoute>
           }
         />
@@ -284,6 +296,30 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['teacher', 'admin']}>
               <Layout><StudentProgress /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/teacher/course/:courseId/assignments"
+          element={
+            <ProtectedRoute allowedRoles={['teacher', 'admin']}>
+              <Layout><TeacherAssignments /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/teacher/course/:courseId/analytics"
+          element={
+            <ProtectedRoute allowedRoles={['teacher', 'admin']}>
+              <Layout><TeacherClassAnalytics /></Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/teacher/groups/:groupId/attendance"
+          element={
+            <ProtectedRoute allowedRoles={['teacher', 'admin']}>
+              <Layout><TeacherAttendance /></Layout>
             </ProtectedRoute>
           }
         />

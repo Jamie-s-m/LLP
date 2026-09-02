@@ -119,6 +119,7 @@ const translations: Record<LanguageCode, TranslationTree> = {
       studentWorkspace: 'Student workspace',
       dashboard: 'Dashboard',
       myLearning: 'My Learning',
+      myAssignments: 'My Assignments',
       progress: 'Progress',
       flashcards: 'Flashcards',
       groups: 'Groups',
@@ -502,7 +503,7 @@ const translations: Record<LanguageCode, TranslationTree> = {
     },
     sidebar: {
       adminWorkspace: 'Пространство администратора', moderatorWorkspace: 'Пространство модератора', teacherWorkspace: 'Пространство преподавателя', parentWorkspace: 'Пространство родителя', studentWorkspace: 'Пространство студента',
-      dashboard: 'Панель', myLearning: 'Моё обучение', progress: 'Прогресс', flashcards: 'Карточки', groups: 'Группы', leaderboard: 'Рейтинг', createCourse: 'Создать курс', myCourses: 'Мои курсы', familyDesk: 'Семейный кабинет', chat: 'Чат', controlCenter: 'Центр управления', businessMetrics: 'Бизнес-метрики', moderationDesk: 'Панель модерации', forum: 'Форум', settings: 'Настройки', placementTest: 'Тест на уровень', speakingReviews: 'Проверка устных заданий', closeMenu: 'Закрыть меню навигации',
+      dashboard: 'Панель', myLearning: 'Моё обучение', myAssignments: 'Мои задания', progress: 'Прогресс', flashcards: 'Карточки', groups: 'Группы', leaderboard: 'Рейтинг', createCourse: 'Создать курс', myCourses: 'Мои курсы', familyDesk: 'Семейный кабинет', chat: 'Чат', controlCenter: 'Центр управления', businessMetrics: 'Бизнес-метрики', moderationDesk: 'Панель модерации', forum: 'Форум', settings: 'Настройки', placementTest: 'Тест на уровень', speakingReviews: 'Проверка устных заданий', closeMenu: 'Закрыть меню навигации',
       sectionLearn: 'Обучение', sectionCommunity: 'Сообщество', sectionAccount: 'Аккаунт', sectionTeach: 'Преподавание', sectionAdmin: 'Администрирование', sectionFamily: 'Семья', schedule: 'Расписание', freePlan: 'Бесплатный тариф', achievements: 'Достижения',
     },
     home: {
@@ -582,7 +583,7 @@ const translations: Record<LanguageCode, TranslationTree> = {
     },
     sidebar: {
       adminWorkspace: 'Admin maydoni', moderatorWorkspace: 'Moderator maydoni', teacherWorkspace: 'Ustoz maydoni', parentWorkspace: 'Ota-ona maydoni', studentWorkspace: 'Talaba maydoni',
-      dashboard: 'Panel', myLearning: 'Mening ta’limim', progress: 'Progress', flashcards: 'Kartochkalar', groups: 'Guruhlar', leaderboard: 'Reyting', createCourse: 'Kurs yaratish', myCourses: 'Mening kurslarim', familyDesk: 'Oila kabineti', chat: 'Chat', controlCenter: 'Boshqaruv markazi', businessMetrics: 'Biznes metrikalari', moderationDesk: 'Moderatsiya paneli', forum: 'Forum', settings: 'Sozlamalar', placementTest: 'Daraja aniqlash testi', speakingReviews: 'Og‘zaki javoblarni tekshirish', closeMenu: 'Navigatsiya menyusini yopish',
+      dashboard: 'Panel', myLearning: 'Mening ta’limim', myAssignments: 'Mening topshiriqlarim', progress: 'Progress', flashcards: 'Kartochkalar', groups: 'Guruhlar', leaderboard: 'Reyting', createCourse: 'Kurs yaratish', myCourses: 'Mening kurslarim', familyDesk: 'Oila kabineti', chat: 'Chat', controlCenter: 'Boshqaruv markazi', businessMetrics: 'Biznes metrikalari', moderationDesk: 'Moderatsiya paneli', forum: 'Forum', settings: 'Sozlamalar', placementTest: 'Daraja aniqlash testi', speakingReviews: 'Og‘zaki javoblarni tekshirish', closeMenu: 'Navigatsiya menyusini yopish',
       sectionLearn: 'O‘qish', sectionCommunity: 'Jamiyat', sectionAccount: 'Hisob', sectionTeach: 'O‘qitish', sectionAdmin: 'Boshqaruv', sectionFamily: 'Oila', schedule: 'Jadval', freePlan: 'Bepul tarif', achievements: 'Yutuqlar',
     },
     home: {

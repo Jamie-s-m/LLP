@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { FiPlus, FiUsers, FiCheck, FiX, FiClock } from 'react-icons/fi'
+import { FiPlus, FiUsers, FiCheck, FiX, FiClock, FiCalendar } from 'react-icons/fi'
 import api from '../../services/api'
 import { useAuthStore } from '../../store/authStore'
 import { useLanguageStore } from '../../store/languageStore'
@@ -51,6 +52,7 @@ const copy = {
     rejectFailed: 'Could not reject request',
     yourGroup: 'Your group',
     teacherOnlyNote: 'Only teachers can create study groups. Students join with the teacher\'s approval.',
+    attendance: 'Attendance',
   },
   ru: {
     kicker: 'Круги сообщества',
@@ -82,6 +84,7 @@ const copy = {
     rejectFailed: 'Не удалось отклонить запрос',
     yourGroup: 'Ваша группа',
     teacherOnlyNote: 'Создавать учебные группы могут только преподаватели. Студенты вступают с одобрения преподавателя.',
+    attendance: 'Посещаемость',
   },
   uz: {
     kicker: 'Hamjamiyat doiralari',
@@ -113,6 +116,7 @@ const copy = {
     rejectFailed: 'So‘rovni rad etib bo‘lmadi',
     yourGroup: 'Sizning guruhingiz',
     teacherOnlyNote: 'Faqat o‘qituvchilar o‘quv guruhi yarata oladi. O‘quvchilar o‘qituvchi tasdig‘i bilan qo‘shiladi.',
+    attendance: 'Davomat',
   },
 } as const
 
@@ -271,7 +275,12 @@ export default function Groups() {
                       <FiUsers size={16} />
                       <span>{ui.members.replace('{count}', String(group.members?.length || 0))}</span>
                     </div>
-                    {!isManager && (
+                    {isManager ? (
+                      <Link to={`/teacher/groups/${group._id}/attendance`} className="btn btn-outline flex items-center gap-1.5">
+                        <FiCalendar size={14} />
+                        {ui.attendance}
+                      </Link>
+                    ) : (
                       <button
                         onClick={() => handleJoin(group._id)}
                         disabled={isMember || hasPendingRequest || isFull}

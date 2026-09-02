@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { FiTrash2, FiPlus, FiEdit3, FiEye, FiEyeOff } from 'react-icons/fi'
+import { FiTrash2, FiPlus, FiEdit3, FiEye, FiEyeOff, FiClipboard, FiBarChart2 } from 'react-icons/fi'
 import api from '../../services/api'
 import { useLanguageStore } from '../../store/languageStore'
 
@@ -32,9 +32,9 @@ interface StudentItem {
 }
 
 const copy = {
-  en: { loading: 'Loading course...', notFound: 'Course not found.', loadFailed: 'Course could not be loaded', createFailed: 'Lesson could not be created', deleteFailed: 'Lesson could not be deleted', deleteConfirm: 'Delete this lesson?', kicker: 'Course operations', title: 'Manage Course', text: 'Update lesson structure, monitor course inventory, and keep the learning path organized.', lessons: 'Lessons', rating: 'Rating', empty: 'No lessons yet. Add the first one below.', newLesson: 'New lesson title', add: 'Add Lesson', published: 'Published', draft: 'Draft', publish: 'Publish', unpublish: 'Unpublish', publishFailed: 'Could not update publish status', students: 'Enrolled students', noStudents: 'No students enrolled yet.', viewProgress: 'View progress' },
-  ru: { loading: 'Загрузка курса...', notFound: 'Курс не найден.', loadFailed: 'Не удалось загрузить курс', createFailed: 'Не удалось создать урок', deleteFailed: 'Не удалось удалить урок', deleteConfirm: 'Удалить этот урок?', kicker: 'Операции курса', title: 'Управление курсом', text: 'Обновляйте структуру уроков, отслеживайте наполнение курса и поддерживайте порядок учебного пути.', lessons: 'Уроки', rating: 'Рейтинг', empty: 'Уроков пока нет. Добавьте первый ниже.', newLesson: 'Название нового урока', add: 'Добавить урок', published: 'Опубликован', draft: 'Черновик', publish: 'Опубликовать', unpublish: 'Снять с публикации', publishFailed: 'Не удалось изменить статус публикации', students: 'Записанные ученики', noStudents: 'Пока нет учеников.', viewProgress: 'Смотреть прогресс' },
-  uz: { loading: 'Kurs yuklanmoqda...', notFound: 'Kurs topilmadi.', loadFailed: 'Kursni yuklab bo‘lmadi', createFailed: 'Darsni yaratib bo‘lmadi', deleteFailed: 'Darsni o‘chirib bo‘lmadi', deleteConfirm: 'Bu dars o‘chirilsinmi?', kicker: 'Kurs operatsiyalari', title: 'Kursni boshqarish', text: 'Dars tuzilmasini yangilang, kurs tarkibini kuzating va o‘quv yo‘lini tartibli saqlang.', lessons: 'Darslar', rating: 'Reyting', empty: 'Hali darslar yo‘q. Birinchisini quyida qo‘shing.', newLesson: 'Yangi dars nomi', add: 'Dars qo‘shish', published: 'Chop etilgan', draft: 'Qoralama', publish: 'Chop etish', unpublish: 'Chop etishni bekor qilish', publishFailed: 'Nashr holatini o‘zgartirib bo‘lmadi', students: 'Ro‘yxatdan o‘tgan o‘quvchilar', noStudents: 'Hali o‘quvchilar yo‘q.', viewProgress: 'Progressni ko‘rish' },
+  en: { loading: 'Loading course...', notFound: 'Course not found.', loadFailed: 'Course could not be loaded', createFailed: 'Lesson could not be created', deleteFailed: 'Lesson could not be deleted', deleteConfirm: 'Delete this lesson?', kicker: 'Course operations', title: 'Manage Course', text: 'Update lesson structure, monitor course inventory, and keep the learning path organized.', lessons: 'Lessons', rating: 'Rating', empty: 'No lessons yet. Add the first one below.', newLesson: 'New lesson title', add: 'Add Lesson', published: 'Published', draft: 'Draft', publish: 'Publish', unpublish: 'Unpublish', publishFailed: 'Could not update publish status', students: 'Enrolled students', noStudents: 'No students enrolled yet.', viewProgress: 'View progress', assignments: 'Assignments', classAnalytics: 'Class analytics' },
+  ru: { loading: 'Загрузка курса...', notFound: 'Курс не найден.', loadFailed: 'Не удалось загрузить курс', createFailed: 'Не удалось создать урок', deleteFailed: 'Не удалось удалить урок', deleteConfirm: 'Удалить этот урок?', kicker: 'Операции курса', title: 'Управление курсом', text: 'Обновляйте структуру уроков, отслеживайте наполнение курса и поддерживайте порядок учебного пути.', lessons: 'Уроки', rating: 'Рейтинг', empty: 'Уроков пока нет. Добавьте первый ниже.', newLesson: 'Название нового урока', add: 'Добавить урок', published: 'Опубликован', draft: 'Черновик', publish: 'Опубликовать', unpublish: 'Снять с публикации', publishFailed: 'Не удалось изменить статус публикации', students: 'Записанные ученики', noStudents: 'Пока нет учеников.', viewProgress: 'Смотреть прогресс', assignments: 'Задания', classAnalytics: 'Аналитика класса' },
+  uz: { loading: 'Kurs yuklanmoqda...', notFound: 'Kurs topilmadi.', loadFailed: 'Kursni yuklab bo‘lmadi', createFailed: 'Darsni yaratib bo‘lmadi', deleteFailed: 'Darsni o‘chirib bo‘lmadi', deleteConfirm: 'Bu dars o‘chirilsinmi?', kicker: 'Kurs operatsiyalari', title: 'Kursni boshqarish', text: 'Dars tuzilmasini yangilang, kurs tarkibini kuzating va o‘quv yo‘lini tartibli saqlang.', lessons: 'Darslar', rating: 'Reyting', empty: 'Hali darslar yo‘q. Birinchisini quyida qo‘shing.', newLesson: 'Yangi dars nomi', add: 'Dars qo‘shish', published: 'Chop etilgan', draft: 'Qoralama', publish: 'Chop etish', unpublish: 'Chop etishni bekor qilish', publishFailed: 'Nashr holatini o‘zgartirib bo‘lmadi', students: 'Ro‘yxatdan o‘tgan o‘quvchilar', noStudents: 'Hali o‘quvchilar yo‘q.', viewProgress: 'Progressni ko‘rish', assignments: 'Topshiriqlar', classAnalytics: 'Sinf tahlili' },
 } as const
 
 export default function ManageCourse() {
@@ -156,6 +156,17 @@ export default function ManageCourse() {
               <p className="text-sm text-muted">{ui.rating}</p>
             </div>
           </div>
+        </div>
+
+        <div className="mb-8 flex flex-wrap gap-3">
+          <Link to={`/teacher/course/${courseId}/assignments`} className="btn btn-outline inline-flex items-center gap-2">
+            <FiClipboard size={16} />
+            {ui.assignments}
+          </Link>
+          <Link to={`/teacher/course/${courseId}/analytics`} className="btn btn-outline inline-flex items-center gap-2">
+            <FiBarChart2 size={16} />
+            {ui.classAnalytics}
+          </Link>
         </div>
 
         <h3 className="mb-4 text-2xl font-bold text-ink dark:text-white">{ui.lessons}</h3>
