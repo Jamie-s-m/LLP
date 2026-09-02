@@ -27,6 +27,12 @@ const courseSchema = new mongoose.Schema(
       required: true,
       enum: ['Beginner', 'Intermediate', 'Advanced'],
     },
+    // Course.level (Beginner/Intermediate/Advanced) predates CEFR tagging and is still the
+    // field catalog/filter UI reads. `cefr` is a lighter, display-only companion for
+    // single-level courses - null for pathways that span multiple CEFR levels (e.g. the
+    // reference course, A1->A2->B1 under one Course), where Lesson.cefr per-lesson is the
+    // real source of truth masteryEngine.js reads. Mirrors Lesson.js's cefr field exactly.
+    cefr: { type: String, enum: ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', null], default: null },
     thumbnail: String,
     instructor: {
       type: mongoose.Schema.ObjectId,

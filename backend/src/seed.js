@@ -342,6 +342,7 @@ export const seedContent = async ({
         description: courseData.description,
         language: courseData.language,
         level: courseData.level,
+        cefr: courseData.cefr || null,
         instructor: teacher._id,
         category: courseData.category,
         estimatedHours: courseData.estimatedHours,

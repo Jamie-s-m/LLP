@@ -412,15 +412,38 @@ const buildLesson = ({ lessonId, title, description, objective, content, level, 
     ? `Talk for 30-60 seconds about ${topic}. Try to use words like ${topicWords.slice(0, 3).join(', ')}.`
     : undefined
   const mediaOverride = LESSON_MEDIA_OVERRIDES[lessonId]
+  const pattern = lessonPatterns[cefr] || lessonPatterns.A1
+  // Picked by `order`, not always pattern.grammar[0], so lessons at the same CEFR level
+  // (there are many per level) don't all claim to teach the exact same grammar point.
+  const grammarRule = pattern.grammar.length > 0 ? pattern.grammar[order % pattern.grammar.length] : null
+
+  // Was previously computed and used only internally (to pick vocab/grammar templates above)
+  // then dropped before the lesson object was returned - every generated lesson persisted
+  // with Lesson.cefr/objectives left at their schema defaults (null/[]), silently limiting
+  // masteryEngine.isLevelReady() and any other CEFR-driven feature to the 3 lessons in
+  // referenceCurriculum.js. `objectives` follows the same {description, skill} can-do shape
+  // that file already established, built from this lesson's own real topic/grammar/vocabulary
+  // instead of a generic templated sentence.
+  const objectives = [
+    { description: `The learner can talk briefly about ${topic} using simple sentences.`, skill: 'speaking' },
+    ...(grammarRule
+      ? [{ description: `The learner can use ${grammarRule.toLowerCase()} correctly in short, ${topic}-related sentences.`, skill: 'grammar' }]
+      : []),
+    ...(topicWords.length > 0
+      ? [{ description: `The learner can recognize and use vocabulary related to ${topic}: ${topicWords.join(', ')}.`, skill: 'vocabulary' }]
+      : []),
+  ]
 
   return {
     id: lessonId,
     title,
     description,
     objective,
+    objectives,
     content,
     order,
     level,
+    cefr,
     duration: 10 + (order % 5) * 5,
     ...(mediaOverride || {}),
     vocabulary: topicWords.map((word) => ({
@@ -429,11 +452,11 @@ const buildLesson = ({ lessonId, title, description, objective, content, level, 
       pronunciation: word,
       examples: [`I use "${word}" when I talk about ${topic}.`],
     })),
-    grammar: lessonPatterns[cefr]?.grammar.slice(0, 2).map((rule) => ({
+    grammar: pattern.grammar.slice(0, 2).map((rule) => ({
       rule,
       explanation: `${rule} is a useful pattern for this lesson.`,
       examples: [`Example: ${rule}.`],
-    })) || [],
+    })),
     exercises: makeExercises(lessonId, title, cefr, order, speakingPrompt),
   }
 }
@@ -473,6 +496,7 @@ const buildCourse = (blueprint) => {
     description: blueprint.description,
     language: blueprint.language,
     level: blueprint.level,
+    cefr: blueprint.cefr,
     category: blueprint.category,
     estimatedHours: 18 + (blueprint.level === 'Advanced' ? 10 : blueprint.level === 'Intermediate' ? 8 : 5),
     modules: moduleList,
