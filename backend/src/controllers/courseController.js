@@ -2,17 +2,12 @@ import mongoose from 'mongoose';
 import Course from '../models/Course.js';
 import Lesson from '../models/Lesson.js';
 import Progress from '../models/Progress.js';
-import { hasModeratorPermission } from '../middleware/auth.js';
+import { hasModeratorPermission, isOwnerId } from '../middleware/auth.js';
 
-// course.instructor may be a raw ObjectId (most callers) or a populated User document
-// (getCourseForManage populates it for the response payload). Document#toString() returns
-// an `inspect()`-style dump of the whole document, not the id, so comparing a populated
-// instructor's .toString() against user.id.toString() always mismatches - use the
-// populated doc's ._id when present, falling back to the raw ObjectId otherwise.
 const canManageCourse = (course, user) =>
   user.role === 'admin' ||
   hasModeratorPermission(user, 'catalogContentQa') ||
-  (course.instructor?._id || course.instructor).toString() === user.id.toString();
+  isOwnerId(course.instructor, user.id);
 
 export const getCourses = async (req, res, next) => {
   try {

@@ -1,9 +1,10 @@
 import Group from '../models/Group.js';
 import User from '../models/User.js';
+import { isOwnerId } from '../middleware/auth.js';
 
 const isGroupManager = (group, userId) => {
   const id = userId.toString();
-  return group.creator.toString() === id || group.moderators.some((mod) => mod.toString() === id);
+  return isOwnerId(group.creator, userId) || group.moderators.some((mod) => mod.toString() === id);
 };
 
 // group.members.length alone counts dangling refs left behind by a deleted user's account

@@ -2,7 +2,7 @@ import Flashcard from '../models/Flashcard.js';
 import Course from '../models/Course.js';
 import FlashcardProgress from '../models/FlashcardProgress.js';
 import User from '../models/User.js';
-import { hasModeratorPermission } from '../middleware/auth.js';
+import { hasModeratorPermission, isOwnerId } from '../middleware/auth.js';
 
 // SM-2 spaced-repetition rating buttons, mapped to the classic 0-5 quality scale.
 const RATING_TO_QUALITY = { again: 1, hard: 3, good: 4, easy: 5 };
@@ -86,7 +86,7 @@ export const createFlashcard = async (req, res, next) => {
     if (!course) {
       return res.status(404).json({ success: false, message: 'Course not found' });
     }
-    if (req.user.role !== 'admin' && !hasModeratorPermission(req.user, 'catalogContentQa') && course.instructor.toString() !== req.user.id.toString()) {
+    if (req.user.role !== 'admin' && !hasModeratorPermission(req.user, 'catalogContentQa') && !isOwnerId(course.instructor, req.user.id)) {
       return res.status(403).json({ success: false, message: 'You do not manage this course' });
     }
 

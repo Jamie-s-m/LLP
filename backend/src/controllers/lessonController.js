@@ -1,6 +1,7 @@
 import Lesson from '../models/Lesson.js';
 import Course from '../models/Course.js';
-import { hasModeratorPermission } from '../middleware/auth.js';
+import { hasModeratorPermission, isOwnerId } from '../middleware/auth.js';
+import { assertLessonOwnership } from '../utils/ownership.js';
 
 export const getLessons = async (req, res, next) => {
   try {
@@ -26,7 +27,7 @@ export const getLessonById = async (req, res, next) => {
     const course = await Course.findById(lesson.course).select('instructor');
     const canSeeAnswers = req.user.role === 'admin'
       || hasModeratorPermission(req.user, 'catalogContentQa')
-      || course?.instructor?.toString() === req.user.id.toString();
+      || isOwnerId(course?.instructor, req.user.id);
 
     if (!canSeeAnswers) {
       lesson.exercises.forEach((exercise) => {
@@ -52,7 +53,7 @@ export const createLesson = async (req, res, next) => {
     if (!course) {
       return res.status(404).json({ success: false, message: 'Course not found' });
     }
-    if (req.user.role !== 'admin' && !hasModeratorPermission(req.user, 'catalogContentQa') && course.instructor.toString() !== req.user.id.toString()) {
+    if (req.user.role !== 'admin' && !hasModeratorPermission(req.user, 'catalogContentQa') && !isOwnerId(course.instructor, req.user.id)) {
       return res.status(403).json({ success: false, message: 'You do not manage this course' });
     }
 
@@ -79,24 +80,6 @@ export const createLesson = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-};
-
-const assertLessonOwnership = async (lessonId, user) => {
-  const lesson = await Lesson.findById(lessonId).populate('course', 'instructor');
-  if (!lesson) return { error: { status: 404, message: 'Lesson not found' } };
-  // lesson.course populates to null if the referenced course was since deleted (no cascade
-  // cleanup of orphaned lessons exists) - only an admin/moderator can manage/clean up an
-  // orphaned lesson at that point, since there's no instructor left to own it.
-  if (!lesson.course) {
-    if (user.role !== 'admin' && !hasModeratorPermission(user, 'catalogContentQa')) {
-      return { error: { status: 404, message: 'Course not found' } };
-    }
-    return { lesson };
-  }
-  if (user.role !== 'admin' && !hasModeratorPermission(user, 'catalogContentQa') && lesson.course.instructor.toString() !== user.id.toString()) {
-    return { error: { status: 403, message: 'You do not manage this course' } };
-  }
-  return { lesson };
 };
 
 export const updateLesson = async (req, res, next) => {

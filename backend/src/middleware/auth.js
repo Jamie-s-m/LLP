@@ -25,6 +25,16 @@ export const normalizeModeratorPermissions = (input = {}) => {
 export const hasModeratorPermission = (user, permission) =>
   user?.role === 'admin' || (user?.role === 'moderator' && Boolean(user?.moderatorPermissions?.[permission]));
 
+// `value` may be a raw ObjectId (the common case) or a populated Mongoose document (e.g. a
+// controller populated it to also return the owner's name/email). Document#toString()
+// returns an inspect()-style dump of the whole document, not the id, so comparing a
+// populated value's .toString() against another id's .toString() can never match - this
+// was a real, live bug in two separate ownership checks (courseController's
+// canManageCourse, groupController's isGroupManager) before being consolidated here. Always
+// read the populated document's own _id when present, falling back to the raw id otherwise.
+export const isOwnerId = (value, userId) =>
+  Boolean(value) && (value._id || value).toString() === userId.toString();
+
 export const hasAnyModeratorPermission = (user, permissions = []) =>
   user?.role === 'admin' || permissions.some((permission) => hasModeratorPermission(user, permission));
 
@@ -81,17 +91,4 @@ export const authorizeRoleOrPermission = ({ roles = [], permissions = [] }) => {
       message: `User role '${req.user.role}' is not authorized to access this route`,
     });
   };
-};
-
-export const checkUserExists = async (req, res, next) => {
-  try {
-    const user = await User.findById(req.params.userId);
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    req.targetUser = user;
-    next();
-  } catch {
-    return res.status(400).json({ success: false, message: 'Invalid user ID' });
-  }
 };

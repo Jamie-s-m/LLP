@@ -2,27 +2,10 @@ import Exercise from '../models/Exercise.js';
 import Lesson from '../models/Lesson.js';
 import User from '../models/User.js';
 import ExerciseAttempt from '../models/ExerciseAttempt.js';
-import { hasModeratorPermission } from '../middleware/auth.js';
+import { hasModeratorPermission, isOwnerId } from '../middleware/auth.js';
+import { assertLessonOwnership as canManageLesson } from '../utils/ownership.js';
 import { applyHeartsRegen, loseHeart, serializeHearts } from '../utils/hearts.js';
 import { inferSkillFromType } from '../utils/skills.js';
-
-const canManageLesson = async (lessonId, user) => {
-  const lesson = await Lesson.findById(lessonId).populate('course', 'instructor');
-  if (!lesson) return { error: { status: 404, message: 'Lesson not found' } };
-  // lesson.course populates to null if the referenced course was since deleted (no cascade
-  // cleanup of orphaned lessons exists) - only an admin/moderator can manage an orphaned
-  // lesson at that point, since there's no instructor left to own it.
-  if (!lesson.course) {
-    if (user.role !== 'admin' && !hasModeratorPermission(user, 'catalogContentQa')) {
-      return { error: { status: 404, message: 'Course not found' } };
-    }
-    return { lesson };
-  }
-  if (user.role !== 'admin' && !hasModeratorPermission(user, 'catalogContentQa') && lesson.course.instructor.toString() !== user.id.toString()) {
-    return { error: { status: 403, message: 'You do not manage this course' } };
-  }
-  return { lesson };
-};
 
 const assertExerciseOwnership = async (exerciseId, user) => {
   const exercise = await Exercise.findById(exerciseId);
@@ -270,7 +253,7 @@ export const listSpeakingReviews = async (req, res, next) => {
     const canReviewAll = req.user.role === 'admin' || hasModeratorPermission(req.user, 'catalogContentQa');
     const visible = canReviewAll
       ? attempts
-      : attempts.filter((attempt) => attempt.exercise?.lesson?.course?.instructor?.toString() === req.user.id.toString());
+      : attempts.filter((attempt) => isOwnerId(attempt.exercise?.lesson?.course?.instructor, req.user.id));
 
     res.status(200).json({ success: true, data: visible });
   } catch (error) {
@@ -292,7 +275,7 @@ export const reviewSpeakingAttempt = async (req, res, next) => {
 
     const isOwner = req.user.role === 'admin'
       || hasModeratorPermission(req.user, 'catalogContentQa')
-      || attempt.exercise?.lesson?.course?.instructor?.toString() === req.user.id.toString();
+      || isOwnerId(attempt.exercise?.lesson?.course?.instructor, req.user.id);
     if (!isOwner) {
       return res.status(403).json({ success: false, message: 'You do not manage this course' });
     }
