@@ -194,10 +194,9 @@ router.post('/register', async (req, res) => {
     // used to make this whole request hang, then take ~20s even after a bounded timeout was
     // added). The verification link is built synchronously below (pure string construction, no
     // I/O) so it's always available in the response regardless of whether the email itself
-    // ever arrives.
-    sendVerificationEmail({ user, token: verification.token }).catch((error) => {
-      logger.error(`Verification email send failed for ${user.email}:`, error.message || error);
-    });
+    // ever arrives. sendVerificationEmail catches and logs its own failures (never rejects),
+    // so no .catch is needed here - one used to sit here but could never actually fire.
+    sendVerificationEmail({ user, token: verification.token });
     const previewUrl = buildVerificationUrl(user.email, verification.token);
 
     if (user.teacherApplicationStatus === 'pending') {
@@ -276,9 +275,8 @@ router.post('/resend-verification', async (req, res) => {
     user.emailVerificationSentAt = new Date();
     await user.save();
 
-    sendVerificationEmail({ user, token: verification.token }).catch((error) => {
-      logger.error(`Verification email resend failed for ${user.email}:`, error.message || error);
-    });
+    // sendVerificationEmail catches and logs its own failures (never rejects) - no .catch needed.
+    sendVerificationEmail({ user, token: verification.token });
 
     res.status(200).json({
       success: true,
@@ -311,10 +309,9 @@ router.post('/forgot-password', async (req, res) => {
       // Unlike verification links, a password-reset link grants control of an existing real
       // account - it must never be returned in this response outside local/dev debugging,
       // regardless of whether the mail server is currently reachable. Sent in the background;
-      // the request never waits on it.
-      sendPasswordResetEmail({ user, token: resetToken.token }).catch((error) => {
-        logger.error(`Password reset email failed for ${user.email}:`, error.message || error);
-      });
+      // the request never waits on it. sendPasswordResetEmail catches and logs its own
+      // failures (never rejects), so no .catch is needed here.
+      sendPasswordResetEmail({ user, token: resetToken.token });
       previewUrl = process.env.NODE_ENV === 'production' ? '' : buildPasswordResetUrl(user.email, resetToken.token);
     }
 

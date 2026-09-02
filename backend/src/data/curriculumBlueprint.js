@@ -126,8 +126,12 @@ export const CURRICULUM_BLUEPRINT = {
 };
 
 // A single place documenting what "the initial commercially important range" (PRIORITY 4)
-// actually is, and why - referenced by the reference curriculum and by anything that needs to
-// explain current coverage honestly (marketing copy, admin content-coverage views).
+// actually is, and why. Not currently imported anywhere (a 2026-09-02 audit found the admin
+// content-health endpoint computes its stats independently from live Mongo counts instead) -
+// kept as source-controlled design documentation, in the same spirit as this file's own
+// explicit "not designed yet" B2/C1/C2 notes. Wire this in as the honest-coverage summary it
+// describes (marketing copy, an admin content-coverage view) if one gets built, rather than
+// letting a second, disconnected version of "what's covered" drift into existence elsewhere.
 export const CURRICULUM_COVERAGE_SUMMARY = {
   levelsWithReferenceLessons: ['A1', 'A2', 'B1'],
   levelsWithBlueprintOnly: ['B2'],

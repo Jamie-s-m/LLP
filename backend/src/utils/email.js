@@ -1,5 +1,6 @@
 import axios from 'axios';
 import nodemailer from 'nodemailer';
+import logger from './logger.js';
 
 const getFrontendAppUrl = () =>
   String(process.env.FRONTEND_APP_URL || process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/+$/, '');
@@ -129,7 +130,7 @@ export const sendVerificationEmail = async ({ user, token }) => {
     // confirmed against a real 422 response; falls back to axios's generic message for non-Bird
     // failures (e.g. the SMTP path, or a network-level error with no response body at all).
     const message = error.response?.data?.error?.message || error.message || 'Email delivery failed';
-    console.warn(`Verification email delivery failed for ${user.email}: ${message}`);
+    logger.warn(`Verification email delivery failed for ${user.email}: ${message}`);
     return makeSafeEmailResult(verificationUrl, message);
   }
 };
@@ -159,7 +160,7 @@ export const sendPasswordResetEmail = async ({ user, token }) => {
     // confirmed against a real 422 response; falls back to axios's generic message for non-Bird
     // failures (e.g. the SMTP path, or a network-level error with no response body at all).
     const message = error.response?.data?.error?.message || error.message || 'Email delivery failed';
-    console.warn(`Password reset email delivery failed for ${user.email}: ${message}`);
+    logger.warn(`Password reset email delivery failed for ${user.email}: ${message}`);
     return makeSafeEmailResult(resetUrl, message);
   }
 };

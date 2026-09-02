@@ -3,6 +3,7 @@ import Badge from '../models/Badge.js';
 import UserAchievement from '../models/UserAchievement.js';
 import DailyRewardClaim from '../models/DailyRewardClaim.js';
 import { BADGE_CATALOG, iconFor, colorFor, rarityFor, isBadgeUnlocked } from '../data/badgeCatalog.js';
+import logger from '../utils/logger.js';
 
 // @desc    Claim daily reward
 // @route   POST /api/daily-reward/claim
@@ -104,7 +105,7 @@ export const claimDailyReward = async (req, res, next) => {
       })
     } catch (e) {
       // non-fatal
-      console.warn('Failed to log daily reward claim', e)
+      logger.warn('Failed to log daily reward claim', { error: e.message })
     }
 
     res.status(200).json({

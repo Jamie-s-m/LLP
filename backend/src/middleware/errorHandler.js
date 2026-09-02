@@ -1,10 +1,14 @@
+import logger from '../utils/logger.js';
+
 export const errorHandler = (err, req, res, next) => {
   void next;
   let error = { ...err };
   error.message = err.message;
 
-  // Log to console for dev
-  console.error(err);
+  // This is the app-wide catch-all (registered last in app.js), so it runs in production
+  // too, not just dev - route through the real logger instead of a bare console.error so
+  // these show up with the same structured format/transports as every other logged error.
+  logger.error(err);
 
   // Mongoose bad ObjectId
   if (err.name === 'CastError') {
@@ -31,6 +35,3 @@ export const errorHandler = (err, req, res, next) => {
     message: error.message || 'Server Error',
   });
 };
-
-export const asyncHandler = (fn) => (req, res, next) =>
-  Promise.resolve(fn(req, res, next)).catch(next);

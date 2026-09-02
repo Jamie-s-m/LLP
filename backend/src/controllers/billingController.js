@@ -14,6 +14,7 @@ import {
 import User from '../models/User.js';
 import PaymeTransaction from '../models/PaymeTransaction.js';
 import AnalyticsEvent from '../models/AnalyticsEvent.js';
+import logger from '../utils/logger.js';
 
 // Fire-and-forget: a webhook's job is to confirm payment with the provider and update
 // billing state - it must return successfully to Stripe/Payme even if this insert fails.
@@ -378,7 +379,7 @@ export const handlePaymeRequest = async (req, res) => {
         return res.status(200).json({ error: PAYME_ERRORS.METHOD_NOT_FOUND, id });
     }
   } catch (error) {
-    console.error('Payme webhook error:', error.message);
+    logger.error('Payme webhook error:', { message: error.message });
     return res.status(200).json({ error: PAYME_ERRORS.SYSTEM_ERROR, id: id ?? null });
   }
 };
@@ -516,7 +517,7 @@ export const handleStripeWebhook = async (req, res) => {
 
     return res.status(200).json({ success: true, received: true, type: event.type });
   } catch (error) {
-    console.error('Stripe webhook error:', error.message);
+    logger.error('Stripe webhook error:', { message: error.message });
     return res.status(400).json({ success: false, message: 'Invalid Stripe signature' });
   }
 };
