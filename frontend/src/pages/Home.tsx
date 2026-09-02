@@ -83,7 +83,7 @@ export default function Home() {
             <Link key={goal.title} to={goal.href} className="atlas-panel rounded-3xl p-6 transition-transform hover:-translate-y-1">
               <p className="atlas-kicker">{t('home.popularIntent')}</p>
               <h2 className="mt-2 text-2xl text-ink dark:text-white">{goal.title}</h2>
-              <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">{goal.copy}</p>
+              <p className="mt-3 text-sm text-[var(--text-muted)]">{goal.copy}</p>
               <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-primary-600 dark:text-primary-300">
                 {t('common.openPath')}
                 <FiArrowRight />
@@ -96,7 +96,7 @@ export default function Home() {
           <div className="mb-6">
             <p className="atlas-kicker">{t('common.howItWorks')}</p>
             <h2 className="text-2xl text-ink dark:text-white">{t('home.routeTitle')}</h2>
-            <p className="mt-2 max-w-3xl text-slate-600 dark:text-slate-300">
+            <p className="mt-2 max-w-3xl text-[var(--text-muted)]">
               {t('home.routeCopy')}
             </p>
           </div>
@@ -109,10 +109,10 @@ export default function Home() {
                     <div className="inline-flex rounded-2xl bg-white/80 p-3 text-primary-600 dark:bg-white/10 dark:text-primary-300">
                       <Icon />
                     </div>
-                    <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">0{index + 1}</span>
+                    <span className="text-sm font-semibold text-[var(--text-muted)]">0{index + 1}</span>
                   </div>
                   <h3 className="text-lg font-semibold text-ink dark:text-white">{step.title}</h3>
-                  <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{step.copy}</p>
+                  <p className="mt-2 text-sm text-[var(--text-muted)]">{step.copy}</p>
                 </div>
               )
             })}
@@ -124,7 +124,7 @@ export default function Home() {
             <div>
               <p className="atlas-kicker">{t('home.commercialReadiness')}</p>
               <h2 className="text-2xl text-ink dark:text-white">{t('home.commercialTitle')}</h2>
-              <p className="mt-2 max-w-2xl text-slate-600 dark:text-slate-300">
+              <p className="mt-2 max-w-2xl text-[var(--text-muted)]">
                 {t('home.commercialCopy')}
               </p>
             </div>
@@ -146,7 +146,7 @@ export default function Home() {
                     <Icon />
                   </div>
                   <h3 className="mt-4 text-lg font-semibold text-ink dark:text-white">{signal.title}</h3>
-                  <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{signal.copy}</p>
+                  <p className="mt-2 text-sm text-[var(--text-muted)]">{signal.copy}</p>
                 </div>
               )
             })}
@@ -197,7 +197,7 @@ export default function Home() {
                       ) : null}
                     </div>
                     <h3 className="mb-2 mt-3 text-xl font-bold text-ink dark:text-white">{course.title}</h3>
-                    <p className="line-clamp-2 text-sm text-slate-600 dark:text-slate-300">{course.description}</p>
+                    <p className="line-clamp-2 text-sm text-[var(--text-muted)]">{course.description}</p>
                   </div>
                   <Link
                     to={`/courses/${courseId}`}

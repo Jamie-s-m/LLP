@@ -322,8 +322,8 @@ export default function Pricing() {
           <div className="mt-5 grid gap-4 md:grid-cols-3">
             {[t('pricing.onboarding1'), t('pricing.onboarding2'), t('pricing.onboarding3')].map((step, index) => (
               <div key={step} className="rounded-2xl bg-[var(--surface-strong)] p-5 dark:bg-white/5">
-                <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">0{index + 1}</p>
-                <p className="mt-3 text-sm text-slate-700 dark:text-slate-200">{step}</p>
+                <p className="text-sm font-semibold text-[var(--text-muted)]">0{index + 1}</p>
+                <p className="mt-3 text-sm text-[var(--text-muted)]">{step}</p>
               </div>
             ))}
           </div>
@@ -338,12 +338,12 @@ export default function Pricing() {
               <section key={plan.name} className="atlas-panel p-6">
                 <h2 className="atlas-kicker">{plan.name}</h2>
                 <strong className="mt-2 block text-4xl text-ink dark:text-white">{plan.priceLabel}</strong>
-                <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">{plan.description}</p>
-                <div className="mt-4 rounded-2xl bg-[var(--surface-strong)] p-4 text-sm text-slate-700 dark:bg-white/5 dark:text-slate-200">
+                <p className="mt-3 text-sm text-[var(--text-muted)]">{plan.description}</p>
+                <div className="mt-4 rounded-2xl bg-[var(--surface-strong)] p-4 text-sm text-[var(--text-muted)] dark:bg-white/5">
                   <strong className="block text-ink dark:text-white">{t('common.bestFor')}</strong>
                   <p className="mt-2">{plan.bestFor}</p>
                 </div>
-                <ul className="mt-5 space-y-3 text-sm text-slate-700 dark:text-slate-200">
+                <ul className="mt-5 space-y-3 text-sm text-[var(--text-muted)]">
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex items-start gap-2">
                       <FiCheckCircle className="mt-0.5 text-primary-500" />
@@ -353,14 +353,14 @@ export default function Pricing() {
                 </ul>
                 {(() => {
                   const paymeSection = payme.available && planPricesUzs[plan.key] && user?.id ? (
-                    <div className="mt-5 border-t border-slate-200 pt-5 dark:border-white/10">
-                      <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
-                        <span className="h-px flex-1 bg-slate-200 dark:bg-white/10" />
+                    <div className="mt-5 border-t border-[var(--border)] pt-5 dark:border-white/10">
+                      <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--text-subtle)]">
+                        <span className="h-px flex-1 bg-[var(--border)] dark:bg-white/10" />
                         {t('pricing.orDivider')}
-                        <span className="h-px flex-1 bg-slate-200 dark:bg-white/10" />
+                        <span className="h-px flex-1 bg-[var(--border)] dark:bg-white/10" />
                       </p>
                       <p className="mt-3 text-sm font-semibold text-ink dark:text-white">{t('pricing.paymeSectionTitle')}</p>
-                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{t('pricing.paymeSectionCopy')} · {planPricesUzs[plan.key].toLocaleString()} so&apos;m/month</p>
+                      <p className="mt-1 text-xs text-[var(--text-muted)]">{t('pricing.paymeSectionCopy')} · {planPricesUzs[plan.key].toLocaleString()} so&apos;m/month</p>
                       <div className="mt-3" onClick={() => track('checkout_started', { plan: plan.key, provider: 'payme' })}>
                         <PaymeCheckoutButton
                           merchantId={payme.merchantId}
@@ -416,7 +416,7 @@ export default function Pricing() {
                   // isn't configured in this environment.
                   if (plan.paymeOnly) {
                     return paymeSection || (
-                      <p className="mt-6 rounded-xl bg-[var(--surface-strong)] p-3 text-center text-sm text-slate-600 dark:bg-white/5 dark:text-slate-300">
+                      <p className="mt-6 rounded-xl bg-[var(--surface-strong)] p-3 text-center text-sm text-[var(--text-muted)] dark:bg-white/5">
                         {t('pricing.planNotConfigured')}
                       </p>
                     )
@@ -451,9 +451,9 @@ export default function Pricing() {
               t('pricing.trust2'),
               t('pricing.trust3'),
             ].map((item) => (
-              <div key={item} className="rounded-2xl bg-[var(--surface-strong)] p-4 text-sm text-slate-700 dark:bg-white/5 dark:text-slate-200">{item}</div>
+              <div key={item} className="rounded-2xl bg-[var(--surface-strong)] p-4 text-sm text-[var(--text-muted)] dark:bg-white/5">{item}</div>
             ))}
-            <div className="rounded-2xl bg-[var(--surface-strong)] p-4 text-sm text-slate-700 dark:bg-white/5 dark:text-slate-200">
+            <div className="rounded-2xl bg-[var(--surface-strong)] p-4 text-sm text-[var(--text-muted)] dark:bg-white/5">
               {t('pricing.trust4')}{' '}
               <Link to="/terms" className="font-semibold text-primary-600 underline dark:text-primary-300">
                 {t('pricing.readTerms')}
@@ -475,9 +475,9 @@ export default function Pricing() {
               { question: t('pricing.faq2q'), answer: t('pricing.faq2a') },
               { question: t('pricing.faq3q'), answer: t('pricing.faq3a') },
             ].map((item) => (
-              <div key={item.question} className="rounded-2xl border border-slate-200 bg-white/80 p-5 dark:border-white/10 dark:bg-white/5">
+              <div key={item.question} className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 dark:border-white/10 dark:bg-white/5">
                 <h3 className="text-base font-semibold text-ink dark:text-white">{item.question}</h3>
-                <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{item.answer}</p>
+                <p className="mt-2 text-sm text-[var(--text-muted)]">{item.answer}</p>
               </div>
             ))}
           </div>

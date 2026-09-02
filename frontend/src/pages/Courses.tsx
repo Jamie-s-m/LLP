@@ -117,7 +117,7 @@ export default function Courses() {
               className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
                 (path.category && filters.category === path.category) || (path.level && filters.level === path.level)
                   ? 'border-primary-500 bg-primary-500 text-white'
-                  : 'border-slate-200 bg-white/80 text-slate-700 hover:border-primary-300 hover:text-primary-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-200'
+                  : 'border-[var(--border)] bg-[var(--surface)] text-[var(--text-muted)] hover:border-primary-300 hover:text-primary-700 dark:border-white/10 dark:bg-white/5'
               }`}
               onClick={() => setFilters((current) => ({
                 ...current,
@@ -131,7 +131,7 @@ export default function Courses() {
         </div>
 
         <div className="atlas-panel mb-8 p-6">
-          <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-500 dark:text-slate-400">
+          <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-[var(--text-muted)]">
             <FiFilter />
             {t('courses.smartFilters')}
           </div>
@@ -139,10 +139,10 @@ export default function Courses() {
             <div className="xl:col-span-2">
               <label className="label" htmlFor="courses-search">{t('common.search')}</label>
               <div className="relative">
-                <FiSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+                <FiSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-subtle)]" aria-hidden="true" />
                 <input
                   id="courses-search"
-                  className="input pl-10"
+                  className="input truncate pl-10"
                   value={filters.query}
                   onChange={(event) => setFilters({ ...filters, query: event.target.value })}
                   placeholder={t('courses.searchPlaceholder')}
@@ -193,7 +193,7 @@ export default function Courses() {
             </div>
           </div>
           <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+            <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
               <FiTarget className="text-primary-500" aria-hidden="true" />
               <span>{resultLabel}</span>
             </div>
@@ -245,17 +245,17 @@ export default function Courses() {
                         {course.category}
                       </span>
                     ) : null}
-                    <span className="rounded-full bg-[var(--border-light)] px-3 py-1 text-xs font-semibold text-ink dark:text-slate-100">
+                    <span className="rounded-full bg-[var(--border-light)] px-3 py-1 text-xs font-semibold text-ink">
                       {course.level}
                     </span>
                   </div>
                   <h3 className="mb-2 text-xl font-bold text-ink dark:text-white">{course.title}</h3>
-                  <p className="mb-4 text-sm text-slate-600 dark:text-slate-300">
+                  <p className="mb-4 text-sm text-[var(--text-muted)]">
                     {course.description}
                   </p>
                   <div className="flex items-center justify-between">
                     <span className="font-semibold text-primary-500">{course.language}</span>
-                    <span className="text-sm font-semibold text-slate-600 dark:text-slate-300">{t('courses.viewPath')}</span>
+                    <span className="text-sm font-semibold text-[var(--text-muted)]">{t('courses.viewPath')}</span>
                   </div>
                 </Link>
               )
@@ -264,7 +264,7 @@ export default function Courses() {
             <div className="col-span-full">
               <div className="atlas-panel rounded-3xl p-8 text-center">
                 <h2 className="text-2xl font-semibold text-ink dark:text-white">{t('courses.noMatchesTitle')}</h2>
-                <p className="mt-2 text-slate-600 dark:text-slate-300">
+                <p className="mt-2 text-[var(--text-muted)]">
                   {t('courses.noMatchesCopy')}
                 </p>
                 <button type="button" className="btn btn-primary mt-5" onClick={resetFilters}>{t('courses.showAllPaths')}</button>

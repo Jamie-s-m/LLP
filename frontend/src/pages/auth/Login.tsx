@@ -33,6 +33,7 @@ export default function Login() {
       : searchParams.get('registered') === '1'
         ? t('login.registered')
         : ''
+  const sessionExpired = searchParams.get('sessionExpired') === '1'
 
   useEffect(() => {
     const googleError = searchParams.get('googleError')
@@ -118,7 +119,9 @@ export default function Login() {
             <p className="text-muted mb-4 text-[var(--text-muted)] dark:text-[var(--dark-text-secondary)]">
               {t('login.copy')}
             </p>
-            {notice ? (
+            {sessionExpired ? (
+              <Alert variant="warning" className="mb-4">{t('login.sessionExpired')}</Alert>
+            ) : notice ? (
               <Alert variant="success" className="mb-4">{notice}</Alert>
             ) : null}
             {loginError ? (

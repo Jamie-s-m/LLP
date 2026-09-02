@@ -100,14 +100,14 @@ export default function Navbar() {
         </div>
 
         {/* Right Section */}
-        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
           <LanguageToggle />
           <ThemeToggle />
           {isAuthenticated ? (
             <div ref={dropdownRef} className="relative">
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-2 py-1.5 text-neutral-900 transition-colors hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700 dark:focus-visible:ring-offset-neutral-800"
+                className="flex items-center gap-2 rounded-full border border-neutral-200 bg-[var(--surface)] px-2 py-1.5 text-neutral-900 transition-colors hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus-visible:ring-offset-neutral-800"
                 aria-expanded={dropdownOpen}
                 aria-haspopup="menu"
                 title={t('nav.accountMenu')}
@@ -128,7 +128,7 @@ export default function Navbar() {
 
               {/* Dropdown Menu */}
               {dropdownOpen && (
-                <div className="absolute right-0 z-[140] mt-2 w-[min(20rem,calc(100vw-1rem))] overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-800 sm:w-64" role="menu">
+                <div className="absolute right-0 z-[140] mt-2 w-[min(20rem,calc(100vw-1rem))] overflow-hidden rounded-2xl border border-neutral-200 bg-[var(--surface)] shadow-xl dark:border-neutral-700 sm:w-64" role="menu">
                   <div className="border-b border-neutral-200 px-4 py-3 dark:border-neutral-700">
                     <p className="text-sm font-semibold text-neutral-900 dark:text-white">{user?.firstName} {user?.lastName}</p>
                     <p className="text-xs text-neutral-500 dark:text-neutral-400">{user?.email}</p>
@@ -187,14 +187,14 @@ export default function Navbar() {
               )}
             </div>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="hidden items-center gap-2 lg:flex">
               <Link
                 to="/login"
-                className="btn btn-outline text-sm px-3 py-1.5"
+                className="btn btn-outline text-sm px-3 py-2"
               >
                 {t('nav.login')}
               </Link>
-              <Link to="/register" className="btn btn-primary text-sm px-3 py-1.5">
+              <Link to="/register" className="btn btn-primary text-sm px-3 py-2">
                 {t('nav.signUp')}
               </Link>
             </div>

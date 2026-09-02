@@ -45,4 +45,27 @@ api.interceptors.request.use((config) => {
   return config
 })
 
+// A 401 on an authenticated request means the stored session is no longer valid (expired,
+// revoked, or corrupted - see authStore.login()'s guard against storing a malformed payload).
+// Without this, a page just shows its own generic "could not save" error while silently
+// still rendering as signed-in, with no way out except knowing to manually log out and back
+// in. Excludes /auth/* itself - a 401 there is a normal "wrong credentials" response, not an
+// expired session, and redirecting would create a loop on the login page.
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (
+      typeof window !== 'undefined' &&
+      error.response?.status === 401 &&
+      !String(error.config?.url || '').includes('/auth/') &&
+      window.location.pathname !== '/login'
+    ) {
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      window.location.href = '/login?sessionExpired=1'
+    }
+    return Promise.reject(error)
+  }
+)
+
 export default api

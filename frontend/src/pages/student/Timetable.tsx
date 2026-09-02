@@ -21,7 +21,7 @@ export default function Timetable() {
           </div>
           <div>
             <h2 className="text-xl font-semibold text-ink dark:text-white">Live scheduled classes aren&apos;t available yet</h2>
-            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600 dark:text-slate-300">
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--text-muted)]">
               LinguaNest doesn&apos;t have real tutor-led class bookings connected yet, so this page won&apos;t show a fabricated schedule.
               Join the tutor waitlist to be notified when live, bookable sessions launch.
             </p>

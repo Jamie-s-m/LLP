@@ -81,10 +81,19 @@ export const useAuthStore = create<AuthState>((set) => {
         const userPayload = response.data.data?.user || response.data.user
         const tokenPayload = response.data.data?.token || response.data.token
 
-        localStorage.setItem('token', tokenPayload)
-        localStorage.setItem('user', JSON.stringify(userPayload))
+        if (tokenPayload) {
+          localStorage.setItem('token', tokenPayload)
+        }
+        if (userPayload) {
+          localStorage.setItem('user', JSON.stringify(userPayload))
+        }
 
-        set({ user: userPayload, token: tokenPayload, isAuthenticated: true, isLoading: false })
+        set({
+          user: userPayload || null,
+          token: tokenPayload || null,
+          isAuthenticated: !!tokenPayload && !!userPayload,
+          isLoading: false,
+        })
       } catch (error: any) {
         const errorMessage =
           error.response?.data?.message || error.message || 'Login failed'
