@@ -470,6 +470,36 @@ html.dark {
   animation: slideInUp 0.3s ease-out;
 }
 
+@keyframes routePageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Plain CSS enter animation for route content (Layout.tsx) - deliberately NOT an
+   AnimatePresence/motion.div exit+enter pair. framer-motion's AnimatePresence needs to
+   synchronously track when its keyed child unmounts to run an exit animation before
+   mounting the next one; a lazy-loaded route (React.lazy + Suspense) that hasn't
+   finished fetching its chunk yet suspends on that first render, and AnimatePresence
+   never recovers from that - the route content freezes on the previous page forever
+   (confirmed live: zero network request for the next page's chunk, and the swap never
+   completes even after waiting). Remounting via `key` and animating in with CSS sidesteps
+   that entirely since nothing needs to track presence/exit of a Suspense-suspending node. */
+.route-page-enter {
+  animation: routePageEnter 0.2s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-page-enter {
+    animation: none;
+  }
+}
+
 @layer components {
   .atlas-page {
     min-height: calc(100vh - 72px);

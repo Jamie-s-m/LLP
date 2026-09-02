@@ -1,5 +1,4 @@
 import React from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
 import { Link, useLocation } from 'react-router-dom'
 import { FiMessageCircle } from 'react-icons/fi'
 import { useAuthStore } from '../store/authStore'
@@ -36,17 +35,15 @@ export default function Layout({ children }: LayoutProps) {
         {isAuthenticated ? <Sidebar /> : null}
 
         <main className={`flex-1 transition-all duration-300 pt-[68px] md:pt-0 lg:pt-0 ${isAuthRoute ? '' : 'pb-[112px] md:pb-0'}`}>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={location.pathname}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
-            >
-              {children}
-            </motion.div>
-          </AnimatePresence>
+          {/* key remounts this div on every route change so the CSS enter animation restarts.
+              This intentionally does NOT use framer-motion's AnimatePresence: AnimatePresence
+              needs to track this node's mount/unmount synchronously to sequence its exit/enter
+              animation, and a lazily-loaded route (React.lazy + Suspense) that suspends on its
+              first render breaks that tracking - the page content froze on the previous route
+              forever when this was AnimatePresence-driven. See index.css `.route-page-enter`. */}
+          <div key={location.pathname} className="route-page-enter">
+            {children}
+          </div>
         </main>
       </div>
 
