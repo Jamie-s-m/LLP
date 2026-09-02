@@ -1,6 +1,6 @@
 import Certificate from '../models/Certificate.js';
 import Course from '../models/Course.js';
-import { computeCourseMastery, isLevelReady } from '../utils/masteryEngine.js';
+import { computeCourseMastery, computeSkillMastery, isLevelReady } from '../utils/masteryEngine.js';
 import { checkLevelReadinessAward, checkCourseCompletionAward } from '../utils/awardingEngine.js';
 import { CERTIFICATE_ISSUER, CERTIFICATE_METHODOLOGY_STATEMENT, CERTIFICATE_LIMITATIONS_STATEMENT } from '../data/certificateMethodology.js';
 
@@ -12,8 +12,9 @@ const CEFR_ORDER = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 export const getCourseMastery = async (req, res, next) => {
   try {
     const { courseId } = req.params;
-    const [courseMastery, course] = await Promise.all([
+    const [courseMastery, skillMastery, course] = await Promise.all([
       computeCourseMastery(req.user.id, courseId),
+      computeSkillMastery(req.user.id, courseId),
       Course.findById(courseId).populate('lessons', 'cefr'),
     ]);
 
@@ -29,7 +30,7 @@ export const getCourseMastery = async (req, res, next) => {
       levelReadiness[level] = await isLevelReady(req.user.id, courseId, level);
     }
 
-    res.status(200).json({ success: true, data: { ...courseMastery, levelReadiness } });
+    res.status(200).json({ success: true, data: { ...courseMastery, skills: skillMastery || [], levelReadiness } });
   } catch (error) {
     next(error);
   }

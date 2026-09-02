@@ -3,7 +3,10 @@ import Course from '../models/Course.js';
 import Lesson from '../models/Lesson.js';
 import User from '../models/User.js';
 import ExerciseAttempt from '../models/ExerciseAttempt.js';
+import Flashcard from '../models/Flashcard.js';
 import { SKILLS } from '../utils/skills.js';
+import { computeSkillMastery } from '../utils/masteryEngine.js';
+import { filterDueFlashcards } from './flashcardController.js';
 
 // @desc    Enroll student in a course
 // @route   POST /api/progress/enroll/:courseId
@@ -240,6 +243,82 @@ export const getSkillProfile = async (req, res, next) => {
           : 'No placement test completed yet.',
         skills,
       },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Skill states worth surfacing as "what to work on", ordered by urgency: 'needs_review' is an
+// active regression/decay signal (see masteryEngine.js's applyRecencyDecay) - something the
+// learner already had and is now losing, the most actionable kind of weak. The rest are
+// ordered from "haven't touched it yet in this course" down to "closest to proficient" -
+// each is a real gap, but not touched at all gets priority over partial progress. Deliberately
+// excludes 'proficient'/'mastered' (see masteryEngine.js's PROFICIENT_STATES) - those aren't gaps.
+const WEAK_SKILL_PRIORITY = ['needs_review', 'not_started', 'introduced', 'practicing', 'developing'];
+
+// @desc    "What should I do today" - combines the in-progress lesson to continue, the
+//          weakest skill in that same course, and how many flashcards are overdue for
+//          review, so the Dashboard can recommend one concrete next action instead of a
+//          static hero block.
+// @route   GET /api/progress/today
+// @access  Private
+export const getTodayRecommendation = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+
+    // Most recently touched course that isn't finished yet. lastAccessedAt is only set once a
+    // lesson is completed (see completeLesson above) - a course the learner enrolled in but
+    // never opened sorts after any course they've actually engaged with, which is the right
+    // course to recommend continuing.
+    const activeProgress = await Progress.findOne({ user: userId, isCompleted: { $ne: true } })
+      .sort({ lastAccessedAt: -1 })
+      .populate('course', 'title');
+
+    let continueLesson = null;
+    let weakestSkill = null;
+
+    if (activeProgress?.course) {
+      const course = activeProgress.course;
+      const lessons = await Lesson.find({ course: course._id }).sort({ order: 1 }).select('title cefr order');
+      const completedSet = new Set((activeProgress.completedLessons || []).map((id) => String(id)));
+      const nextLesson = lessons.find((lesson) => !completedSet.has(String(lesson._id)));
+
+      if (nextLesson) {
+        continueLesson = {
+          lessonId: nextLesson._id,
+          courseId: course._id,
+          courseTitle: course.title,
+          lessonTitle: nextLesson.title,
+          cefr: nextLesson.cefr || null,
+        };
+      }
+
+      const skillMastery = await computeSkillMastery(userId, course._id);
+      // totalExercises > 0 matters here: a skill with zero exercises in this course is
+      // trivially 'not_started' but there's nothing to actually recommend practicing - only
+      // consider skills the course can genuinely offer the learner something for.
+      const weakCandidates = (skillMastery || []).filter(
+        (entry) => WEAK_SKILL_PRIORITY.includes(entry.state) && entry.totalExercises > 0
+      );
+      weakCandidates.sort((a, b) => {
+        const priorityDiff = WEAK_SKILL_PRIORITY.indexOf(a.state) - WEAK_SKILL_PRIORITY.indexOf(b.state);
+        return priorityDiff !== 0 ? priorityDiff : a.attemptCount - b.attemptCount;
+      });
+
+      if (weakCandidates.length > 0) {
+        weakestSkill = { skill: weakCandidates[0].skill, state: weakCandidates[0].state, courseId: course._id };
+      }
+    }
+
+    // Platform-wide, same scope getFlashcards uses with no courseId - this project's decks
+    // aren't presented as course-scoped from the learner's side.
+    const allFlashcards = await Flashcard.find().select('_id');
+    const dueFlashcards = await filterDueFlashcards(userId, allFlashcards);
+
+    res.status(200).json({
+      success: true,
+      data: { continueLesson, weakestSkill, overdueFlashcardCount: dueFlashcards.length },
     });
   } catch (error) {
     next(error);

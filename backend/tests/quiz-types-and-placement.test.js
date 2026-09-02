@@ -346,6 +346,8 @@ describe('Speaking exercise manual-review queue', () => {
 describe('Placement test', () => {
   let token;
   let user;
+  let advancedCourse;
+  let b2Lesson;
 
   beforeAll(async () => {
     await PlacementQuestion.deleteMany({});
@@ -362,11 +364,35 @@ describe('Placement test', () => {
       isEmailVerified: true,
     });
     token = signToken(user);
+
+    // Fixture course/lesson at the tier a perfect score resolves to (Advanced/B2), so the
+    // recommended-starting-lesson resolution below is deterministic regardless of what other
+    // test files have (or haven't) seeded into the shared test database.
+    advancedCourse = await Course.create({
+      title: 'Placement Fixture Advanced Course',
+      description: 'Fixture course for placement recommendedLesson coverage.',
+      language: 'English',
+      level: 'Advanced',
+      instructor: user._id,
+      category: 'Grammar',
+      isPublished: true,
+    });
+    b2Lesson = await Lesson.create({
+      title: 'Placement Fixture B2 Lesson',
+      course: advancedCourse._id,
+      order: 1,
+      content: 'Fixture content.',
+      cefr: 'B2',
+    });
+    advancedCourse.lessons = [b2Lesson._id];
+    await advancedCourse.save();
   });
 
   afterAll(async () => {
     await User.deleteOne({ _id: user._id });
     await PlacementQuestion.deleteMany({});
+    await Lesson.deleteOne({ _id: b2Lesson._id });
+    await Course.deleteOne({ _id: advancedCourse._id });
   });
 
   test('lists questions without exposing the correct answer', async () => {
@@ -398,6 +424,22 @@ describe('Placement test', () => {
     expect(refreshed.placementCompletedAt).not.toBeNull();
     expect(refreshed.placementCefr).toBe('B2');
     expect(refreshed.placementSkillStats.grammar.total).toBeGreaterThan(0);
+  });
+
+  test('resolves a specific starting lesson via Lesson.cefr, not just a coarse course-level filter', async () => {
+    const questions = await PlacementQuestion.find().sort({ order: 1 });
+    const answers = questions.map((question) => ({ questionId: question._id.toString(), answer: question.correctAnswer }));
+
+    const res = await request(app)
+      .post('/api/placement/submit')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ answers });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.recommendedCourses.some((c) => String(c._id) === String(advancedCourse._id))).toBe(true);
+    expect(res.body.data.recommendedLesson).not.toBeNull();
+    expect(res.body.data.recommendedLesson.lessonId).toBe(String(b2Lesson._id));
+    expect(res.body.data.recommendedLesson.courseId).toBe(String(advancedCourse._id));
   });
 
   test('only passing the A1 tier places the student at Beginner', async () => {

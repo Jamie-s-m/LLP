@@ -1,5 +1,6 @@
 import PlacementQuestion from '../models/PlacementQuestion.js';
 import Course from '../models/Course.js';
+import Lesson from '../models/Lesson.js';
 import User from '../models/User.js';
 
 const TIERS = ['A1', 'A2', 'B1', 'B2'];
@@ -68,9 +69,25 @@ export const submitPlacement = async (req, res, next) => {
 
     const recommendedCourses = await Course.find({ level, isPublished: true }).limit(3);
 
+    // Resolve a specific starting Lesson via its own cefr tag (Phase 5's fix made this data
+    // real across ~213 lessons), rather than only pointing the learner at a coarse
+    // level-filtered course list - the lowest-order lesson tagged with the achieved tier,
+    // scoped to the same courses already shown as recommendations so the two stay coherent.
+    // Null when none of those courses happen to have a lesson at exactly that tier (e.g. a
+    // multi-level pathway course whose per-lesson tagging doesn't line up) - the frontend
+    // falls back to the course-browse link in that case.
+    const recommendedLessonDoc = recommendedCourses.length > 0
+      ? await Lesson.findOne({ cefr, course: { $in: recommendedCourses.map((course) => course._id) } })
+          .sort({ order: 1 })
+          .select('title course order cefr')
+      : null;
+    const recommendedLesson = recommendedLessonDoc
+      ? { lessonId: recommendedLessonDoc._id, courseId: recommendedLessonDoc.course, title: recommendedLessonDoc.title }
+      : null;
+
     res.status(200).json({
       success: true,
-      data: { cefr, level, totalCorrect, totalQuestions: answers.length, tierStats, skillStats, recommendedCourses },
+      data: { cefr, level, totalCorrect, totalQuestions: answers.length, tierStats, skillStats, recommendedCourses, recommendedLesson },
     });
   } catch (error) {
     next(error);

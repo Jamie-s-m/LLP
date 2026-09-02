@@ -171,6 +171,8 @@ describe('Acceptance: new-user journey through the CEFR curriculum architecture'
     const a1LessonMastery = res.body.data.lessons.find((l) => l.lessonId === String(a1Lesson._id));
     expect(a1LessonMastery.state).toBe('mastered');
     expect(res.body.data.levelReadiness.A1.ready).toBe(true);
+    expect(Array.isArray(res.body.data.skills)).toBe(true);
+    expect(res.body.data.skills.some((s) => s.attemptCount > 0)).toBe(true);
   });
 
   it('10. becomes eligible for and receives a level_readiness certificate', async () => {
