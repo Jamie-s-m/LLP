@@ -26,6 +26,25 @@ interface LessonSummary {
   duration?: number
 }
 
+interface SkillMasteryRow {
+  skill: string
+  attemptCount: number
+  totalExercises: number
+  state: string
+}
+
+interface LevelReadiness {
+  ready: boolean
+  reason: string
+}
+
+interface CourseMastery {
+  completionPercentage: number
+  masteryPercentage: number
+  skills: SkillMasteryRow[]
+  levelReadiness: Record<string, LevelReadiness>
+}
+
 export default function CourseDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -77,6 +96,28 @@ export default function CourseDetail() {
   const isEnrolled = myLearning.some(
     (item) => item.course?._id === id || (item.course as any) === id
   )
+
+  const [mastery, setMastery] = useState<CourseMastery | null>(null)
+
+  // Mastery only means something once the learner has actually engaged with the course - a
+  // fresh visitor would otherwise see an all-zeros panel that looks like a bug, not a real state.
+  useEffect(() => {
+    if (!id || !isEnrolled) {
+      setMastery(null)
+      return
+    }
+    let cancelled = false
+    api.get(`/certificates/mastery/${id}`)
+      .then((response) => {
+        if (!cancelled) setMastery(response.data.data)
+      })
+      .catch(() => {
+        if (!cancelled) setMastery(null)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [id, isEnrolled])
 
   const handleEnroll = async () => {
     if (!isAuthenticated) {
@@ -158,6 +199,54 @@ export default function CourseDetail() {
             {enrolling ? t('courseDetail.enrolling') : t('courseDetail.enroll')}
           </button>
         )}
+
+        {isEnrolled && mastery ? (
+          <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 dark:bg-white/5">
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{t('courseDetail.masteryKicker')}</p>
+            <h3 className="mt-2 text-xl font-semibold text-ink dark:text-white">{t('courseDetail.masteryHeading')}</h3>
+
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="rounded-xl bg-[var(--border-light)]/50 p-3 text-center">
+                <strong className="block text-2xl text-ink dark:text-white">{mastery.completionPercentage}%</strong>
+                <span className="text-xs text-muted">{t('courseDetail.masteryCompletion')}</span>
+              </div>
+              <div className="rounded-xl bg-[var(--border-light)]/50 p-3 text-center">
+                <strong className="block text-2xl text-ink dark:text-white">{mastery.masteryPercentage}%</strong>
+                <span className="text-xs text-muted">{t('courseDetail.masteryLevel')}</span>
+              </div>
+            </div>
+
+            {Object.keys(mastery.levelReadiness || {}).length > 0 ? (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {Object.entries(mastery.levelReadiness).map(([cefr, readiness]) => (
+                  <span
+                    key={cefr}
+                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                      readiness.ready
+                        ? 'bg-[var(--success)]/15 text-[var(--success)]'
+                        : 'bg-[var(--border-light)] text-slate-500 dark:text-slate-400'
+                    }`}
+                  >
+                    {cefr}: {readiness.ready ? t('courseDetail.levelReady') : t('courseDetail.levelNotReady')}
+                  </span>
+                ))}
+              </div>
+            ) : null}
+
+            <div className="mt-4 space-y-2">
+              {mastery.skills.filter((row) => row.totalExercises > 0).length > 0 ? (
+                mastery.skills.filter((row) => row.totalExercises > 0).map((row) => (
+                  <div key={row.skill} className="flex items-center justify-between text-sm">
+                    <span className="font-medium text-ink dark:text-white">{t(`skills.${row.skill}`)}</span>
+                    <span className="text-xs text-muted">{t(`masteryStates.${row.state}`)}</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted">{t('courseDetail.noSkillData')}</p>
+              )}
+            </div>
+          </div>
+        ) : null}
       </div> : null}
       </div>
     </div>
