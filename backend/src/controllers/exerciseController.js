@@ -6,6 +6,7 @@ import { hasModeratorPermission, isOwnerId } from '../middleware/auth.js';
 import { assertLessonOwnership as canManageLesson } from '../utils/ownership.js';
 import { applyHeartsRegen, loseHeart, serializeHearts } from '../utils/hearts.js';
 import { inferSkillFromType } from '../utils/skills.js';
+import { requireLessonEntitlement } from '../utils/entitlement.js';
 
 const assertExerciseOwnership = async (exerciseId, user) => {
   const exercise = await Exercise.findById(exerciseId);
@@ -168,6 +169,22 @@ export const submitExercise = async (req, res, next) => {
     const user = await User.findById(req.user.id);
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const lesson = await Lesson.findById(exercise.lesson).select('order cefr course').populate('course', 'instructor');
+    if (!lesson) {
+      return res.status(404).json({ success: false, message: 'Lesson not found' });
+    }
+    const isManager = user.role === 'admin'
+      || hasModeratorPermission(user, 'catalogContentQa')
+      || isOwnerId(lesson.course?.instructor, user.id);
+    const entitlement = requireLessonEntitlement(lesson, user);
+    if (!entitlement.allowed && !isManager) {
+      return res.status(entitlement.error.status).json({
+        success: false,
+        message: entitlement.error.message,
+        data: entitlement.error.data,
+      });
     }
 
     const skill = exercise.skill || inferSkillFromType(exercise.type);

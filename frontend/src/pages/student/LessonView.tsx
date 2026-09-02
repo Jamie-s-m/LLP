@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { FiArrowLeft, FiCheckCircle, FiVolume2, FiMic, FiEdit3, FiHelpCircle } from 'react-icons/fi'
+import { FiArrowLeft, FiCheckCircle, FiVolume2, FiMic, FiEdit3, FiHelpCircle, FiLock } from 'react-icons/fi'
 import toast from 'react-hot-toast'
 import api from '../../services/api'
 import { useLearningStore } from '../../store/learningStore'
 import VideoEmbed from '../../components/ui/VideoEmbed'
 import { track } from '../../utils/analytics'
+import { useI18n } from '../../utils/i18n'
 
 interface VocabItem {
   word: string
@@ -31,14 +32,16 @@ interface LessonData {
   _id: string
   title: string
   description?: string
-  content: string
+  // Optional because a locked (paywalled) lesson's shell response omits these entirely -
+  // see the `locked` state below, which is the real signal for which shape came back.
+  content?: string
   course: string
   order: number
   difficulty?: string
   duration?: number
-  vocabulary: VocabItem[]
-  grammar: GrammarItem[]
-  exercises: ExerciseSummary[]
+  vocabulary?: VocabItem[]
+  grammar?: GrammarItem[]
+  exercises?: ExerciseSummary[]
   contentType?: 'text' | 'video' | 'audio' | 'interactive'
   mediaUrl?: string
 }
@@ -62,7 +65,9 @@ export default function LessonView() {
   const { lessonId } = useParams()
   const navigate = useNavigate()
   const { myLearning, fetchMyLearning, completeLesson } = useLearningStore()
+  const { t } = useI18n()
   const [lesson, setLesson] = useState<LessonData | null>(null)
+  const [locked, setLocked] = useState(false)
   const [siblings, setSiblings] = useState<LessonListItem[]>([])
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
@@ -81,8 +86,12 @@ export default function LessonView() {
     api.get(`/lessons/${lessonId}`)
       .then(async (response) => {
         const data = response.data.data as LessonData
+        const isLocked = Boolean(response.data.meta?.locked)
         setLesson(data)
-        track('lesson_started', { lessonId: data._id, courseId: data.course })
+        setLocked(isLocked)
+        if (!isLocked) {
+          track('lesson_started', { lessonId: data._id, courseId: data.course })
+        }
         try {
           const listRes = await api.get('/lessons', { params: { courseId: data.course } })
           setSiblings(listRes.data.data || [])
@@ -150,93 +159,106 @@ export default function LessonView() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2">
-            {lesson.contentType === 'video' && lesson.mediaUrl ? (
-              <VideoEmbed url={lesson.mediaUrl} title={lesson.title} />
-            ) : null}
-            {lesson.contentType === 'audio' && lesson.mediaUrl ? (
-              <audio controls className="mb-8 w-full" src={lesson.mediaUrl}>
-                Your browser does not support embedded audio.
-              </audio>
-            ) : null}
-
-            <div className="card mb-8">
-              <h2 className="text-xl sm:text-2xl font-semibold mb-3">Overview</h2>
-              <div className="prose dark:prose-invert max-w-none">
-                <p className="text-base sm:text-lg text-neutral-700 dark:text-neutral-300 mb-2">
-                  {lesson.description}
-                </p>
-                <p className="text-sm text-neutral-600 dark:text-neutral-400">{lesson.content}</p>
-              </div>
-            </div>
-
-            {lesson.vocabulary.length > 0 ? (
-              <div className="card mb-8">
-                <h3 className="text-lg sm:text-xl font-semibold mb-3">New Vocabulary</h3>
-                <div className="space-y-3">
-                  {lesson.vocabulary.map((item, idx) => (
-                    <div key={idx} className="border border-neutral-200 dark:border-neutral-700 rounded-lg p-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <p className="text-base sm:text-lg font-semibold">{item.word}</p>
-                          {item.pronunciation ? <p className="text-xs sm:text-sm text-neutral-600 dark:text-neutral-400">{item.pronunciation}</p> : null}
-                        </div>
-                        <FiVolume2 size={18} className="text-primary-500" />
-                      </div>
-                      <p className="text-sm text-neutral-700 dark:text-neutral-300">{item.translation}</p>
-                    </div>
-                  ))}
+            {locked ? (
+              <div className="card flex flex-col items-center gap-4 py-10 text-center">
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--accent-light)] text-[var(--accent)]">
+                  <FiLock size={24} />
                 </div>
+                <h2 className="text-xl font-semibold">{t('paywall.lockedLessonTitle')}</h2>
+                <p className="max-w-md text-sm text-neutral-600 dark:text-neutral-400">{t('paywall.lockedLessonCopy')}</p>
+                <Link to="/pricing" className="btn btn-primary mt-2">{t('paywall.viewPlans')}</Link>
               </div>
-            ) : null}
+            ) : (
+              <>
+                {lesson.contentType === 'video' && lesson.mediaUrl ? (
+                  <VideoEmbed url={lesson.mediaUrl} title={lesson.title} />
+                ) : null}
+                {lesson.contentType === 'audio' && lesson.mediaUrl ? (
+                  <audio controls className="mb-8 w-full" src={lesson.mediaUrl}>
+                    Your browser does not support embedded audio.
+                  </audio>
+                ) : null}
 
-            {lesson.grammar.length > 0 ? (
-              <div className="card mb-8">
-                <h3 className="text-xl font-bold mb-4">Grammar</h3>
-                {lesson.grammar.map((item, idx) => (
-                  <div key={idx} className="mb-4 last:mb-0">
-                    <p className="text-neutral-700 dark:text-neutral-300 mb-2">{item.explanation}</p>
-                    <div className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg p-4">
-                      <p className="font-mono text-primary-700 dark:text-primary-300">{item.rule}</p>
+                <div className="card mb-8">
+                  <h2 className="text-xl sm:text-2xl font-semibold mb-3">Overview</h2>
+                  <div className="prose dark:prose-invert max-w-none">
+                    <p className="text-base sm:text-lg text-neutral-700 dark:text-neutral-300 mb-2">
+                      {lesson.description}
+                    </p>
+                    <p className="text-sm text-neutral-600 dark:text-neutral-400">{lesson.content}</p>
+                  </div>
+                </div>
+
+                {lesson.vocabulary && lesson.vocabulary.length > 0 ? (
+                  <div className="card mb-8">
+                    <h3 className="text-lg sm:text-xl font-semibold mb-3">New Vocabulary</h3>
+                    <div className="space-y-3">
+                      {lesson.vocabulary.map((item, idx) => (
+                        <div key={idx} className="border border-neutral-200 dark:border-neutral-700 rounded-lg p-3">
+                          <div className="flex items-center justify-between mb-2">
+                            <div>
+                              <p className="text-base sm:text-lg font-semibold">{item.word}</p>
+                              {item.pronunciation ? <p className="text-xs sm:text-sm text-neutral-600 dark:text-neutral-400">{item.pronunciation}</p> : null}
+                            </div>
+                            <FiVolume2 size={18} className="text-primary-500" />
+                          </div>
+                          <p className="text-sm text-neutral-700 dark:text-neutral-300">{item.translation}</p>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : null}
+                ) : null}
 
-            {lesson.exercises.length > 0 ? (
-              <div className="card mb-8">
-                <h3 className="text-lg sm:text-xl font-semibold mb-3">Practice</h3>
-                <div className="space-y-3">
-                  {lesson.exercises.map((exercise) => {
-                    const Icon = EXERCISE_ICON[exercise.type] || FiHelpCircle
-                    return (
-                      <Link
-                        key={exercise._id}
-                        to={`/exercise/${exercise._id}`}
-                        className="flex items-center justify-between rounded-lg border border-neutral-200 p-3 transition hover:border-primary-300 dark:border-neutral-700"
-                      >
-                        <span className="flex items-center gap-3">
-                          <Icon size={18} className="text-primary-500" />
-                          <span className="font-medium">{exercise.title}</span>
-                        </span>
-                        <span className="text-sm text-neutral-500">+{exercise.points} pts</span>
-                      </Link>
-                    )
-                  })}
+                {lesson.grammar && lesson.grammar.length > 0 ? (
+                  <div className="card mb-8">
+                    <h3 className="text-xl font-bold mb-4">Grammar</h3>
+                    {lesson.grammar.map((item, idx) => (
+                      <div key={idx} className="mb-4 last:mb-0">
+                        <p className="text-neutral-700 dark:text-neutral-300 mb-2">{item.explanation}</p>
+                        <div className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg p-4">
+                          <p className="font-mono text-primary-700 dark:text-primary-300">{item.rule}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+
+                {lesson.exercises && lesson.exercises.length > 0 ? (
+                  <div className="card mb-8">
+                    <h3 className="text-lg sm:text-xl font-semibold mb-3">Practice</h3>
+                    <div className="space-y-3">
+                      {lesson.exercises.map((exercise) => {
+                        const Icon = EXERCISE_ICON[exercise.type] || FiHelpCircle
+                        return (
+                          <Link
+                            key={exercise._id}
+                            to={`/exercise/${exercise._id}`}
+                            className="flex items-center justify-between rounded-lg border border-neutral-200 p-3 transition hover:border-primary-300 dark:border-neutral-700"
+                          >
+                            <span className="flex items-center gap-3">
+                              <Icon size={18} className="text-primary-500" />
+                              <span className="font-medium">{exercise.title}</span>
+                            </span>
+                            <span className="text-sm text-neutral-500">+{exercise.points} pts</span>
+                          </Link>
+                        )
+                      })}
+                    </div>
+                  </div>
+                ) : null}
+
+                <div className="card">
+                  <button
+                    onClick={handleComplete}
+                    disabled={completing || isCompleted}
+                    className={`w-full btn ${isCompleted ? 'btn-ghost' : 'btn-primary'} flex items-center justify-center gap-2 disabled:opacity-70`}
+                  >
+                    {isCompleted && <FiCheckCircle size={18} />}
+                    {isCompleted ? 'Completed ✓' : completing ? 'Saving...' : 'Mark as Completed'}
+                  </button>
                 </div>
-              </div>
-            ) : null}
-
-            <div className="card">
-              <button
-                onClick={handleComplete}
-                disabled={completing || isCompleted}
-                className={`w-full btn ${isCompleted ? 'btn-ghost' : 'btn-primary'} flex items-center justify-center gap-2 disabled:opacity-70`}
-              >
-                {isCompleted && <FiCheckCircle size={18} />}
-                {isCompleted ? 'Completed ✓' : completing ? 'Saving...' : 'Mark as Completed'}
-              </button>
-            </div>
+              </>
+            )}
           </div>
 
           {/* Sidebar */}

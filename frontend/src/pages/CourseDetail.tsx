@@ -7,6 +7,8 @@ import api from '../services/api'
 import { demoCourseMap } from '../data/demoCourses'
 import { useI18n } from '../utils/i18n'
 import { isDemoFallbackAllowed } from '../utils/runtimeMode'
+import { hasActivePlan, isLessonFree } from '../utils/entitlement'
+import { FiLock } from 'react-icons/fi'
 
 const demoFallbackEnabled = () => isDemoFallbackAllowed()
 
@@ -24,6 +26,7 @@ interface LessonSummary {
   title: string
   order: number
   duration?: number
+  cefr?: string | null
 }
 
 interface SkillMasteryRow {
@@ -49,7 +52,7 @@ export default function CourseDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { enrollInCourse, myLearning } = useLearningStore()
-  const { isAuthenticated } = useAuthStore()
+  const { isAuthenticated, user } = useAuthStore()
   const { t } = useI18n()
   const [enrolling, setEnrolling] = useState(false)
   const [course, setCourse] = useState<CourseDetails | null>(null)
@@ -157,15 +160,22 @@ export default function CourseDetail() {
 
         <h2 className="mb-3 text-xl font-semibold text-ink">{t('courseDetail.lessons')}</h2>
         {lessons.length > 0 ? <div className="space-y-2 mb-6">
-          {lessons.map((lesson) => (
-            <button
-              key={lesson._id}
-              onClick={() => navigate(`/lesson/${lesson._id}`)}
-              className="w-full rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-left text-[var(--text-primary)] transition hover:border-primary-300 hover:bg-[var(--accent-light)]"
-            >
-              {lesson.order}. {lesson.title}
-            </button>
-          ))}
+          {lessons.map((lesson) => {
+            // Display-only: the real gate is server-side (getLessonById strips the content on
+            // a locked lesson regardless of what this renders) - this just lets the student see
+            // what's free before clicking in, rather than discovering it lesson by lesson.
+            const gated = !isLessonFree(lesson) && !hasActivePlan(user?.billing)
+            return (
+              <button
+                key={lesson._id}
+                onClick={() => navigate(`/lesson/${lesson._id}`)}
+                className="flex w-full items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-left text-[var(--text-primary)] transition hover:border-primary-300 hover:bg-[var(--accent-light)]"
+              >
+                <span>{lesson.order}. {lesson.title}</span>
+                {gated ? <FiLock className="flex-shrink-0 text-[var(--text-muted)]" size={14} aria-label={t('paywall.lockedLessonTitle')} /> : null}
+              </button>
+            )
+          })}
         </div> : <p className="text-slate-400 mb-6">{t('courseDetail.lessonsEmpty')}</p>}
 
         <div className="mb-6 rounded-2xl bg-[#f6efe7] p-5 dark:bg-white/5">

@@ -322,17 +322,20 @@ describe('Speaking exercise manual-review queue', () => {
     });
     const otherToken = signToken(otherTeacher);
 
+    // cefr: 'A1' keeps this lesson in the free tier regardless of billing - this test is
+    // about the ownership boundary on the review queue, not paywall enforcement.
     const secondExercise = await Exercise.create({
-      lesson: (await Lesson.create({ course: course._id, order: 2, title: 'Second Speaking Lesson', content: 'content' }))._id,
+      lesson: (await Lesson.create({ course: course._id, order: 2, title: 'Second Speaking Lesson', content: 'content', cefr: 'A1' }))._id,
       title: 'Second Speaking Exercise',
       type: 'speaking',
       question: 'Describe your day.',
       points: 10,
     });
-    await request(app)
+    const submitRes = await request(app)
       .post('/api/exercises/submit')
       .set('Authorization', `Bearer ${studentToken}`)
       .send({ exerciseId: secondExercise._id.toString(), audioBase64: 'data:audio/webm;base64,ZmFrZQ==' });
+    expect(submitRes.status).toBe(200);
 
     const queueRes = await request(app)
       .get('/api/exercises/reviews/speaking')

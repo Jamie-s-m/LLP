@@ -6,7 +6,7 @@ import ExerciseAttempt from '../models/ExerciseAttempt.js';
 import Flashcard from '../models/Flashcard.js';
 import { SKILLS } from '../utils/skills.js';
 import { computeSkillMastery } from '../utils/masteryEngine.js';
-import { filterDueFlashcards } from './flashcardController.js';
+import { filterDueFlashcards, filterAccessibleFlashcards } from './flashcardController.js';
 
 // @desc    Enroll student in a course
 // @route   POST /api/progress/enroll/:courseId
@@ -312,9 +312,11 @@ export const getTodayRecommendation = async (req, res, next) => {
     }
 
     // Platform-wide, same scope getFlashcards uses with no courseId - this project's decks
-    // aren't presented as course-scoped from the learner's side.
-    const allFlashcards = await Flashcard.find().select('_id');
-    const dueFlashcards = await filterDueFlashcards(userId, allFlashcards);
+    // aren't presented as course-scoped from the learner's side. Filtered to what the learner
+    // can actually access first, so this count never promises a card a free plan can't open.
+    const allFlashcards = await Flashcard.find().select('_id course');
+    const accessibleFlashcards = await filterAccessibleFlashcards(allFlashcards, req.user);
+    const dueFlashcards = await filterDueFlashcards(userId, accessibleFlashcards);
 
     res.status(200).json({
       success: true,

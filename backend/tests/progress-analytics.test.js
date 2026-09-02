@@ -151,6 +151,9 @@ describe('Today recommendation', () => {
       level: 'Beginner',
       category: 'Grammar',
       instructor: user._id,
+      // Keeps this course's flashcards in the free tier - this test is about the
+      // today-recommendation logic, not paywall enforcement.
+      cefr: 'A1',
     });
 
     lesson1 = await Lesson.create({ course: course._id, order: 1, title: 'Lesson One', content: 'content', cefr: 'A1' });

@@ -3,6 +3,7 @@ import Course from '../models/Course.js';
 import FlashcardProgress from '../models/FlashcardProgress.js';
 import User from '../models/User.js';
 import { hasModeratorPermission, isOwnerId } from '../middleware/auth.js';
+import { hasActivePlan, isCourseFreeForFlashcards } from '../utils/entitlement.js';
 
 // SM-2 spaced-repetition rating buttons, mapped to the classic 0-5 quality scale.
 const RATING_TO_QUALITY = { again: 1, hard: 3, good: 4, easy: 5 };
@@ -61,17 +62,49 @@ export const filterDueFlashcards = async (userId, flashcards) => {
   });
 };
 
+// Flashcards carry no CEFR level of their own - only their course does, and there's no "lesson
+// 1" equivalent for a course-wide deck (see entitlement.js's isCourseFreeForFlashcards). Narrows
+// an already-fetched flashcard list down to ones the user is entitled to, so a free student
+// browsing the unscoped deck (no courseId) sees only cards from A1 (free) courses. Exported for
+// the Dashboard "today" recommendation's overdue count, so it never counts a card the student
+// can't actually open.
+export const filterAccessibleFlashcards = async (flashcards, user) => {
+  if (hasActivePlan(user) || flashcards.length === 0) return flashcards;
+  // course is optional on Flashcard (never enforced at the schema level) - a card with no
+  // course to check against has nothing to gate it, so it stays accessible.
+  const courseIds = [...new Set(flashcards.filter((card) => card.course).map((card) => String(card.course)))];
+  const courses = courseIds.length > 0 ? await Course.find({ _id: { $in: courseIds } }).select('cefr') : [];
+  const cefrByCourseId = new Map(courses.map((course) => [String(course._id), course.cefr]));
+  return flashcards.filter((card) => !card.course || isCourseFreeForFlashcards(cefrByCourseId.get(String(card.course))));
+};
+
 export const getFlashcards = async (req, res, next) => {
   try {
     const { courseId } = req.query;
     const filter = courseId ? { course: courseId } : {};
+
+    // A specific gated course gets an explicit 402 (mirroring submitExercise) rather than a
+    // silently empty deck - the unscoped browse case below stays a quiet filter instead, since
+    // there's no single "this course" the student was asking for.
+    if (courseId && !hasActivePlan(req.user)) {
+      const course = await Course.findById(courseId).select('cefr');
+      if (course && !isCourseFreeForFlashcards(course.cefr)) {
+        return res.status(402).json({
+          success: false,
+          message: "This course's flashcards require an active LinguaNest plan.",
+          data: { requiresUpgrade: true },
+        });
+      }
+    }
+
     const flashcards = await Flashcard.find(filter).sort({ createdAt: -1 });
-    const dueFlashcards = await filterDueFlashcards(req.user.id, flashcards);
+    const accessibleFlashcards = courseId ? flashcards : await filterAccessibleFlashcards(flashcards, req.user);
+    const dueFlashcards = await filterDueFlashcards(req.user.id, accessibleFlashcards);
 
     res.status(200).json({
       success: true,
       data: dueFlashcards,
-      meta: { dueCount: dueFlashcards.length, totalCount: flashcards.length },
+      meta: { dueCount: dueFlashcards.length, totalCount: accessibleFlashcards.length },
     });
   } catch (error) {
     next(error);

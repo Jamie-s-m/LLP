@@ -145,6 +145,8 @@ describe('Flashcard SM-2 review', () => {
     });
     token = signToken(user);
 
+    // cefr: 'A1' keeps this course's flashcards in the free tier - this describe block is
+    // about SM-2 due-date scheduling, not paywall enforcement.
     const course = await Course.create({
       title: 'Flash Course',
       description: 'Course for flashcard test',
@@ -152,6 +154,7 @@ describe('Flashcard SM-2 review', () => {
       level: 'Beginner',
       category: 'Conversation',
       instructor: user._id,
+      cefr: 'A1',
     });
 
     card = await Flashcard.create({

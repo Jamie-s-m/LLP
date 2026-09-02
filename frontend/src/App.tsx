@@ -5,6 +5,7 @@ import { useAuthStore } from './store/authStore'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import ScrollToTop from './components/ScrollToTop'
+import PaywallModal from './components/PaywallModal'
 import { initializeLanguage } from './store/languageStore'
 import { useI18n } from './utils/i18n'
 
@@ -99,6 +100,7 @@ function App() {
     <Router basename={import.meta.env.BASE_URL}>
       <ScrollToTop />
       <Toaster position="top-right" />
+      <PaywallModal />
       <Suspense fallback={<Layout><div className="atlas-page flex items-center justify-center px-4 py-16"><div className="atlas-panel p-6 text-center text-[var(--text-muted)]">{t('app.loadingPage')}</div></div></Layout>}>
       <Routes>
         {/* Public Routes */}

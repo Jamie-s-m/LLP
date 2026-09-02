@@ -51,6 +51,13 @@ api.interceptors.request.use((config) => {
 // still rendering as signed-in, with no way out except knowing to manually log out and back
 // in. Excludes /auth/* itself - a 401 there is a normal "wrong credentials" response, not an
 // expired session, and redirecting would create a loop on the login page.
+// A 402 means the gate added in Phase 7 (backend/src/utils/entitlement.js) blocked a real
+// content/exercise/flashcard access point because the user's plan isn't active. Dispatching a
+// DOM event rather than importing a store/component here keeps this interceptor free of a
+// dependency on the rest of the app's module graph - PaywallModal (mounted once in App.tsx)
+// just listens for it, wherever the 402 came from.
+export const PAYWALL_EVENT = 'linguanest:paywall'
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -64,6 +71,17 @@ api.interceptors.response.use(
       localStorage.removeItem('user')
       window.location.href = '/login?sessionExpired=1'
     }
+
+    if (
+      typeof window !== 'undefined' &&
+      error.response?.status === 402 &&
+      error.response?.data?.data?.requiresUpgrade
+    ) {
+      window.dispatchEvent(new CustomEvent(PAYWALL_EVENT, {
+        detail: { message: error.response?.data?.message as string | undefined },
+      }))
+    }
+
     return Promise.reject(error)
   }
 )
