@@ -26,6 +26,8 @@ import waitlistRoutes from './routes/waitlist.js';
 import analyticsRoutes from './routes/analytics.js';
 import certificateRoutes from './routes/certificates.js';
 import debugRoutes from './routes/debug.js';
+import assignmentRoutes from './routes/assignments.js';
+import attendanceRoutes from './routes/attendance.js';
 import { handleStripeWebhook } from './controllers/billingController.js';
 
 dotenv.config();
@@ -178,6 +180,8 @@ app.use('/api/waitlist', waitlistRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/certificates', certificateRoutes);
 app.use('/api/debug', debugRoutes);
+app.use('/api/assignments', assignmentRoutes);
+app.use('/api/attendance', attendanceRoutes);
 
 // Catch-all API 404 handler
 app.use('/api', (req, res) => {

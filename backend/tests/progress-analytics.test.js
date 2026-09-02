@@ -229,6 +229,109 @@ describe('Today recommendation', () => {
   });
 });
 
+describe('Class analytics', () => {
+  let ownerToken;
+  let owner;
+  let otherTeacher;
+  let otherTeacherToken;
+  let adminToken;
+  let admin;
+  let course;
+  let lesson;
+  let exercise;
+  let studentA;
+  let studentB;
+
+  beforeAll(async () => {
+    owner = await User.create({
+      firstName: 'Class', lastName: 'Owner', email: 'class-owner@example.com', password: 'testpass123', role: 'teacher', isEmailVerified: true,
+    });
+    ownerToken = signToken(owner);
+
+    otherTeacher = await User.create({
+      firstName: 'Other', lastName: 'Teacher', email: 'class-other-teacher@example.com', password: 'testpass123', role: 'teacher', isEmailVerified: true,
+    });
+    otherTeacherToken = signToken(otherTeacher);
+
+    admin = await User.create({
+      firstName: 'Class', lastName: 'Admin', email: 'class-admin@example.com', password: 'testpass123', role: 'admin', isEmailVerified: true,
+    });
+    adminToken = signToken(admin);
+
+    course = await Course.create({
+      title: 'Class Analytics Course', description: 'Fixture course', language: 'English', level: 'Beginner', category: 'Grammar', instructor: owner._id,
+    });
+    lesson = await Lesson.create({ course: course._id, order: 1, title: 'Class Lesson', content: 'content', cefr: 'A1' });
+    exercise = await Exercise.create({
+      lesson: lesson._id, title: 'Class Exercise', type: 'multiple_choice', question: 'Q', options: ['a', 'b'], correctAnswer: 0, skill: 'grammar', points: 10,
+    });
+    course.lessons = [lesson._id];
+    await course.save();
+
+    studentA = await User.create({
+      firstName: 'Class', lastName: 'StudentA', email: 'class-student-a@example.com', password: 'testpass123', role: 'student', isEmailVerified: true,
+    });
+    studentB = await User.create({
+      firstName: 'Class', lastName: 'StudentB', email: 'class-student-b@example.com', password: 'testpass123', role: 'student', isEmailVerified: true,
+    });
+
+    await Progress.create({ user: studentA._id, course: course._id, completedLessons: [lesson._id], progressPercentage: 100, isCompleted: true });
+    await Progress.create({ user: studentB._id, course: course._id, completedLessons: [], progressPercentage: 0, isCompleted: false });
+    await ExerciseAttempt.create({ user: studentA._id, exercise: exercise._id, skill: 'grammar', isCorrect: true, status: 'graded' });
+  });
+
+  afterAll(async () => {
+    await ExerciseAttempt.deleteMany({ exercise: exercise._id });
+    await Progress.deleteMany({ course: course._id });
+    await Exercise.deleteMany({ lesson: lesson._id });
+    await Lesson.deleteOne({ _id: lesson._id });
+    await Course.deleteOne({ _id: course._id });
+    await User.deleteMany({ _id: { $in: [owner._id, otherTeacher._id, admin._id, studentA._id, studentB._id] } });
+  });
+
+  test('the owning teacher sees every enrolled student with completion and per-skill mastery', async () => {
+    const res = await request(app)
+      .get(`/api/progress/class-analytics/${course._id}`)
+      .set('Authorization', `Bearer ${ownerToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.studentCount).toBe(2);
+    expect(res.body.data.classAverageCompletion).toBe(50);
+
+    const studentARow = res.body.data.students.find((row) => row.studentId === String(studentA._id));
+    expect(studentARow.completionPercentage).toBe(100);
+    expect(studentARow.isCompleted).toBe(true);
+    const grammarMastery = studentARow.skillMastery.find((row) => row.skill === 'grammar');
+    expect(grammarMastery.attemptCount).toBe(1);
+
+    const studentBRow = res.body.data.students.find((row) => row.studentId === String(studentB._id));
+    expect(studentBRow.completionPercentage).toBe(0);
+  });
+
+  test('a teacher who does not own the course is rejected', async () => {
+    const res = await request(app)
+      .get(`/api/progress/class-analytics/${course._id}`)
+      .set('Authorization', `Bearer ${otherTeacherToken}`);
+    expect(res.status).toBe(403);
+  });
+
+  test('an admin can see any course\'s class analytics', async () => {
+    const res = await request(app)
+      .get(`/api/progress/class-analytics/${course._id}`)
+      .set('Authorization', `Bearer ${adminToken}`);
+    expect(res.status).toBe(200);
+    expect(res.body.data.studentCount).toBe(2);
+  });
+
+  test('a student cannot access class analytics at all', async () => {
+    const studentToken = signToken(studentA);
+    const res = await request(app)
+      .get(`/api/progress/class-analytics/${course._id}`)
+      .set('Authorization', `Bearer ${studentToken}`);
+    expect(res.status).toBe(403);
+  });
+});
+
 describe('Daily reward history', () => {
   let token;
   let user;

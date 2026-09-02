@@ -7,6 +7,7 @@ import Flashcard from '../models/Flashcard.js';
 import { SKILLS } from '../utils/skills.js';
 import { computeSkillMastery } from '../utils/masteryEngine.js';
 import { filterDueFlashcards, filterAccessibleFlashcards } from './flashcardController.js';
+import { hasModeratorPermission, isOwnerId } from '../middleware/auth.js';
 
 // @desc    Enroll student in a course
 // @route   POST /api/progress/enroll/:courseId
@@ -150,6 +151,73 @@ export const getStudentProgressForTeacher = async (req, res, next) => {
           progressPercentage: record.progressPercentage,
           isCompleted: record.isCompleted,
         })),
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Class-wide view for one course: every enrolled student's completion plus their
+//          per-skill mastery, so a teacher can see who's behind without opening each student
+//          individually. Deliberately reuses computeSkillMastery (Phase 6) per student rather
+//          than a second, differently-shaped aggregation path.
+// @route   GET /api/progress/class-analytics/:courseId
+// @access  Private (the course's own instructor, or admin/catalogContentQa)
+export const getClassAnalyticsForCourse = async (req, res, next) => {
+  try {
+    const { courseId } = req.params;
+    const course = await Course.findById(courseId).select('instructor title');
+    if (!course) {
+      return res.status(404).json({ success: false, message: 'Course not found' });
+    }
+
+    const isManager = req.user.role === 'admin'
+      || hasModeratorPermission(req.user, 'catalogContentQa')
+      || isOwnerId(course.instructor, req.user.id);
+    if (!isManager) {
+      return res.status(403).json({ success: false, message: 'You do not manage this course' });
+    }
+
+    const progressRecords = await Progress.find({ course: courseId }).populate('user', 'firstName lastName email');
+
+    // A skill only counts as a real gap once it has real exercises in this course - same
+    // reasoning as progressController.getTodayRecommendation's weak-skill filter, so a
+    // "needs attention" flag never points at a skill this course couldn't have offered anyway.
+    const NEEDS_ATTENTION_STATES = new Set(['needs_review', 'not_started', 'introduced', 'practicing']);
+
+    const students = await Promise.all(
+      progressRecords
+        .filter((progress) => progress.user)
+        .map(async (progress) => {
+          const skillMastery = await computeSkillMastery(progress.user._id, courseId);
+          const weakSkillCount = (skillMastery || [])
+            .filter((entry) => NEEDS_ATTENTION_STATES.has(entry.state) && entry.totalExercises > 0)
+            .length;
+
+          return {
+            studentId: progress.user._id,
+            name: `${progress.user.firstName} ${progress.user.lastName}`,
+            completionPercentage: progress.progressPercentage,
+            isCompleted: progress.isCompleted,
+            skillMastery: skillMastery || [],
+            weakSkillCount,
+          };
+        })
+    );
+
+    const classAverageCompletion = students.length > 0
+      ? Math.round(students.reduce((sum, student) => sum + student.completionPercentage, 0) / students.length)
+      : 0;
+
+    res.status(200).json({
+      success: true,
+      data: {
+        courseId: course._id,
+        courseTitle: course.title,
+        studentCount: students.length,
+        classAverageCompletion,
+        students,
       },
     });
   } catch (error) {
