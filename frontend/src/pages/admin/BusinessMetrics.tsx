@@ -9,7 +9,7 @@ interface Metrics {
   users: { registered: number; dailyActive: number; weeklyActive: number; monthlyActive: number }
   activation: { onboardingCompletionRate: number; placementCompletionRate: number; firstLessonCompletionRate: number }
   retention: { methodology: string; d1: number; d7: number; d30: number; d1CohortSize: number; d7CohortSize: number; d30CohortSize: number }
-  monetization: { payingUsers: number; conversionRate: number; payingByPlan: Record<string, number>; mrrUsd: number; arpuUsd: number; cancellationsLast30d: number }
+  monetization: { payingUsers: number; conversionRate: number; payingByPlan: Record<string, number>; mrrUzs: number; arpuUzs: number; cancellationsLast30d: number }
   learning: { lessonsCompleted: number; exercisesCompleted: number; averageAccuracyPercent: number; vocabularyReviews: number }
 }
 
@@ -120,13 +120,12 @@ export default function BusinessMetrics() {
         <div className="mb-4 flex items-center gap-3">
           <h2 className="text-xl font-bold text-ink dark:text-white">Monetization</h2>
           <SectionLabel />
-          <span className="text-xs text-muted">(MRR/ARPU convert the so&apos;m-priced plan to USD — see below)</span>
         </div>
         <div className="grid gap-4 sm:grid-cols-4">
           <StatCard label="Paying users" value={metrics.monetization.payingUsers} icon={<FiDollarSign />} />
           <StatCard label="Conversion" value={`${metrics.monetization.conversionRate}%`} icon={<FiDollarSign />} />
-          <StatCard label="MRR (est., USD)" value={`$${metrics.monetization.mrrUsd}`} icon={<FiDollarSign />} />
-          <StatCard label="ARPU (est., USD)" value={`$${metrics.monetization.arpuUsd}`} icon={<FiDollarSign />} />
+          <StatCard label="MRR" value={`${metrics.monetization.mrrUzs.toLocaleString('en-US')} so'm`} icon={<FiDollarSign />} />
+          <StatCard label="ARPU" value={`${metrics.monetization.arpuUzs.toLocaleString('en-US')} so'm`} icon={<FiDollarSign />} />
         </div>
         <div className="mt-4 flex flex-wrap gap-2 text-sm text-muted">
           {Object.entries(metrics.monetization.payingByPlan).map(([plan, count]) => (
