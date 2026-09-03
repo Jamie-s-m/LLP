@@ -173,6 +173,93 @@ describe('Billing enforcement (paywall)', () => {
     });
   });
 
+  describe('GET /api/exercises/:id', () => {
+    it('serves full content for the free-tier exercise to a no-plan student', async () => {
+      const student = await makeStudent();
+      const res = await request(app).get(`/api/exercises/${freeExercise._id}`).set('Authorization', `Bearer ${signToken(student)}`);
+      expect(res.status).toBe(200);
+      expect(res.body.data.question).toBe('Q');
+      expect(res.body.data.options).toEqual(['a', 'b']);
+      await User.deleteOne({ _id: student._id });
+    });
+
+    it('returns a locked shell (no question/options) for a gated exercise to a no-plan student, not a 402 - matches getLessonById\'s locked-preview convention', async () => {
+      const student = await makeStudent();
+      const res = await request(app).get(`/api/exercises/${gatedExercise._id}`).set('Authorization', `Bearer ${signToken(student)}`);
+      expect(res.status).toBe(200);
+      expect(res.body.meta.locked).toBe(true);
+      expect(res.body.data.question).toBeUndefined();
+      expect(res.body.data.options).toBeUndefined();
+      expect(res.body.data.correctAnswer).toBeUndefined();
+      await User.deleteOne({ _id: student._id });
+    });
+
+    it('serves full content for the gated exercise to an active-plan student', async () => {
+      const student = await makeStudent({ plan: 'learner', status: 'active', provider: 'payme' });
+      const res = await request(app).get(`/api/exercises/${gatedExercise._id}`).set('Authorization', `Bearer ${signToken(student)}`);
+      expect(res.status).toBe(200);
+      expect(res.body.data.question).toBe('Q');
+      expect(res.body.meta?.locked).toBeUndefined();
+      await User.deleteOne({ _id: student._id });
+    });
+
+    it('lets the course-owning instructor see full gated-exercise content regardless of their own billing state', async () => {
+      const res = await request(app).get(`/api/exercises/${gatedExercise._id}`).set('Authorization', `Bearer ${signToken(instructor)}`);
+      expect(res.status).toBe(200);
+      expect(res.body.data.question).toBe('Q');
+    });
+  });
+
+  describe('GET /api/exercises?lessonId=', () => {
+    it('strips question/options (not just answers) from every exercise in a gated lesson for a no-plan student', async () => {
+      const student = await makeStudent();
+      const res = await request(app)
+        .get('/api/exercises')
+        .query({ lessonId: gatedLesson._id.toString() })
+        .set('Authorization', `Bearer ${signToken(student)}`);
+      expect(res.status).toBe(200);
+      expect(res.body.meta.locked).toBe(true);
+      expect(res.body.data.length).toBe(1);
+      expect(res.body.data[0].question).toBeUndefined();
+      expect(res.body.data[0].correctAnswer).toBeUndefined();
+      await User.deleteOne({ _id: student._id });
+    });
+
+    it('serves full exercise content for a free lesson to a no-plan student', async () => {
+      const student = await makeStudent();
+      const res = await request(app)
+        .get('/api/exercises')
+        .query({ lessonId: freeLessonByOrder._id.toString() })
+        .set('Authorization', `Bearer ${signToken(student)}`);
+      expect(res.status).toBe(200);
+      expect(res.body.meta?.locked).toBeUndefined();
+      expect(res.body.data[0].question).toBe('Q');
+      await User.deleteOne({ _id: student._id });
+    });
+
+    it('strips content from an unfiltered catalog listing (no lessonId) for a plain student - no legitimate use case for a full raw dump', async () => {
+      const student = await makeStudent({ plan: 'learner', status: 'active', provider: 'payme' });
+      const res = await request(app).get('/api/exercises').set('Authorization', `Bearer ${signToken(student)}`);
+      expect(res.status).toBe(200);
+      expect(res.body.meta.locked).toBe(true);
+      const gated = res.body.data.find((e) => e._id === String(gatedExercise._id));
+      expect(gated.question).toBeUndefined();
+      await User.deleteOne({ _id: student._id });
+    });
+
+    it('serves the unfiltered catalog listing with full content to an admin', async () => {
+      const admin = await User.create({
+        firstName: 'Billing', lastName: 'Admin', email: 'billing-exercises-admin@example.com', password: 'testpass123', role: 'admin', isEmailVerified: true,
+      });
+      const res = await request(app).get('/api/exercises').set('Authorization', `Bearer ${signToken(admin)}`);
+      expect(res.status).toBe(200);
+      expect(res.body.meta?.locked).toBeUndefined();
+      const gated = res.body.data.find((e) => e._id === String(gatedExercise._id));
+      expect(gated.question).toBe('Q');
+      await User.deleteOne({ _id: admin._id });
+    });
+  });
+
   describe('GET /api/flashcards', () => {
     let freeCourse;
     let gatedCourse;

@@ -16,24 +16,46 @@ const assertExerciseOwnership = async (exerciseId, user) => {
   return { exercise };
 };
 
+// Content fields stripped from a locked exercise - mirrors getLessonById's locked-shell field
+// list (title/type/skill/difficulty/points survive so the shape is still usable for a picker
+// UI; everything a paying plan would actually be paying for does not).
+const CONTENT_FIELDS = '-question -instructions -options -sentenceTemplate -leftItems -rightItems -audioReference -acceptablePronunciations -maxWords -minWords -audioFile -transcript -hints -explanation -description';
+
 // Answer fields are only visible to whoever manages the exercise's course (so the content
 // editor can load an existing exercise to edit it) - everyone else, including enrolled
-// students, gets them stripped so a quiz can't be inspected for the answer key.
+// students, gets them stripped so a quiz can't be inspected for the answer key. Question/option
+// content is additionally gated behind the same paywall submitExercise enforces - this list
+// endpoint (and getExerciseById) used to let anyone read a gated exercise's full content without
+// ever calling submit, which defeated the paywall entirely for read-only access.
 export const getExercises = async (req, res, next) => {
   try {
     const { lessonId } = req.query;
     const filter = lessonId ? { lesson: lessonId } : {};
 
     let canSeeAnswers = false;
+    let canSeeContent = false;
     if (lessonId) {
       const { error } = await canManageLesson(lessonId, req.user);
       canSeeAnswers = !error;
+      if (canSeeAnswers) {
+        canSeeContent = true;
+      } else {
+        const lesson = await Lesson.findById(lessonId).select('order cefr course');
+        canSeeContent = Boolean(lesson) && requireLessonEntitlement(lesson, req.user).allowed;
+      }
+    } else {
+      // No lessonId means "every exercise in the catalog" - there is no legitimate non-manager
+      // use case for that (the only real caller, teacher/Assignments.tsx, always passes a
+      // lessonId), so only global content managers get full content in this branch.
+      canSeeAnswers = req.user.role === 'admin' || hasModeratorPermission(req.user, 'catalogContentQa');
+      canSeeContent = canSeeAnswers;
     }
 
     const query = Exercise.find(filter).sort({ createdAt: 1 });
     if (!canSeeAnswers) query.select('-correctAnswer -correctAnswers -correctPairs');
+    if (!canSeeContent) query.select(CONTENT_FIELDS);
     const exercises = await query;
-    res.status(200).json({ success: true, data: exercises });
+    res.status(200).json({ success: true, data: exercises, meta: canSeeContent ? undefined : { locked: true, requiresUpgrade: true } });
   } catch (error) {
     next(error);
   }
@@ -47,10 +69,33 @@ export const getExerciseById = async (req, res, next) => {
     }
 
     const { error } = await canManageLesson(exercise.lesson, req.user);
+    const isManager = !error;
     if (error) {
       exercise.correctAnswer = undefined;
       exercise.correctAnswers = undefined;
       exercise.correctPairs = undefined;
+    }
+
+    // submitExercise already gates grading behind the paywall - this closes the same gate on
+    // the read path, which previously let anyone fetch a gated exercise's full question/options
+    // straight from its ID without ever calling submit (confirmed live: no billing check existed
+    // here at all). Mirrors getLessonById's locked-shell pattern rather than a blanket 403.
+    if (!isManager) {
+      const lesson = await Lesson.findById(exercise.lesson).select('order cefr course').populate('course', 'instructor');
+      if (lesson && !requireLessonEntitlement(lesson, req.user).allowed) {
+        return res.status(200).json({
+          success: true,
+          data: {
+            _id: exercise._id,
+            lesson: exercise.lesson,
+            type: exercise.type,
+            skill: exercise.skill,
+            difficulty: exercise.difficulty,
+            points: exercise.points,
+          },
+          meta: { locked: true, requiresUpgrade: true },
+        });
+      }
     }
 
     res.status(200).json({ success: true, data: exercise });
