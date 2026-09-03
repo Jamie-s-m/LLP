@@ -1,7 +1,11 @@
 import { Helmet } from 'react-helmet-async'
 
 const SITE_NAME = 'LinguaNest'
-const SITE_URL = 'https://linguanest.uz'
+// www is the real canonical-serving host - the bare domain 301-redirects here (confirmed live
+// via curl -I). Every canonical link, og:url, and JSON-LD url/sameAs must point at this domain,
+// not the one that redirects away, or the SEO work these tags exist for actively undermines
+// itself. Matches public/sitemap.xml, which already uses www throughout.
+const SITE_URL = 'https://www.linguanest.uz'
 const DEFAULT_IMAGE = `${SITE_URL}/icons/icon-512x512.png`
 
 interface SeoProps {

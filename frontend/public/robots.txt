@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://linguanest.uz/sitemap.xml
+Sitemap: https://www.linguanest.uz/sitemap.xml
