@@ -1,11 +1,20 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { FiArrowRight, FiCheck } from 'react-icons/fi'
 import api from '../services/api'
 import { useAuthStore } from '../store/authStore'
 import { useI18n } from '../utils/i18n'
 import { track } from '../utils/analytics'
+import Illustration, { type IllustrationName } from '../components/illustrations/Illustration'
+import { fadeInUp } from '../utils/motion'
+
+const STEP_ILLUSTRATION: Record<number, IllustrationName> = {
+  1: 'goal',
+  2: 'book-lover',
+  3: 'journey',
+}
 
 type Goal = 'job' | 'it' | 'abroad' | 'study' | 'confidence' | 'other'
 type SelfLevel = 'beginner' | 'basic' | 'intermediate' | 'advanced' | 'not_sure'
@@ -71,6 +80,9 @@ export default function Onboarding() {
     }
   }
 
+  const reduced = useReducedMotion()
+  const stepAcknowledged = step === 1 ? !!goal : step === 2 ? !!selfLevel : !!dailyMinutes
+
   const OptionGrid = <T extends string | number>({
     options,
     labels,
@@ -89,7 +101,7 @@ export default function Onboarding() {
           type="button"
           aria-pressed={selected === option}
           onClick={() => onSelect(option)}
-          className={`flex items-center justify-between rounded-2xl border-2 p-4 text-left font-medium transition-all ${
+          className={`dimensional-card flex items-center justify-between rounded-2xl border-2 p-4 text-left font-medium transition-colors ${
             selected === option
               ? 'border-[var(--accent)] bg-[var(--accent-light)] text-[var(--accent)]'
               : 'border-[var(--border)] hover:border-[var(--accent)]'
@@ -112,26 +124,44 @@ export default function Onboarding() {
           <div className="h-2 rounded-full bg-[var(--accent)] transition-all" style={{ width: `${(step / 3) * 100}%` }} />
         </div>
 
+        <div className="mx-auto mb-2 h-32 w-32">
+          <Illustration name={STEP_ILLUSTRATION[step]} className="h-full w-full" />
+        </div>
+
         <div className="atlas-panel p-6">
-          {step === 1 ? (
-            <>
-              <h1 className="mb-2 text-2xl font-bold text-ink dark:text-white">{t('onboarding.step1Title')}</h1>
-              <p className="mb-6 text-muted">{t('onboarding.step1Copy')}</p>
-              <OptionGrid options={GOALS} labels={goalLabels} selected={goal} onSelect={setGoal} />
-            </>
-          ) : step === 2 ? (
-            <>
-              <h1 className="mb-2 text-2xl font-bold text-ink dark:text-white">{t('onboarding.step2Title')}</h1>
-              <p className="mb-6 text-muted">{t('onboarding.step2Copy')}</p>
-              <OptionGrid options={LEVELS} labels={levelLabels} selected={selfLevel} onSelect={setSelfLevel} />
-            </>
-          ) : (
-            <>
-              <h1 className="mb-2 text-2xl font-bold text-ink dark:text-white">{t('onboarding.step3Title')}</h1>
-              <p className="mb-6 text-muted">{t('onboarding.step3Copy')}</p>
-              <OptionGrid options={TIMES} labels={timeLabels} selected={dailyMinutes} onSelect={setDailyMinutes} />
-            </>
-          )}
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={step}
+              variants={fadeInUp(!!reduced)}
+              initial="hidden"
+              animate="visible"
+            >
+              {step === 1 ? (
+                <>
+                  <h1 className="mb-2 text-h1 text-ink dark:text-white">{t('onboarding.step1Title')}</h1>
+                  <p className="mb-6 text-muted">{t('onboarding.step1Copy')}</p>
+                  <OptionGrid options={GOALS} labels={goalLabels} selected={goal} onSelect={setGoal} />
+                </>
+              ) : step === 2 ? (
+                <>
+                  <h1 className="mb-2 text-h1 text-ink dark:text-white">{t('onboarding.step2Title')}</h1>
+                  <p className="mb-6 text-muted">{t('onboarding.step2Copy')}</p>
+                  <OptionGrid options={LEVELS} labels={levelLabels} selected={selfLevel} onSelect={setSelfLevel} />
+                </>
+              ) : (
+                <>
+                  <h1 className="mb-2 text-h1 text-ink dark:text-white">{t('onboarding.step3Title')}</h1>
+                  <p className="mb-6 text-muted">{t('onboarding.step3Copy')}</p>
+                  <OptionGrid options={TIMES} labels={timeLabels} selected={dailyMinutes} onSelect={setDailyMinutes} />
+                </>
+              )}
+              {stepAcknowledged ? (
+                <p className="mt-4 text-sm font-semibold text-[var(--accent)]" role="status">
+                  <FiCheck className="mr-1 inline" aria-hidden="true" /> {t('onboarding.stepAcknowledged')}
+                </p>
+              ) : null}
+            </motion.div>
+          </AnimatePresence>
 
           <div className="mt-8 flex items-center justify-between gap-3">
             {step > 1 ? (

@@ -45,7 +45,7 @@ const plans: BillingPlan[] = [
   {
     key: 'family',
     name: 'Family',
-    priceLabel: "1,200,000 so'm/month",
+    priceLabel: "149,000 so'm/month",
     description: 'For parents supporting one or more learners together.',
     roleHint: 'parent',
     cta: 'Create family account',
@@ -57,7 +57,7 @@ const plans: BillingPlan[] = [
   {
     key: 'teaching',
     name: 'Teaching team',
-    priceLabel: "2,000,000 so'm/month",
+    priceLabel: "350,000 so'm/month",
     description: 'For teachers or small academies running guided programs.',
     roleHint: 'teacher',
     cta: 'Open teaching workspace',
@@ -295,10 +295,20 @@ export default function Pricing() {
             const returnUrl = `${window.location.origin}/pricing?checkout=payme`
             const clickReturnUrl = `${window.location.origin}/pricing?checkout=click`
 
+            const isRecommended = plan.key === 'learner'
+
             return (
-              <section key={plan.name} className="atlas-panel p-6">
+              <section
+                key={plan.name}
+                className={`atlas-panel dimensional-card p-6 ${isRecommended ? 'pricing-recommended' : ''}`}
+              >
+                {isRecommended ? (
+                  <span className="mb-3 inline-block rounded-full bg-[var(--accent)] px-3 py-1 text-xs font-bold uppercase tracking-wide text-[var(--on-accent)]">
+                    {t('pricing.mostPopular')}
+                  </span>
+                ) : null}
                 <h2 className="atlas-kicker">{plan.name}</h2>
-                <strong className="mt-2 block text-4xl text-ink dark:text-white">{plan.priceLabel}</strong>
+                <strong className="mt-2 block text-h1 text-ink dark:text-white">{plan.priceLabel}</strong>
                 <p className="mt-3 text-sm text-[var(--text-muted)]">{plan.description}</p>
                 <div className="mt-4 rounded-2xl bg-[var(--surface-strong)] p-4 text-sm text-[var(--text-muted)] dark:bg-white/5">
                   <strong className="block text-ink dark:text-white">{t('common.bestFor')}</strong>

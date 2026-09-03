@@ -1,14 +1,25 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate, Link } from 'react-router-dom'
-import { FiCheckCircle } from 'react-icons/fi'
+import { motion, useReducedMotion } from 'framer-motion'
 import { useAuthStore } from '../store/authStore'
 import { useI18n } from '../utils/i18n'
 import api from '../services/api'
+import Orbit, { type CefrLevel } from '../components/orbit/Orbit'
+import { fadeInUp } from '../utils/motion'
 
 interface PlacementResult {
   cefr: string
   level: 'Beginner' | 'Intermediate' | 'Advanced'
   recommendedLesson?: { lessonId: string; courseId: string; title: string } | null
+}
+
+const ORBIT_LEVELS: CefrLevel[] = ['A1', 'A2', 'B1', 'B2', 'C1']
+const BUCKET_FALLBACK: Record<string, CefrLevel> = { Beginner: 'A1', Intermediate: 'B1', Advanced: 'C1' }
+
+function toOrbitLevel(cefr: string | null, bucket: string | null): CefrLevel {
+  const normalized = (cefr || '').toUpperCase()
+  if ((ORBIT_LEVELS as string[]).includes(normalized)) return normalized as CefrLevel
+  return (bucket && BUCKET_FALLBACK[bucket]) || 'A1'
 }
 
 export default function OnboardingPlan() {
@@ -90,14 +101,17 @@ export default function OnboardingPlan() {
           ? `${level} courses`
           : 'Courses'
 
+  const reduced = useReducedMotion()
+  const orbitLevel = toOrbitLevel(cefr, level)
+
   return (
     <div className="atlas-page px-4 py-12">
       <div className="mx-auto max-w-xl text-center">
-        <div className="atlas-panel p-8">
-          <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-[var(--accent-light)] text-[var(--accent)]">
-            <FiCheckCircle size={28} />
+        <motion.div className="atlas-panel p-8" variants={fadeInUp(!!reduced)} initial="hidden" animate="visible">
+          <div className="mx-auto mb-2 h-40 w-40">
+            <Orbit currentLevel={orbitLevel} levelProgress={0} variant="full" className="h-full w-full" />
           </div>
-          <h1 className="mb-6 text-3xl font-bold text-ink dark:text-white">{t('onboarding.planTitle')}</h1>
+          <h1 className="mb-6 text-h1 text-ink dark:text-white">{t('onboarding.planTitle')}</h1>
 
           <dl className="mb-6 space-y-3 rounded-2xl border border-[var(--border)] p-5 text-left text-sm">
             <div>
@@ -137,7 +151,7 @@ export default function OnboardingPlan() {
               {t('pricing.goToDashboard')}
             </button>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   )

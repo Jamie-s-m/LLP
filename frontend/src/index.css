@@ -741,6 +741,34 @@ html.dark {
     pointer-events: none;
   }
 
+  /* Phase 20 - premium-surface treatment for the recommended pricing tier. Reuses
+     .atlas-hero::before's exact blurred-blob technique (already live, already the
+     established "glow" precedent in this codebase) rather than inventing a new effect,
+     scaled down and pinned to the accent border instead of floating loose. */
+  .pricing-recommended {
+    position: relative;
+    border-color: var(--accent) !important;
+    box-shadow: 0 20px 44px -16px color-mix(in srgb, var(--accent) 35%, transparent) !important;
+  }
+
+  .pricing-recommended::before {
+    content: '';
+    position: absolute;
+    inset: -20% -10% auto auto;
+    width: 12rem;
+    height: 12rem;
+    border-radius: var(--radius-full);
+    background: color-mix(in srgb, var(--accent) 16%, transparent);
+    filter: blur(36px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .pricing-recommended > * {
+    position: relative;
+    z-index: 1;
+  }
+
   .atlas-panel {
     @apply rounded-[2rem] border shadow-sm transition-colors duration-200;
     border-color: var(--brand-border);
