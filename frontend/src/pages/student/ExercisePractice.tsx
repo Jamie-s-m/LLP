@@ -7,6 +7,7 @@ import HeartsRow from '../../components/ui/HeartsRow'
 import Alert from '../../components/ui/Alert'
 import { track } from '../../utils/analytics'
 import { useI18n } from '../../utils/i18n'
+import { BadgeIcon } from '../../utils/badgeIcons'
 
 interface ExerciseData {
   _id: string
@@ -133,7 +134,10 @@ export default function ExercisePractice() {
       // needs to fire here too rather than only ever showing up silently in the catalog later.
       const unlockedBadges = response.data.data.unlockedBadges as Array<{ name: string; icon?: string }> | undefined
       unlockedBadges?.forEach((badge) => {
-        toast.success(`${badge.icon ? `${badge.icon} ` : ''}Badge unlocked: ${badge.name}!`, { duration: 5000 })
+        toast.success(`Badge unlocked: ${badge.name}!`, {
+          duration: 5000,
+          icon: badge.icon ? <BadgeIcon iconKey={badge.icon} className="text-xl" /> : undefined,
+        })
       })
     } catch (error: any) {
       if (error.response?.status === 403) {

@@ -16,25 +16,32 @@ export const BADGE_CATALOG = [
   { name: 'Polyglot Pro', description: 'Earn 10,000 XP total', category: 'milestone', points: 1000, statKey: 'totalXP', threshold: 10000 },
 ];
 
+// Icon KEYS, not glyphs - this app's own established rule is no emoji anywhere in UI chrome
+// (confirmed elsewhere in the codebase), which this catalog was violating directly. Each key
+// names a real Phosphor icon component (frontend/src/utils/badgeIcons.tsx maps these to the
+// actual React components, since a JSON API response can carry a string but not a component).
 const ICONS = {
-  'First Steps': '🌱',
-  'Three Day Streak': '🔥',
-  'Week Warrior': '⚡',
-  'Month Master': '👑',
-  'Century Streak': '💎',
-  'Coin Collector': '🪙',
-  'Wealth Builder': '💰',
-  'Coin Millionaire': '💎',
-  'Rising Star': '⭐',
-  'Language Learner': '🌟',
-  'Polyglot Pro': '🏆',
+  'First Steps': 'PiPlantDuotone',
+  'Three Day Streak': 'PiFlameDuotone',
+  'Week Warrior': 'PiLightningDuotone',
+  'Month Master': 'PiCrownDuotone',
+  'Century Streak': 'PiDiamondDuotone',
+  'Coin Collector': 'PiCoinDuotone',
+  'Wealth Builder': 'PiCoinsDuotone',
+  'Coin Millionaire': 'PiWalletDuotone',
+  'Rising Star': 'PiStarDuotone',
+  'Language Learner': 'PiSparkleDuotone',
+  'Polyglot Pro': 'PiTrophyDuotone',
 };
 
+// Real brand tokens (frontend/src/index.css / tailwind.config.js) instead of raw hex values
+// unrelated to the live design system - terracotta/pine/wine are this app's actual primary/
+// secondary/accent colors.
 const CATEGORY_COLORS = {
-  streak: '#FF6B35',
-  achievement: '#FFD700',
-  milestone: '#5B5CE2',
-  special: '#36C9A5',
+  streak: '#C84B31', // terracotta - momentum/energy
+  achievement: '#3F6B52', // pine - growth/wealth (coin-based badges)
+  milestone: '#7C2D42', // wine - prestige/mastery (XP-based badges)
+  special: '#3E6FA6', // sky - reserved for a future badge category
 };
 
 export const iconFor = (name) => ICONS[name] || '🏅';

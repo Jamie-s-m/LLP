@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
+import { PiLockDuotone } from 'react-icons/pi'
 import api from '../../services/api'
 import { useLanguageStore } from '../../store/languageStore'
 import Card from '../../components/ui/Card'
 import ProgressBar from '../../components/ui/ProgressBar'
+import { BadgeIcon } from '../../utils/badgeIcons'
 
 interface BadgeEntry {
   name: string
@@ -67,9 +69,9 @@ export default function Achievements() {
                 <Card key={badge.name} className="flex flex-col items-center gap-2 text-center">
                   <div
                     className="flex h-16 w-16 items-center justify-center rounded-full text-3xl"
-                    style={{ background: `${badge.color}22` }}
+                    style={{ background: `${badge.color}22`, color: badge.color }}
                   >
-                    {badge.icon}
+                    <BadgeIcon iconKey={badge.icon} />
                   </div>
                   <p className="font-semibold">{badge.name}</p>
                   <p className="text-xs text-[var(--text-muted)]">{badge.description}</p>
@@ -81,9 +83,9 @@ export default function Achievements() {
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
               {lockedBadges.map((badge) => (
                 <Card key={badge.name} className="flex flex-col items-center gap-2 text-center opacity-70 grayscale">
-                  <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-[var(--border-light)] text-3xl">
-                    {badge.icon}
-                    <span className="absolute -bottom-1 -right-1 text-base grayscale-0">🔒</span>
+                  <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-[var(--border-light)] text-3xl text-[var(--text-muted)]">
+                    <BadgeIcon iconKey={badge.icon} />
+                    <span className="absolute -bottom-1 -right-1 grayscale-0 text-[var(--text-primary)]"><PiLockDuotone className="text-base" aria-hidden="true" /></span>
                   </div>
                   <p className="font-semibold">{badge.name}</p>
                   <p className="text-xs text-[var(--text-muted)]">{badge.description}</p>

@@ -29,6 +29,21 @@ export const checkAndAwardBadges = async (userId) => {
     if (!isBadgeUnlocked(entry, stats)) continue;
 
     let badge = await Badge.findOne({ name: entry.name });
+    if (badge) {
+      // Self-healing: a Badge document created before badgeCatalog.js's icon/color values last
+      // changed (e.g. the emoji-to-Phosphor-icon-key migration) would otherwise keep serving its
+      // stale stored icon/color forever, since this lookup only creates a new document when none
+      // exists - the exact "stored copy drifts from the real source" bug class already fixed
+      // elsewhere in this app for priceLabel/mrrUzs. Syncing on every award-check is cheap and
+      // keeps every already-earned badge's display current with the catalog's latest definition.
+      const freshIcon = iconFor(entry.name);
+      const freshColor = colorFor(entry.category);
+      if (badge.icon !== freshIcon || badge.color !== freshColor) {
+        badge.icon = freshIcon;
+        badge.color = freshColor;
+        await badge.save();
+      }
+    }
     if (!badge) {
       badge = await Badge.create({
         name: entry.name,

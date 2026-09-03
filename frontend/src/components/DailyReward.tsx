@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
+import { PiCoinDuotone } from 'react-icons/pi'
 import api from '../services/api'
 import { track } from '../utils/analytics'
+import { BadgeIcon } from '../utils/badgeIcons'
 
 export default function DailyReward() {
   const [status, setStatus] = useState<any>(null)
@@ -32,7 +34,10 @@ export default function DailyReward() {
       if (newStreak > 1) track('streak_maintained', { streak: newStreak })
       const unlockedBadges = res.data.data.unlockedBadges as Array<{ name: string; icon?: string }> | undefined
       unlockedBadges?.forEach((badge) => {
-        toast.success(`${badge.icon ? `${badge.icon} ` : ''}Badge unlocked: ${badge.name}!`, { duration: 5000 })
+        toast.success(`Badge unlocked: ${badge.name}!`, {
+          duration: 5000,
+          icon: badge.icon ? <BadgeIcon iconKey={badge.icon} className="text-xl" /> : undefined,
+        })
       })
     } catch (err: any) {
       setError(err?.response?.data?.message || err.message || 'Claim failed')
@@ -52,7 +57,7 @@ export default function DailyReward() {
           <p className="text-sm text-muted">Keep your streak and earn LinguaCoins and XP.</p>
         </div>
         <div className="text-right">
-          <div className="text-xl font-bold">{status.linguaCoins ?? 0} 🪙</div>
+          <div className="text-xl font-bold flex items-center justify-end gap-1">{status.linguaCoins ?? 0} <PiCoinDuotone className="text-lg" aria-hidden="true" /></div>
           <div className="text-xs text-muted">Streak: {status.currentStreak ?? 0} days</div>
         </div>
       </div>
@@ -60,7 +65,7 @@ export default function DailyReward() {
       <div className="mt-4 flex items-center justify-between">
         <div>
           <div className="text-sm">Today&apos;s reward preview</div>
-          <div className="text-base font-semibold">{status.previewCoins} 🪙 • {status.previewXP} XP</div>
+          <div className="text-base font-semibold flex items-center gap-1">{status.previewCoins} <PiCoinDuotone className="inline text-base" aria-hidden="true" /> • {status.previewXP} XP</div>
         </div>
         <div>
           <button

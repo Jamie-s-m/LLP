@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { FiHeart } from 'react-icons/fi'
+import { PiCoinDuotone } from 'react-icons/pi'
 import api from '../services/api'
 
 const HEART_REFILL_COST = 50
@@ -44,7 +45,7 @@ export default function CoinStore() {
           <FiHeart className="text-coral" />
           <div>
             <p className="text-sm font-semibold">Refill hearts to full</p>
-            <p className="text-xs text-muted">{hearts.hearts}/{hearts.maxHearts} hearts · {HEART_REFILL_COST} 🪙</p>
+            <p className="text-xs text-muted flex items-center gap-1">{hearts.hearts}/{hearts.maxHearts} hearts · {HEART_REFILL_COST} <PiCoinDuotone className="inline text-sm" aria-hidden="true" /></p>
           </div>
         </div>
         <button

@@ -8,6 +8,7 @@ import VideoEmbed from '../../components/ui/VideoEmbed'
 import ProgressBar from '../../components/ui/ProgressBar'
 import { track } from '../../utils/analytics'
 import { useI18n } from '../../utils/i18n'
+import { BadgeIcon } from '../../utils/badgeIcons'
 
 interface VocabItem {
   word: string
@@ -121,7 +122,10 @@ export default function LessonView() {
       // Matches DailyReward.tsx's exact toast pattern - badges can unlock from lesson
       // completion, not just claiming the daily reward.
       unlockedBadges.forEach((badge) => {
-        toast.success(`${badge.icon ? `${badge.icon} ` : ''}Badge unlocked: ${badge.name}!`, { duration: 5000 })
+        toast.success(`Badge unlocked: ${badge.name}!`, {
+          duration: 5000,
+          icon: badge.icon ? <BadgeIcon iconKey={badge.icon} className="text-xl" /> : undefined,
+        })
       })
     } else {
       toast.error('Could not save your progress. Are you enrolled in this course?')
