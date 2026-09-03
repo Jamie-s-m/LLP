@@ -5,6 +5,9 @@ node_modules/
 
 # Testing
 /coverage
+/test-results/
+/playwright-report/
+/blob-report/
 
 # Production (build output - Render builds fresh from source, see render.yaml)
 dist/

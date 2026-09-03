@@ -73,6 +73,64 @@ jobs:
           MONGODB_TEST_URI: mongodb://localhost:27017
         run: npm test
 
+  e2e:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    # Own Mongo service container, separate database name from the Jest suite's - e2e-server.mjs
+    # (backend/scripts/e2e-server.mjs) skips its local mongodb-memory-server fallback whenever
+    # MONGODB_URI is already set, which it is here, so this reuses the same real-container
+    # pattern as build-and-test rather than downloading a second Mongo binary.
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.runCommand({ ping: 1 })' --quiet"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            frontend/package-lock.json
+            backend/package-lock.json
+
+      - name: Install root (Playwright) dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run E2E suite
+        env:
+          MONGODB_URI: mongodb://localhost:27017/linguanest-e2e
+        run: npx playwright test
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
   # No deploy job here on purpose. Both Render services (linguanest-api, linguanest-web) have
   # native GitHub auto-deploy enabled (autoDeploy: "yes", autoDeployTrigger: "commit", confirmed
   # via the Render API) - Render watches this repo's `main` branch directly and deploys the
