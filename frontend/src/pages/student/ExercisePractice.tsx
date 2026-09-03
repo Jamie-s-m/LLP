@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { FiArrowLeft, FiCheck, FiX, FiMic, FiSquare, FiPlay } from 'react-icons/fi'
+import { FiArrowLeft, FiCheck, FiX, FiMic, FiSquare, FiPlay, FiLock } from 'react-icons/fi'
 import api from '../../services/api'
 import HeartsRow from '../../components/ui/HeartsRow'
 import Alert from '../../components/ui/Alert'
 import { track } from '../../utils/analytics'
+import { useI18n } from '../../utils/i18n'
 
 interface ExerciseData {
   _id: string
@@ -35,11 +36,13 @@ const formatRegenTime = (isoDate: string | null) => {
 export default function ExercisePractice() {
   const { exerciseId } = useParams()
   const navigate = useNavigate()
+  const { t } = useI18n()
   const [exercise, setExercise] = useState<ExerciseData | null>(null)
   const [selected, setSelected] = useState<number | null>(null)
   const [textAnswer, setTextAnswer] = useState('')
   const [result, setResult] = useState<SubmitResult | null>(null)
   const [loading, setLoading] = useState(true)
+  const [locked, setLocked] = useState(false)
   const [outOfHearts, setOutOfHearts] = useState<{ heartsRegenAt: string | null } | null>(null)
   const [hearts, setHearts] = useState({ hearts: 5, maxHearts: 5 })
   const [submitting, setSubmitting] = useState(false)
@@ -56,7 +59,10 @@ export default function ExercisePractice() {
   useEffect(() => {
     if (!exerciseId) return
     api.get(`/exercises/${exerciseId}`)
-      .then((response) => setExercise(response.data.data))
+      .then((response) => {
+        setExercise(response.data.data)
+        setLocked(Boolean(response.data.meta?.locked))
+      })
       .catch(() => toast.error('Exercise could not be loaded'))
       .finally(() => setLoading(false))
 
@@ -140,6 +146,26 @@ export default function ExercisePractice() {
 
   if (!exercise) {
     return <div className="min-h-screen py-8 px-4 text-center">Exercise not found.</div>
+  }
+
+  if (locked) {
+    return (
+      <div className="min-h-screen py-8 px-4 bg-gradient-to-br from-primary-50 to-secondary-50 dark:from-neutral-900 dark:to-neutral-800">
+        <div className="container mx-auto max-w-md text-center">
+          <div className="card flex flex-col items-center gap-4 p-8">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--accent-light)] text-[var(--accent)]">
+              <FiLock size={24} />
+            </div>
+            <h2 className="text-2xl font-bold">{t('paywall.lockedExerciseTitle')}</h2>
+            <p className="text-[var(--text-muted)]">{t('paywall.lockedExerciseCopy')}</p>
+            <Link to="/pricing" className="btn btn-primary w-full">{t('paywall.viewPlans')}</Link>
+            <button className="btn btn-outline w-full" onClick={() => navigate(-1)}>
+              Back
+            </button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   if (outOfHearts) {
