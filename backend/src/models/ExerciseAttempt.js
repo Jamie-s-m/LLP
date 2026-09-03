@@ -15,6 +15,9 @@ const exerciseAttemptSchema = new mongoose.Schema(
     // (see progressController.getSkillsBreakdown) until a teacher reviews them.
     status: { type: String, enum: ['graded', 'pending_review'], default: 'graded' },
     audioSubmission: { type: String, default: '' },
+    // Writing attempts, same review model as speaking (see submitExercise) - free text instead
+    // of an audio recording.
+    writtenSubmission: { type: String, default: '' },
     reviewedBy: { type: mongoose.Schema.ObjectId, ref: 'User', default: null },
     reviewFeedback: { type: String, default: '' },
     reviewedAt: { type: Date, default: null },

@@ -185,12 +185,27 @@ export const deleteExercise = async (req, res, next) => {
 
 const normalizeText = (value) => String(value ?? '').trim().toLowerCase();
 
+// Order-independent: the learner can pair items in any click sequence, only the resulting
+// set of {left, right} index pairs has to match the stored answer key.
+const pairsKey = (pairs) => (Array.isArray(pairs) ? pairs : [])
+  .map((pair) => `${pair?.left}-${pair?.right}`)
+  .sort()
+  .join(',');
+
 const gradeAnswer = (exercise, answer) => {
   if (exercise.type === 'fill_blank') {
     const candidates = exercise.correctAnswers && exercise.correctAnswers.length > 0
       ? exercise.correctAnswers
       : [exercise.correctAnswer].filter((value) => typeof value === 'string' && value.length > 0);
     return candidates.some((candidate) => normalizeText(candidate) === normalizeText(answer));
+  }
+
+  if (exercise.type === 'matching') {
+    // Previously fell through to the generic correctAnswer comparison below, which matching
+    // exercises never populate (their answer key lives in correctPairs) - every submission
+    // graded incorrect regardless of what was submitted. No live content used this type yet,
+    // so this was latent rather than reported.
+    return pairsKey(answer) === pairsKey(exercise.correctPairs) && pairsKey(answer) !== '';
   }
 
   // multiple_choice and listening both grade against an option index.
@@ -200,6 +215,9 @@ const gradeAnswer = (exercise, answer) => {
 const feedbackAnswer = (exercise) => {
   if (exercise.type === 'fill_blank') {
     return exercise.correctAnswers?.[0] ?? exercise.correctAnswer;
+  }
+  if (exercise.type === 'matching') {
+    return exercise.correctPairs;
   }
   return exercise.correctAnswer;
 };
@@ -235,11 +253,18 @@ export const submitExercise = async (req, res, next) => {
 
     const skill = exercise.skill || inferSkillFromType(exercise.type);
 
-    // Speaking exercises can't be auto-graded: queue the recording for a teacher to review
-    // instead of gating on hearts or awarding XP now (see reviewSpeakingAttempt).
-    if (exercise.type === 'speaking') {
-      if (!audioBase64) {
+    // Speaking and writing are both open-ended free response - neither can be auto-graded
+    // against a fixed correctAnswer, so both queue for teacher review instead of gating on
+    // hearts or awarding XP now (see reviewSpeakingAttempt). Writing previously fell through
+    // to the generic correctAnswer comparison, which it never populates (no correctAnswer
+    // concept for free text) - every submission graded incorrect, unconditionally losing a
+    // heart, regardless of what was written. No live content used this type yet.
+    if (exercise.type === 'speaking' || exercise.type === 'writing') {
+      if (exercise.type === 'speaking' && !audioBase64) {
         return res.status(400).json({ success: false, message: 'A recording is required for speaking exercises' });
+      }
+      if (exercise.type === 'writing' && !String(answer || '').trim()) {
+        return res.status(400).json({ success: false, message: 'A written answer is required' });
       }
 
       const attempt = await ExerciseAttempt.create({
@@ -249,7 +274,7 @@ export const submitExercise = async (req, res, next) => {
         isCorrect: false,
         pointsAwarded: 0,
         status: 'pending_review',
-        audioSubmission: audioBase64,
+        ...(exercise.type === 'speaking' ? { audioSubmission: audioBase64 } : { writtenSubmission: String(answer).trim() }),
       });
 
       return res.status(200).json({

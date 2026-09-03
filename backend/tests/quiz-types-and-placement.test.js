@@ -346,6 +346,137 @@ describe('Speaking exercise manual-review queue', () => {
   });
 });
 
+describe('Matching exercise grading', () => {
+  let studentToken, student, exercise;
+
+  beforeAll(async () => {
+    student = await User.create({
+      firstName: 'Match', lastName: 'Student', email: 'match-student@example.com', password: 'testpass123', role: 'student', isEmailVerified: true,
+    });
+    studentToken = signToken(student);
+
+    const course = await Course.create({
+      title: 'Matching Course', description: 'Course for matching test', language: 'English', level: 'Beginner', category: 'Vocabulary', instructor: student._id,
+    });
+    const lesson = await Lesson.create({ course: course._id, order: 1, title: 'Matching Lesson', content: 'content' });
+    exercise = await Exercise.create({
+      lesson: lesson._id,
+      title: 'Matching Exercise',
+      type: 'matching',
+      question: 'Match each word to its translation.',
+      leftItems: ['cat', 'dog'],
+      rightItems: ['mushuk', 'it'],
+      correctPairs: [{ left: 0, right: 0 }, { left: 1, right: 1 }],
+      points: 15,
+    });
+  });
+
+  afterAll(async () => {
+    await User.deleteOne({ _id: student._id });
+    await ExerciseAttempt.deleteMany({ exercise: exercise._id });
+  });
+
+  // Regression: gradeAnswer previously only ever compared against exercise.correctAnswer,
+  // which matching exercises never populate (their key is correctPairs) - every submission
+  // graded incorrect no matter what was submitted.
+  test('the correct set of pairs grades correct regardless of click order', async () => {
+    const res = await request(app)
+      .post('/api/exercises/submit')
+      .set('Authorization', `Bearer ${studentToken}`)
+      .send({ exerciseId: exercise._id.toString(), answer: [{ left: 1, right: 1 }, { left: 0, right: 0 }] });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.isCorrect).toBe(true);
+    expect(res.body.data.points).toBe(15);
+  });
+
+  test('an incomplete or wrong pairing grades incorrect', async () => {
+    const res = await request(app)
+      .post('/api/exercises/submit')
+      .set('Authorization', `Bearer ${studentToken}`)
+      .send({ exerciseId: exercise._id.toString(), answer: [{ left: 0, right: 1 }, { left: 1, right: 0 }] });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.isCorrect).toBe(false);
+  });
+});
+
+describe('Writing exercise manual-review queue', () => {
+  let teacherToken, teacher, studentToken, student, exercise;
+
+  beforeAll(async () => {
+    teacher = await User.create({
+      firstName: 'Write', lastName: 'Teacher', email: 'write-teacher@example.com', password: 'testpass123', role: 'teacher', isEmailVerified: true,
+    });
+    teacherToken = signToken(teacher);
+    student = await User.create({
+      firstName: 'Write', lastName: 'Student', email: 'write-student@example.com', password: 'testpass123', role: 'student', isEmailVerified: true,
+    });
+    studentToken = signToken(student);
+
+    const course = await Course.create({
+      title: 'Writing Course', description: 'Course for writing test', language: 'English', level: 'Beginner', category: 'Writing', instructor: teacher._id,
+    });
+    const lesson = await Lesson.create({ course: course._id, order: 1, title: 'Writing Lesson', content: 'content' });
+    exercise = await Exercise.create({
+      lesson: lesson._id, title: 'Writing Exercise', type: 'writing', question: 'Describe your morning routine.', minWords: 10, points: 20,
+    });
+  });
+
+  afterAll(async () => {
+    await User.deleteMany({ _id: { $in: [teacher._id, student._id] } });
+    await ExerciseAttempt.deleteMany({ exercise: exercise._id });
+  });
+
+  // Regression: writing previously fell through to the generic correctAnswer comparison
+  // (which it never populates - there's no fixed answer for free text), so every submission
+  // graded incorrect and unconditionally lost a heart. It's free-response, same as speaking,
+  // so it queues for teacher review instead of trying to auto-grade it.
+  test('submission is queued for review, not auto-graded, and does not touch hearts', async () => {
+    const res = await request(app)
+      .post('/api/exercises/submit')
+      .set('Authorization', `Bearer ${studentToken}`)
+      .send({ exerciseId: exercise._id.toString(), answer: 'I wake up, drink coffee, and check my email before work.' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.status).toBe('pending_review');
+
+    const attempt = await ExerciseAttempt.findOne({ exercise: exercise._id, user: student._id });
+    expect(attempt.status).toBe('pending_review');
+    expect(attempt.writtenSubmission).toBe('I wake up, drink coffee, and check my email before work.');
+
+    const refreshedStudent = await User.findById(student._id);
+    expect(refreshedStudent.hearts).toBe(5);
+  });
+
+  test('an empty submission is rejected before it reaches the review queue', async () => {
+    const res = await request(app)
+      .post('/api/exercises/submit')
+      .set('Authorization', `Bearer ${studentToken}`)
+      .send({ exerciseId: exercise._id.toString(), answer: '   ' });
+
+    expect(res.status).toBe(400);
+  });
+
+  test('the owning teacher sees the written submission in the same review queue as speaking', async () => {
+    const queueRes = await request(app)
+      .get('/api/exercises/reviews/speaking')
+      .set('Authorization', `Bearer ${teacherToken}`);
+
+    expect(queueRes.status).toBe(200);
+    const item = queueRes.body.data.find((entry) => entry.exercise?.question === 'Describe your morning routine.');
+    expect(item.writtenSubmission).toBe('I wake up, drink coffee, and check my email before work.');
+
+    const reviewRes = await request(app)
+      .post(`/api/exercises/reviews/speaking/${item._id}`)
+      .set('Authorization', `Bearer ${teacherToken}`)
+      .send({ isCorrect: true, feedback: 'Nice and clear.' });
+
+    expect(reviewRes.status).toBe(200);
+    expect(reviewRes.body.data.pointsAwarded).toBe(20);
+  });
+});
+
 describe('Placement test', () => {
   let token;
   let user;
