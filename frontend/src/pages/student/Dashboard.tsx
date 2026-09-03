@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
-import { FiBookOpen, FiCheck, FiClock, FiTarget, FiUsers, FiX, FiZap } from 'react-icons/fi'
+import { FiCheck, FiClock, FiTarget, FiUsers, FiX, FiZap } from 'react-icons/fi'
 import api from '../../services/api'
 import { useAuthStore } from '../../store/authStore'
 import { useLanguageStore } from '../../store/languageStore'
@@ -131,7 +131,12 @@ export default function Dashboard() {
               <Link to="/courses" className="btn btn-primary">{t('studentDashboard.exploreCourses')}</Link>
               <Link to="/my-learning" className="btn btn-outline">{t('studentDashboard.openLearning')}</Link>
             </div>
-            <div className="hero-orbit-wrap mt-6 hidden sm:flex" aria-hidden="true">
+            {/* md, not sm - a live user report showed this still rendering on a real phone at
+                what should have been a sub-640px viewport (likely a WebView that reports a
+                wider effective width than a typical mobile browser) - md (768px) is a safer
+                margin for "definitely not a phone" given decorative content shouldn't cost
+                scroll depth on a device we can't fully verify the effective width of. */}
+            <div className="hero-orbit-wrap mt-6 hidden md:flex" aria-hidden="true">
               <Illustration name="online-learning" className="hero-orbit-image" />
             </div>
           </div>
@@ -217,29 +222,65 @@ export default function Dashboard() {
           <div className="atlas-panel p-6 text-muted">{t('common.loadingProgress')}</div>
         ) : (
           <>
-            <div className="atlas-stat-grid mb-8">
-              <div className="atlas-stat"><FiZap /><strong>{summary?.totalXp ?? 0}</strong><span>{t('studentDashboard.totalPoints')}</span></div>
-              <div className="atlas-stat"><FiClock /><strong>{summary?.streak ?? 0}</strong><span>{t('studentDashboard.currentStreak')}</span></div>
-              <div className="atlas-stat"><FiBookOpen /><strong>{summary?.totalCourses ?? 0}</strong><span>{t('studentDashboard.enrolledCourses')}</span></div>
-            </div>
-            <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+            {/* Next step comes first, above the fold on mobile - it's the one action this
+                page exists to surface. The old layout buried it below a fully redundant
+                stat grid (streak/completion already shown in the hero above) and a second
+                progress bar repeating the same completion% again. */}
+            <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
               <div className="atlas-panel p-6">
-                <p className="atlas-kicker">{t('studentDashboard.progressKicker')}</p>
-                <h2 className="text-2xl text-ink dark:text-white">{t('studentDashboard.progressHeading')}</h2>
-                <p className="mt-2 text-muted">{t('studentDashboard.progressCopy', { completed: summary?.completedCourses ?? 0, total: summary?.totalCourses ?? 0 })}</p>
+                <p className="atlas-kicker">{t('studentDashboard.nextStepKicker')}</p>
+                <h2 className="text-2xl text-ink dark:text-white">{t('studentDashboard.nextStepHeading')}</h2>
+                <p className="mt-2 text-muted">
+                  {today?.continueLesson
+                    ? t('studentDashboard.nextStepContinueLesson', { title: today.continueLesson.lessonTitle })
+                    : summary?.totalCourses ? t('studentDashboard.nextStepContinue') : t('studentDashboard.nextStepStart')}
+                </p>
+                <div className="mt-5">
+                  {today?.continueLesson ? (
+                    <Link to={`/lesson/${today.continueLesson.lessonId}`} className="btn btn-primary">
+                      {t('studentDashboard.resumeLearning')}
+                    </Link>
+                  ) : (
+                    <Link to={summary?.totalCourses ? '/my-learning' : '/courses'} className="btn btn-primary">
+                      {summary?.totalCourses ? t('studentDashboard.resumeLearning') : t('studentDashboard.browseCourses')}
+                    </Link>
+                  )}
+                </div>
+                {today?.weakestSkill ? (
+                  <p className="mt-4 text-sm text-muted">
+                    {t('studentDashboard.nextStepWeakSkill', { skill: t(`skills.${today.weakestSkill.skill}`) })}
+                  </p>
+                ) : null}
+                {today && today.overdueFlashcardCount > 0 ? (
+                  <Link to="/flashcards" className="mt-3 inline-block text-sm font-semibold text-[var(--accent)]">
+                    {t(
+                      today.overdueFlashcardCount === 1 ? 'studentDashboard.nextStepFlashcardsDue' : 'studentDashboard.nextStepFlashcardsDuePlural',
+                      { count: today.overdueFlashcardCount }
+                    )}
+                  </Link>
+                ) : null}
+              </div>
+
+              <div className="atlas-panel p-6">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="atlas-kicker">{t('studentDashboard.progressKicker')}</p>
+                    <h2 className="text-2xl text-ink dark:text-white">{t('studentDashboard.progressHeading')}</h2>
+                  </div>
+                  <div className="flex shrink-0 gap-4 text-right text-sm text-muted">
+                    <span><strong className="block text-lg text-ink dark:text-white">{summary?.totalXp ?? 0}</strong>{t('studentDashboard.totalPoints')}</span>
+                    <span><strong className="block text-lg text-ink dark:text-white">{progressPercent}%</strong>{t('studentDashboard.overallCompletion')}</span>
+                  </div>
+                </div>
                 <div
                   role="progressbar"
                   aria-label={t('studentDashboard.overallCompletion')}
                   aria-valuenow={progressPercent}
                   aria-valuemin={0}
                   aria-valuemax={100}
-                  className="mt-6 h-3 overflow-hidden rounded-full bg-[var(--border-light)]"
+                  className="mt-3 h-1.5 overflow-hidden rounded-full bg-[var(--border-light)]"
                 >
                   <div className="h-full rounded-full bg-gradient-to-r from-primary-500 to-secondary-500" style={{ width: `${progressPercent}%` }} />
-                </div>
-                <div className="mt-3 flex items-center justify-between text-sm text-muted">
-                  <span>{t('studentDashboard.overallCompletion')}</span>
-                  <strong className="text-ink dark:text-white">{progressPercent}%</strong>
                 </div>
                 {activityChartData.length > 0 ? (
                   <div className="mt-6">
@@ -263,65 +304,25 @@ export default function Dashboard() {
                       </ResponsiveContainer>
                     </div>
                   </div>
-                ) : null}
-              </div>
-
-              {/* Right column: next step + daily reward */}
-              <div className="space-y-4">
-                <div className="atlas-panel p-6">
-                  <p className="atlas-kicker">{t('studentDashboard.nextStepKicker')}</p>
-                  <h2 className="text-2xl text-ink dark:text-white">{t('studentDashboard.nextStepHeading')}</h2>
-                  <p className="mt-2 text-muted">
-                    {today?.continueLesson
-                      ? t('studentDashboard.nextStepContinueLesson', { title: today.continueLesson.lessonTitle })
-                      : summary?.totalCourses ? t('studentDashboard.nextStepContinue') : t('studentDashboard.nextStepStart')}
-                  </p>
-                  <div className="mt-5">
-                    {today?.continueLesson ? (
-                      <Link to={`/lesson/${today.continueLesson.lessonId}`} className="btn btn-primary">
-                        {t('studentDashboard.resumeLearning')}
-                      </Link>
-                    ) : (
-                      <Link to={summary?.totalCourses ? '/my-learning' : '/courses'} className="btn btn-primary">
-                        {summary?.totalCourses ? t('studentDashboard.resumeLearning') : t('studentDashboard.browseCourses')}
-                      </Link>
-                    )}
-                  </div>
-                  {today?.weakestSkill ? (
-                    <p className="mt-4 text-sm text-muted">
-                      {t('studentDashboard.nextStepWeakSkill', { skill: t(`skills.${today.weakestSkill.skill}`) })}
-                    </p>
-                  ) : null}
-                  {today && today.overdueFlashcardCount > 0 ? (
-                    <Link to="/flashcards" className="mt-3 inline-block text-sm font-semibold text-[var(--accent)]">
-                      {t(
-                        today.overdueFlashcardCount === 1 ? 'studentDashboard.nextStepFlashcardsDue' : 'studentDashboard.nextStepFlashcardsDuePlural',
-                        { count: today.overdueFlashcardCount }
-                      )}
-                    </Link>
-                  ) : null}
-                </div>
-
-                <DailyReward />
+                ) : (
+                  <p className="mt-4 text-sm text-muted">{t('studentDashboard.progressCopy', { completed: summary?.completedCourses ?? 0, total: summary?.totalCourses ?? 0 })}</p>
+                )}
               </div>
             </div>
 
             <div className="grid gap-6 lg:grid-cols-2 mt-6">
-              <NotificationOptIn />
+              <DailyReward />
               <CoinStore />
             </div>
 
+            {/* A compact opt-in nudge, not daily content - NotificationOptIn already hides
+                its own "enable" affordance once already subscribed (see the component).
+                InstallPrompt is a fixed-position overlay (renders null unless the browser
+                actually fires a real install prompt) - it doesn't take up scroll space
+                regardless of where it's mounted, kept here only because it needs to be
+                mounted somewhere on an authenticated page. */}
+            <div className="atlas-panel mt-6 p-4"><NotificationOptIn /></div>
             <InstallPrompt />
-
-            <div className="atlas-panel mt-6 p-6">
-              <p className="atlas-kicker">{t('studentDashboard.structuredKicker')}</p>
-              <h2 className="text-2xl text-ink dark:text-white">{t('studentDashboard.structuredHeading')}</h2>
-              <div className="mt-4 grid gap-4 md:grid-cols-3">
-                {[t('studentDashboard.structured1'), t('studentDashboard.structured2'), t('studentDashboard.structured3')].map((item) => (
-                  <div key={item} className="rounded-2xl bg-[var(--surface-strong)] p-4 text-sm text-muted dark:bg-white/5">{item}</div>
-                ))}
-              </div>
-            </div>
           </>
         )}
       </div>

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { FiFilter, FiSearch, FiTarget, FiX } from 'react-icons/fi'
+import { FiChevronDown, FiFilter, FiSearch, FiTarget, FiX } from 'react-icons/fi'
 import { useLearningStore } from '../store/learningStore'
 import { useI18n } from '../utils/i18n'
 import { Spinner } from '../components/ui'
@@ -26,6 +26,9 @@ export default function Courses() {
     category: searchParams.get('category') || '',
     sort: (searchParams.get('sort') as SortMode) || 'recommended',
   })
+  const [filtersOpen, setFiltersOpen] = useState(() => Boolean(
+    searchParams.get('q') || searchParams.get('language') || searchParams.get('category'),
+  ))
 
   useEffect(() => {
     fetchCourses()
@@ -138,10 +141,23 @@ export default function Courses() {
         </div>
 
         <div className="atlas-panel mb-8 p-6">
-          <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-[var(--text-muted)]">
-            <FiFilter />
-            {t('courses.smartFilters')}
-          </div>
+          <button
+            type="button"
+            className="flex w-full items-center justify-between gap-2 text-sm font-semibold text-[var(--text-muted)] md:cursor-default"
+            onClick={() => setFiltersOpen((open) => !open)}
+            aria-expanded={filtersOpen}
+            aria-controls="courses-filter-panel"
+          >
+            <span className="flex items-center gap-2">
+              <FiFilter />
+              {t('courses.smartFilters')}
+            </span>
+            <span className="flex items-center gap-2 md:hidden">
+              <span className="font-normal text-[var(--text-subtle)]">{resultLabel}</span>
+              <FiChevronDown className={`transition-transform ${filtersOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
+            </span>
+          </button>
+          <div id="courses-filter-panel" className={`mt-4 md:block ${filtersOpen ? 'block' : 'hidden'}`}>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
             <div className="xl:col-span-2">
               <label className="label" htmlFor="courses-search">{t('common.search')}</label>
@@ -221,6 +237,7 @@ export default function Courses() {
                 {t('common.reset')}
               </button>
             </div>
+          </div>
           </div>
         </div>
 
