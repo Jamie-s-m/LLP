@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
-import { FiArrowLeft, FiLifeBuoy, FiMessageCircle, FiSearch, FiSend, FiUsers } from 'react-icons/fi'
+import { FiArrowLeft, FiCheck, FiLifeBuoy, FiMessageCircle, FiSearch, FiSend, FiUsers } from 'react-icons/fi'
 import api from '../services/api'
 import { useAuthStore } from '../store/authStore'
 import { useChatStore } from '../store/chatStore'
@@ -246,14 +246,14 @@ export default function Chat() {
     if (readByOthers > 0) {
       return {
         label: readByOthers === otherParticipantIds.length ? ui.readAll : ui.readBy.replace('{count}', String(readByOthers)),
-        ticks: '✓✓',
+        tickCount: 2 as const,
         className: 'read',
       }
     }
 
     return {
       label: ui.sent,
-      ticks: '✓',
+      tickCount: 1 as const,
       className: 'sent',
     }
   }
@@ -322,7 +322,11 @@ export default function Chat() {
                 const isOwn = message.sender._id ? message.sender._id === user?.id : message.sender.firstName === user?.firstName && message.sender.lastName === user?.lastName
                 const receipt = isOwn ? getOwnMessageReceipt(message) : null
 
-                return <article key={message._id} className={`message-bubble ${isOwn ? 'own ml-auto' : ''}`}><strong>{message.sender.firstName} {message.sender.lastName}</strong><p>{message.body}</p><div className="message-meta"><time>{new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</time>{receipt ? <span className={`message-receipt ${receipt.className}`} title={receipt.label} aria-label={receipt.label}>{receipt.ticks}</span> : null}</div></article>
+                return <article key={message._id} className={`message-bubble ${isOwn ? 'own ml-auto' : ''}`}><strong>{message.sender.firstName} {message.sender.lastName}</strong><p>{message.body}</p><div className="message-meta"><time>{new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</time>{receipt ? (
+                  <span className={`message-receipt inline-flex items-center -space-x-1 ${receipt.className}`} title={receipt.label} aria-label={receipt.label}>
+                    {Array.from({ length: receipt.tickCount }).map((_, i) => <FiCheck key={i} />)}
+                  </span>
+                ) : null}</div></article>
               })}
             </div>
             <form onSubmit={sendMessage} className="chat-compose"><input value={draft} onChange={(event) => setDraft(event.target.value)} placeholder={ui.write} maxLength={4000} /><button className="btn btn-primary" aria-label={ui.write}><FiSend /></button></form>

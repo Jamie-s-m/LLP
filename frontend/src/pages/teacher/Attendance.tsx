@@ -428,7 +428,7 @@ export default function Attendance() {
                           </button>
                           <span className="text-sm text-muted">{statusLabel(record.status)}</span>
                         </div>
-                        {record.notes ? <p className="mt-1 text-sm text-muted">{record.notes}</p> : null}
+                        {record.notes ? <p className="mt-1 text-sm text-muted whitespace-pre-wrap">{record.notes}</p> : null}
                         {isExpanded ? renderSummary(record.student._id) : null}
                       </div>
                     )

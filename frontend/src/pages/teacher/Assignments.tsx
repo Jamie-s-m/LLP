@@ -611,7 +611,7 @@ export default function Assignments() {
                         <h2 className="text-lg font-bold text-ink dark:text-white break-words">{assignment.title}</h2>
                       </div>
                       {assignment.description ? (
-                        <p className="text-sm text-muted mb-2">{assignment.description}</p>
+                        <p className="text-sm text-muted mb-2 whitespace-pre-wrap">{assignment.description}</p>
                       ) : null}
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted">
                         <span className="inline-flex items-center gap-1">

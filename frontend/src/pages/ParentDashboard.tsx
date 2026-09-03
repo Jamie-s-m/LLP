@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { FiBarChart2, FiBookOpen, FiMessageCircle, FiUsers } from 'react-icons/fi'
+import { FiMessageCircle, FiUsers } from 'react-icons/fi'
 import api from '../services/api'
 import { useI18n } from '../utils/i18n'
 
@@ -46,10 +46,19 @@ export default function ParentDashboard() {
         </div>
         <img src={`${import.meta.env.BASE_URL}linguanest-orbit.svg`} alt="LinguaNest family learning illustration" />
       </div>
-      <div className="atlas-stat-grid mb-8">
-        <div className="atlas-stat"><FiUsers /><strong>{links.filter((link) => link.status === 'approved').length}</strong><span>{t('parentDashboard.linkedLearners')}</span></div>
-        <div className="atlas-stat"><FiBarChart2 /><strong>{averageProgress}%</strong><span>{t('parentDashboard.averageProgress')}</span></div>
-        <div className="atlas-stat"><FiBookOpen /><strong>{activeThisWeek}</strong><span>{t('parentDashboard.activeCourses')}</span></div>
+      <div className="atlas-panel mb-8 grid grid-cols-3 gap-2 p-4 text-center">
+        <div>
+          <p className="text-2xl font-bold text-primary-500">{links.filter((link) => link.status === 'approved').length}</p>
+          <p className="text-xs text-muted">{t('parentDashboard.linkedLearners')}</p>
+        </div>
+        <div>
+          <p className="text-2xl font-bold text-secondary-500">{averageProgress}%</p>
+          <p className="text-xs text-muted">{t('parentDashboard.averageProgress')}</p>
+        </div>
+        <div>
+          <p className="text-2xl font-bold text-success">{activeThisWeek}</p>
+          <p className="text-xs text-muted">{t('parentDashboard.activeCourses')}</p>
+        </div>
       </div>
       <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <section className="atlas-panel p-6">

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { FiTrendingUp, FiAward, FiUser } from 'react-icons/fi'
+import { PiMedalFill } from 'react-icons/pi'
 import api from '../../services/api'
 import { useLanguageStore } from '../../store/languageStore'
 
@@ -10,6 +11,8 @@ interface LeaderboardEntry {
   xp: number
   streak: number
 }
+
+const MEDAL_COLORS = { 1: '#d4af37', 2: '#a8a8a8', 3: '#b08d57' } as const
 
 const copy = {
   en: { kicker: 'Learner ranking', title: 'Global Leaderboard', text: 'See top learners, compare momentum, and use your rank as a daily motivation signal.', yourRank: 'Your Rank', yourRankText: 'Keep learning to climb higher', loading: 'Loading leaderboard...', empty: 'No ranked learners yet.', rank: 'Rank', user: 'User', points: 'Points', streak: 'Streak' },
@@ -42,42 +45,58 @@ export default function Leaderboard() {
           <p>{ui.text}</p>
         </div>
 
-        {leaderboard.length >= 3 && (
-          <div className="atlas-panel mb-8 flex items-end justify-center gap-3 p-6 sm:gap-6">
-            {[leaderboard[1], leaderboard[0], leaderboard[2]].map((entry, position) => {
-              const place = position === 1 ? 1 : position === 0 ? 2 : 3
-              const heights = { 1: 'h-40', 2: 'h-28', 3: 'h-20' } as const
-              const medals = { 1: '🥇', 2: '🥈', 3: '🥉' } as const
-              return (
-                <div key={entry._id} className="flex flex-1 flex-col items-center gap-2">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white font-bold">
-                    {entry.firstName?.[0]}
+        {/* Podium + Your Rank used to be two separate full-height panels stacked with their
+            own margins/padding, pushing the actual ranked table two scroll-screens down on
+            mobile. Combined into one panel (Your Rank as a slim attached strip) when the
+            podium renders; Your Rank still shows on its own, compact, when there aren't
+            enough ranked learners for a podium. */}
+        {leaderboard.length >= 3 ? (
+          <div className="atlas-panel mb-8">
+            <div className="flex items-end justify-center gap-3 p-6 sm:gap-6">
+              {[leaderboard[1], leaderboard[0], leaderboard[2]].map((entry, position) => {
+                const place = position === 1 ? 1 : position === 0 ? 2 : 3
+                const heights = { 1: 'h-40', 2: 'h-28', 3: 'h-20' } as const
+                return (
+                  <div key={entry._id} className="flex flex-1 flex-col items-center gap-2">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white font-bold">
+                      {entry.firstName?.[0]}
+                    </div>
+                    <p className="max-w-[6rem] truncate text-sm font-semibold">{entry.firstName}</p>
+                    <div className={`flex w-full flex-col items-center justify-start rounded-t-xl bg-[var(--accent-light)] pt-2 ${heights[place]}`}>
+                      <PiMedalFill className="text-2xl" style={{ color: MEDAL_COLORS[place] }} aria-label={`Rank ${place}`} />
+                      <span className="mt-1 text-xs font-bold text-[var(--accent)]">{entry.xp.toLocaleString()} XP</span>
+                    </div>
                   </div>
-                  <p className="max-w-[6rem] truncate text-sm font-semibold">{entry.firstName}</p>
-                  <div className={`flex w-full flex-col items-center justify-start rounded-t-xl bg-[var(--accent-light)] pt-2 ${heights[place]}`}>
-                    <span className="text-2xl">{medals[place]}</span>
-                    <span className="mt-1 text-xs font-bold text-[var(--accent)]">{entry.xp.toLocaleString()} XP</span>
-                  </div>
+                )
+              })}
+            </div>
+            <div className="flex items-center justify-between gap-4 border-t border-[var(--border)] p-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 text-sm font-bold text-white">
+                  {myRank || '—'}
                 </div>
-              )
-            })}
+                <div>
+                  <p className="text-sm font-bold">{ui.yourRank}</p>
+                  <p className="text-xs text-muted">{ui.yourRankText}</p>
+                </div>
+              </div>
+              <FiTrendingUp className="h-5 w-5 shrink-0 text-primary-500" />
+            </div>
           </div>
-        )}
-
-        <div className="atlas-panel mb-8 border-2 border-primary-200 bg-gradient-to-r from-primary-50 to-secondary-50 p-6 dark:border-primary-700 dark:from-primary-900/20 dark:to-secondary-900/20">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white text-2xl font-bold">
+        ) : (
+          <div className="atlas-panel mb-8 flex items-center justify-between gap-4 p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 text-sm font-bold text-white">
                 {myRank || '—'}
               </div>
               <div>
-                <p className="text-xl font-bold">{ui.yourRank}</p>
-                <p className="text-muted">{ui.yourRankText}</p>
+                <p className="text-sm font-bold">{ui.yourRank}</p>
+                <p className="text-xs text-muted">{ui.yourRankText}</p>
               </div>
             </div>
-            <FiTrendingUp className="w-8 h-8 text-primary-500" />
+            <FiTrendingUp className="h-5 w-5 shrink-0 text-primary-500" />
           </div>
-        </div>
+        )}
 
         <div className="atlas-panel p-2 sm:p-4">
           {loading ? (

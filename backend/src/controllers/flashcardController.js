@@ -159,6 +159,12 @@ export const reviewFlashcard = async (req, res, next) => {
     }
 
     let progress = await FlashcardProgress.findOne({ student: req.user.id, flashcard: card._id });
+    // Captured before applySm2 mutates nextReviewDate into the future - without this,
+    // reviewFlashcard paid out XP/coins on every call with no due-date check at all (the SM-2
+    // "due" filter is only ever applied when listing cards, never here), so re-rating the same
+    // card any number of times was an unlimited farm. Reviewing early for practice still fully
+    // works (SRS state still updates below) - only the repeat payout is removed.
+    const wasAlreadyDue = !progress || !progress.nextReviewDate || progress.nextReviewDate <= new Date();
     if (!progress) {
       progress = new FlashcardProgress({
         student: req.user.id,
@@ -170,8 +176,8 @@ export const reviewFlashcard = async (req, res, next) => {
     applySm2(progress, quality);
     await progress.save();
 
-    const xpAwarded = XP_BY_QUALITY[quality] || 0;
-    const coinsAwarded = COINS_BY_QUALITY[quality] || 0;
+    const xpAwarded = wasAlreadyDue ? (XP_BY_QUALITY[quality] || 0) : 0;
+    const coinsAwarded = wasAlreadyDue ? (COINS_BY_QUALITY[quality] || 0) : 0;
     const user = await User.findById(req.user.id);
     user.xp = (user.xp || 0) + xpAwarded;
     user.linguaCoins = (user.linguaCoins || 0) + coinsAwarded;

@@ -768,8 +768,11 @@ export default function ControlCenter() {
   useEffect(() => { load() }, [ui.adminLoadFailed])
 
   useEffect(() => {
+    // goToTab, not setTab - a moderator whose scopes exclude the default 'courses' tab lands
+    // here on mount, and setTab alone never triggers that tab's data fetch (only goToTab does),
+    // so the page would permanently render an empty state with no error shown.
     if (!availableTabs.includes(tab) && availableTabs[0]) {
-      setTab(availableTabs[0])
+      goToTab(availableTabs[0])
     }
   }, [availableTabs, tab])
 

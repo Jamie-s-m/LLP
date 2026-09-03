@@ -261,7 +261,7 @@ export default function Groups() {
                     <h3 className="text-xl font-bold text-ink dark:text-white">{group.name}</h3>
                     {isManager && <span className="shrink-0 rounded-full bg-primary-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-primary-600 dark:bg-primary-900/40 dark:text-primary-300">{ui.yourGroup}</span>}
                   </div>
-                  <p className="text-muted mb-4">{group.description}</p>
+                  <p className="text-muted mb-4 whitespace-pre-wrap">{group.description}</p>
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex gap-2">
                       {group.language && (

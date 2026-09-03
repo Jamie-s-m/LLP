@@ -275,19 +275,9 @@ export default function Pricing() {
           </div>
         </div>
 
-        <section className="atlas-panel mb-10 p-6">
-          <p className="atlas-kicker">{t('pricing.howToStart')}</p>
-          <h2 className="text-2xl text-ink dark:text-white">{t('pricing.simplerPath')}</h2>
-          <div className="mt-5 grid gap-4 md:grid-cols-3">
-            {[t('pricing.onboarding1'), t('pricing.onboarding2'), t('pricing.onboarding3')].map((step, index) => (
-              <div key={step} className="rounded-2xl bg-[var(--surface-strong)] p-5 dark:bg-white/5">
-                <p className="text-sm font-semibold text-[var(--text-muted)]">0{index + 1}</p>
-                <p className="mt-3 text-sm text-[var(--text-muted)]">{step}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
+        {/* Moved below the plan cards (was between the hero and the plans, delaying the
+            page's actual purpose - comparing/picking a plan - by a full extra scroll-screen
+            on mobile). This is supporting context, not primary content. */}
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
           {enrichedPlans.map((plan) => {
             const isCurrentPlan = effectiveBilling?.plan === plan.key && hasManagedSubscription
@@ -384,6 +374,19 @@ export default function Pricing() {
             )
           })}
         </div>
+
+        <section className="atlas-panel mt-10 p-6">
+          <p className="atlas-kicker">{t('pricing.howToStart')}</p>
+          <h2 className="text-2xl text-ink dark:text-white">{t('pricing.simplerPath')}</h2>
+          <div className="mt-5 grid gap-4 md:grid-cols-3">
+            {[t('pricing.onboarding1'), t('pricing.onboarding2'), t('pricing.onboarding3')].map((step, index) => (
+              <div key={step} className="rounded-2xl bg-[var(--surface-strong)] p-5 dark:bg-white/5">
+                <p className="text-sm font-semibold text-[var(--text-muted)]">0{index + 1}</p>
+                <p className="mt-3 text-sm text-[var(--text-muted)]">{step}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
         <section className="atlas-panel mt-10 p-6">
           <p className="atlas-kicker">{t('pricing.trustTitle')}</p>

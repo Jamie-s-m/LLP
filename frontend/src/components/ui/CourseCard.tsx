@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { PiStarFill } from 'react-icons/pi'
 import Pill from './Pill'
 import ProgressBar from './ProgressBar'
 import Illustration from '../illustrations/Illustration'
@@ -64,12 +65,12 @@ export default function CourseCard({
           {level ? <Pill variant={LEVEL_PILL[levelKey] || 'neutral'}>{level}</Pill> : null}
         </div>
         <h3 className="font-display text-lg font-bold text-[var(--text-primary)]">{title}</h3>
-        {description ? <p className="line-clamp-2 text-sm text-[var(--text-muted)]">{description}</p> : null}
+        {description ? <p className="line-clamp-2 whitespace-pre-line text-sm text-[var(--text-muted)]">{description}</p> : null}
         {typeof progressPercentage === 'number' ? (
           <ProgressBar value={progressPercentage} />
         ) : rating ? (
-          <p className="text-sm text-[var(--text-muted)]">
-            ★ {rating.toFixed(1)} {reviewsCount ? `· ${reviewsCount} reviews` : ''}
+          <p className="flex items-center gap-1 text-sm text-[var(--text-muted)]">
+            <PiStarFill className="text-[var(--warning)]" aria-hidden="true" /> {rating.toFixed(1)} {reviewsCount ? `· ${reviewsCount} reviews` : ''}
           </p>
         ) : null}
       </div>

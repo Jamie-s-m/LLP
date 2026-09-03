@@ -173,7 +173,7 @@ export default function Assignments() {
                       </div>
 
                       {assignment.description && (
-                        <p className="text-sm text-muted mb-2">{assignment.description}</p>
+                        <p className="text-sm text-muted mb-2 whitespace-pre-wrap">{assignment.description}</p>
                       )}
 
                       {dueDate && (

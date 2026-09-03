@@ -244,3 +244,117 @@ describe('Flashcard SM-2 review', () => {
     expect(res.body.data.interval).toBe(1);
   });
 });
+
+describe('Flashcard review XP gating (regression: repeat-rating a not-yet-due card was an unlimited XP/coin farm)', () => {
+  let token;
+  let user;
+  let card;
+
+  beforeAll(async () => {
+    user = await User.create({
+      firstName: 'FlashReplay',
+      lastName: 'Tester',
+      email: 'flash-replay-tester@example.com',
+      password: 'testpass123',
+      role: 'student',
+      isEmailVerified: true,
+    });
+    token = signToken(user);
+
+    const course = await Course.create({
+      title: 'Flash Replay Course',
+      description: 'Course for flashcard XP gating test',
+      language: 'English',
+      level: 'Beginner',
+      category: 'Conversation',
+      instructor: user._id,
+      cefr: 'A1',
+    });
+
+    card = await Flashcard.create({
+      course: course._id,
+      language: 'English',
+      front: { text: 'Good morning' },
+      back: { text: 'Xayrli tong' },
+      category: 'greetings',
+    });
+  });
+
+  afterAll(async () => {
+    await User.deleteOne({ _id: user._id });
+    await FlashcardProgress.deleteMany({ student: user._id });
+  });
+
+  test('the first review of a due card awards XP and coins', async () => {
+    const res = await request(app)
+      .post(`/api/flashcards/${card._id}/review`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ rating: 'easy' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.xpAwarded).toBe(5);
+    expect(res.body.data.coinsAwarded).toBe(1);
+    expect(res.body.data.totalXp).toBe(5);
+    expect(res.body.data.totalLinguaCoins).toBe(1);
+  });
+
+  test('re-rating the same card before it is due again still updates SRS state but awards no further XP/coins', async () => {
+    const res = await request(app)
+      .post(`/api/flashcards/${card._id}/review`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ rating: 'easy' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.xpAwarded).toBe(0);
+    expect(res.body.data.coinsAwarded).toBe(0);
+    // SRS state still advances (repetitions 1 -> 2) even though no reward was paid out -
+    // reviewing ahead of schedule for genuine practice is not blocked, only the payout is.
+    expect(res.body.data.repetitions).toBe(2);
+    expect(res.body.data.totalXp).toBe(5);
+    expect(res.body.data.totalLinguaCoins).toBe(1);
+
+    const refreshed = await User.findById(user._id);
+    expect(refreshed.xp).toBe(5);
+    expect(refreshed.linguaCoins).toBe(1);
+  });
+});
+
+describe('Heart-refill coin spend is atomic (regression: read-then-write allowed a double-spend race)', () => {
+  let token;
+  let user;
+
+  beforeAll(async () => {
+    user = await User.create({
+      firstName: 'RefillRace',
+      lastName: 'Tester',
+      email: 'refill-race-tester@example.com',
+      password: 'testpass123',
+      role: 'student',
+      isEmailVerified: true,
+      hearts: 2,
+      linguaCoins: 50,
+    });
+    token = signToken(user);
+  });
+
+  afterAll(async () => {
+    await User.deleteOne({ _id: user._id });
+  });
+
+  test('two concurrent refill requests with coins for exactly one refill: only one succeeds, coins never go negative', async () => {
+    const [first, second] = await Promise.all([
+      request(app).post('/api/gamification/hearts/refill').set('Authorization', `Bearer ${token}`),
+      request(app).post('/api/gamification/hearts/refill').set('Authorization', `Bearer ${token}`),
+    ]);
+
+    const statuses = [first.status, second.status].sort();
+    // Exactly one request wins the atomic update (200) and the other correctly sees
+    // insufficient funds (400) - the old read-then-write code let both win, driving
+    // linguaCoins negative and granting two refills for one refill's worth of coins.
+    expect(statuses).toEqual([200, 400]);
+
+    const refreshed = await User.findById(user._id);
+    expect(refreshed.linguaCoins).toBe(0);
+    expect(refreshed.hearts).toBe(5);
+  });
+});

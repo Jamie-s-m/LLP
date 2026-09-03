@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import toast from 'react-hot-toast'
 import { io } from 'socket.io-client'
+import { FiMessageCircle } from 'react-icons/fi'
 import { useAuthStore } from '../store/authStore'
 import { useChatStore } from '../store/chatStore'
 import { emitChatMessage, emitConversationRefresh, type LiveChatMessage } from '../utils/chatEvents'
@@ -58,7 +59,7 @@ export default function ChatRealtimeBridge() {
       }
 
       if (document.visibilityState === 'visible') {
-        toast(body, { icon: '💬' })
+        toast(body, { icon: <FiMessageCircle /> })
       }
     }
 
