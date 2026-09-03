@@ -294,10 +294,19 @@ export const submitExercise = async (req, res, next) => {
     }
 
     const isCorrect = gradeAnswer(exercise, answer);
-    const pointsAwarded = isCorrect ? exercise.points : 0;
+    // XP is a one-time reward for first mastering an exercise, not a per-submission payout -
+    // without this check, replaying any already-completed lesson's exercises was an unlimited
+    // XP farm (confirmed live: nothing anywhere gated repeat submissions). Still records every
+    // attempt (below) and still grades correctly, so replaying a lesson for review purposes
+    // stays fully intact - only the repeat XP/coin payout is removed.
+    const alreadyEarned = isCorrect
+      && (await ExerciseAttempt.exists({ user: user._id, exercise: exercise._id, isCorrect: true }));
+    const pointsAwarded = isCorrect && !alreadyEarned ? exercise.points : 0;
 
     if (isCorrect) {
-      user.xp = (user.xp || 0) + pointsAwarded;
+      if (pointsAwarded > 0) {
+        user.xp = (user.xp || 0) + pointsAwarded;
+      }
     } else {
       loseHeart(user);
     }

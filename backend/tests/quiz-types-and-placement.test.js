@@ -210,6 +210,94 @@ describe('Multiple-choice grading (regression: correctAnswer must be an option i
   });
 });
 
+describe('Repeat-submission XP gating (regression: replaying an exercise was an unlimited XP farm)', () => {
+  let token;
+  let user;
+  let exercise;
+
+  beforeAll(async () => {
+    user = await User.create({
+      firstName: 'Replay',
+      lastName: 'Tester',
+      email: 'replay-tester@example.com',
+      password: 'testpass123',
+      role: 'student',
+      isEmailVerified: true,
+    });
+    token = signToken(user);
+
+    const course = await Course.create({
+      title: 'Replay Course',
+      description: 'Course for repeat-submission XP gating test',
+      language: 'English',
+      level: 'Beginner',
+      category: 'Grammar',
+      instructor: user._id,
+    });
+    const lesson = await Lesson.create({ course: course._id, order: 1, title: 'Replay Lesson', content: 'content' });
+    exercise = await Exercise.create({
+      lesson: lesson._id,
+      title: 'Replay Exercise',
+      type: 'multiple_choice',
+      question: 'Choose the correct sentence.',
+      options: ['She works in a bank.', 'She working in a bank.'],
+      correctAnswer: 0,
+      points: 10,
+    });
+  });
+
+  afterAll(async () => {
+    await User.deleteOne({ _id: user._id });
+    await ExerciseAttempt.deleteMany({ exercise: exercise._id });
+  });
+
+  test('the first correct submission awards XP', async () => {
+    const res = await request(app)
+      .post('/api/exercises/submit')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ exerciseId: exercise._id.toString(), answer: 0 });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.isCorrect).toBe(true);
+    expect(res.body.data.points).toBe(10);
+    expect(res.body.data.xp).toBe(10);
+  });
+
+  test('replaying the same exercise still grades correctly but awards no further XP', async () => {
+    const res = await request(app)
+      .post('/api/exercises/submit')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ exerciseId: exercise._id.toString(), answer: 0 });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.isCorrect).toBe(true);
+    expect(res.body.data.points).toBe(0);
+    expect(res.body.data.xp).toBe(10);
+
+    const refreshed = await User.findById(user._id);
+    expect(refreshed.xp).toBe(10);
+
+    // Still recorded as a real attempt (mastery/analytics need every attempt, not just the first).
+    const attempts = await ExerciseAttempt.find({ user: user._id, exercise: exercise._id });
+    expect(attempts.length).toBe(2);
+    expect(attempts.every((a) => a.isCorrect)).toBe(true);
+  });
+
+  test('a wrong answer after mastering it still costs a heart, not an XP replay loophole', async () => {
+    const res = await request(app)
+      .post('/api/exercises/submit')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ exerciseId: exercise._id.toString(), answer: 1 });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.isCorrect).toBe(false);
+
+    const refreshed = await User.findById(user._id);
+    expect(refreshed.xp).toBe(10);
+    expect(refreshed.hearts).toBe(4);
+  });
+});
+
 describe('Generated course content produces index-based multiple_choice answers', () => {
   test('every generated multiple_choice exercise has an in-range numeric correctAnswer', async () => {
     const { buildLinguaNestContentLibrary } = await import('../src/contentLibrary.js');

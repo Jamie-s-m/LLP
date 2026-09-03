@@ -190,16 +190,19 @@ export default function LessonView() {
   }
 
   // Stepper labels: Learn -> one dot per exercise -> Complete. Kept even when there are zero
-  // exercises (Learn -> Complete) so the "where am I" signal never disappears.
+  // exercises (Learn -> Complete) so the "where am I" signal never disappears. isCompleted
+  // (from progressRecord, i.e. real saved completion) is folded into every step so reopening
+  // an already-completed lesson shows it as done immediately, instead of the stepper always
+  // resetting to "nothing done yet" just because local phase state starts at 'learn' on load.
   const steps: Array<{ key: string; label: string; active: boolean; done: boolean }> = [
-    { key: 'learn', label: 'Learn', active: phase === 'learn', done: phase !== 'learn' },
+    { key: 'learn', label: 'Learn', active: phase === 'learn', done: isCompleted || phase !== 'learn' },
     ...exercises.map((ex, i) => ({
       key: ex._id,
       label: `${i + 1}`,
       active: phase === 'practice' && practiceIndex === i,
-      done: phase === 'complete' || (phase === 'practice' && practiceIndex > i),
+      done: isCompleted || phase === 'complete' || (phase === 'practice' && practiceIndex > i),
     })),
-    { key: 'complete', label: 'Done', active: phase === 'complete', done: false },
+    { key: 'complete', label: 'Done', active: phase === 'complete', done: isCompleted || phase === 'complete' },
   ]
 
   return (
@@ -346,7 +349,9 @@ export default function LessonView() {
                     disabled={completing}
                     className="w-full btn btn-primary flex items-center justify-center gap-2 disabled:opacity-70"
                   >
-                    {exercises.length > 0 ? 'Start Practice' : completing ? 'Saving...' : 'Mark as Completed'}
+                    {exercises.length > 0
+                      ? (isCompleted ? 'Practice Again' : 'Start Practice')
+                      : completing ? 'Saving...' : 'Mark as Completed'}
                   </button>
                 </div>
               </>

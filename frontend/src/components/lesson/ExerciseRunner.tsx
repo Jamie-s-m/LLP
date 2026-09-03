@@ -147,7 +147,13 @@ export default function ExerciseRunner({ exercise, hearts, onHeartsChange, onOut
 
   const outcomeBanner = result && exercise.type !== 'speaking' && exercise.type !== 'writing' ? (
     <Alert variant={result.isCorrect ? 'success' : 'error'} title={result.isCorrect ? 'Correct!' : 'Not quite'} className="mb-6">
-      <p>{result.isCorrect ? `Nice work - you earned ${result.points} points.` : 'You lost a heart. Try the next one.'}</p>
+      <p>
+        {result.isCorrect
+          ? result.points > 0
+            ? `Nice work - you earned ${result.points} points.`
+            : 'Correct! You already earned points for this one - great review.'
+          : 'You lost a heart. Try the next one.'}
+      </p>
       {exercise.type === 'listening' && exercise.transcript ? <p className="mt-2 italic text-[var(--text-muted)]">Transcript: {exercise.transcript}</p> : null}
     </Alert>
   ) : null
