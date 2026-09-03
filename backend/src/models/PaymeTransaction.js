@@ -19,7 +19,7 @@ const paymeTransactionSchema = new mongoose.Schema(
     },
     plan: {
       type: String,
-      enum: ['local', 'learner', 'family', 'teaching'],
+      enum: ['learner', 'family', 'teaching'],
       required: true,
     },
     amount: {

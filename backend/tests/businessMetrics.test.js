@@ -100,7 +100,7 @@ describe('Business metrics API', () => {
     expect(activation.onboardingCompletionRate).toBeGreaterThan(0);
     expect(monetization.payingUsers).toBeGreaterThanOrEqual(1);
     expect(monetization.payingByPlan.learner).toBeGreaterThanOrEqual(1);
-    expect(monetization.mrrUzs).toBeGreaterThanOrEqual(800000);
+    expect(monetization.mrrUzs).toBeGreaterThanOrEqual(55000);
     expect(learning.lessonsCompleted).toBeGreaterThanOrEqual(1);
     expect(learning.exercisesCompleted).toBeGreaterThanOrEqual(2);
     expect(learning.averageAccuracyPercent).toBe(50);

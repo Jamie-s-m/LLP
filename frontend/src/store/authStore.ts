@@ -24,7 +24,7 @@ interface User {
   teacherApplicationStatus?: 'none' | 'pending' | 'approved' | 'rejected'
   isEmailVerified?: boolean
   billing?: {
-    plan: 'none' | 'local' | 'learner' | 'family' | 'teaching'
+    plan: 'none' | 'learner' | 'family' | 'teaching'
     status: 'inactive' | 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid' | 'refunded'
     provider?: 'none' | 'payme' | 'click'
     currentPeriodEnd?: string | null

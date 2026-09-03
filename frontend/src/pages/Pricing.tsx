@@ -10,7 +10,7 @@ import ClickCheckoutButton from '../components/ClickCheckoutButton'
 import { track } from '../utils/analytics'
 import Seo from '../components/Seo'
 
-type BillingPlanKey = 'local' | 'learner' | 'family' | 'teaching'
+type BillingPlanKey = 'learner' | 'family' | 'teaching'
 
 // No incomplete/incomplete_expired - those were Stripe payment-intent states with no Payme/Click
 // equivalent (both are simple one-time checkouts, not a multi-step payment-intent flow).
@@ -31,27 +31,15 @@ interface BillingPlan {
 
 const plans: BillingPlan[] = [
   {
-    key: 'local',
-    name: 'Local',
-    priceLabel: "39,000 so'm/month",
+    key: 'learner',
+    name: 'Learner',
+    priceLabel: "55,000 so'm/month",
     description: "LinguaNest's full learner plan, priced for Uzbekistan and paid through Payme or Click.",
     roleHint: 'student',
     cta: 'Start learning',
     href: '/register?role=student',
     available: true,
     bestFor: 'Learners paying in soʻm who want the full course, flashcard, and progress experience at a local price.',
-    features: ['Unlimited active courses', 'Flashcards and exercises', 'Progress tracking and streaks', 'Community chat access'],
-  },
-  {
-    key: 'learner',
-    name: 'Learner',
-    priceLabel: "800,000 so'm/month",
-    description: 'For individual students building daily momentum.',
-    roleHint: 'student',
-    cta: 'Start learning',
-    href: '/register?role=student',
-    available: true,
-    bestFor: 'Independent learners who want structured progress and daily fluency momentum.',
     features: ['Unlimited active courses', 'Flashcards and exercises', 'Progress tracking and streaks', 'Community chat access'],
   },
   {
@@ -207,13 +195,23 @@ export default function Pricing() {
   const hasManagedSubscription = activeStatuses.has((effectiveBilling?.status || 'inactive') as BillingStatus)
 
   const enrichedPlans = useMemo(
-    () => plans.map((plan) => ({
-      ...plan,
-      available: configuredPlans[plan.key] ?? false,
-      name: plan.key === 'local' ? t('pricing.localName') : plan.key === 'learner' ? t('pricing.learnerName') : plan.key === 'family' ? t('pricing.familyName') : t('pricing.teachingName'),
-      bestFor: plan.key === 'local' ? t('pricing.localBestFor') : plan.key === 'learner' ? t('pricing.learnerBestFor') : plan.key === 'family' ? t('pricing.familyBestFor') : t('pricing.teachingBestFor'),
-    })),
-    [configuredPlans, t]
+    () => plans.map((plan) => {
+      // Derived live from GET /billing/plans rather than kept as a static string - the exact
+      // "priceLabel silently drifts out of sync with the real charged amount" bug class this
+      // migration already fixed once on the backend (see billing.js's formatPriceLabel) was
+      // still present here on the frontend via this file's own hardcoded priceLabel strings.
+      // Falls back to the static value only for the brief window before the API call resolves.
+      const livePriceUzs = planPricesUzs[plan.key]
+      const priceLabel = livePriceUzs ? `${livePriceUzs.toLocaleString('en-US')} so'm/month` : plan.priceLabel
+      return {
+        ...plan,
+        priceLabel,
+        available: configuredPlans[plan.key] ?? false,
+        name: plan.key === 'learner' ? t('pricing.learnerName') : plan.key === 'family' ? t('pricing.familyName') : t('pricing.teachingName'),
+        bestFor: plan.key === 'learner' ? t('pricing.learnerBestFor') : plan.key === 'family' ? t('pricing.familyBestFor') : t('pricing.teachingBestFor'),
+      }
+    }),
+    [configuredPlans, planPricesUzs, t]
   )
 
   // Friendly plan name for the raw plan key stored on a billing record ('none' when there

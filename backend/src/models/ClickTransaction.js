@@ -38,7 +38,7 @@ const clickTransactionSchema = new mongoose.Schema(
     },
     plan: {
       type: String,
-      enum: ['local', 'learner', 'family', 'teaching'],
+      enum: ['learner', 'family', 'teaching'],
       required: true,
     },
     // Whole so'm (Click's native unit) - unlike Payme, which uses tiyin.

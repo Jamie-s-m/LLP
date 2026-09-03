@@ -4,19 +4,19 @@ describe('billing configuration helpers', () => {
   it('returns the expected commercial plan catalog', () => {
     const plans = getBillingPlans();
 
-    expect(plans.map((plan) => plan.key)).toEqual(['local', 'learner', 'family', 'teaching']);
+    expect(plans.map((plan) => plan.key)).toEqual(['learner', 'family', 'teaching']);
     expect(plans.every((plan) => typeof plan.available === 'boolean')).toBe(true);
     expect(plans.every((plan) => typeof plan.priceUzs === 'number' && plan.priceUzs > 0)).toBe(true);
   });
 
   it('finds known plans and ignores unknown plan keys', () => {
-    expect(findBillingPlan('learner')).toEqual(expect.objectContaining({ key: 'learner', name: 'Learner', priceUzs: 800000 }));
+    expect(findBillingPlan('learner')).toEqual(expect.objectContaining({ key: 'learner', name: 'Learner', priceUzs: 55000 }));
     expect(findBillingPlan('missing-plan')).toBeUndefined();
   });
 
   it('derives priceLabel from priceUzs rather than a second hand-maintained string', () => {
     const learner = getBillingPlans().find((plan) => plan.key === 'learner');
-    expect(learner.priceLabel).toBe("800,000 so'm/month");
+    expect(learner.priceLabel).toBe("55,000 so'm/month");
   });
 
   it('every plan is available whenever either Payme or Click is configured - Stripe removed the per-plan price-ID gate', async () => {

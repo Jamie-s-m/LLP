@@ -5,7 +5,7 @@ import PaymeTransaction from '../src/models/PaymeTransaction.js';
 
 describe('Payme merchant webhook (/api/billing/payme)', () => {
   let learner;
-  const AMOUNT_LEARNER = 800000 * 100; // priceUzs -> tiyin
+  const AMOUNT_LEARNER = 55000 * 100; // priceUzs -> tiyin
 
   const authHeader = () => `Basic ${Buffer.from(`Paycom:${process.env.PAYME_MERCHANT_KEY}`).toString('base64')}`;
 

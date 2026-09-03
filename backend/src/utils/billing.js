@@ -4,36 +4,39 @@
 // whenever at least one of the two local rails is configured.
 const frontendAppUrl = process.env.FRONTEND_APP_URL || process.env.FRONTEND_URL || 'http://localhost:5173';
 
-// priceUzs values and the "Local" launch-pricing tier are unchanged from before this migration -
-// this migration only touches which payment rails sell them, not what they cost. Re-pricing/
-// consolidating the tiers now that Local's original "cheaper than the Stripe-FX-converted rate"
-// rationale no longer applies is a real pricing decision, deliberately left untouched here.
+// Repriced against real Uzbekistan market data (Tashkent in-person English-center fees,
+// Preply/Duolingo/Busuu/Babbel/Memrise/ELSA pricing where regionalized, national/Tashkent wage
+// data - see the Phase 19 plan). The old "Local" (39,000) and "Learner" (800,000) plans were
+// confirmed functionally identical - same feature list, no code path unlocked anything extra for
+// the 20.5x-more-expensive Learner tier - so they've been consolidated into one plan under the
+// `learner` key at Local's affordable price point, not Learner's old overpriced one.
+//
+// Family/Teaching are flat monthly prices for now, not seat/usage-based - a real per-additional-
+// child add-on for Family and per-seat pricing for Teaching are both real future enhancements
+// once there's actual demand signal to size them against (matching how Phase 10's tutor
+// marketplace scope is gated on real demand rather than built speculatively), not something to
+// invent checkout-quantity/proration logic for on a guess. Teaching team's price specifically has
+// no solid local B2B comparable behind it (unlike the other three) and should be validated with
+// real Tashkent teachers/academy owners before being treated as settled.
 const billingPlans = [
   {
-    key: 'local',
-    name: 'Local',
-    priceUzs: 39000,
+    key: 'learner',
+    name: 'Learner',
+    priceUzs: 55000,
     roleHint: 'student',
     description: "LinguaNest's full learner plan, priced for Uzbekistan and paid through Payme or Click.",
   },
   {
-    key: 'learner',
-    name: 'Learner',
-    priceUzs: 800000,
-    roleHint: 'student',
-    description: 'For individual students building daily momentum.',
-  },
-  {
     key: 'family',
     name: 'Family',
-    priceUzs: 1200000,
+    priceUzs: 149000,
     roleHint: 'parent',
     description: 'For parents supporting one or more learners together.',
   },
   {
     key: 'teaching',
     name: 'Teaching team',
-    priceUzs: 2000000,
+    priceUzs: 350000,
     roleHint: 'teacher',
     description: 'For teachers or academies running guided programs.',
   },

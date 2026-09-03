@@ -69,7 +69,12 @@ const userSchema = new mongoose.Schema(
     parents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     teacherApplicationStatus: { type: String, enum: ['none', 'pending', 'approved', 'rejected'], default: 'none' },
     billing: {
-      plan: { type: String, enum: ['none', 'local', 'learner', 'family', 'teaching'], default: 'none' },
+      // 'local' was removed (Phase 19 repricing) - it was a confirmed duplicate of 'learner'
+      // with an identical feature set at a 20.5x lower price, consolidated into one plan under
+      // 'learner'. Before deploying this, production must be checked for any real user still on
+      // plan: 'local' and migrated to 'learner' - not verified from this session (no production
+      // DB credentials held here).
+      plan: { type: String, enum: ['none', 'learner', 'family', 'teaching'], default: 'none' },
       // No incomplete/incomplete_expired - those were Stripe payment-intent states with no
       // Payme/Click equivalent (both are simple one-time checkouts, not a multi-step
       // payment-intent flow).

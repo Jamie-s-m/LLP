@@ -11,7 +11,7 @@ import ClickTransaction from '../src/models/ClickTransaction.js';
 // credentials exist" caveat this test suite inherits.
 describe('Click merchant webhook (/api/billing/click)', () => {
   let learner;
-  const AMOUNT_LEARNER = 800000; // priceUzs, so'm (not tiyin - Click's native unit)
+  const AMOUNT_LEARNER = 55000; // priceUzs, so'm (not tiyin - Click's native unit)
   let transIdCounter = 0;
   const nextClickTransId = () => `click_txn_${Date.now()}_${transIdCounter++}`;
 
