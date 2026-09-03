@@ -166,7 +166,7 @@ export default function CourseDetail() {
           <span className="rounded-full bg-[var(--border-light)] px-3 py-1">{course.level}</span>
           <span className="rounded-full bg-[var(--border-light)] px-3 py-1">{course.category}</span>
         </div>
-        <p className="mb-6 text-muted">{course.description}</p>
+        <p className="mb-6 whitespace-pre-wrap text-muted">{course.description}</p>
 
         <h2 className="mb-3 text-xl font-semibold text-ink">{t('courseDetail.lessons')}</h2>
         {lessons.length > 0 ? <div className="space-y-2 mb-6">

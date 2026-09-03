@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { FiBook, FiCheckCircle, FiBarChart2 } from 'react-icons/fi'
 import { useLearningStore } from '../../store/learningStore'
 import { useLanguageStore } from '../../store/languageStore'
 import { ProgressBar } from '../../components/ui'
@@ -75,25 +74,18 @@ export default function MyLearning() {
           <p>{ui.text}</p>
         </div>
 
-        <div className="atlas-stat-grid mb-10">
-          <div className="atlas-stat text-center">
-            <FiBook className="w-8 h-8 mx-auto mb-2 text-primary-500" />
-            <p className="text-3xl font-bold text-primary-500">{myLearning.length}</p>
-            <p className="text-muted">{ui.activeCourses}</p>
+        <div className="atlas-panel mb-8 grid grid-cols-3 gap-2 p-4 text-center">
+          <div>
+            <p className="text-2xl font-bold text-primary-500">{myLearning.length}</p>
+            <p className="text-xs text-muted">{ui.activeCourses}</p>
           </div>
-          <div className="atlas-stat text-center">
-            <FiBarChart2 className="w-8 h-8 mx-auto mb-2 text-secondary-500" />
-            <p className="text-3xl font-bold text-secondary-500">
-              {averageProgress}%
-            </p>
-            <p className="text-muted">{ui.averageProgress}</p>
+          <div>
+            <p className="text-2xl font-bold text-secondary-500">{averageProgress}%</p>
+            <p className="text-xs text-muted">{ui.averageProgress}</p>
           </div>
-          <div className="atlas-stat text-center">
-            <FiCheckCircle className="w-8 h-8 mx-auto mb-2 text-success" />
-            <p className="text-3xl font-bold text-success">
-              {totalLessonsCompleted}
-            </p>
-            <p className="text-muted">{ui.lessonsCompleted}</p>
+          <div>
+            <p className="text-2xl font-bold text-success">{totalLessonsCompleted}</p>
+            <p className="text-xs text-muted">{ui.lessonsCompleted}</p>
           </div>
         </div>
 

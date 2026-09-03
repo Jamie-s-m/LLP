@@ -10,6 +10,7 @@ import { track } from '../../utils/analytics'
 import { useI18n } from '../../utils/i18n'
 import { BadgeIcon } from '../../utils/badgeIcons'
 import Illustration from '../../components/illustrations/Illustration'
+import { speak } from '../../utils/speech'
 import ExerciseRunner, { type ExerciseData } from '../../components/lesson/ExerciseRunner'
 
 interface VocabItem {
@@ -263,10 +264,10 @@ export default function LessonView() {
                 <div className="card mb-8">
                   <h2 className="text-xl sm:text-2xl font-semibold mb-3">Overview</h2>
                   <div className="prose dark:prose-invert max-w-none">
-                    <p className="text-base sm:text-lg text-neutral-700 dark:text-neutral-300 mb-2">
+                    <p className="whitespace-pre-wrap text-base sm:text-lg text-neutral-700 dark:text-neutral-300 mb-2">
                       {lesson.description}
                     </p>
-                    <p className="text-sm text-neutral-600 dark:text-neutral-400">{lesson.content}</p>
+                    <p className="whitespace-pre-wrap text-sm text-neutral-600 dark:text-neutral-400">{lesson.content}</p>
                   </div>
                 </div>
 
@@ -281,7 +282,14 @@ export default function LessonView() {
                               <p className="text-base sm:text-lg font-semibold">{item.word}</p>
                               {item.pronunciation ? <p className="text-xs sm:text-sm text-neutral-600 dark:text-neutral-400">{item.pronunciation}</p> : null}
                             </div>
-                            <FiVolume2 size={18} className="text-primary-500" />
+                            <button
+                              type="button"
+                              onClick={() => speak(item.word)}
+                              aria-label={`Play pronunciation of ${item.word}`}
+                              className="rounded-lg p-1.5 text-primary-500 transition-colors hover:bg-primary-50 dark:hover:bg-primary-900/20"
+                            >
+                              <FiVolume2 size={18} />
+                            </button>
                           </div>
                           <p className="text-sm text-neutral-700 dark:text-neutral-300">{item.translation}</p>
                         </div>
@@ -295,7 +303,7 @@ export default function LessonView() {
                     <h3 className="text-xl font-bold mb-4">Grammar</h3>
                     {lesson.grammar.map((item, idx) => (
                       <div key={idx} className="mb-4 last:mb-0">
-                        <p className="text-neutral-700 dark:text-neutral-300 mb-2">{item.explanation}</p>
+                        <p className="whitespace-pre-wrap text-neutral-700 dark:text-neutral-300 mb-2">{item.explanation}</p>
                         <div className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg p-4">
                           <p className="font-mono text-primary-700 dark:text-primary-300">{item.rule}</p>
                         </div>
@@ -308,16 +316,24 @@ export default function LessonView() {
                   <div className="card mb-8">
                     <h3 className="text-lg sm:text-xl font-semibold mb-3">Practice</h3>
                     <div className="space-y-3">
-                      {exercises.map((exercise) => {
+                      {exercises.map((exercise, idx) => {
                         const Icon = EXERCISE_ICON[exercise.type] || FiHelpCircle
                         return (
-                          <div key={exercise._id} className="flex items-center justify-between rounded-lg border border-neutral-200 p-3 dark:border-neutral-700">
+                          <button
+                            key={exercise._id}
+                            type="button"
+                            onClick={() => {
+                              setPracticeIndex(idx)
+                              setPhase('practice')
+                            }}
+                            className="flex w-full items-center justify-between rounded-lg border border-neutral-200 p-3 text-left transition hover:border-primary-300 hover:bg-primary-50 dark:border-neutral-700 dark:hover:bg-primary-900/20"
+                          >
                             <span className="flex items-center gap-3">
                               <Icon size={18} className="text-primary-500" />
                               <span className="font-medium">{exercise.title}</span>
                             </span>
                             <span className="text-sm text-neutral-500">+{exercise.points} pts</span>
-                          </div>
+                          </button>
                         )
                       })}
                     </div>

@@ -5,6 +5,7 @@ import api from '../../services/api'
 import { useLanguageStore } from '../../store/languageStore'
 import { useAuthStore } from '../../store/authStore'
 import { track } from '../../utils/analytics'
+import { speak } from '../../utils/speech'
 import ProgressBar from '../../components/ui/ProgressBar'
 import Illustration from '../../components/illustrations/Illustration'
 
@@ -173,7 +174,12 @@ export default function Flashcards() {
 
         <div className="atlas-panel space-y-4 p-5">
           <div className="flex justify-center gap-4">
-            <button aria-label="Play pronunciation" className="p-2 hover:bg-white dark:hover:bg-neutral-800 rounded-lg transition-colors">
+            <button
+              type="button"
+              onClick={() => speak(card.front.text)}
+              aria-label="Play pronunciation"
+              className="p-2 hover:bg-white dark:hover:bg-neutral-800 rounded-lg transition-colors"
+            >
               <FiVolume2 size={24} className="text-primary-500" />
             </button>
             <button

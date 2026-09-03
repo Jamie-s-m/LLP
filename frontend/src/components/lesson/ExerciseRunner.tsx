@@ -157,7 +157,7 @@ export default function ExerciseRunner({ exercise, hearts, onHeartsChange, onOut
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
           <h2 className="text-h2 text-ink dark:text-white">{exercise.question}</h2>
-          {exercise.instructions ? <p className="mt-1 text-sm text-[var(--text-muted)]">{exercise.instructions}</p> : null}
+          {exercise.instructions ? <p className="mt-1 whitespace-pre-wrap text-sm text-[var(--text-muted)]">{exercise.instructions}</p> : null}
         </div>
         <HeartsRow hearts={hearts.hearts} maxHearts={hearts.maxHearts} />
       </div>

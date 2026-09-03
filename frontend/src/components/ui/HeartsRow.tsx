@@ -1,3 +1,5 @@
+import { PiHeartFill, PiHeart } from 'react-icons/pi'
+
 type HeartsRowProps = {
   hearts: number
   maxHearts?: number
@@ -9,9 +11,9 @@ export default function HeartsRow({ hearts, maxHearts = 5, size = 20, className 
   return (
     <div className={`flex items-center gap-1 ${className}`} aria-label={`${hearts} of ${maxHearts} hearts remaining`}>
       {Array.from({ length: maxHearts }).map((_, index) => (
-        <span key={index} style={{ fontSize: size, lineHeight: 1 }} aria-hidden="true">
-          {index < hearts ? '❤️' : '🤍'}
-        </span>
+        index < hearts
+          ? <PiHeartFill key={index} size={size} className="text-[var(--error)]" aria-hidden="true" />
+          : <PiHeart key={index} size={size} className="text-[var(--border)]" aria-hidden="true" />
       ))}
     </div>
   )
