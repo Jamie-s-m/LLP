@@ -715,6 +715,16 @@ html.dark {
     }
   }
 
+  /* Phase 20 - Achievements V6: earned badges are collectible objects, not interchangeable
+     tiles, so each one's hover shadow is tinted with its own --badge-glow (set inline per
+     badge from its real `color` field in Achievements.tsx) instead of the generic
+     text-primary-tinted shadow above. Two classes beats .dimensional-card's one, so this wins
+     on specificity without !important. */
+  .dimensional-card.badge-card:hover,
+  .dimensional-card.badge-card:focus-visible {
+    box-shadow: 0 22px 40px -12px var(--badge-glow, color-mix(in srgb, var(--text-primary) 28%, transparent));
+  }
+
   /* Phase 20 - radiant-arc-wrap: the speaking/voice-surface treatment. Geometric concentric
      rings (echoes .hero-orbit-wrap's dashed ring and the CEFR Orbit component's geometry)
      plus the same restrained low-opacity radial wash already used on .hero-orbit-wrap::before
