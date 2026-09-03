@@ -242,6 +242,7 @@ export default function Courses() {
                     <img
                       src={course.thumbnail}
                       alt={course.title}
+                      loading="lazy"
                       className="mb-4 h-40 w-full rounded-2xl object-cover"
                     />
                   ) : null}

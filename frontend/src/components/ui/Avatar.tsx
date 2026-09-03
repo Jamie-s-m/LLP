@@ -30,6 +30,7 @@ export default function Avatar({ name, src, size = 'md', className = '' }: Avata
       <img
         src={src}
         alt={name || ''}
+        loading="lazy"
         className={`flex-shrink-0 rounded-full object-cover ${sizeClasses[size]} ${className}`}
       />
     )
