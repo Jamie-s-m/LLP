@@ -241,9 +241,16 @@ router.get('/verify-email', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Verification link is invalid or expired' });
     }
 
+    // Deliberately NOT clearing emailVerificationToken/emailVerificationExpiresAt here - this
+    // endpoint needs to be idempotent within the token's own TTL. Clearing the token on first
+    // success made a second identical GET (a real, documented failure mode: many corporate email
+    // scanners and link-safety proxies - e.g. Outlook Safe Links - silently prefetch GET links in
+    // transactional email before the real recipient ever clicks) find no matching user and
+    // return "invalid or expired" to the actual user's own click. Setting isEmailVerified=true
+    // twice is harmless; leaving the token live until its natural expiry is not a meaningful
+    // security weakening (it's a one-purpose, low-value token - verifying an email address, not
+    // authenticating a session or authorizing a payment).
     user.isEmailVerified = true;
-    user.emailVerificationToken = '';
-    user.emailVerificationExpiresAt = null;
     await user.save();
 
     res.status(200).json({ success: true, message: 'Email verified successfully. You can now sign in.' });
