@@ -8,6 +8,7 @@ import ScrollToTop from './components/ScrollToTop'
 import PaywallModal from './components/PaywallModal'
 import { initializeLanguage } from './store/languageStore'
 import { useI18n } from './utils/i18n'
+import DefaultSeo from './components/DefaultSeo'
 
 const CHUNK_RELOAD_KEY = 'linguanest-lazy-chunk-reload'
 
@@ -103,6 +104,7 @@ function App() {
     // Render serves the application from the root path.
     <Router basename={import.meta.env.BASE_URL}>
       <ScrollToTop />
+      <DefaultSeo />
       <Toaster position="top-right" />
       <PaywallModal />
       <Suspense fallback={<Layout><div className="atlas-page flex items-center justify-center px-4 py-16"><div className="atlas-panel p-6 text-center text-[var(--text-muted)]">{t('app.loadingPage')}</div></div></Layout>}>

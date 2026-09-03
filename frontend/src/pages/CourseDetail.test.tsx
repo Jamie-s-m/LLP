@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
+import { HelmetProvider } from 'react-helmet-async'
 import { vi } from 'vitest'
 import CourseDetail from './CourseDetail'
 import { useLearningStore } from '../store/learningStore'
@@ -16,11 +17,13 @@ const COURSE_ID = 'course-1'
 
 const renderAt = () =>
   render(
-    <MemoryRouter initialEntries={[`/courses/${COURSE_ID}`]}>
-      <Routes>
-        <Route path="/courses/:id" element={<CourseDetail />} />
-      </Routes>
-    </MemoryRouter>
+    <HelmetProvider>
+      <MemoryRouter initialEntries={[`/courses/${COURSE_ID}`]}>
+        <Routes>
+          <Route path="/courses/:id" element={<CourseDetail />} />
+        </Routes>
+      </MemoryRouter>
+    </HelmetProvider>
   )
 
 // Regression coverage for Phase 6: GET /certificates/mastery/:courseId now also returns a

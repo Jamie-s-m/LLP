@@ -9,6 +9,8 @@ import { useI18n } from '../utils/i18n'
 import { isDemoFallbackAllowed } from '../utils/runtimeMode'
 import { hasActivePlan, isLessonFree } from '../utils/entitlement'
 import { FiLock } from 'react-icons/fi'
+import Seo from '../components/Seo'
+import { getCourseSchema } from '../utils/structuredData'
 
 const demoFallbackEnabled = () => isDemoFallbackAllowed()
 
@@ -145,6 +147,14 @@ export default function CourseDetail() {
 
   return (
     <div className="atlas-page">
+      {course ? (
+        <Seo
+          title={course.title}
+          description={course.description}
+          path={`/courses/${course._id}`}
+          jsonLd={getCourseSchema(course)}
+        />
+      ) : null}
       <div className="max-w-4xl mx-auto p-6">
       {loading ? <p>{t('common.loadingCourse')}</p> : null}
       {!loading && !course ? <p>{t('courseDetail.notFound')}</p> : null}

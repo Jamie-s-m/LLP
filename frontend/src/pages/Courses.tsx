@@ -4,6 +4,7 @@ import { FiFilter, FiSearch, FiTarget, FiX } from 'react-icons/fi'
 import { useLearningStore } from '../store/learningStore'
 import { useI18n } from '../utils/i18n'
 import { Spinner } from '../components/ui'
+import Seo from '../components/Seo'
 
 type SortMode = 'recommended' | 'title' | 'level'
 
@@ -102,6 +103,11 @@ export default function Courses() {
 
   return (
     <div className="atlas-page px-4 py-12">
+      <Seo
+        title="English Courses"
+        description="Browse English courses in Uzbekistan by level, category, and goal - from beginner conversation to job-focused Business and IT English, with a free placement test to find your starting point."
+        path="/courses"
+      />
       <div className="container mx-auto max-w-6xl">
         <div className="atlas-heading mb-8">
           <p className="atlas-kicker">{t('courses.kicker')}</p>

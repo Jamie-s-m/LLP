@@ -8,6 +8,7 @@ import { useI18n } from '../utils/i18n'
 import PaymeCheckoutButton from '../components/PaymeCheckoutButton'
 import ClickCheckoutButton from '../components/ClickCheckoutButton'
 import { track } from '../utils/analytics'
+import Seo from '../components/Seo'
 
 type BillingPlanKey = 'local' | 'learner' | 'family' | 'teaching'
 
@@ -221,6 +222,11 @@ export default function Pricing() {
 
   return (
     <div className="atlas-page">
+      <Seo
+        title="Pricing"
+        description="Local pricing for English courses in Uzbekistan, paid in so'm through Payme or Click - no card fees or currency conversion. Plans for individual learners, families, and teaching teams."
+        path="/pricing"
+      />
       <div className="mx-auto max-w-7xl px-4 py-10">
         <div className="atlas-hero mb-10">
           <div>

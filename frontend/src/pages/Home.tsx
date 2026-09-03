@@ -5,6 +5,8 @@ import { BRAND } from '../config/brand'
 import { useLearningStore } from '../store/learningStore'
 import { useI18n } from '../utils/i18n'
 import { Spinner, EmptyState, Alert } from '../components/ui'
+import Seo from '../components/Seo'
+import { getOrganizationSchema } from '../utils/structuredData'
 
 export default function Home() {
   const { courses, fetchCourses, isLoading, error } = useLearningStore()
@@ -32,6 +34,13 @@ export default function Home() {
   ]
   return (
     <div className="atlas-page">
+      <Seo
+        isHome
+        title="LinguaNest | English Courses in Uzbekistan"
+        description="Practical English courses in Uzbekistan for work, IT, and studying or working abroad. Free placement test, CEFR-referenced lessons, and local pricing in Tashkent via Payme or Click."
+        path="/"
+        jsonLd={getOrganizationSchema()}
+      />
       <div className="mx-auto max-w-7xl px-4 py-8">
         <div className="atlas-hero mb-12">
           <div>
