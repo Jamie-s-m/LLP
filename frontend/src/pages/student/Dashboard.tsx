@@ -1,19 +1,46 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
 import { FiBookOpen, FiCheck, FiClock, FiTarget, FiUsers, FiX, FiZap } from 'react-icons/fi'
 import api from '../../services/api'
 import { useAuthStore } from '../../store/authStore'
+import { useLanguageStore } from '../../store/languageStore'
 import { useI18n } from '../../utils/i18n'
 import DailyReward from '../../components/DailyReward'
 import InstallPrompt from '../../components/InstallPrompt'
 import NotificationOptIn from '../../components/NotificationOptIn'
 import CoinStore from '../../components/CoinStore'
+import Illustration from '../../components/illustrations/Illustration'
+import Orbit, { type CefrLevel } from '../../components/orbit/Orbit'
 
 interface Summary {
   totalCourses: number
   completedCourses: number
   totalXp: number
   streak: number
+}
+
+interface SkillProfile {
+  overallCefr: string | null
+  overallLevel: string | null
+  skills: Array<{
+    skill: string
+    placement: { accuracyPercent: number | null }
+    practice: { accuracyPercent: number | null }
+  }>
+}
+
+interface ActivityDay {
+  date: string
+  count: number
+}
+
+const ORBIT_LEVELS: CefrLevel[] = ['A1', 'A2', 'B1', 'B2', 'C1']
+const LOCALE_BY_LANGUAGE: Record<string, string> = { en: 'en-US', ru: 'ru-RU', uz: 'uz-UZ' }
+
+function toOrbitLevel(cefr: string | null): CefrLevel {
+  const normalized = (cefr || '').toUpperCase()
+  return (ORBIT_LEVELS as string[]).includes(normalized) ? (normalized as CefrLevel) : 'A1'
 }
 
 interface TodayRecommendation {
@@ -35,26 +62,52 @@ interface FamilyLinkRequest {
 export default function Dashboard() {
   const { user } = useAuthStore()
   const { t } = useI18n()
+  const language = useLanguageStore((state) => state.language)
   const [summary, setSummary] = useState<Summary | null>(null)
   const [familyLinks, setFamilyLinks] = useState<FamilyLinkRequest[]>([])
   const [today, setToday] = useState<TodayRecommendation | null>(null)
+  const [skillProfile, setSkillProfile] = useState<SkillProfile | null>(null)
+  const [activity, setActivity] = useState<ActivityDay[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     Promise.all([
       api.get('/users/dashboard-summary'),
       api.get('/family'),
-      // Caught separately: this recommendation is a nice-to-have on top of the dashboard's
-      // core stats, not a reason to fail the whole page if it errors.
+      // Caught separately: none of these are a reason to fail the whole page if they error -
+      // each is a supplementary panel on top of the dashboard's core stats.
       api.get('/progress/today').catch(() => null),
+      api.get('/progress/skill-profile').catch(() => null),
+      api.get('/progress/weekly-activity').catch(() => null),
     ])
-      .then(([summaryResponse, familyResponse, todayResponse]) => {
+      .then(([summaryResponse, familyResponse, todayResponse, skillProfileResponse, activityResponse]) => {
         setSummary(summaryResponse.data.data)
         setFamilyLinks(familyResponse.data.data || [])
         setToday(todayResponse?.data?.data ?? null)
+        setSkillProfile(skillProfileResponse?.data?.data ?? null)
+        setActivity(Array.isArray(activityResponse?.data?.data) ? activityResponse.data.data : [])
       })
       .finally(() => setLoading(false))
   }, [])
+
+  const orbitLevel = toOrbitLevel(skillProfile?.overallCefr ?? null)
+  const orbitSkills = (skillProfile?.skills ?? []).map((row) => ({
+    key: row.skill,
+    label: row.skill,
+    mastery: row.practice.accuracyPercent ?? row.placement.accuracyPercent ?? 0,
+  }))
+  // A rough, honestly-labeled proxy for "progress within the current level" - the average of
+  // whatever real per-skill accuracy exists, not a fabricated metric. Matches this codebase's
+  // established practice (see progressController.js#getSkillProfile) of reporting an honest
+  // approximation rather than implying precision the underlying data doesn't support.
+  const measuredSkills = orbitSkills.filter((s) => s.mastery > 0)
+  const orbitLevelProgress = measuredSkills.length
+    ? Math.round(measuredSkills.reduce((sum, s) => sum + s.mastery, 0) / measuredSkills.length)
+    : 0
+  const activityChartData = activity.map((day) => ({
+    label: new Date(`${day.date}T00:00:00Z`).toLocaleDateString(LOCALE_BY_LANGUAGE[language] || 'en-US', { weekday: 'short', timeZone: 'UTC' }),
+    count: day.count,
+  }))
 
   const progressPercent = summary && summary.totalCourses > 0
     ? Math.round((summary.completedCourses / summary.totalCourses) * 100)
@@ -78,19 +131,27 @@ export default function Dashboard() {
               <Link to="/courses" className="btn btn-primary">{t('studentDashboard.exploreCourses')}</Link>
               <Link to="/my-learning" className="btn btn-outline">{t('studentDashboard.openLearning')}</Link>
             </div>
+            <div className="hero-orbit-wrap mt-6 hidden sm:flex" aria-hidden="true">
+              <Illustration name="online-learning" className="hero-orbit-image" />
+            </div>
           </div>
           <div className="atlas-hero-card">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/70">{t('studentDashboard.todaysFocus')}</p>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-2xl bg-white/10 p-4">
-                <FiZap className="mb-3 text-xl text-secondary-200" />
-                <strong className="block text-3xl text-white">{summary?.streak ?? 0}</strong>
-                <span className="text-sm text-white/80">{t('studentDashboard.dayStreak')}</span>
-              </div>
-              <div className="rounded-2xl bg-white/10 p-4">
-                <FiTarget className="mb-3 text-xl text-primary-200" />
-                <strong className="block text-3xl text-white">{progressPercent}%</strong>
-                <span className="text-sm text-white/80">{t('studentDashboard.courseCompletion')}</span>
+            <div className="mt-4 grid gap-4 sm:grid-cols-[auto_1fr] sm:items-center">
+              <Link to="/progress" className="mx-auto block h-28 w-28 shrink-0" aria-label={`Your CEFR progress: ${orbitLevel}`}>
+                <Orbit currentLevel={orbitLevel} levelProgress={orbitLevelProgress} variant="compact" />
+              </Link>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="rounded-2xl bg-white/10 p-4">
+                  <FiZap className="mb-3 text-xl text-secondary-200" />
+                  <strong className="block text-3xl text-white">{summary?.streak ?? 0}</strong>
+                  <span className="text-sm text-white/80">{t('studentDashboard.dayStreak')}</span>
+                </div>
+                <div className="rounded-2xl bg-white/10 p-4">
+                  <FiTarget className="mb-3 text-xl text-primary-200" />
+                  <strong className="block text-3xl text-white">{progressPercent}%</strong>
+                  <span className="text-sm text-white/80">{t('studentDashboard.courseCompletion')}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -180,11 +241,34 @@ export default function Dashboard() {
                   <span>{t('studentDashboard.overallCompletion')}</span>
                   <strong className="text-ink dark:text-white">{progressPercent}%</strong>
                 </div>
+                {activityChartData.length > 0 ? (
+                  <div className="mt-6">
+                    <p className="mb-2 text-sm text-muted">{t('studentDashboard.weeklyActivity')}</p>
+                    <div className="h-28">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={activityChartData} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
+                          <defs>
+                            <linearGradient id="dashboardActivityFill" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="var(--accent)" stopOpacity={0.35} />
+                              <stop offset="100%" stopColor="var(--accent)" stopOpacity={0} />
+                            </linearGradient>
+                          </defs>
+                          <XAxis dataKey="label" interval={0} tick={{ fontSize: 11, fill: 'var(--text-subtle)' }} axisLine={false} tickLine={false} />
+                          <Tooltip
+                            formatter={(value) => [String(value ?? 0), t('studentDashboard.exercisesCompleted')]}
+                            contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, fontSize: 12 }}
+                          />
+                          <Area type="monotone" dataKey="count" stroke="var(--accent)" strokeWidth={2} fill="url(#dashboardActivityFill)" isAnimationActive />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                ) : null}
               </div>
 
               {/* Right column: next step + daily reward */}
               <div className="space-y-4">
-                <div className="atlas-panel p-6">
+                <div className="atlas-panel dimensional-card p-6">
                   <p className="atlas-kicker">{t('studentDashboard.nextStepKicker')}</p>
                   <h2 className="text-2xl text-ink dark:text-white">{t('studentDashboard.nextStepHeading')}</h2>
                   <p className="mt-2 text-muted">

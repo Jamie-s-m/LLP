@@ -269,6 +269,42 @@ export const getSkillsBreakdown = async (req, res, next) => {
   }
 };
 
+// Phase 20: real data for the Dashboard's weekly-activity chart - no day-by-day activity
+// was aggregated anywhere before this. Counts graded ExerciseAttempts per day over the last
+// 7 days (UTC calendar days); the {user, createdAt} index this relies on already exists
+// (see ExerciseAttempt.js). Always returns exactly 7 entries, oldest first, zero-filling any
+// day with no attempts rather than omitting it - a chart consumer shouldn't have to guess
+// which day a missing entry means.
+// @desc    Exercise attempts per day, last 7 days
+// @route   GET /api/progress/weekly-activity
+// @access  Private
+export const getWeeklyActivity = async (req, res, next) => {
+  try {
+    const today = new Date();
+    const startOfToday = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+    const rangeStart = new Date(startOfToday);
+    rangeStart.setUTCDate(rangeStart.getUTCDate() - 6);
+
+    const rows = await ExerciseAttempt.aggregate([
+      { $match: { user: req.user._id, createdAt: { $gte: rangeStart } } },
+      { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt', timezone: 'UTC' } }, count: { $sum: 1 } } },
+    ]);
+    const byDay = new Map(rows.map((row) => [row._id, row.count]));
+
+    const days = [];
+    for (let i = 0; i < 7; i += 1) {
+      const day = new Date(rangeStart);
+      day.setUTCDate(day.getUTCDate() + i);
+      const key = day.toISOString().slice(0, 10);
+      days.push({ date: key, count: byDay.get(key) || 0 });
+    }
+
+    res.status(200).json({ success: true, data: days });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // PRIORITY 9/85: a real per-skill profile instead of one percentage. Deliberately does NOT
 // invent a separate CEFR letter per skill from the placement test's per-skill counts (e.g.
 // "Grammar: B1, Vocabulary: A2") - the placement test's skill-tagged items span every CEFR

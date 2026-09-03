@@ -36,6 +36,14 @@ describe('Dashboard', () => {
           },
         })
       }
+      if (url === '/progress/skill-profile') {
+        return Promise.resolve({
+          data: { data: { overallCefr: 'A2', overallLevel: 'A2', skills: [{ skill: 'grammar', placement: { accuracyPercent: 60 }, practice: { accuracyPercent: 70 } }] } },
+        })
+      }
+      if (url === '/progress/weekly-activity') {
+        return Promise.resolve({ data: { data: [{ date: '2026-09-01', count: 1 }, { date: '2026-09-02', count: 0 }] } })
+      }
       // DailyReward/CoinStore's own fetches - safe defaults so they render without crashing.
       return Promise.resolve({ data: { data: {} } })
     })

@@ -1,6 +1,6 @@
 import express from 'express';
 import { protect, authorize } from '../middleware/auth.js';
-import { enrollCourse, completeLesson, getMyLearning, getStudentProgressForTeacher, getSkillsBreakdown, getSkillProfile, getTodayRecommendation, getClassAnalyticsForCourse } from '../controllers/progressController.js';
+import { enrollCourse, completeLesson, getMyLearning, getStudentProgressForTeacher, getSkillsBreakdown, getSkillProfile, getWeeklyActivity, getTodayRecommendation, getClassAnalyticsForCourse } from '../controllers/progressController.js';
 
 const router = express.Router();
 
@@ -9,6 +9,7 @@ router.post('/complete-lesson', protect, completeLesson);
 router.get('/my-learning', protect, getMyLearning);
 router.get('/skills-breakdown', protect, getSkillsBreakdown);
 router.get('/skill-profile', protect, getSkillProfile);
+router.get('/weekly-activity', protect, getWeeklyActivity);
 router.get('/today', protect, getTodayRecommendation);
 router.get('/student/:studentId', protect, authorize('teacher', 'admin'), getStudentProgressForTeacher);
 router.get('/class-analytics/:courseId', protect, authorize('teacher', 'admin'), getClassAnalyticsForCourse);

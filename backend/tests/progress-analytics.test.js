@@ -125,6 +125,67 @@ describe('Skills breakdown', () => {
   });
 });
 
+describe('Weekly activity', () => {
+  let token;
+  let user;
+  let exercise;
+
+  beforeAll(async () => {
+    user = await User.create({
+      firstName: 'Weekly',
+      lastName: 'Tester',
+      email: 'weekly-tester@example.com',
+      password: 'testpass123',
+      role: 'student',
+      isEmailVerified: true,
+    });
+    token = signToken(user);
+
+    const course = await Course.create({
+      title: 'Weekly Activity Course',
+      description: 'Course for the weekly-activity test',
+      language: 'English',
+      level: 'Beginner',
+      category: 'Reading',
+      instructor: user._id,
+    });
+    const lesson = await Lesson.create({ course: course._id, order: 1, title: 'Weekly Lesson', content: 'content' });
+    exercise = await Exercise.create({
+      lesson: lesson._id,
+      title: 'Weekly Exercise',
+      type: 'multiple_choice',
+      question: 'Pick the right word',
+      options: ['a', 'b'],
+      correctAnswer: 'a',
+      points: 10,
+    });
+  });
+
+  afterAll(async () => {
+    await User.deleteOne({ _id: user._id });
+  });
+
+  test('returns exactly 7 zero-filled days with today reflecting a real attempt', async () => {
+    await request(app).post('/api/exercises/submit').set('Authorization', `Bearer ${token}`).send({ exerciseId: exercise._id.toString(), answer: 'a' });
+    await request(app).post('/api/exercises/submit').set('Authorization', `Bearer ${token}`).send({ exerciseId: exercise._id.toString(), answer: 'b' });
+
+    const res = await request(app)
+      .get('/api/progress/weekly-activity')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.length).toBe(7);
+
+    const todayKey = new Date().toISOString().slice(0, 10);
+    const today = res.body.data.find((day) => day.date === todayKey);
+    expect(today.count).toBe(2);
+
+    // Every earlier day in the window is real zero-fill, not omitted.
+    expect(res.body.data.every((day) => typeof day.count === 'number')).toBe(true);
+    expect(res.body.data[6].date).toBe(todayKey);
+  });
+});
+
 describe('Today recommendation', () => {
   let token;
   let user;

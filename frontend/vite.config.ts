@@ -146,6 +146,11 @@ export default defineConfig(({ mode }) => ({
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
           'ui-vendor': ['framer-motion', 'react-hot-toast', 'react-icons'],
           'store-vendor': ['zustand', 'axios'],
+          // Phase 20: recharts (~150kb) and dotlottie-react pulled into their own chunk so
+          // only the routes that actually render a chart/celebration animation pay for them,
+          // instead of bloating every route's own chunk (recharts alone pushed Dashboard's
+          // chunk past every other route's before this split).
+          'charts-vendor': ['recharts', '@lottiefiles/dotlottie-react'],
         },
       },
     },

@@ -72,6 +72,25 @@
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
 
+  /* Phase 20 - course-category identity (replaces CourseCard.tsx's per-language flag-emoji
+     + off-palette hex gradient map with a per-category system, per the founder's ask that
+     course cards stop being interchangeable regardless of subject). All five derive from
+     tokens already in this file - no new hues introduced. */
+  --category-general: var(--accent);
+  --category-business: var(--wine);
+  --category-speaking: var(--info);
+  --category-kids: var(--warning);
+  --category-travel: var(--success);
+
+  /* Phase 20 - restrained "radiant arc" accent, speaking/voice surfaces only. Deliberately
+     NOT a diffuse colored glow (docs/PHASE8_BRAND_MIGRATION.md: "flat and confident, not
+     gradient-and-glow... no colored shadows, no glow effects") - this is a low-opacity,
+     single-hue radial wash used behind geometric arc rings (see .radiant-arc-wrap below),
+     the same restrained-bloom technique already used on .hero-orbit-wrap::before (a white
+     0 0 40px shadow at 8% opacity), just tied to the brand accent instead of white and
+     scoped to one product area instead of applied broadly. */
+  --radiant-accent: color-mix(in srgb, var(--accent) 16%, transparent);
+
   --brand-background: var(--bg);
   --brand-surface: var(--surface);
   --brand-border: var(--border);
@@ -114,6 +133,15 @@
   --dark-info-light: rgba(143, 184, 224, 0.12);
   --dark-error: #f87171;
   --dark-error-light: rgba(248, 113, 113, 0.12);
+}
+
+.dark {
+  --category-general: var(--dark-accent);
+  --category-business: var(--dark-wine);
+  --category-speaking: var(--dark-info);
+  --category-kids: var(--dark-warning);
+  --category-travel: var(--dark-success);
+  --radiant-accent: color-mix(in srgb, var(--dark-accent) 20%, transparent);
 }
 
 /* Global motion discipline: every transition/animation in the app is capped and, for anyone
@@ -662,6 +690,55 @@ html.dark {
     top: 24%;
     background: linear-gradient(135deg, #ff9ab4, #ff7a6a);
     animation-delay: 2s;
+  }
+
+  /* Phase 20 - dimensional-card: generalizes .hero-orbit-image's CSS-3D tilt (already live,
+     proven on the marketing Home page) to achievement badges, course cards, and milestone
+     moments, per the "dimensional feel without literal 3D assets" strategy - real depth
+     from perspective+rotate+translateZ on hover/focus, not a rendered 3D model. */
+  .dimensional-card {
+    transform-style: preserve-3d;
+    transition: transform 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out);
+    will-change: transform;
+  }
+
+  .dimensional-card:hover,
+  .dimensional-card:focus-visible {
+    transform: perspective(900px) rotateX(4deg) rotateY(-4deg) translateY(-4px) translateZ(12px);
+    box-shadow: 0 22px 40px -12px color-mix(in srgb, var(--text-primary) 28%, transparent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dimensional-card:hover,
+    .dimensional-card:focus-visible {
+      transform: none;
+    }
+  }
+
+  /* Phase 20 - radiant-arc-wrap: the speaking/voice-surface treatment. Geometric concentric
+     rings (echoes .hero-orbit-wrap's dashed ring and the CEFR Orbit component's geometry)
+     plus the same restrained low-opacity radial wash already used on .hero-orbit-wrap::before
+     - scoped to one product area, not a site-wide glow effect (see --radiant-accent above). */
+  .radiant-arc-wrap {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .radiant-arc-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -10%;
+    z-index: -1;
+    border-radius: 9999px;
+    background: radial-gradient(circle, var(--radiant-accent), transparent 70%);
+  }
+
+  .radiant-arc-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    border: 1.5px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    pointer-events: none;
   }
 
   .atlas-panel {

@@ -94,6 +94,19 @@ export default {
         sans: ["Source Sans 3", "system-ui", "sans-serif"],
         display: ["Bricolage Grotesque", "Source Sans 3", "sans-serif"],
       },
+      // Named type scale from docs/PHASE8_BRAND_MIGRATION.md's typography table - existed
+      // as a spec but had no matching Tailwind utilities, so components fell back to ad hoc
+      // arbitrary sizes (text-2xl next to text-[1.375rem] for visually-equivalent headings).
+      // Use text-display/text-h1/etc. instead of raw text-{size} for anything matching a
+      // role in that table; Tailwind's default scale (text-sm, text-lg, ...) still covers
+      // everything else and isn't being replaced wholesale.
+      fontSize: {
+        display: ["clamp(2.5rem, 2rem + 2vw, 3.5rem)", { lineHeight: "1.05", fontWeight: "800", letterSpacing: "-0.02em" }],
+        h1: ["clamp(2rem, 1.75rem + 1vw, 2.25rem)", { lineHeight: "1.15", fontWeight: "700", letterSpacing: "-0.01em" }],
+        h2: ["clamp(1.5rem, 1.35rem + 0.6vw, 1.75rem)", { lineHeight: "1.2", fontWeight: "700" }],
+        h3: ["1.25rem", { lineHeight: "1.3", fontWeight: "600" }],
+        caption: ["0.75rem", { lineHeight: "1.4", fontWeight: "500", letterSpacing: "0.04em" }],
+      },
       animation: {
         fadeIn: "fadeIn 0.3s ease-in-out",
         slideInUp: "slideInUp 0.3s ease-out",
