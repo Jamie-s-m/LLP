@@ -4,6 +4,8 @@ import { FiBook, FiCheckCircle, FiBarChart2 } from 'react-icons/fi'
 import { useLearningStore } from '../../store/learningStore'
 import { useLanguageStore } from '../../store/languageStore'
 import { ProgressBar } from '../../components/ui'
+import Illustration from '../../components/illustrations/Illustration'
+import { courseDomainFor, DOMAIN_META } from '../../utils/courseDomain'
 
 const copy = {
   en: {
@@ -103,10 +105,19 @@ export default function MyLearning() {
           {isLoading ? <div className="atlas-panel p-6 text-muted">{ui.loading}</div> : myLearning.length === 0 ? <div className="atlas-panel p-6 text-muted">{ui.empty}</div> : myLearning.map((record) => {
             const course = record.course
             const courseId = course?._id || course?.id
+            const domain = courseDomainFor({ title: course?.title, category: (course as { category?: string } | undefined)?.category })
+            const domainMeta = DOMAIN_META[domain]
 
-            return <div key={record._id} className="atlas-panel p-6">
+            return <div key={record._id} className="atlas-panel dimensional-card p-6">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-                <div className="flex-1">
+                <div className="flex flex-1 items-start gap-4">
+                  <div
+                    className="hidden h-14 w-14 shrink-0 items-center justify-center rounded-2xl sm:flex"
+                    style={{ background: `color-mix(in srgb, var(${domainMeta.colorVar}) 22%, var(--surface-strong))` }}
+                  >
+                    <Illustration name={domainMeta.illustration} className="h-10 w-10" />
+                  </div>
+                  <div className="flex-1">
                   <h3 className="mb-2 text-xl font-bold text-ink dark:text-white">{course?.title}</h3>
                   <div className="flex flex-wrap gap-3 mb-4">
                     <span className="text-sm text-muted">
@@ -120,6 +131,7 @@ export default function MyLearning() {
                   <p className="text-sm text-muted">
                     {ui.completed.replace('{count}', String(record.completedLessons.length))} • {record.progressPercentage}%
                   </p>
+                  </div>
                 </div>
                 <Link
                   to={courseId ? `/courses/${courseId}` : '/courses'}

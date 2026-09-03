@@ -11,6 +11,13 @@ const translations: Record<LanguageCode, TranslationTree> = {
       loading: 'Loading...',
       loadingPage: 'Loading...',
     },
+    courseDomain: {
+      general: 'General English',
+      business: 'Business',
+      speaking: 'Speaking',
+      kids: 'Kids',
+      travel: 'Travel',
+    },
     common: {
       workspace: 'Workspace',
       other: 'Other',
@@ -457,6 +464,7 @@ const translations: Record<LanguageCode, TranslationTree> = {
   },
   ru: {
     app: { loading: 'Загрузка...', loadingPage: 'Загрузка...' },
+    courseDomain: { general: 'Общий английский', business: 'Бизнес', speaking: 'Разговорный', kids: 'Для детей', travel: 'Путешествия' },
     common: {
       workspace: 'Рабочее пространство',
       other: 'Другое',
@@ -553,6 +561,7 @@ const translations: Record<LanguageCode, TranslationTree> = {
   },
   uz: {
     app: { loading: 'Yuklanmoqda...', loadingPage: 'Yuklanmoqda...' },
+    courseDomain: { general: 'Umumiy ingliz tili', business: 'Biznes', speaking: 'Gapirish', kids: 'Bolalar uchun', travel: 'Sayohat' },
     common: {
       workspace: 'Ish maydoni', other: 'Boshqa', reset: 'Qayta tiklash', search: 'Qidiruv', language: 'Til', level: 'Daraja', category: 'Kategoriya', allLanguages: 'Barcha tillar', allLevels: 'Barcha darajalar', allCategories: 'Barcha kategoriyalar', openPath: 'Yo‘lni ochish', bestFor: 'Eng mos', howItWorks: 'Qanday ishlaydi', loadingProgress: 'Progress yuklanmoqda...', loadingCourse: 'Kurs yuklanmoqda...',
     },

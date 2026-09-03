@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { FiFilter, FiSearch, FiTarget, FiX } from 'react-icons/fi'
 import { useLearningStore } from '../store/learningStore'
 import { useI18n } from '../utils/i18n'
 import { Spinner } from '../components/ui'
+import CourseCard from '../components/ui/CourseCard'
 import Seo from '../components/Seo'
 
 type SortMode = 'recommended' | 'title' | 'level'
@@ -230,41 +231,18 @@ export default function Courses() {
             </div>
           ) : filteredCourses.length > 0 ? (
             filteredCourses.map((course) => {
-              const courseId = course._id || course.id
+              const courseId = course._id || course.id || ''
 
               return (
-                <Link
+                <CourseCard
                   key={courseId}
+                  id={courseId}
+                  title={course.title}
+                  description={course.description}
+                  category={course.category}
+                  level={course.level}
                   to={`/courses/${courseId}`}
-                  className="atlas-panel rounded-3xl p-6 transition-transform hover:-translate-y-1"
-                >
-                  {course.thumbnail ? (
-                    <img
-                      src={course.thumbnail}
-                      alt={course.title}
-                      loading="lazy"
-                      className="mb-4 h-40 w-full rounded-2xl object-cover"
-                    />
-                  ) : null}
-                  <div className="mb-3 flex flex-wrap gap-2">
-                    {course.category ? (
-                      <span className="rounded-full bg-primary-500/10 px-3 py-1 text-xs font-semibold text-primary-700 dark:text-primary-300">
-                        {course.category}
-                      </span>
-                    ) : null}
-                    <span className="rounded-full bg-[var(--border-light)] px-3 py-1 text-xs font-semibold text-ink">
-                      {course.level}
-                    </span>
-                  </div>
-                  <h3 className="mb-2 text-xl font-bold text-ink dark:text-white">{course.title}</h3>
-                  <p className="mb-4 text-sm text-[var(--text-muted)]">
-                    {course.description}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-primary-500">{course.language}</span>
-                    <span className="text-sm font-semibold text-[var(--text-muted)]">{t('courses.viewPath')}</span>
-                  </div>
-                </Link>
+                />
               )
             })
           ) : (
