@@ -7,6 +7,7 @@ import { assertLessonOwnership as canManageLesson } from '../utils/ownership.js'
 import { applyHeartsRegen, loseHeart, serializeHearts } from '../utils/hearts.js';
 import { inferSkillFromType } from '../utils/skills.js';
 import { requireLessonEntitlement } from '../utils/entitlement.js';
+import { checkAndAwardBadges } from '../utils/achievements.js';
 
 const assertExerciseOwnership = async (exerciseId, user) => {
   const exercise = await Exercise.findById(exerciseId);
@@ -286,6 +287,11 @@ export const submitExercise = async (req, res, next) => {
       pointsAwarded,
     });
 
+    // Real XP was just awarded above - a badge could cross its threshold from this alone,
+    // never having claimed a daily reward (the only place this check used to run). Matches the
+    // same unlockedBadges shape the daily-reward claim response already returns.
+    const unlockedBadges = isCorrect ? await checkAndAwardBadges(user._id) : [];
+
     res.status(200).json({
       success: true,
       data: {
@@ -293,6 +299,7 @@ export const submitExercise = async (req, res, next) => {
         points: pointsAwarded,
         correctAnswer: feedbackAnswer(exercise),
         xp: user.xp,
+        unlockedBadges,
         ...serializeHearts(user),
       },
     });

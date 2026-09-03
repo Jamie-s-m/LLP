@@ -35,7 +35,7 @@ interface LearningState {
   fetchCourses: (params?: Record<string, any>) => Promise<void>
   fetchMyLearning: () => Promise<void>
   enrollInCourse: (courseId: string) => Promise<boolean>
-  completeLesson: (courseId: string, lessonId: string) => Promise<boolean>
+  completeLesson: (courseId: string, lessonId: string) => Promise<{ success: boolean; unlockedBadges: Array<{ name: string; icon?: string }> }>
 }
 
 export const useLearningStore = create<LearningState>((set, get) => ({
@@ -123,12 +123,12 @@ fetchCourses: async (params) => {
       })
       if (response.data?.success) {
         await get().fetchMyLearning()
-        return true
+        return { success: true, unlockedBadges: response.data.unlockedBadges || [] }
       }
-      return false
+      return { success: false, unlockedBadges: [] }
     } catch (err: any) {
       console.error('Failed to update lesson progress:', err)
-      return false
+      return { success: false, unlockedBadges: [] }
     }
   },
 }))

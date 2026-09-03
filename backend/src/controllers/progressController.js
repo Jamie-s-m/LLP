@@ -6,6 +6,7 @@ import ExerciseAttempt from '../models/ExerciseAttempt.js';
 import Flashcard from '../models/Flashcard.js';
 import { SKILLS } from '../utils/skills.js';
 import { computeSkillMastery } from '../utils/masteryEngine.js';
+import { checkAndAwardBadges } from '../utils/achievements.js';
 import { filterDueFlashcards, filterAccessibleFlashcards } from './flashcardController.js';
 import { hasModeratorPermission, isOwnerId } from '../middleware/auth.js';
 
@@ -81,6 +82,7 @@ export const completeLesson = async (req, res, next) => {
 
       // Award XP & Update Streak on User
       const user = await User.findById(userId);
+      let unlockedBadges = [];
       if (user) {
         user.xp = (user.xp || 0) + 50;
 
@@ -100,7 +102,13 @@ export const completeLesson = async (req, res, next) => {
 
         user.lastActiveDate = now;
         await user.save();
+
+        // Real XP was just awarded above - a badge could cross its threshold from lesson
+        // completion alone, never having claimed a daily reward.
+        unlockedBadges = await checkAndAwardBadges(user._id);
       }
+
+      return res.status(200).json({ success: true, data: progress, unlockedBadges });
     }
 
     res.status(200).json({ success: true, data: progress });

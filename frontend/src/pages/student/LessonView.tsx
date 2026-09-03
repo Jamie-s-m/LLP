@@ -113,11 +113,16 @@ export default function LessonView() {
   const handleComplete = async () => {
     if (!lesson || isCompleted) return
     setCompleting(true)
-    const success = await completeLesson(lesson.course, lesson._id)
+    const { success, unlockedBadges } = await completeLesson(lesson.course, lesson._id)
     setCompleting(false)
     if (success) {
       track('lesson_completed', { lessonId: lesson._id, courseId: lesson.course })
       toast.success('Lesson marked complete — nice work!')
+      // Matches DailyReward.tsx's exact toast pattern - badges can unlock from lesson
+      // completion, not just claiming the daily reward.
+      unlockedBadges.forEach((badge) => {
+        toast.success(`${badge.icon ? `${badge.icon} ` : ''}Badge unlocked: ${badge.name}!`, { duration: 5000 })
+      })
     } else {
       toast.error('Could not save your progress. Are you enrolled in this course?')
     }

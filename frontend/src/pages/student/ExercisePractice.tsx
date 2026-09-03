@@ -128,6 +128,13 @@ export default function ExercisePractice() {
       setResult(response.data.data)
       setHearts({ hearts: response.data.data.hearts, maxHearts: response.data.data.maxHearts })
       track('exercise_completed', { exerciseId: exercise._id, type: exercise.type, correct: Boolean(response.data.data.isCorrect) })
+      // Matches DailyReward.tsx's exact toast pattern - badges can now unlock from exercise
+      // completion, not just claiming the daily reward, so the "you just unlocked X" moment
+      // needs to fire here too rather than only ever showing up silently in the catalog later.
+      const unlockedBadges = response.data.data.unlockedBadges as Array<{ name: string; icon?: string }> | undefined
+      unlockedBadges?.forEach((badge) => {
+        toast.success(`${badge.icon ? `${badge.icon} ` : ''}Badge unlocked: ${badge.name}!`, { duration: 5000 })
+      })
     } catch (error: any) {
       if (error.response?.status === 403) {
         setOutOfHearts({ heartsRegenAt: error.response.data?.data?.heartsRegenAt || null })

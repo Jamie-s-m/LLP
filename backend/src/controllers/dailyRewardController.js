@@ -1,8 +1,6 @@
 import User from '../models/User.js';
-import Badge from '../models/Badge.js';
-import UserAchievement from '../models/UserAchievement.js';
 import DailyRewardClaim from '../models/DailyRewardClaim.js';
-import { BADGE_CATALOG, iconFor, colorFor, rarityFor, isBadgeUnlocked } from '../data/badgeCatalog.js';
+import { checkAndAwardBadges } from '../utils/achievements.js';
 import logger from '../utils/logger.js';
 
 // @desc    Claim daily reward
@@ -92,7 +90,7 @@ export const claimDailyReward = async (req, res, next) => {
     await user.save();
 
     // Check for badge unlocks
-    const unlockedBadges = await checkAndUnlockBadges(userId, newDailyRewardStreak, user.totalLinguaCoinsEarned, user.xp);
+    const unlockedBadges = await checkAndAwardBadges(userId);
 
     // Log the claim for auditing (and for the streak-calendar history endpoint below)
     try {
@@ -240,47 +238,4 @@ export const spendLinguaCoins = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-};
-
-// Helper: Check and unlock badges based on milestones (catalog lives in data/badgeCatalog.js
-// so the achievements-catalog endpoint can also list locked badges + progress from it).
-const checkAndUnlockBadges = async (userId, dailyStreak, totalCoins, totalXP) => {
-  const unlockedBadges = [];
-  const stats = { dailyStreak, totalCoins, totalXP };
-
-  for (const entry of BADGE_CATALOG) {
-    if (!isBadgeUnlocked(entry, stats)) continue;
-
-    let badge = await Badge.findOne({ name: entry.name });
-    if (!badge) {
-      badge = await Badge.create({
-        name: entry.name,
-        description: entry.description,
-        icon: iconFor(entry.name),
-        color: colorFor(entry.category),
-        requirement: entry.description,
-        category: entry.category,
-        points: entry.points,
-        rarity: rarityFor(entry.points),
-      });
-    }
-
-    const existing = await UserAchievement.findOne({ student: userId, badge: badge._id });
-    if (!existing) {
-      await UserAchievement.create({
-        student: userId,
-        badge: badge._id,
-      });
-      unlockedBadges.push({
-        name: badge.name,
-        description: badge.description,
-        icon: badge.icon,
-        color: badge.color,
-        points: badge.points,
-        rarity: badge.rarity,
-      });
-    }
-  }
-
-  return unlockedBadges;
 };
