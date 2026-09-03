@@ -62,9 +62,9 @@ export default function ParentDashboard() {
             <input className="input" type="email" required value={studentEmail} onChange={(event) => setStudentEmail(event.target.value)} placeholder={t('parentDashboard.learnerEmail')} />
             <button className="btn btn-primary sm:min-w-40">{t('parentDashboard.requestLink')}</button>
           </form>
-          <div className="rounded-2xl bg-[#f6efe7] p-4 dark:bg-white/5">
+          <div className="rounded-2xl bg-[var(--surface-strong)] p-4 dark:bg-white/5">
             <p className="text-sm font-semibold text-ink dark:text-white">{t('common.howItWorks')}</p>
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{t('parentDashboard.howItWorksCopy')}</p>
+            <p className="mt-2 text-sm text-muted">{t('parentDashboard.howItWorksCopy')}</p>
           </div>
           <Link to="/chat" className="btn btn-primary mt-5 inline-flex items-center gap-2">{t('parentDashboard.openFamilyChat')} <FiMessageCircle /></Link>
         </section>
@@ -78,11 +78,11 @@ export default function ParentDashboard() {
                 <p>{t('parentDashboard.noLinks')}</p>
               </div>
             ) : links.map((link) => (
-              <div key={link._id} className="flex items-center justify-between rounded-2xl bg-[#f6efe7] p-4 dark:bg-white/5">
+              <div key={link._id} className="flex items-center justify-between rounded-2xl bg-[var(--surface-strong)] p-4 dark:bg-white/5">
                 <div>
-                  {link.student && link.status === 'approved' ? <Link className="font-semibold text-ink dark:text-white" to={`/parent/children/${link.student._id}`}>{link.student.firstName} {link.student.lastName}</Link> : link.student ? <span className="font-semibold text-ink dark:text-white">{link.student.firstName} {link.student.lastName}</span> : <span className="font-semibold text-slate-700 dark:text-slate-100">{t('parentDashboard.learnerFallback')}</span>}
-                  {link.student ? <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t('parentDashboard.streakDays', { xp: link.student.xp, streak: link.student.streak })}</p> : null}
-                  {link.status === 'pending' ? <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t('parentDashboard.waitingApproval')}</p> : null}
+                  {link.student && link.status === 'approved' ? <Link className="font-semibold text-ink dark:text-white" to={`/parent/children/${link.student._id}`}>{link.student.firstName} {link.student.lastName}</Link> : link.student ? <span className="font-semibold text-ink dark:text-white">{link.student.firstName} {link.student.lastName}</span> : <span className="font-semibold text-ink dark:text-white">{t('parentDashboard.learnerFallback')}</span>}
+                  {link.student ? <p className="mt-1 text-sm text-muted">{t('parentDashboard.streakDays', { xp: link.student.xp, streak: link.student.streak })}</p> : null}
+                  {link.status === 'pending' ? <p className="mt-1 text-sm text-muted">{t('parentDashboard.waitingApproval')}</p> : null}
                 </div>
                 <span className={`status-pill ${link.status === 'approved' ? '' : 'muted'}`}>{link.status === 'approved' ? t('parentDashboard.statusApproved') : link.status === 'rejected' ? t('parentDashboard.statusRejected') : t('parentDashboard.statusPending')}</span>
               </div>

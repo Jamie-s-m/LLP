@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { FiBook, FiCheckCircle, FiBarChart2 } from 'react-icons/fi'
 import { useLearningStore } from '../../store/learningStore'
 import { useLanguageStore } from '../../store/languageStore'
+import { ProgressBar } from '../../components/ui'
 
 const copy = {
   en: {
@@ -115,12 +116,7 @@ export default function MyLearning() {
                       {course?.level}
                     </span>
                   </div>
-                  <div className="w-full max-w-xs bg-neutral-200 dark:bg-neutral-700 rounded-full h-2 mb-2">
-                    <div
-                      className="bg-primary-500 h-2 rounded-full transition-all"
-                      style={{ width: `${record.progressPercentage}%` }}
-                    />
-                  </div>
+                  <ProgressBar value={record.progressPercentage} className="w-full max-w-xs mb-2" />
                   <p className="text-sm text-muted">
                     {ui.completed.replace('{count}', String(record.completedLessons.length))} • {record.progressPercentage}%
                   </p>

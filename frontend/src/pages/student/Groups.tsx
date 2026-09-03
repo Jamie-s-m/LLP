@@ -219,16 +219,22 @@ export default function Groups() {
 
         {canManageGroups && showForm && (
           <form onSubmit={handleCreate} className="atlas-panel mb-8 space-y-4 p-6">
-            <input className="input" placeholder={ui.groupName} required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
-            <textarea className="input" placeholder={ui.description} required value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
+            <div>
+              <label className="label" htmlFor="group-name">{ui.groupName}</label>
+              <input id="group-name" className="input" placeholder={ui.groupName} required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
+            </div>
+            <div>
+              <label className="label" htmlFor="group-description">{ui.description}</label>
+              <textarea id="group-description" className="input" placeholder={ui.description} required value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
+            </div>
             <div className="grid grid-cols-2 gap-4">
-              <select className="input" value={formData.language} onChange={(e) => setFormData({ ...formData, language: e.target.value })}>
+              <select id="group-language" className="input" value={formData.language} onChange={(e) => setFormData({ ...formData, language: e.target.value })}>
                 <option value="English">{optionLabels.English[language]}</option>
                 <option value="Turkish">{optionLabels.Turkish[language]}</option>
                 <option value="Russian">{optionLabels.Russian[language]}</option>
                 <option value="Uzbek">{optionLabels.Uzbek[language]}</option>
               </select>
-              <select className="input" value={formData.level} onChange={(e) => setFormData({ ...formData, level: e.target.value })}>
+              <select id="group-level" className="input" value={formData.level} onChange={(e) => setFormData({ ...formData, level: e.target.value })}>
                 <option value="Beginner">{optionLabels.Beginner[language]}</option>
                 <option value="Intermediate">{optionLabels.Intermediate[language]}</option>
                 <option value="Advanced">{optionLabels.Advanced[language]}</option>
@@ -305,16 +311,18 @@ export default function Groups() {
                               <button
                                 onClick={() => handleApprove(group._id, request.user._id)}
                                 disabled={pendingAction === `${group._id}:${request.user._id}`}
-                                className="rounded-full bg-green-100 p-1.5 text-green-700 hover:bg-green-200 disabled:opacity-50 dark:bg-green-900/40 dark:text-green-300"
+                                className="rounded-full bg-green-100 p-1.5 text-green-700 hover:bg-green-200 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-2 dark:bg-green-900/40 dark:text-green-300 dark:focus-visible:ring-offset-neutral-800"
                                 title={ui.approve}
+                                aria-label={ui.approve}
                               >
                                 <FiCheck size={14} />
                               </button>
                               <button
                                 onClick={() => handleReject(group._id, request.user._id)}
                                 disabled={pendingAction === `${group._id}:${request.user._id}`}
-                                className="rounded-full bg-red-100 p-1.5 text-red-700 hover:bg-red-200 disabled:opacity-50 dark:bg-red-900/40 dark:text-red-300"
+                                className="rounded-full bg-red-100 p-1.5 text-red-700 hover:bg-red-200 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 dark:bg-red-900/40 dark:text-red-300 dark:focus-visible:ring-offset-neutral-800"
                                 title={ui.reject}
+                                aria-label={ui.reject}
                               >
                                 <FiX size={14} />
                               </button>

@@ -151,12 +151,12 @@ export default function CourseDetail() {
       {course ? <h1 className="mb-4 text-4xl font-bold text-ink">{course.title}</h1> : null}
       {/* Course metadata card */}
       {course ? <div className="atlas-panel mb-6 rounded-3xl p-6">
-        <div className="mb-4 flex flex-wrap gap-2 text-sm text-slate-600 dark:text-slate-300">
+        <div className="mb-4 flex flex-wrap gap-2 text-sm text-muted">
           <span className="rounded-full bg-[var(--border-light)] px-3 py-1">{course.language}</span>
           <span className="rounded-full bg-[var(--border-light)] px-3 py-1">{course.level}</span>
           <span className="rounded-full bg-[var(--border-light)] px-3 py-1">{course.category}</span>
         </div>
-        <p className="mb-6 text-slate-700 dark:text-slate-200">{course.description}</p>
+        <p className="mb-6 text-muted">{course.description}</p>
 
         <h2 className="mb-3 text-xl font-semibold text-ink">{t('courseDetail.lessons')}</h2>
         {lessons.length > 0 ? <div className="space-y-2 mb-6">
@@ -176,17 +176,17 @@ export default function CourseDetail() {
               </button>
             )
           })}
-        </div> : <p className="text-slate-400 mb-6">{t('courseDetail.lessonsEmpty')}</p>}
+        </div> : <p className="text-muted mb-6">{t('courseDetail.lessonsEmpty')}</p>}
 
-        <div className="mb-6 rounded-2xl bg-[#f6efe7] p-5 dark:bg-white/5">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{t('courseDetail.blueprintKicker')}</p>
+        <div className="mb-6 rounded-2xl bg-[var(--surface-strong)] p-5 dark:bg-white/5">
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-muted">{t('courseDetail.blueprintKicker')}</p>
           <h3 className="mt-3 text-xl font-semibold text-ink dark:text-white">{t('courseDetail.blueprintHeading')}</h3>
-          <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{t('courseDetail.blueprintGoal')}</p>
+          <p className="mt-2 text-sm text-muted">{t('courseDetail.blueprintGoal')}</p>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
-            <div className="rounded-2xl border border-slate-200 bg-white/80 p-4 text-sm text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-200">
+            <div className="rounded-2xl border border-[var(--border)] bg-white/80 p-4 text-sm text-muted dark:border-white/10 dark:bg-white/5">
               {lessons.length === 1 ? t('courseDetail.lessonCount', { count: lessons.length }) : t('courseDetail.lessonCountPlural', { count: lessons.length })}
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-white/80 p-4 text-sm text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-200">
+            <div className="rounded-2xl border border-[var(--border)] bg-white/80 p-4 text-sm text-muted dark:border-white/10 dark:bg-white/5">
               {t('courseDetail.pathOutcome')}
             </div>
           </div>
@@ -212,7 +212,7 @@ export default function CourseDetail() {
 
         {isEnrolled && mastery ? (
           <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 dark:bg-white/5">
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{t('courseDetail.masteryKicker')}</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-muted">{t('courseDetail.masteryKicker')}</p>
             <h3 className="mt-2 text-xl font-semibold text-ink dark:text-white">{t('courseDetail.masteryHeading')}</h3>
 
             <div className="mt-4 grid grid-cols-2 gap-3">
@@ -234,7 +234,7 @@ export default function CourseDetail() {
                     className={`rounded-full px-3 py-1 text-xs font-semibold ${
                       readiness.ready
                         ? 'bg-[var(--success)]/15 text-[var(--success)]'
-                        : 'bg-[var(--border-light)] text-slate-500 dark:text-slate-400'
+                        : 'bg-[var(--border-light)] text-muted'
                     }`}
                   >
                     {cefr}: {readiness.ready ? t('courseDetail.levelReady') : t('courseDetail.levelNotReady')}

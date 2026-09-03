@@ -5,6 +5,7 @@ import toast from 'react-hot-toast'
 import api from '../../services/api'
 import { useLearningStore } from '../../store/learningStore'
 import VideoEmbed from '../../components/ui/VideoEmbed'
+import ProgressBar from '../../components/ui/ProgressBar'
 import { track } from '../../utils/analytics'
 import { useI18n } from '../../utils/i18n'
 
@@ -271,9 +272,7 @@ export default function LessonView() {
                     <span>Overall</span>
                     <span>{progressRecord?.progressPercentage ?? 0}%</span>
                   </div>
-                  <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2">
-                    <div className="bg-primary-500 h-2 rounded-full" style={{ width: `${progressRecord?.progressPercentage ?? 0}%` }} />
-                  </div>
+                  <ProgressBar value={progressRecord?.progressPercentage ?? 0} />
                 </div>
               </div>
               <hr className="my-6 border-neutral-200 dark:border-neutral-700" />

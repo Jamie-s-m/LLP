@@ -64,10 +64,11 @@ export default function CreateCourse() {
 
         <form onSubmit={handleSubmit} className="card space-y-6">
           <div>
-            <label className="label">{ui.titleLabel}</label>
+            <label className="label" htmlFor="create-course-title">{ui.titleLabel}</label>
             <input
               type="text"
               name="title"
+              id="create-course-title"
               className="input"
               placeholder={ui.titlePlaceholder}
               value={formData.title}
@@ -77,9 +78,10 @@ export default function CreateCourse() {
           </div>
 
           <div>
-            <label className="label">{ui.description}</label>
+            <label className="label" htmlFor="create-course-description">{ui.description}</label>
             <textarea
               name="description"
+              id="create-course-description"
               className="input min-h-32"
               placeholder={ui.descriptionPlaceholder}
               value={formData.description}
@@ -90,8 +92,8 @@ export default function CreateCourse() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="label">{ui.language}</label>
-              <select name="language" className="input" value={formData.language} onChange={handleChange}>
+              <label className="label" htmlFor="create-course-language">{ui.language}</label>
+              <select name="language" id="create-course-language" className="input" value={formData.language} onChange={handleChange}>
                 <option value="English">{optionLabels.English[language]}</option>
                 <option value="Turkish">{optionLabels.Turkish[language]}</option>
                 <option value="Russian">{optionLabels.Russian[language]}</option>
@@ -99,8 +101,8 @@ export default function CreateCourse() {
               </select>
             </div>
             <div>
-              <label className="label">{ui.level}</label>
-              <select name="level" className="input" value={formData.level} onChange={handleChange}>
+              <label className="label" htmlFor="create-course-level">{ui.level}</label>
+              <select name="level" id="create-course-level" className="input" value={formData.level} onChange={handleChange}>
                 <option value="Beginner">{optionLabels.Beginner[language]}</option>
                 <option value="Intermediate">{optionLabels.Intermediate[language]}</option>
                 <option value="Advanced">{optionLabels.Advanced[language]}</option>
@@ -109,8 +111,8 @@ export default function CreateCourse() {
           </div>
 
           <div>
-            <label className="label">{ui.category}</label>
-            <select name="category" className="input" value={formData.category} onChange={handleChange}>
+            <label className="label" htmlFor="create-course-category">{ui.category}</label>
+            <select name="category" id="create-course-category" className="input" value={formData.category} onChange={handleChange}>
             <option value="Grammar">{optionLabels.Grammar[language]}</option>
             <option value="Vocabulary">{optionLabels.Vocabulary[language]}</option>
             <option value="Conversation">{optionLabels.Conversation[language]}</option>

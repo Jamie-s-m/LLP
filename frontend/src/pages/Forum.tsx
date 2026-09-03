@@ -140,13 +140,13 @@ export default function Forum() {
                     <p className="text-2xl font-bold">{post.replies?.length || 0}</p>
                     <p className="text-xs">{ui.replies}</p>
                   </div>
-                  <div className="rounded-lg bg-neutral-100 px-3 py-2 text-sm font-medium text-neutral-700 dark:bg-white/10 dark:text-slate-200">{ui.likes.replace('{count}', String(post.upvotes || 0))}</div>
+                  <div className="rounded-lg bg-neutral-100 px-3 py-2 text-sm font-medium text-neutral-700 dark:bg-white/10 dark:text-neutral-300">{ui.likes.replace('{count}', String(post.upvotes || 0))}</div>
                 </div>
               </div>
               {post.replies?.length ? (
                 <div className="mt-5 space-y-3 border-t border-neutral-200 pt-4">
                   {post.replies.map((reply: any) => (
-                    <div key={reply._id} className="rounded-2xl bg-[#f6efe7] p-3 text-sm text-slate-700 dark:bg-white/5 dark:text-slate-200">
+                    <div key={reply._id} className="rounded-2xl bg-[var(--surface-strong)] p-3 text-sm text-muted dark:bg-white/5">
                       <div className="mb-1 flex items-center gap-2 font-semibold text-ink dark:text-white">
                         <FiCornerDownRight size={14} />
                         <span>{reply.author?.firstName} {reply.author?.lastName}</span>

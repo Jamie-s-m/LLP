@@ -1171,11 +1171,11 @@ export default function ControlCenter() {
             ))}
           </div>
           {loading ? (
-            <div className="rounded-2xl bg-[#f6efe7] p-5 text-slate-600 dark:bg-white/5 dark:text-slate-300">{ui.loadingCurriculum}</div>
+            <div className="rounded-2xl bg-[var(--surface-strong)] p-5 text-muted dark:bg-white/5">{ui.loadingCurriculum}</div>
           ) : (
             <>
               {filteredCourses.length > 0 ? (
-                <label className="mb-3 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+                <label className="mb-3 flex items-center gap-2 text-sm text-muted">
                   <input
                     type="checkbox"
                     checked={selectedCourseIds.size > 0 && filteredCourses.every((course) => selectedCourseIds.has(course._id))}
@@ -1190,7 +1190,7 @@ export default function ControlCenter() {
                   <button disabled={bulkActionPending} onClick={() => bulkPublishCourses(true)} className="btn btn-outline text-sm">{ui.bulkPublish}</button>
                   <button disabled={bulkActionPending} onClick={() => bulkPublishCourses(false)} className="btn btn-outline text-sm">{ui.bulkUnpublish}</button>
                   <button disabled={bulkActionPending} onClick={bulkDeleteCourses} className="btn btn-outline text-sm text-red-600">{ui.bulkDelete}</button>
-                  <button onClick={() => setSelectedCourseIds(new Set())} className="ml-auto text-sm text-slate-500 hover:underline">{ui.clearSelection}</button>
+                  <button onClick={() => setSelectedCourseIds(new Set())} className="ml-auto text-sm text-muted hover:underline">{ui.clearSelection}</button>
                 </div>
               ) : null}
               <div className="admin-table">
@@ -1221,7 +1221,7 @@ export default function ControlCenter() {
             <input className="input max-w-sm" value={userSearch} onChange={(event) => { setUserSearch(event.target.value); setUserPage(1) }} placeholder={ui.searchUsers} />
           </div>
           {visibleUsers.length > 0 ? (
-            <label className="mb-3 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+            <label className="mb-3 flex items-center gap-2 text-sm text-muted">
               <input
                 type="checkbox"
                 checked={selectedUserIds.size > 0 && visibleUsers.every((user) => selectedUserIds.has(user._id))}
@@ -1241,7 +1241,7 @@ export default function ControlCenter() {
                   <button disabled={bulkActionPending} onClick={() => bulkUserAction('delete')} className="btn btn-outline text-sm text-red-600">{ui.bulkDelete}</button>
                 </>
               ) : null}
-              <button onClick={() => setSelectedUserIds(new Set())} className="ml-auto text-sm text-slate-500 hover:underline">{ui.clearSelection}</button>
+              <button onClick={() => setSelectedUserIds(new Set())} className="ml-auto text-sm text-muted hover:underline">{ui.clearSelection}</button>
             </div>
           ) : null}
           <div className="admin-table">
@@ -1277,7 +1277,7 @@ export default function ControlCenter() {
             })}
             {visibleUsers.length === 0 ? <div className="empty-state"><FiUsers /><p>{filteredUsers.length === 0 ? ui.noUsersMatch : ui.noUsersPage}</p></div> : null}
           </div>
-          <div className="mt-5 flex items-center justify-between text-sm text-slate-600 dark:text-slate-300">
+          <div className="mt-5 flex items-center justify-between text-sm text-muted">
             <span>{ui.usersCount.replace('{count}', String(filteredUsers.length))}</span>
             <div className="flex gap-2">
               <button className="btn btn-outline" disabled={userPage === 1} onClick={() => setUserPage((page) => page - 1)}>{ui.previous}</button>
@@ -1303,7 +1303,7 @@ export default function ControlCenter() {
             </div>
           </div>
           {content.length > 0 ? (
-            <label className="mb-3 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+            <label className="mb-3 flex items-center gap-2 text-sm text-muted">
               <input
                 type="checkbox"
                 checked={selectedContentIds.size > 0 && content.every((item) => selectedContentIds.has(item._id))}
@@ -1316,7 +1316,7 @@ export default function ControlCenter() {
             <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl bg-[var(--accent-light)] px-4 py-3 text-sm dark:bg-white/5">
               <span className="font-semibold text-[var(--accent)]">{ui.selectedCount.replace('{count}', String(selectedContentIds.size))}</span>
               <button disabled={bulkActionPending} onClick={bulkDeleteContentItems} className="btn btn-outline text-sm text-red-600">{ui.bulkDelete}</button>
-              <button onClick={() => setSelectedContentIds(new Set())} className="ml-auto text-sm text-slate-500 hover:underline">{ui.clearSelection}</button>
+              <button onClick={() => setSelectedContentIds(new Set())} className="ml-auto text-sm text-muted hover:underline">{ui.clearSelection}</button>
             </div>
           ) : null}
           <div className="admin-table">
@@ -1419,14 +1419,14 @@ export default function ControlCenter() {
           <h2 className="text-2xl text-ink dark:text-white">{ui.supportTitle}</h2>
           <p className="mt-2 text-muted">{ui.supportText}</p>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
-            <div className="rounded-2xl bg-[#f6efe7] p-5 dark:bg-white/5">
-              <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">{ui.currentChatVolume}</p>
+            <div className="rounded-2xl bg-[var(--surface-strong)] p-5 dark:bg-white/5">
+              <p className="text-sm font-semibold text-muted">{ui.currentChatVolume}</p>
               <strong className="mt-3 block text-3xl text-ink dark:text-white">{overview?.totals.chatMessages ?? 0}</strong>
-              <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{ui.currentChatVolumeText}</p>
+              <p className="mt-2 text-sm text-muted">{ui.currentChatVolumeText}</p>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-white/80 p-5 dark:border-white/10 dark:bg-white/5">
-              <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">{ui.operationalAction}</p>
-              <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{ui.operationalActionText}</p>
+            <div className="rounded-2xl border border-[var(--border)] bg-white/80 p-5 dark:border-white/10 dark:bg-white/5">
+              <p className="text-sm font-semibold text-muted">{ui.operationalAction}</p>
+              <p className="mt-2 text-sm text-muted">{ui.operationalActionText}</p>
               <Link to="/chat" className="btn btn-primary mt-4 inline-flex">{ui.openSupportChat}</Link>
 
               <div className="mt-6">
@@ -1468,19 +1468,19 @@ export default function ControlCenter() {
               { title: ui.potentialLearnerSeats, value: overview?.totals.students ?? 0, note: ui.potentialLearnerSeatsText },
               { title: ui.potentialFamilyAccounts, value: overview?.totals.parents ?? 0, note: ui.potentialFamilyAccountsText },
               { title: ui.potentialTeachingWorkspaces, value: overview?.totals.teachers ?? 0, note: ui.potentialTeachingWorkspacesText },
-            ].map((card) => <div key={card.title} className="rounded-2xl bg-[#f6efe7] p-5 dark:bg-white/5"><p className="text-sm font-semibold text-slate-500 dark:text-slate-400">{card.title}</p><strong className="mt-3 block text-3xl text-ink dark:text-white">{card.value}</strong><p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{card.note}</p></div>)}
+            ].map((card) => <div key={card.title} className="rounded-2xl bg-[var(--surface-strong)] p-5 dark:bg-white/5"><p className="text-sm font-semibold text-muted">{card.title}</p><strong className="mt-3 block text-3xl text-ink dark:text-white">{card.value}</strong><p className="mt-2 text-sm text-muted">{card.note}</p></div>)}
           </div>
           <div className="mt-6 grid gap-4 lg:grid-cols-3">
             {billingPlans.map((plan) => (
-              <div key={plan.key} className="rounded-2xl border border-slate-200 bg-white/80 p-5 dark:border-white/10 dark:bg-white/5">
+              <div key={plan.key} className="rounded-2xl border border-[var(--border)] bg-white/80 p-5 dark:border-white/10 dark:bg-white/5">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">{plan.name}</p>
+                    <p className="text-sm font-semibold text-muted">{plan.name}</p>
                     <strong className="mt-2 block text-2xl text-ink dark:text-white">{plan.priceLabel}</strong>
                   </div>
                   <span className={`status-pill ${plan.available ? '' : 'muted'}`}>{plan.available ? ui.configured : ui.missingPriceId}</span>
                 </div>
-                <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">{plan.description}</p>
+                <p className="mt-3 text-sm text-muted">{plan.description}</p>
               </div>
             ))}
             {billingPlans.length === 0 ? <div className="empty-state lg:col-span-3"><FiCreditCard /><p>{ui.noStripePlans}</p></div> : null}
@@ -1491,13 +1491,13 @@ export default function ControlCenter() {
               ui.billingTask2,
               ui.billingTask3,
               ui.billingTask4,
-            ].map((item) => <div key={item} className="rounded-2xl border border-slate-200 bg-white/80 p-4 text-sm text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-200">{item}</div>)}
+            ].map((item) => <div key={item} className="rounded-2xl border border-[var(--border)] bg-white/80 p-4 text-sm text-muted dark:border-white/10 dark:bg-white/5">{item}</div>)}
           </div>
         </section>
       ) : null}
 
       {courseModal !== false ? (
-        <div className="fixed inset-0 z-[170] flex items-start justify-center overflow-y-auto bg-slate-950/45 px-4 py-8 sm:items-center">
+        <div className="fixed inset-0 z-[170] flex items-start justify-center overflow-y-auto bg-[color-mix(in_srgb,var(--text-primary)_62%,transparent)] px-4 py-8 sm:items-center">
           <form className="atlas-panel w-full max-w-2xl p-6" onSubmit={saveCourseModal}>
             <div className="mb-6 flex items-center justify-between gap-4">
               <h2 className="text-2xl text-ink dark:text-white">{courseModal ? ui.editCourse : ui.newCourseModal}</h2>
@@ -1516,24 +1516,24 @@ export default function ControlCenter() {
       ) : null}
 
       {userModal && isAdmin ? (
-        <div className="fixed inset-0 z-[170] flex items-start justify-center overflow-y-auto bg-slate-950/45 px-4 py-8 sm:items-center">
+        <div className="fixed inset-0 z-[170] flex items-start justify-center overflow-y-auto bg-[color-mix(in_srgb,var(--text-primary)_62%,transparent)] px-4 py-8 sm:items-center">
           <form className="atlas-panel w-full max-w-2xl p-6" onSubmit={saveUserModal}>
             <div className="mb-6 flex items-center justify-between gap-4">
               <div>
                 <h2 className="text-2xl text-ink dark:text-white">{ui.manageUserAccess}</h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400">{userModal.email}</p>
+                <p className="text-sm text-muted">{userModal.email}</p>
               </div>
               <button type="button" className="icon-button" onClick={() => setUserModal(false)} aria-label={ui.closeUserModal}><FiX /></button>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               <div><label className="label">{ui.roleLabel}</label><select className="input" value={userForm.role} onChange={(event) => setUserForm((current) => ({ ...current, role: event.target.value as User['role'] }))}><option value="student">{localizedLabels.roles.student[language]}</option><option value="parent">{localizedLabels.roles.parent[language]}</option><option value="teacher">{localizedLabels.roles.teacher[language]}</option><option value="moderator">{localizedLabels.roles.moderator[language]}</option><option value="admin">{localizedLabels.roles.admin[language]}</option></select></div>
-              <div className="space-y-3 rounded-2xl bg-[#f6efe7] p-4 dark:bg-white/5">
-                <label className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-200"><input type="checkbox" checked={userForm.isActive} onChange={(event) => setUserForm((current) => ({ ...current, isActive: event.target.checked }))} /> {ui.activeAccount}</label>
-                <label className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-200"><input type="checkbox" checked={userForm.isEmailVerified} onChange={(event) => setUserForm((current) => ({ ...current, isEmailVerified: event.target.checked }))} /> {ui.emailVerified}</label>
+              <div className="space-y-3 rounded-2xl bg-[var(--surface-strong)] p-4 dark:bg-white/5">
+                <label className="flex items-center gap-3 text-sm text-ink dark:text-white"><input type="checkbox" checked={userForm.isActive} onChange={(event) => setUserForm((current) => ({ ...current, isActive: event.target.checked }))} /> {ui.activeAccount}</label>
+                <label className="flex items-center gap-3 text-sm text-ink dark:text-white"><input type="checkbox" checked={userForm.isEmailVerified} onChange={(event) => setUserForm((current) => ({ ...current, isEmailVerified: event.target.checked }))} /> {ui.emailVerified}</label>
               </div>
             </div>
             {userForm.role === 'moderator' ? (
-              <div className="mt-6 rounded-2xl border border-slate-200 p-5 dark:border-white/10">
+              <div className="mt-6 rounded-2xl border border-[var(--border)] p-5 dark:border-white/10">
                 <h3 className="text-lg font-semibold text-ink dark:text-white">{ui.moderatorScopes}</h3>
                 <div className="mt-4 grid gap-3 md:grid-cols-2">
                   {[
@@ -1542,7 +1542,7 @@ export default function ControlCenter() {
                     ['catalogContentQa', ui.scopeCatalog],
                     ['limitedUserManagement', ui.scopeUsers],
                   ].map(([key, label]) => (
-                    <label key={key} className="flex items-center gap-3 rounded-xl bg-[#f6efe7] p-3 text-sm text-slate-700 dark:bg-white/5 dark:text-slate-200">
+                    <label key={key} className="flex items-center gap-3 rounded-xl bg-[var(--surface-strong)] p-3 text-sm text-ink dark:text-white">
                       <input type="checkbox" checked={userForm.moderatorPermissions[key as keyof ModeratorPermissions]} onChange={(event) => setUserForm((current) => ({ ...current, moderatorPermissions: { ...current.moderatorPermissions, [key]: event.target.checked } }))} />
                       <span>{label}</span>
                     </label>
@@ -1556,12 +1556,12 @@ export default function ControlCenter() {
       ) : null}
 
       {contentModal !== false ? (
-        <div className="fixed inset-0 z-[170] flex items-start justify-center overflow-y-auto bg-slate-950/45 px-4 py-8 sm:items-center">
+        <div className="fixed inset-0 z-[170] flex items-start justify-center overflow-y-auto bg-[color-mix(in_srgb,var(--text-primary)_62%,transparent)] px-4 py-8 sm:items-center">
           <form className="atlas-panel w-full max-w-3xl p-6" onSubmit={saveContentModal}>
             <div className="mb-6 flex items-center justify-between gap-4">
               <div>
                 <h2 className="text-2xl text-ink dark:text-white">{contentModal ? ui.editContentItem : ui.createContentItem}</h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400">{currentContentResource}</p>
+                <p className="text-sm text-muted">{currentContentResource}</p>
               </div>
               <button type="button" className="icon-button" onClick={() => setContentModal(false)} aria-label={ui.closeContentModal}><FiX /></button>
             </div>
@@ -1593,7 +1593,7 @@ export default function ControlCenter() {
                   <div className="md:col-span-2"><label className="label">{ui.titleField}</label><input className="input" value={contentForm.title} onChange={(event) => setContentForm((current) => ({ ...current, title: event.target.value }))} required /></div>
                   <div className="md:col-span-2"><label className="label">{ui.contentField}</label><textarea className="input min-h-32" value={contentForm.content} onChange={(event) => setContentForm((current) => ({ ...current, content: event.target.value }))} required /></div>
                   <div><label className="label">{ui.categoryLabel}</label><select className="input" value={contentForm.category} onChange={(event) => setContentForm((current) => ({ ...current, category: event.target.value }))}><option value="discussion">{localizedLabels.categories.discussion[language]}</option><option value="question">{localizedLabels.categories.question[language]}</option><option value="resource">{localizedLabels.categories.resource[language]}</option><option value="event">{localizedLabels.categories.event[language]}</option></select></div>
-                  <label className="flex items-center gap-3 rounded-2xl bg-[#f6efe7] p-4 text-sm text-slate-700 dark:bg-white/5 dark:text-slate-200"><input type="checkbox" checked={contentForm.isPinned} onChange={(event) => setContentForm((current) => ({ ...current, isPinned: event.target.checked }))} /> {ui.pinPost}</label>
+                  <label className="flex items-center gap-3 rounded-2xl bg-[var(--surface-strong)] p-4 text-sm text-ink dark:text-white"><input type="checkbox" checked={contentForm.isPinned} onChange={(event) => setContentForm((current) => ({ ...current, isPinned: event.target.checked }))} /> {ui.pinPost}</label>
                 </>
               ) : null}
 
@@ -1604,7 +1604,7 @@ export default function ControlCenter() {
                   <div><label className="label">{ui.languageLabel}</label><select className="input" value={contentForm.language} onChange={(event) => setContentForm((current) => ({ ...current, language: event.target.value }))}><option value="English">{localizedLabels.languages.English[language]}</option><option value="Turkish">{localizedLabels.languages.Turkish[language]}</option><option value="Russian">{localizedLabels.languages.Russian[language]}</option><option value="Uzbek">{localizedLabels.languages.Uzbek[language]}</option></select></div>
                   <div><label className="label">{ui.levelLabel}</label><select className="input" value={contentForm.level} onChange={(event) => setContentForm((current) => ({ ...current, level: event.target.value }))}><option value="Beginner">{localizedLabels.levels.Beginner[language]}</option><option value="Intermediate">{localizedLabels.levels.Intermediate[language]}</option><option value="Advanced">{localizedLabels.levels.Advanced[language]}</option></select></div>
                   <div><label className="label">{ui.maxMembers}</label><input className="input" type="number" min="1" value={contentForm.maxMembers} onChange={(event) => setContentForm((current) => ({ ...current, maxMembers: event.target.value }))} /></div>
-                  <label className="flex items-center gap-3 rounded-2xl bg-[#f6efe7] p-4 text-sm text-slate-700 dark:bg-white/5 dark:text-slate-200"><input type="checkbox" checked={contentForm.isPrivate} onChange={(event) => setContentForm((current) => ({ ...current, isPrivate: event.target.checked }))} /> {ui.privateGroup}</label>
+                  <label className="flex items-center gap-3 rounded-2xl bg-[var(--surface-strong)] p-4 text-sm text-ink dark:text-white"><input type="checkbox" checked={contentForm.isPrivate} onChange={(event) => setContentForm((current) => ({ ...current, isPrivate: event.target.checked }))} /> {ui.privateGroup}</label>
                 </>
               ) : null}
             </div>

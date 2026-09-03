@@ -237,21 +237,21 @@ export default function LessonEditor() {
         <div className="atlas-panel mb-6 p-6 space-y-4">
           <h2 className="text-lg font-bold text-ink dark:text-white">Lesson content</h2>
           <div>
-            <label className="label">Title</label>
-            <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} />
+            <label className="label" htmlFor="lesson-title">Title</label>
+            <input id="lesson-title" className="input" value={title} onChange={(e) => setTitle(e.target.value)} />
           </div>
           <div>
-            <label className="label">Description</label>
-            <textarea className="input min-h-20" value={description} onChange={(e) => setDescription(e.target.value)} />
+            <label className="label" htmlFor="lesson-description">Description</label>
+            <textarea id="lesson-description" className="input min-h-20" value={description} onChange={(e) => setDescription(e.target.value)} />
           </div>
           <div>
-            <label className="label">Lesson content (overview text students read)</label>
-            <textarea className="input min-h-32" value={content} onChange={(e) => setContent(e.target.value)} />
+            <label className="label" htmlFor="lesson-content">Lesson content (overview text students read)</label>
+            <textarea id="lesson-content" className="input min-h-32" value={content} onChange={(e) => setContent(e.target.value)} />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="label">Content type</label>
-              <select className="input" value={contentType} onChange={(e) => setContentType(e.target.value as any)}>
+              <label className="label" htmlFor="lesson-content-type">Content type</label>
+              <select id="lesson-content-type" className="input" value={contentType} onChange={(e) => setContentType(e.target.value as any)}>
                 <option value="text">Text</option>
                 <option value="video">Video</option>
                 <option value="audio">Audio</option>
@@ -259,12 +259,12 @@ export default function LessonEditor() {
               </select>
             </div>
             <div>
-              <label className="label">Duration (min)</label>
-              <input type="number" min={1} className="input" value={duration} onChange={(e) => setDuration(e.target.value === '' ? '' : Number(e.target.value))} />
+              <label className="label" htmlFor="lesson-duration">Duration (min)</label>
+              <input id="lesson-duration" type="number" min={1} className="input" value={duration} onChange={(e) => setDuration(e.target.value === '' ? '' : Number(e.target.value))} />
             </div>
             <div>
-              <label className="label">Difficulty</label>
-              <select className="input" value={difficulty} onChange={(e) => setDifficulty(e.target.value as any)}>
+              <label className="label" htmlFor="lesson-difficulty">Difficulty</label>
+              <select id="lesson-difficulty" className="input" value={difficulty} onChange={(e) => setDifficulty(e.target.value as any)}>
                 <option value="Easy">Easy</option>
                 <option value="Medium">Medium</option>
                 <option value="Hard">Hard</option>
@@ -273,8 +273,8 @@ export default function LessonEditor() {
           </div>
           {contentType === 'video' || contentType === 'audio' ? (
             <div>
-              <label className="label">{contentType === 'video' ? 'Video URL (YouTube or Vimeo link)' : 'Audio file URL'}</label>
-              <input className="input" placeholder="https://www.youtube.com/watch?v=..." value={mediaUrl} onChange={(e) => setMediaUrl(e.target.value)} />
+              <label className="label" htmlFor="lesson-media-url">{contentType === 'video' ? 'Video URL (YouTube or Vimeo link)' : 'Audio file URL'}</label>
+              <input id="lesson-media-url" className="input" placeholder="https://www.youtube.com/watch?v=..." value={mediaUrl} onChange={(e) => setMediaUrl(e.target.value)} />
             </div>
           ) : null}
         </div>
@@ -291,11 +291,11 @@ export default function LessonEditor() {
             {vocabulary.map((row, index) => (
               <div key={index} className="rounded-xl border border-[var(--border)] p-4">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-2">
-                  <input className="input" placeholder="Word" value={row.word} onChange={(e) => setVocabulary((rows) => rows.map((r, i) => (i === index ? { ...r, word: e.target.value } : r)))} />
-                  <input className="input" placeholder="Translation" value={row.translation} onChange={(e) => setVocabulary((rows) => rows.map((r, i) => (i === index ? { ...r, translation: e.target.value } : r)))} />
-                  <input className="input" placeholder="Pronunciation" value={row.pronunciation} onChange={(e) => setVocabulary((rows) => rows.map((r, i) => (i === index ? { ...r, pronunciation: e.target.value } : r)))} />
+                  <input className="input" aria-label={`Vocabulary word ${index + 1}`} placeholder="Word" value={row.word} onChange={(e) => setVocabulary((rows) => rows.map((r, i) => (i === index ? { ...r, word: e.target.value } : r)))} />
+                  <input className="input" aria-label={`Translation for word ${index + 1}`} placeholder="Translation" value={row.translation} onChange={(e) => setVocabulary((rows) => rows.map((r, i) => (i === index ? { ...r, translation: e.target.value } : r)))} />
+                  <input className="input" aria-label={`Pronunciation for word ${index + 1}`} placeholder="Pronunciation" value={row.pronunciation} onChange={(e) => setVocabulary((rows) => rows.map((r, i) => (i === index ? { ...r, pronunciation: e.target.value } : r)))} />
                 </div>
-                <textarea className="input min-h-16 mb-2" placeholder="Example sentences (one per line)" value={row.examples} onChange={(e) => setVocabulary((rows) => rows.map((r, i) => (i === index ? { ...r, examples: e.target.value } : r)))} />
+                <textarea className="input min-h-16 mb-2" aria-label={`Example sentences for word ${index + 1}`} placeholder="Example sentences (one per line)" value={row.examples} onChange={(e) => setVocabulary((rows) => rows.map((r, i) => (i === index ? { ...r, examples: e.target.value } : r)))} />
                 <button type="button" className="text-sm text-red-600 inline-flex items-center gap-1" onClick={() => setVocabulary((rows) => rows.filter((_, i) => i !== index))}>
                   <FiTrash2 size={14} /> Remove
                 </button>
@@ -316,9 +316,9 @@ export default function LessonEditor() {
           <div className="space-y-4">
             {grammar.map((row, index) => (
               <div key={index} className="rounded-xl border border-[var(--border)] p-4">
-                <input className="input mb-2" placeholder="Rule (e.g. Present Perfect)" value={row.rule} onChange={(e) => setGrammar((rows) => rows.map((r, i) => (i === index ? { ...r, rule: e.target.value } : r)))} />
-                <textarea className="input min-h-16 mb-2" placeholder="Explanation" value={row.explanation} onChange={(e) => setGrammar((rows) => rows.map((r, i) => (i === index ? { ...r, explanation: e.target.value } : r)))} />
-                <textarea className="input min-h-16 mb-2" placeholder="Example sentences (one per line)" value={row.examples} onChange={(e) => setGrammar((rows) => rows.map((r, i) => (i === index ? { ...r, examples: e.target.value } : r)))} />
+                <input className="input mb-2" aria-label={`Grammar rule ${index + 1}`} placeholder="Rule (e.g. Present Perfect)" value={row.rule} onChange={(e) => setGrammar((rows) => rows.map((r, i) => (i === index ? { ...r, rule: e.target.value } : r)))} />
+                <textarea className="input min-h-16 mb-2" aria-label={`Explanation for rule ${index + 1}`} placeholder="Explanation" value={row.explanation} onChange={(e) => setGrammar((rows) => rows.map((r, i) => (i === index ? { ...r, explanation: e.target.value } : r)))} />
+                <textarea className="input min-h-16 mb-2" aria-label={`Example sentences for rule ${index + 1}`} placeholder="Example sentences (one per line)" value={row.examples} onChange={(e) => setGrammar((rows) => rows.map((r, i) => (i === index ? { ...r, examples: e.target.value } : r)))} />
                 <button type="button" className="text-sm text-red-600 inline-flex items-center gap-1" onClick={() => setGrammar((rows) => rows.filter((_, i) => i !== index))}>
                   <FiTrash2 size={14} /> Remove
                 </button>
@@ -359,8 +359,9 @@ export default function LessonEditor() {
           <form onSubmit={handleSubmitExercise} className="space-y-4 rounded-xl border border-dashed border-[var(--border)] p-4">
             <h3 className="font-semibold text-ink dark:text-white">{editingExerciseId ? 'Edit exercise' : 'Add exercise'}</h3>
             <div>
-              <label className="label">Type</label>
+              <label className="label" htmlFor="exercise-type">Type</label>
               <select
+                id="exercise-type"
                 className="input"
                 value={exerciseDraft.type}
                 onChange={(e) => setExerciseDraft((draft) => ({ ...draft, type: e.target.value }))}
@@ -370,13 +371,13 @@ export default function LessonEditor() {
               </select>
             </div>
             <div>
-              <label className="label">{exerciseDraft.type === 'fill_blank' ? 'Sentence (use ___ for the blank)' : 'Question'}</label>
-              <input className="input" value={exerciseDraft.question} onChange={(e) => setExerciseDraft((draft) => ({ ...draft, question: e.target.value }))} required />
+              <label className="label" htmlFor="exercise-question">{exerciseDraft.type === 'fill_blank' ? 'Sentence (use ___ for the blank)' : 'Question'}</label>
+              <input id="exercise-question" className="input" value={exerciseDraft.question} onChange={(e) => setExerciseDraft((draft) => ({ ...draft, question: e.target.value }))} required />
             </div>
             {exerciseDraft.type === 'speaking' ? (
               <div>
-                <label className="label">Instructions (optional)</label>
-                <textarea className="input min-h-16" value={exerciseDraft.instructions} onChange={(e) => setExerciseDraft((draft) => ({ ...draft, instructions: e.target.value }))} />
+                <label className="label" htmlFor="exercise-instructions">Instructions (optional)</label>
+                <textarea id="exercise-instructions" className="input min-h-16" value={exerciseDraft.instructions} onChange={(e) => setExerciseDraft((draft) => ({ ...draft, instructions: e.target.value }))} />
               </div>
             ) : null}
             {exerciseDraft.type === 'multiple_choice' || exerciseDraft.type === 'listening' ? (
@@ -387,11 +388,13 @@ export default function LessonEditor() {
                     <input
                       type="radio"
                       name="correctOption"
+                      aria-label={`Mark option ${index + 1} as the correct answer`}
                       checked={exerciseDraft.correctAnswerIndex === index}
                       onChange={() => setExerciseDraft((draft) => ({ ...draft, correctAnswerIndex: index }))}
                     />
                     <input
                       className="input"
+                      aria-label={`Option ${index + 1}`}
                       placeholder={`Option ${index + 1}`}
                       value={option}
                       onChange={(e) => setExerciseDraft((draft) => ({ ...draft, options: draft.options.map((o, i) => (i === index ? e.target.value : o)) }))}
@@ -410,24 +413,24 @@ export default function LessonEditor() {
             {exerciseDraft.type === 'listening' ? (
               <>
                 <div>
-                  <label className="label">Audio file URL</label>
-                  <input className="input" placeholder="https://..." value={exerciseDraft.audioFile} onChange={(e) => setExerciseDraft((draft) => ({ ...draft, audioFile: e.target.value }))} />
+                  <label className="label" htmlFor="exercise-audio-file">Audio file URL</label>
+                  <input id="exercise-audio-file" className="input" placeholder="https://..." value={exerciseDraft.audioFile} onChange={(e) => setExerciseDraft((draft) => ({ ...draft, audioFile: e.target.value }))} />
                 </div>
                 <div>
-                  <label className="label">Transcript (optional, shown after answering)</label>
-                  <textarea className="input min-h-16" value={exerciseDraft.transcript} onChange={(e) => setExerciseDraft((draft) => ({ ...draft, transcript: e.target.value }))} />
+                  <label className="label" htmlFor="exercise-transcript">Transcript (optional, shown after answering)</label>
+                  <textarea id="exercise-transcript" className="input min-h-16" value={exerciseDraft.transcript} onChange={(e) => setExerciseDraft((draft) => ({ ...draft, transcript: e.target.value }))} />
                 </div>
               </>
             ) : null}
             {exerciseDraft.type === 'fill_blank' ? (
               <div>
-                <label className="label">Accepted answers (comma-separated)</label>
-                <input className="input" placeholder="go, goes" value={exerciseDraft.correctAnswersText} onChange={(e) => setExerciseDraft((draft) => ({ ...draft, correctAnswersText: e.target.value }))} />
+                <label className="label" htmlFor="exercise-correct-answers">Accepted answers (comma-separated)</label>
+                <input id="exercise-correct-answers" className="input" placeholder="go, goes" value={exerciseDraft.correctAnswersText} onChange={(e) => setExerciseDraft((draft) => ({ ...draft, correctAnswersText: e.target.value }))} />
               </div>
             ) : null}
             <div>
-              <label className="label">Points</label>
-              <input type="number" min={1} className="input" value={exerciseDraft.points} onChange={(e) => setExerciseDraft((draft) => ({ ...draft, points: Number(e.target.value) }))} />
+              <label className="label" htmlFor="exercise-points">Points</label>
+              <input id="exercise-points" type="number" min={1} className="input" value={exerciseDraft.points} onChange={(e) => setExerciseDraft((draft) => ({ ...draft, points: Number(e.target.value) }))} />
             </div>
             <div className="flex gap-3">
               <button type="submit" disabled={savingExercise} className="btn btn-primary">

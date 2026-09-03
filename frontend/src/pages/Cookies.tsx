@@ -16,9 +16,9 @@ export default function Cookies() {
         <div className="atlas-panel p-8">
           <p className="atlas-kicker">Legal</p>
           <h1 className="text-4xl text-ink dark:text-white">Cookie policy</h1>
-          <p className="mt-2 text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Last updated 2026-09-01</p>
+          <p className="mt-2 text-xs uppercase tracking-wide text-muted">Last updated 2026-09-01</p>
 
-          <div className="mt-8 space-y-8 text-sm leading-7 text-slate-700 dark:text-slate-200">
+          <div className="mt-8 space-y-8 text-sm leading-7 text-muted">
             <section>
               <h2 className="text-lg font-semibold text-ink dark:text-white">What LinguaNest actually stores in your browser</h2>
               <p className="mt-2">LinguaNest doesn&apos;t set third-party tracking cookies today. It uses your browser&apos;s local storage (not cookies, technically) to keep you signed in and remember your preferences: your session token and profile, your selected interface language, and your light/dark theme choice. These are strictly necessary for the app to function — clearing them signs you out and resets your preferences.</p>

@@ -5,6 +5,7 @@ import api from '../../services/api'
 import { useLanguageStore } from '../../store/languageStore'
 import { useAuthStore } from '../../store/authStore'
 import { track } from '../../utils/analytics'
+import ProgressBar from '../../components/ui/ProgressBar'
 
 interface FlashcardItem {
   _id: string
@@ -130,12 +131,7 @@ export default function Flashcards() {
           {deckTotal > totalCards ? (
             <p className="mb-2 text-xs text-muted">{ui.deckSize.replace('{total}', String(deckTotal))}</p>
           ) : null}
-          <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2">
-            <div
-              className="bg-primary-500 h-2 rounded-full transition-all"
-              style={{ width: `${((currentCard + 1) / totalCards) * 100}%` }}
-            />
-          </div>
+          <ProgressBar value={((currentCard + 1) / totalCards) * 100} />
         </div>
 
         <div
@@ -152,7 +148,7 @@ export default function Flashcards() {
             }}
           >
             <div
-              className="w-full h-full rounded-[2rem] border border-neutral-200 bg-[#e8f3fc] p-8 flex flex-col items-center justify-center text-neutral-900 absolute shadow-sm"
+              className="w-full h-full rounded-[2rem] border border-neutral-200 bg-sky-50 p-8 flex flex-col items-center justify-center text-neutral-900 absolute shadow-sm"
               style={{ backfaceVisibility: 'hidden' }}
             >
               <p className="text-sm opacity-75 mb-4">{ui.front}</p>
@@ -170,11 +166,12 @@ export default function Flashcards() {
 
         <div className="atlas-panel space-y-4 p-5">
           <div className="flex justify-center gap-4">
-            <button className="p-2 hover:bg-white dark:hover:bg-neutral-800 rounded-lg transition-colors">
+            <button aria-label="Play pronunciation" className="p-2 hover:bg-white dark:hover:bg-neutral-800 rounded-lg transition-colors">
               <FiVolume2 size={24} className="text-primary-500" />
             </button>
             <button
               onClick={() => setIsFlipped(!isFlipped)}
+              aria-label="Flip card"
               className="p-2 hover:bg-white dark:hover:bg-neutral-800 rounded-lg transition-colors"
             >
               <FiRotateCw size={24} className="text-secondary-500" />

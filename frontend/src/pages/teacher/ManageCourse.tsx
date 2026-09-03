@@ -4,6 +4,7 @@ import toast from 'react-hot-toast'
 import { FiTrash2, FiPlus, FiEdit3, FiEye, FiEyeOff, FiClipboard, FiBarChart2 } from 'react-icons/fi'
 import api from '../../services/api'
 import { useLanguageStore } from '../../store/languageStore'
+import Pill from '../../components/ui/Pill'
 
 interface CourseDetails {
   _id: string
@@ -131,9 +132,9 @@ export default function ManageCourse() {
               <p className="text-muted">{course.language} • {course.level} • {course.category}</p>
             </div>
             <div className="flex flex-col items-end gap-2">
-              <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${course.isPublished ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300'}`}>
+              <Pill variant={course.isPublished ? 'success' : 'warning'}>
                 {course.isPublished ? ui.published : ui.draft}
-              </span>
+              </Pill>
               <button
                 type="button"
                 onClick={handleTogglePublish}
@@ -191,7 +192,9 @@ export default function ManageCourse() {
         </div>
 
         <form onSubmit={handleAddLesson} className="atlas-panel flex gap-2 p-4">
+          <label className="sr-only" htmlFor="new-lesson-title">{ui.newLesson}</label>
           <input
+            id="new-lesson-title"
             className="input"
             placeholder={ui.newLesson}
             value={newLessonTitle}

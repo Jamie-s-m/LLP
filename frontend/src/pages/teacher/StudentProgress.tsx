@@ -4,6 +4,7 @@ import toast from 'react-hot-toast'
 import { FiBarChart2, FiAward } from 'react-icons/fi'
 import api from '../../services/api'
 import { useLanguageStore } from '../../store/languageStore'
+import ProgressBar from '../../components/ui/ProgressBar'
 
 interface StudentInfo {
   firstName: string
@@ -101,12 +102,7 @@ export default function StudentProgress() {
             <div key={course.courseId} className="atlas-panel p-5">
               <div className="mb-3">
                 <p className="font-bold text-ink dark:text-white">{course.title}</p>
-                <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2 mt-2">
-                  <div
-                    className="bg-primary-500 h-2 rounded-full"
-                    style={{ width: `${course.progressPercentage}%` }}
-                  />
-                </div>
+                <ProgressBar value={course.progressPercentage} className="mt-2" />
               </div>
               <p className="text-sm text-muted">
                 {ui.complete.replace('{percent}', String(course.progressPercentage))} {course.isCompleted ? ui.finished : ''}

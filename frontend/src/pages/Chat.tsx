@@ -272,7 +272,7 @@ export default function Chat() {
           </div>
           <div className="space-y-4">
             <div className="relative">
-              <FiSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <FiSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-subtle)]" aria-hidden="true" />
               <input
                 className="input pl-10"
                 value={search}
@@ -281,7 +281,7 @@ export default function Chat() {
               />
             </div>
             {searchResults.length > 0 ? (
-              <div className="space-y-2 rounded-2xl bg-[#f6efe7] p-3">
+              <div className="space-y-2 rounded-2xl bg-[var(--surface-strong)] p-3">
                 {searchResults.map((person) => (
                   <button key={person._id} type="button" className="chat-thread" onClick={() => createDirectConversation(person._id)} disabled={creatingConversation}>
                     <span className="chat-avatar">{person.firstName.charAt(0)}</span>

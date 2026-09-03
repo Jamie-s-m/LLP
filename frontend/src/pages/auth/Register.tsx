@@ -315,7 +315,7 @@ export default function Register() {
                   autoComplete="email"
                 />
                 {emailStatusMessage ? (
-                  <p className={`mt-2 text-sm ${emailStatus === 'available' ? 'text-[var(--success)] dark:text-[var(--dark-success)]' : emailStatus === 'exists' ? 'text-[var(--warning)] dark:text-[var(--dark-warning)]' : 'text-slate-500 dark:text-slate-400'}`}>
+                  <p className={`mt-2 text-sm ${emailStatus === 'available' ? 'text-[var(--success)] dark:text-[var(--dark-success)]' : emailStatus === 'exists' ? 'text-[var(--warning)] dark:text-[var(--dark-warning)]' : 'text-muted'}`}>
                     {emailStatus === 'checking' ? ui.checking : emailStatusMessage}
                   </p>
                 ) : null}
@@ -353,7 +353,7 @@ export default function Register() {
                   <button
                     type="button"
                     onClick={() => setShowPassword((current) => !current)}
-                    className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-500 transition hover:bg-[var(--border-light)] hover:text-slate-700 dark:hover:bg-white/10 dark:hover:text-slate-200"
+                    className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-[var(--text-subtle)] transition hover:bg-[var(--border-light)] hover:text-[var(--text-primary)] dark:hover:bg-white/10"
                     aria-label={showPassword ? ui.hidePassword : ui.showPassword}
                   >
                     {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}

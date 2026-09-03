@@ -57,12 +57,12 @@ export default function TeacherDashboard() {
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/70">{ui.snapshot}</p>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div className="rounded-2xl bg-white/10 p-4">
-                <FiUsers className="mb-3 text-xl text-[#a7e8d5]" />
+                <FiUsers className="mb-3 text-xl text-secondary-200" />
                 <strong className="block text-3xl text-white">{overview?.totalStudents ?? 0}</strong>
                 <span className="text-sm text-white/80">{ui.activeLearners}</span>
               </div>
               <div className="rounded-2xl bg-white/10 p-4">
-                <FiBarChart2 className="mb-3 text-xl text-[#f8c16c]" />
+                <FiBarChart2 className="mb-3 text-xl text-primary-200" />
                 <strong className="block text-3xl text-white">{overview?.avgRating ?? 0}</strong>
                 <span className="text-sm text-white/80">{ui.averageRating}</span>
               </div>
@@ -97,7 +97,7 @@ export default function TeacherDashboard() {
             </Link>
           </div>
           {loading ? (
-            <p className="text-slate-600 dark:text-slate-300">{ui.loading}</p>
+            <p className="text-muted">{ui.loading}</p>
           ) : courses.length === 0 ? (
             <div className="empty-state">
               <FiBookOpen />
@@ -106,7 +106,7 @@ export default function TeacherDashboard() {
           ) : (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {courses.map((course) => (
-                <Link key={course._id} to={`/teacher/manage/${course._id}`} className="rounded-2xl border border-slate-200 bg-white/80 p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
+                <Link key={course._id} to={`/teacher/manage/${course._id}`} className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                   <h3 className="mb-2 text-xl font-bold text-ink dark:text-white">{course.title}</h3>
                   <p className="text-neutral-600 dark:text-neutral-400">{course.language} · {course.level}</p>
                   <span className={`inline-block mt-3 rounded-full px-3 py-1 text-xs font-semibold ${course.isPublished ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300'}`}>

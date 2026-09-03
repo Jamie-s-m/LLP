@@ -212,7 +212,14 @@ export default function ProgressAnalytics() {
                     {row.attempts > 0 ? `${row.accuracy}% · ${row.attempts} attempts` : ui.noAttempts}
                   </span>
                 </div>
-                <div className="h-2 overflow-hidden rounded-full bg-[var(--border-light)]">
+                <div
+                  role="progressbar"
+                  aria-label={`${SKILL_LABELS[row.skill] || row.skill} ${row.accuracy}%`}
+                  aria-valuenow={row.accuracy}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  className="h-2 overflow-hidden rounded-full bg-[var(--border-light)]"
+                >
                   <div
                     className="h-full rounded-full transition-all duration-500"
                     style={{ width: `${row.accuracy}%`, background: SKILL_COLORS[row.skill] || 'var(--accent)' }}

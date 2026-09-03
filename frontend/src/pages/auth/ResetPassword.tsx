@@ -121,13 +121,13 @@ export default function ResetPassword() {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-            <label className="label">{ui.newPassword}</label>
+            <label className="label" htmlFor="reset-password-new">{ui.newPassword}</label>
               <div className="relative">
-                <input className="input pr-11" type={showPassword ? 'text' : 'password'} value={password} onChange={(event) => setPassword(event.target.value)} minLength={8} autoComplete="new-password" required />
+                <input id="reset-password-new" className="input pr-11" type={showPassword ? 'text' : 'password'} value={password} onChange={(event) => setPassword(event.target.value)} minLength={8} autoComplete="new-password" required />
                 <button
                   type="button"
                   onClick={() => setShowPassword((current) => !current)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-slate-700 dark:hover:text-slate-200"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-subtle)] transition hover:text-[var(--text-primary)]"
                   aria-label={showPassword ? ui.hide : ui.show}
                 >
                   {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
@@ -135,20 +135,20 @@ export default function ResetPassword() {
               </div>
             </div>
             <div>
-              <label className="label">{ui.confirmPassword}</label>
+              <label className="label" htmlFor="reset-password-confirm">{ui.confirmPassword}</label>
               <div className="relative">
-                <input className="input pr-11" type={showConfirmPassword ? 'text' : 'password'} value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} minLength={8} autoComplete="new-password" required />
+                <input id="reset-password-confirm" className="input pr-11" type={showConfirmPassword ? 'text' : 'password'} value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} minLength={8} autoComplete="new-password" required />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword((current) => !current)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-slate-700 dark:hover:text-slate-200"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-subtle)] transition hover:text-[var(--text-primary)]"
                   aria-label={showConfirmPassword ? ui.hide : ui.show}
                 >
                   {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
                 </button>
               </div>
             </div>
-            <p className="text-sm text-slate-500 dark:text-slate-400">{ui.hint}</p>
+            <p className="text-sm text-muted">{ui.hint}</p>
             <button className="btn btn-primary w-full" disabled={loading}>{loading ? ui.saving : ui.reset}</button>
           </form>
         )}

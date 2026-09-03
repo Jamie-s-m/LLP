@@ -66,7 +66,9 @@ export default function SpeakingReviews() {
                 </div>
                 <p className="mb-3 font-medium text-ink dark:text-white">{item.exercise.question}</p>
                 <audio controls src={item.audioSubmission} className="w-full mb-4" />
+                <label className="sr-only" htmlFor={`speaking-feedback-${item._id}`}>Feedback for {item.user.firstName} {item.user.lastName}</label>
                 <textarea
+                  id={`speaking-feedback-${item._id}`}
                   className="input min-h-16 mb-3"
                   placeholder="Optional feedback for the student..."
                   value={feedback[item._id] || ''}

@@ -4,6 +4,7 @@ import toast from 'react-hot-toast'
 import { FiBookOpen, FiPlus } from 'react-icons/fi'
 import api from '../../services/api'
 import { useLanguageStore } from '../../store/languageStore'
+import Pill from '../../components/ui/Pill'
 
 interface CourseItem {
   _id: string
@@ -59,13 +60,13 @@ export default function TeacherCourses() {
               <Link
                 key={course._id}
                 to={`/teacher/manage/${course._id}`}
-                className="rounded-2xl border border-slate-200 bg-white/80 p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5"
+                className="rounded-2xl border border-[var(--border)] bg-white/80 p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5"
               >
                 <h3 className="mb-2 text-xl font-bold text-ink dark:text-white">{course.title}</h3>
                 <p className="text-neutral-600 dark:text-neutral-400">{course.language} · {course.level}</p>
-                <span className={`inline-block mt-3 rounded-full px-3 py-1 text-xs font-semibold ${course.isPublished ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300'}`}>
+                <Pill variant={course.isPublished ? 'success' : 'warning'} className="mt-3">
                   {course.isPublished ? ui.published : ui.draft}
-                </span>
+                </Pill>
               </Link>
             ))}
           </div>

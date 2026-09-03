@@ -83,12 +83,12 @@ export default function Dashboard() {
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/70">{t('studentDashboard.todaysFocus')}</p>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div className="rounded-2xl bg-white/10 p-4">
-                <FiZap className="mb-3 text-xl text-[#a7e8d5]" />
+                <FiZap className="mb-3 text-xl text-secondary-200" />
                 <strong className="block text-3xl text-white">{summary?.streak ?? 0}</strong>
                 <span className="text-sm text-white/80">{t('studentDashboard.dayStreak')}</span>
               </div>
               <div className="rounded-2xl bg-white/10 p-4">
-                <FiTarget className="mb-3 text-xl text-[#f8c16c]" />
+                <FiTarget className="mb-3 text-xl text-primary-200" />
                 <strong className="block text-3xl text-white">{progressPercent}%</strong>
                 <span className="text-sm text-white/80">{t('studentDashboard.courseCompletion')}</span>
               </div>
@@ -124,7 +124,7 @@ export default function Dashboard() {
             </div>
             <div className="space-y-3">
               {pendingFamilyRequests.map((link) => (
-                <div key={link._id} className="flex flex-col gap-4 rounded-2xl bg-[#f6efe7] p-4 dark:bg-white/5 md:flex-row md:items-center md:justify-between">
+                <div key={link._id} className="flex flex-col gap-4 rounded-2xl bg-[var(--surface-strong)] p-4 dark:bg-white/5 md:flex-row md:items-center md:justify-between">
                   <div>
                     <strong className="text-ink dark:text-white">{link.parent?.firstName} {link.parent?.lastName}</strong>
                     <p className="mt-1 text-sm text-muted">{link.parent?.email}</p>
@@ -153,7 +153,7 @@ export default function Dashboard() {
           </div>
         ) : null}
         {loading ? (
-          <div className="atlas-panel p-6 text-slate-600 dark:text-slate-300">{t('common.loadingProgress')}</div>
+          <div className="atlas-panel p-6 text-muted">{t('common.loadingProgress')}</div>
         ) : (
           <>
             <div className="atlas-stat-grid mb-8">
@@ -172,11 +172,11 @@ export default function Dashboard() {
                   aria-valuenow={progressPercent}
                   aria-valuemin={0}
                   aria-valuemax={100}
-                  className="mt-6 h-3 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10"
+                  className="mt-6 h-3 overflow-hidden rounded-full bg-[var(--border-light)]"
                 >
                   <div className="h-full rounded-full bg-gradient-to-r from-primary-500 to-secondary-500" style={{ width: `${progressPercent}%` }} />
                 </div>
-                <div className="mt-3 flex items-center justify-between text-sm text-slate-600 dark:text-slate-300">
+                <div className="mt-3 flex items-center justify-between text-sm text-muted">
                   <span>{t('studentDashboard.overallCompletion')}</span>
                   <strong className="text-ink dark:text-white">{progressPercent}%</strong>
                 </div>
@@ -234,7 +234,7 @@ export default function Dashboard() {
               <h2 className="text-2xl text-ink dark:text-white">{t('studentDashboard.structuredHeading')}</h2>
               <div className="mt-4 grid gap-4 md:grid-cols-3">
                 {[t('studentDashboard.structured1'), t('studentDashboard.structured2'), t('studentDashboard.structured3')].map((item) => (
-                  <div key={item} className="rounded-2xl bg-[#f6efe7] p-4 text-sm text-slate-700 dark:bg-white/5 dark:text-slate-200">{item}</div>
+                  <div key={item} className="rounded-2xl bg-[var(--surface-strong)] p-4 text-sm text-muted dark:bg-white/5">{item}</div>
                 ))}
               </div>
             </div>

@@ -112,8 +112,9 @@ export default function Profile() {
           <div className="space-y-6">
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <label className="label">{ui.firstName}</label>
+                <label className="label" htmlFor="profile-firstName">{ui.firstName}</label>
                 <input
+                  id="profile-firstName"
                   type="text"
                   name="firstName"
                   className="input"
@@ -123,8 +124,9 @@ export default function Profile() {
                 />
               </div>
               <div>
-                <label className="label">{ui.lastName}</label>
+                <label className="label" htmlFor="profile-lastName">{ui.lastName}</label>
                 <input
+                  id="profile-lastName"
                   type="text"
                   name="lastName"
                   className="input"
@@ -136,8 +138,9 @@ export default function Profile() {
             </div>
 
             <div>
-              <label className="label">{ui.email}</label>
+              <label className="label" htmlFor="profile-email">{ui.email}</label>
               <input
+                id="profile-email"
                 type="email"
                 name="email"
                 className="input"
@@ -147,8 +150,9 @@ export default function Profile() {
             </div>
 
             <div>
-              <label className="label">{ui.nativeLanguage}</label>
+              <label className="label" htmlFor="profile-nativeLanguage">{ui.nativeLanguage}</label>
               <select
+                id="profile-nativeLanguage"
                 name="nativeLanguage"
                 className="input"
                 value={formData.nativeLanguage}
@@ -164,11 +168,11 @@ export default function Profile() {
             </div>
 
             <div className="grid gap-4 border-t border-neutral-200 py-6 dark:border-neutral-700 md:grid-cols-2">
-              <div className="rounded-2xl bg-[#f6efe7] p-4 text-center dark:bg-white/5">
+              <div className="rounded-2xl bg-[var(--surface-strong)] p-4 text-center dark:bg-white/5">
                 <p className="text-2xl font-bold text-primary-500">{profile?.xp ?? 0}</p>
                 <p className="text-sm text-muted">{ui.points}</p>
               </div>
-              <div className="rounded-2xl bg-[#f6efe7] p-4 text-center dark:bg-white/5">
+              <div className="rounded-2xl bg-[var(--surface-strong)] p-4 text-center dark:bg-white/5">
                 <p className="text-2xl font-bold text-secondary-500">{profile?.streak ?? 0}</p>
                 <p className="text-sm text-muted">{ui.streak}</p>
               </div>

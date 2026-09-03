@@ -16,9 +16,9 @@ export default function Terms() {
         <div className="atlas-panel p-8">
           <p className="atlas-kicker">Legal</p>
           <h1 className="text-4xl text-ink dark:text-white">Terms of service</h1>
-          <p className="mt-2 text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Last updated 2026-09-01</p>
+          <p className="mt-2 text-xs uppercase tracking-wide text-muted">Last updated 2026-09-01</p>
 
-          <div className="mt-8 space-y-8 text-sm leading-7 text-slate-700 dark:text-slate-200">
+          <div className="mt-8 space-y-8 text-sm leading-7 text-muted">
             <section>
               <h2 className="text-lg font-semibold text-ink dark:text-white">1. What LinguaNest is</h2>
               <p className="mt-2">LinguaNest is a language-learning platform providing courses, lessons, exercises, flashcards, progress tracking, messaging, and account dashboards for students, teachers, parents, and administrators, accessible at linguanest.uz.</p>
@@ -79,7 +79,7 @@ export default function Terms() {
               <p className="mt-2">We may update these terms as the product changes; the &ldquo;Last updated&rdquo; date above reflects the most recent revision. Questions about these terms can be sent to <a href="mailto:support@linguanest.uz" className="text-primary-600 underline dark:text-primary-300">support@linguanest.uz</a>.</p>
             </section>
 
-            <p className="text-xs text-slate-500 dark:text-slate-400">This page describes LinguaNest&apos;s actual product behavior as accurately as possible. The sections marked above still need a founder decision or formal legal review before they&apos;re complete — that gap is stated openly rather than hidden.</p>
+            <p className="text-xs text-muted">This page describes LinguaNest&apos;s actual product behavior as accurately as possible. The sections marked above still need a founder decision or formal legal review before they&apos;re complete — that gap is stated openly rather than hidden.</p>
           </div>
         </div>
       </div>

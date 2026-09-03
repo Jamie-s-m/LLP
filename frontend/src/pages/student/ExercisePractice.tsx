@@ -4,6 +4,7 @@ import toast from 'react-hot-toast'
 import { FiArrowLeft, FiCheck, FiX, FiMic, FiSquare, FiPlay } from 'react-icons/fi'
 import api from '../../services/api'
 import HeartsRow from '../../components/ui/HeartsRow'
+import Alert from '../../components/ui/Alert'
 import { track } from '../../utils/analytics'
 
 interface ExerciseData {
@@ -190,6 +191,7 @@ export default function ExercisePractice() {
             <button
               onClick={() => navigate(-1)}
               className="p-2 hover:bg-white dark:hover:bg-neutral-800 rounded-lg transition-colors"
+              aria-label="Back"
             >
               <FiArrowLeft size={24} />
             </button>
@@ -214,6 +216,8 @@ export default function ExercisePractice() {
               {(exercise.options || []).map((option, idx) => (
                 <button
                   key={idx}
+                  type="button"
+                  aria-pressed={selected === idx}
                   onClick={() => !result && setSelected(idx)}
                   disabled={!!result}
                   className={`w-full p-4 rounded-lg border-2 transition-all text-left font-medium ${
@@ -232,8 +236,8 @@ export default function ExercisePractice() {
                 >
                   <div className="flex items-center justify-between">
                     <span>{option}</span>
-                    {result && idx === result.correctAnswer && <FiCheck className="text-success" size={20} />}
-                    {result && idx === selected && idx !== result.correctAnswer && <FiX className="text-error" size={20} />}
+                    {result && idx === result.correctAnswer && <FiCheck className="text-success" size={20} aria-hidden="true" />}
+                    {result && idx === selected && idx !== result.correctAnswer && <FiX className="text-error" size={20} aria-hidden="true" />}
                   </div>
                 </button>
               ))}
@@ -246,6 +250,7 @@ export default function ExercisePractice() {
               <input
                 className="input text-lg"
                 placeholder="Type your answer..."
+                aria-label="Your answer"
                 value={textAnswer}
                 onChange={(e) => setTextAnswer(e.target.value)}
                 disabled={!!result}
@@ -288,19 +293,18 @@ export default function ExercisePractice() {
 
           {/* Feedback (multiple_choice / listening / fill_blank) */}
           {result && exercise.type !== 'speaking' && (
-            <div
-              className={`p-4 rounded-lg mb-8 ${
-                result.isCorrect ? 'bg-green-50 dark:bg-green-900/20 text-success' : 'bg-red-50 dark:bg-red-900/20 text-error'
-              }`}
+            <Alert
+              variant={result.isCorrect ? 'success' : 'error'}
+              title={result.isCorrect ? '✓ Correct!' : '✗ Incorrect'}
+              className="mb-8"
             >
-              <p className="font-bold">{result.isCorrect ? '✓ Correct!' : '✗ Incorrect'}</p>
-              <p className="text-sm mt-1">
+              <p>
                 {result.isCorrect ? `Great job! You earned ${result.points} points.` : 'You lost a heart. Try the next one!'}
               </p>
               {exercise.type === 'listening' && exercise.transcript ? (
-                <p className="text-sm mt-2 italic text-[var(--text-muted)]">Transcript: {exercise.transcript}</p>
+                <p className="mt-2 italic text-[var(--text-muted)]">Transcript: {exercise.transcript}</p>
               ) : null}
-            </div>
+            </Alert>
           )}
 
           {/* Actions */}

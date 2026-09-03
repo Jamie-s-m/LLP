@@ -64,7 +64,7 @@ export default function Tutors() {
           </div>
           <p className="atlas-kicker">{t('tutors.kicker')}</p>
           <h1 className="text-3xl font-bold text-ink dark:text-white md:text-4xl">{t('tutors.title')}</h1>
-          <p className="mx-auto mt-4 max-w-xl text-base text-slate-600 dark:text-slate-300">
+          <p className="mx-auto mt-4 max-w-xl text-base text-muted">
             {t('tutors.copy')}
           </p>
 
@@ -78,7 +78,7 @@ export default function Tutors() {
             <div className="mx-auto mt-8 flex max-w-md flex-col items-center gap-2 rounded-2xl bg-success/10 px-6 py-5 text-success">
               <FiCheckCircle className="text-2xl" />
               <p className="font-semibold">{t('tutors.joinedTitle')}</p>
-              <p className="text-sm text-slate-600 dark:text-slate-300">{t('tutors.joinedCopy')}</p>
+              <p className="text-sm text-muted">{t('tutors.joinedCopy')}</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="mx-auto mt-8 flex max-w-md flex-col gap-3 sm:flex-row">
@@ -102,15 +102,15 @@ export default function Tutors() {
         <div className="grid gap-4 md:grid-cols-3">
           <div className="atlas-panel rounded-2xl p-5">
             <p className="atlas-kicker">{t('tutors.step1Kicker')}</p>
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{t('tutors.step1Copy')}</p>
+            <p className="mt-2 text-sm text-muted">{t('tutors.step1Copy')}</p>
           </div>
           <div className="atlas-panel rounded-2xl p-5">
             <p className="atlas-kicker">{t('tutors.step2Kicker')}</p>
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{t('tutors.step2Copy')}</p>
+            <p className="mt-2 text-sm text-muted">{t('tutors.step2Copy')}</p>
           </div>
           <div className="atlas-panel rounded-2xl p-5">
             <p className="atlas-kicker">{t('tutors.step3Kicker')}</p>
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{t('tutors.step3Copy')}</p>
+            <p className="mt-2 text-sm text-muted">{t('tutors.step3Copy')}</p>
           </div>
         </div>
 

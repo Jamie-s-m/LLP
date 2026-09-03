@@ -24,7 +24,7 @@ export default function InstallPrompt() {
 
   if (!visible) return null
   return (
-    <div className="fixed bottom-20 left-1/2 z-50 w-[92%] -translate-x-1/2 rounded-xl bg-white/95 p-3 shadow-lg dark:bg-[#122b40]/95">
+    <div className="fixed bottom-20 left-1/2 z-50 w-[92%] -translate-x-1/2 rounded-xl bg-[var(--surface)]/95 p-3 shadow-lg">
       <div className="flex items-center justify-between">
         <div>
           <strong className="block">Install LinguaNest</strong>
