@@ -110,7 +110,7 @@ describe('ExercisePractice multiple_choice flow', () => {
 
     const feedback = await screen.findByRole('status')
     expect(feedback).toHaveTextContent('Correct!')
-    expect(feedback).toHaveTextContent('You earned 10 points')
+    expect(feedback).toHaveTextContent('you earned 10 points')
   })
 
   it('shows incorrect feedback as an alert when the submitted answer is wrong', async () => {
@@ -125,7 +125,7 @@ describe('ExercisePractice multiple_choice flow', () => {
     await user.click(screen.getByRole('button', { name: /submit answer/i }))
 
     const feedback = await screen.findByRole('alert')
-    expect(feedback).toHaveTextContent('Incorrect')
+    expect(feedback).toHaveTextContent('Not quite')
     expect(feedback).toHaveTextContent('You lost a heart')
   })
 })
