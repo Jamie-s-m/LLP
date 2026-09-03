@@ -6,6 +6,7 @@ import { useLanguageStore } from '../../store/languageStore'
 import { useAuthStore } from '../../store/authStore'
 import { track } from '../../utils/analytics'
 import ProgressBar from '../../components/ui/ProgressBar'
+import Illustration from '../../components/illustrations/Illustration'
 
 interface FlashcardItem {
   _id: string
@@ -55,10 +56,14 @@ export default function Flashcards() {
   }
 
   if (cards.length === 0) {
+    const caughtUp = deckTotal > 0
     return (
       <div className="atlas-page px-4 py-12 text-center">
-        <div className="mx-auto max-w-2xl atlas-panel p-6 text-muted">
-          {deckTotal > 0 ? ui.allCaughtUp : ui.empty}
+        <div className="mx-auto max-w-2xl atlas-panel p-8">
+          <div className="mx-auto mb-4 h-32 w-32">
+            <Illustration name={caughtUp ? 'celebration' : 'empty'} className="h-full w-full" />
+          </div>
+          <p className="text-muted">{caughtUp ? ui.allCaughtUp : ui.empty}</p>
         </div>
       </div>
     )
@@ -124,9 +129,11 @@ export default function Flashcards() {
         </div>
 
         <div className="atlas-panel mb-8 p-5">
-          <div className="flex justify-between mb-1 text-sm font-medium">
-            <span>{ui.card.replace('{current}', String(currentCard + 1)).replace('{total}', String(totalCards))}</span>
-            <span>{ui.masteredCount.replace('{count}', String(reviewed.size))}</span>
+          <div className="mb-1 flex items-end justify-between gap-3">
+            <span className="text-h3 text-[var(--text-primary)]">
+              {ui.card.replace('{current}', String(currentCard + 1)).replace('{total}', String(totalCards))}
+            </span>
+            <span className="text-sm font-medium text-muted">{ui.masteredCount.replace('{count}', String(reviewed.size))}</span>
           </div>
           {deckTotal > totalCards ? (
             <p className="mb-2 text-xs text-muted">{ui.deckSize.replace('{total}', String(deckTotal))}</p>
@@ -148,14 +155,14 @@ export default function Flashcards() {
             }}
           >
             <div
-              className="w-full h-full rounded-[2rem] border border-neutral-200 bg-sky-50 p-8 flex flex-col items-center justify-center text-neutral-900 absolute shadow-sm"
+              className="w-full h-full rounded-[2rem] border border-[var(--border)] bg-[var(--card)] p-8 flex flex-col items-center justify-center text-[var(--text-primary)] absolute shadow-sm"
               style={{ backfaceVisibility: 'hidden' }}
             >
               <p className="text-sm opacity-75 mb-4">{ui.front}</p>
               <p className="text-4xl font-bold text-center">{card.front.text}</p>
             </div>
             <div
-              className="w-full h-full rounded-[2rem] border border-neutral-200 bg-white p-8 flex flex-col items-center justify-center text-neutral-900 absolute shadow-sm"
+              className="w-full h-full rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-8 flex flex-col items-center justify-center text-[var(--text-primary)] absolute shadow-sm"
               style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
             >
               <p className="text-sm opacity-75 mb-4">{ui.back}</p>
