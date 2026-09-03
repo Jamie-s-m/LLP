@@ -246,14 +246,14 @@ export default function Dashboard() {
                     <p className="mb-2 text-sm text-muted">{t('studentDashboard.weeklyActivity')}</p>
                     <div className="h-28">
                       <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={activityChartData} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
+                        <AreaChart data={activityChartData} margin={{ top: 4, right: 8, left: 8, bottom: 0 }}>
                           <defs>
                             <linearGradient id="dashboardActivityFill" x1="0" y1="0" x2="0" y2="1">
                               <stop offset="0%" stopColor="var(--accent)" stopOpacity={0.35} />
                               <stop offset="100%" stopColor="var(--accent)" stopOpacity={0} />
                             </linearGradient>
                           </defs>
-                          <XAxis dataKey="label" interval={0} tick={{ fontSize: 11, fill: 'var(--text-subtle)' }} axisLine={false} tickLine={false} />
+                          <XAxis dataKey="label" interval={0} padding={{ left: 12, right: 12 }} tick={{ fontSize: 11, fill: 'var(--text-subtle)' }} axisLine={false} tickLine={false} />
                           <Tooltip
                             formatter={(value) => [String(value ?? 0), t('studentDashboard.exercisesCompleted')]}
                             contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, fontSize: 12 }}

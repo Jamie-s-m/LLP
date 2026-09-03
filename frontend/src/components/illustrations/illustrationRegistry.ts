@@ -16,7 +16,7 @@ for (const path in modules) {
 export type IllustrationName =
   | 'online-learning'
   | 'journey'
-  | 'goal'
+  | 'personal-goals'
   | 'onboarding'
   | 'conversation'
   | 'audio-conversation'

@@ -11,7 +11,7 @@ import Illustration, { type IllustrationName } from '../components/illustrations
 import { fadeInUp } from '../utils/motion'
 
 const STEP_ILLUSTRATION: Record<number, IllustrationName> = {
-  1: 'goal',
+  1: 'personal-goals',
   2: 'book-lover',
   3: 'journey',
 }
