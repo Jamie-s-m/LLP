@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import api from '../services/api'
 
 const urlBase64ToUint8Array = (base64String: string) => {
@@ -14,8 +14,44 @@ const urlBase64ToUint8Array = (base64String: string) => {
 
 export default function NotificationOptIn() {
   const [enabled, setEnabled] = useState<boolean>(false)
+  const [checking, setChecking] = useState(true)
   const [loading, setLoading] = useState(false)
   const vapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY || ''
+
+  // Previously always started from enabled=false, so the button reverted to "Enable" on every
+  // remount (any navigation, or a parent re-render) even when the browser already had a real,
+  // active push subscription - it never checked. This is the actual source of truth: whether
+  // the service worker currently holds a subscription, not any local/component state.
+  //
+  // Uses getRegistration() (resolves immediately with whatever's registered, or undefined),
+  // not .ready (waits indefinitely for an ACTIVE worker) - confirmed live that .ready never
+  // resolves at all in a plain `vite dev` session (no SW registers there), which would have
+  // left this stuck on "Checking..." forever in that environment. A timeout is kept as a
+  // second backstop in case a real registration exists but stalls before activating.
+  useEffect(() => {
+    let cancelled = false
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      setChecking(false)
+      return
+    }
+    const timeout = setTimeout(() => {
+      if (!cancelled) setChecking(false)
+    }, 4000)
+    navigator.serviceWorker.getRegistration()
+      .then((reg) => reg?.pushManager.getSubscription() ?? null)
+      .then((sub) => {
+        if (!cancelled) setEnabled(!!sub)
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        clearTimeout(timeout)
+        if (!cancelled) setChecking(false)
+      })
+    return () => {
+      cancelled = true
+      clearTimeout(timeout)
+    }
+  }, [])
 
   const subscribe = async () => {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
@@ -58,9 +94,11 @@ export default function NotificationOptIn() {
       </div>
       <div>
         {enabled ? (
-          <button className="btn btn-ghost" onClick={unsubscribe} disabled={loading}>Disable</button>
+          <button className="btn btn-ghost" onClick={unsubscribe} disabled={loading || checking}>Disable</button>
         ) : (
-          <button className="btn btn-primary" onClick={subscribe} disabled={loading}>{loading ? 'Processing...' : 'Enable'}</button>
+          <button className="btn btn-primary" onClick={subscribe} disabled={loading || checking}>
+            {checking ? 'Checking...' : loading ? 'Processing...' : 'Enable'}
+          </button>
         )}
       </div>
     </div>

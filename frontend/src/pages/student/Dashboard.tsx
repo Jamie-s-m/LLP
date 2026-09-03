@@ -268,7 +268,7 @@ export default function Dashboard() {
 
               {/* Right column: next step + daily reward */}
               <div className="space-y-4">
-                <div className="atlas-panel dimensional-card p-6">
+                <div className="atlas-panel p-6">
                   <p className="atlas-kicker">{t('studentDashboard.nextStepKicker')}</p>
                   <h2 className="text-2xl text-ink dark:text-white">{t('studentDashboard.nextStepHeading')}</h2>
                   <p className="mt-2 text-muted">

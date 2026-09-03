@@ -108,7 +108,7 @@ export default function MyLearning() {
             const domain = courseDomainFor({ title: course?.title, category: (course as { category?: string } | undefined)?.category })
             const domainMeta = DOMAIN_META[domain]
 
-            return <div key={record._id} className="atlas-panel dimensional-card p-6">
+            return <div key={record._id} className="atlas-panel p-6">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                 <div className="flex flex-1 items-start gap-4">
                   <div

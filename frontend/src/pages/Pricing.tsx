@@ -300,7 +300,7 @@ export default function Pricing() {
             return (
               <section
                 key={plan.name}
-                className={`atlas-panel dimensional-card p-6 ${isRecommended ? 'pricing-recommended' : ''}`}
+                className={`atlas-panel p-6 ${isRecommended ? 'pricing-recommended' : ''}`}
               >
                 {isRecommended ? (
                   <span className="mb-3 inline-block rounded-full bg-[var(--accent)] px-3 py-1 text-xs font-bold uppercase tracking-wide text-[var(--on-accent)]">
