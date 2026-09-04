@@ -28,7 +28,7 @@ export default function Sidebar() {
     <aside className="sticky top-0 z-0 hidden h-screen w-64 flex-shrink-0 overflow-y-auto border-r border-[var(--border)] bg-[var(--surface)] lg:block">
       <div className="flex h-full flex-col p-5 sm:p-6">
         <div className="flex items-center gap-2 pb-8">
-          <img src="/linguanest-mark.svg" alt="" className="h-8 w-8" />
+          <img src="/linguanest-mark.svg" alt="" width="128" height="128" className="h-8 w-8" />
           <span className="font-display text-lg font-bold text-[var(--text-primary)]">LinguaNest</span>
         </div>
 

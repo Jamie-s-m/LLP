@@ -14,6 +14,13 @@ const sizeClasses: Record<AvatarSize, string> = {
   xl: 'h-24 w-24 text-3xl',
 }
 
+const sizePixels: Record<AvatarSize, number> = {
+  sm: 32,
+  md: 40,
+  lg: 64,
+  xl: 96,
+}
+
 function initialsFrom(name?: string) {
   if (!name) return '?'
   return name
@@ -30,6 +37,8 @@ export default function Avatar({ name, src, size = 'md', className = '' }: Avata
       <img
         src={src}
         alt={name || ''}
+        width={sizePixels[size]}
+        height={sizePixels[size]}
         loading="lazy"
         className={`flex-shrink-0 rounded-full object-cover ${sizeClasses[size]} ${className}`}
       />

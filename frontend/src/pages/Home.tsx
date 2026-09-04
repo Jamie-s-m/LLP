@@ -83,7 +83,7 @@ export default function Home() {
             <span className="hero-float hero-float-two" />
             <span className="hero-float hero-float-three" />
             <span className="hero-float hero-float-four" />
-            <img src={`${import.meta.env.BASE_URL}linguanest-orbit.svg`} alt="LinguaNest premium language learning illustration" className="hero-orbit-image drop-shadow-[0_18px_40px_rgba(15,23,42,0.14)]" />
+            <img src={`${import.meta.env.BASE_URL}linguanest-orbit.svg`} alt="LinguaNest premium language learning illustration" width="240" height="240" fetchPriority="high" className="hero-orbit-image drop-shadow-[0_18px_40px_rgba(15,23,42,0.14)]" />
           </div>
         </div>
 

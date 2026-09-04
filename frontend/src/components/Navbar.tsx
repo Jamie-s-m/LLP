@@ -5,7 +5,6 @@ import { useAuthStore } from '../store/authStore'
 import ThemeToggle from './ThemeToggle'
 import LanguageToggle from './LanguageToggle'
 import { useI18n } from '../utils/i18n'
-import { BRAND } from '../config/brand'
 
 export default function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -75,7 +74,7 @@ export default function Navbar() {
       <div className="container mx-auto flex items-center justify-between gap-3 px-3 py-3 sm:px-4 sm:py-4 xl:gap-6">
         {/* Logo */}
         <Link to="/" className="flex shrink-0 items-center gap-3">
-          <img src={`${import.meta.env.BASE_URL}linguanest-mark.svg`} alt={BRAND.name} className="h-9 w-9 object-contain sm:h-10 sm:w-10" />
+          <img src={`${import.meta.env.BASE_URL}linguanest-mark.svg`} alt="" width="128" height="128" className="h-9 w-9 object-contain sm:h-10 sm:w-10" />
           <div className="hidden items-center sm:flex">
             <span className="font-['Bricolage_Grotesque',sans-serif] text-[1.05rem] font-black tracking-[-0.06em] text-[var(--text-primary)] dark:text-white">
               Lingua<span className="text-[var(--accent-hover)]">Nest</span>

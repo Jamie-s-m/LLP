@@ -20,8 +20,8 @@
      halation/fatigue, not less. Lightened to a warm plum-neutral (~11:1, still comfortably
      AAA) that keeps the wine-family hue but reads softer over a 20+ minute lesson. */
   --text-primary: #3d3340;
-  --text-muted: #78716c;
-  --text-subtle: #a8a29e;
+  --text-muted: #6b625c;
+  --text-subtle: #766d67;
   /* Terracotta is primary again - the founder's call after seeing gold live ("the original
      color... the orange one"). Unlike gold, terracotta is dark/saturated enough to safely
      serve as both a solid fill (white text, ~4.7:1) and text-on-light (~4.7:1 the same
@@ -116,7 +116,7 @@
   --dark-border-strong: rgba(243, 238, 234, 0.14);
   --dark-text-primary: #e8e1d7;
   --dark-text-secondary: #a8a09a;
-  --dark-text-muted: #6b6560;
+  --dark-text-muted: #978e86;
   --dark-accent: #e07a50;
   --dark-accent-hover: #f2a88a;
   --dark-accent-light: rgba(224, 122, 80, 0.12);
