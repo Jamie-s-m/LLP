@@ -12,6 +12,8 @@ type IllustrationProps = {
   loading?: 'lazy' | 'eager'
 }
 
+const illustrationDimensions = { width: 862, height: 645 }
+
 // The single seam between "functional icon" (react-icons/pi, imported directly in
 // components) and "emotional/product artwork" (this). Keeping illustrations behind one
 // component - rather than importing SVG URLs ad hoc per page - is what makes that boundary
@@ -20,6 +22,8 @@ export default function Illustration({ name, className = '', alt = '', loading =
   return (
     <img
       src={illustrationUrls[name]}
+      width={illustrationDimensions.width}
+      height={illustrationDimensions.height}
       alt={alt}
       aria-hidden={alt === '' ? true : undefined}
       loading={loading}

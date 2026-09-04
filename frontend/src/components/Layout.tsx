@@ -1,4 +1,4 @@
-import React from 'react'
+import { lazy, type ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { FiMessageCircle } from 'react-icons/fi'
 import { useAuthStore } from '../store/authStore'
@@ -7,11 +7,12 @@ import Footer from './Footer'
 import Navbar from './Navbar'
 import Sidebar from './Sidebar'
 import BottomNav from './BottomNav'
-import ChatRealtimeBridge from './ChatRealtimeBridge'
 import { useI18n } from '../utils/i18n'
 
+const ChatRealtimeBridge = lazy(() => import('./ChatRealtimeBridge'))
+
 interface LayoutProps {
-  children: React.ReactNode
+  children: ReactNode
 }
 
 export default function Layout({ children }: LayoutProps) {
