@@ -13,7 +13,7 @@ export default function Footer() {
             <img src={`${import.meta.env.BASE_URL}linguanest-mark.svg`} alt={BRAND.name} className="h-9 w-9 object-contain" loading="lazy" />
             <div>
               <p className="font-['Bricolage_Grotesque',sans-serif] text-[1.05rem] font-black tracking-[-0.06em] text-[var(--text-primary)] dark:text-white">
-                Lingua<span className="text-[var(--accent)]">Nest</span>
+                Lingua<span className="text-[var(--accent-hover)]">Nest</span>
               </p>
               <h2 className="text-lg font-semibold text-[var(--text-primary)] dark:text-white">{BRAND.tagline}</h2>
             </div>

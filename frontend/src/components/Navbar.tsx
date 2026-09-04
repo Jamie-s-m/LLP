@@ -78,7 +78,7 @@ export default function Navbar() {
           <img src={`${import.meta.env.BASE_URL}linguanest-mark.svg`} alt={BRAND.name} className="h-9 w-9 object-contain sm:h-10 sm:w-10" />
           <div className="hidden items-center sm:flex">
             <span className="font-['Bricolage_Grotesque',sans-serif] text-[1.05rem] font-black tracking-[-0.06em] text-[var(--text-primary)] dark:text-white">
-              Lingua<span className="text-[var(--accent)]">Nest</span>
+              Lingua<span className="text-[var(--accent-hover)]">Nest</span>
             </span>
           </div>
         </Link>

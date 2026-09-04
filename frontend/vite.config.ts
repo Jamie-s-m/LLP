@@ -140,17 +140,48 @@ export default defineConfig(({ mode }) => ({
   build: {
     outDir: 'dist',
     sourcemap: false,
+    // Vite's default modulePreload injects a <link rel="modulepreload"> for every manual
+    // vendor chunk into index.html unconditionally, regardless of whether the current route
+    // actually needs it - confirmed live via PageSpeed Insights: charts-vendor was being
+    // eagerly fetched and parsed on every single page load. Excluding it here stops the HTML
+    // from hinting the browser to fetch it upfront; see the react/jsx-runtime fix below for
+    // the deeper reason it was still loading regardless of this hint.
+    modulePreload: {
+      resolveDependencies: (_filename, deps) => deps.filter((dep) => !dep.includes('charts-vendor')),
+    },
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui-vendor': ['framer-motion', 'react-hot-toast', 'react-icons'],
-          'store-vendor': ['zustand', 'axios'],
-          // Phase 20: recharts (~150kb) and dotlottie-react pulled into their own chunk so
-          // only the routes that actually render a chart/celebration animation pay for them,
-          // instead of bloating every route's own chunk (recharts alone pushed Dashboard's
-          // chunk past every other route's before this split).
-          'charts-vendor': ['recharts', '@lottiefiles/dotlottie-react'],
+        // A function, not the plain {name: [packages]} object this used to be: the object form
+        // matches package names as plain substrings of the resolved module id, which broke on
+        // Windows-style backslash paths for a scoped subpath import (react/jsx-runtime) - it
+        // silently never matched, so Rollup was free to physically place that shared runtime
+        // shim wherever its own graph coloring picked, which turned out to be inside
+        // charts-vendor (recharts also depends on it). Since EVERY compiled JSX file calls into
+        // jsx-runtime, that meant every single page - not just the two chart-using routes - had
+        // to eagerly load charts-vendor just to render anything at all. Confirmed directly in
+        // the built output (`import{j as i}from"./charts-vendor-*.js"` at the top of the main
+        // entry chunk) after live PageSpeed testing showed charts-vendor loading, still unused,
+        // on the Home page. Matching with a regex character class ([\\/]) here instead handles
+        // both path separators regardless of OS.
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return undefined
+          if (/[\\/]react[\\/]jsx-runtime|[\\/]react[\\/]|[\\/]react-dom[\\/]|[\\/]react-router-dom[\\/]/.test(id)) {
+            return 'react-vendor'
+          }
+          if (/[\\/]framer-motion[\\/]|[\\/]react-hot-toast[\\/]|[\\/]react-icons[\\/]/.test(id)) {
+            return 'ui-vendor'
+          }
+          if (/[\\/]zustand[\\/]|[\\/]axios[\\/]/.test(id)) {
+            return 'store-vendor'
+          }
+          // Phase 20: recharts (~150kb) and dotlottie-react pulled into their own chunk so only
+          // the routes that actually render a chart/celebration animation pay for them, instead
+          // of bloating every route's own chunk (recharts alone pushed Dashboard's chunk past
+          // every other route's before this split).
+          if (/[\\/]recharts[\\/]|[\\/]@lottiefiles[\\/]/.test(id)) {
+            return 'charts-vendor'
+          }
+          return undefined
         },
       },
     },
