@@ -140,15 +140,10 @@ export default defineConfig(({ mode }) => ({
   build: {
     outDir: 'dist',
     sourcemap: false,
-    // Vite's default modulePreload injects a <link rel="modulepreload"> for every manual
-    // vendor chunk into index.html unconditionally, regardless of whether the current route
-    // actually needs it - confirmed live via PageSpeed Insights: charts-vendor was being
-    // eagerly fetched and parsed on every single page load. Excluding it here stops the HTML
-    // from hinting the browser to fetch it upfront; see the react/jsx-runtime fix below for
-    // the deeper reason it was still loading regardless of this hint.
-    modulePreload: {
-      resolveDependencies: (_filename, deps) => deps.filter((dep) => !dep.includes('charts-vendor')),
-    },
+    // Routes are lazy-loaded, so preloading shared vendor chunks on every entry page only
+    // creates unused requests and console warnings. Dynamic imports still fetch these chunks
+    // when a route actually needs them.
+    modulePreload: false,
     rollupOptions: {
       output: {
         // A function, not the plain {name: [packages]} object this used to be: the object form

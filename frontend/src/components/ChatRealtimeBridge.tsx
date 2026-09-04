@@ -42,7 +42,10 @@ export default function ChatRealtimeBridge() {
 
     const connection = io(SOCKET_URL, {
       auth: { token },
-      transports: ['websocket', 'polling'],
+      // The production proxy currently closes the initial WebSocket upgrade and logs a
+      // browser warning before Socket.IO can fall back. Polling keeps chat reliable and
+      // avoids that failed upgrade; it remains realtime through Socket.IO's long polling.
+      transports: ['polling'],
     })
     socketRef.current = connection
 
